@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İlan & Proje Pazarı | YTU Social</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- GENEL AYARLAR --- */
+        body { background-color: var(--bg-color); transition: background-color 0.3s; }
+
+        /* --- SAYFA DÜZENİ --- */
+        .main-layout {
+            display: block;
+            max-width: 1100px;
+            margin: 90px auto 20px auto; 
+            padding: 0 20px;
+            padding-bottom: 100px;
+        }
+
+        /* --- İLAN KARTLARI --- */
+        .ad-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
+            gap: 25px; 
+        }
+        
+        .ad-card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 16px; 
+            padding: 25px; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            position: relative; 
+            display: flex;
+            flex-direction: column;
+            min-height: 220px;
+        }
+        
+        .ad-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15); 
+            border-color: var(--ytu-lacivert);
+        }
+
+        /* Kategori Etiketi */
+        .ad-cat-badge { 
+            position: absolute; 
+            top: 20px; 
+            left: 20px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.15); 
+            color: var(--ytu-lacivert); 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* Başlık ve Açıklama */
+        .ad-title { 
+            font-size: 1.25rem; 
+            font-weight: 800; 
+            margin-top: 35px; 
+            margin-bottom: 12px; 
+            color: var(--text-color); 
+            line-height: 1.3;
+            padding-right: 30px; 
+        }
+        
+        .ad-desc { 
+            font-size: 0.95rem; 
+            color: var(--text-muted); 
+            margin-bottom: 20px; 
+            line-height: 1.5; 
+            flex-grow: 1; 
+        }
+
+        /* Alt Bilgi Alanı */
+        .ad-footer { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding-top: 15px; 
+            border-top: 1px solid var(--border-color); 
+        }
+        
+        .ad-author { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            text-decoration: none; 
+            color: var(--text-color); 
+            font-size: 0.9rem; 
+            font-weight: 600;
+        }
+
+        /* --- FİLTRE BUTONLARI --- */
+        .filter-container {
+            margin-bottom: 30px; 
+            overflow-x: auto; 
+            white-space: nowrap; 
+            padding-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .filter-btn { 
+            display: inline-block; 
+            padding: 10px 18px; 
+            border-radius: 25px; 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            color: var(--text-color); 
+            text-decoration: none; 
+            margin-right: 8px; 
+            font-size: 0.95rem; 
+            font-weight: 500;
+            transition: 0.3s; 
+        }
+        
+        .filter-btn:hover, .filter-btn.active { 
+            background: var(--ytu-lacivert); 
+            color: white; 
+            border-color: var(--ytu-lacivert); 
+            box-shadow: 0 4px 10px rgba(var(--ytu-lacivert-rgb), 0.3);
+        }
+
+        /* --- MODAL (Açılır Pencere) --- */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); 
+            display: none; align-items: center; justify-content: center; 
+            z-index: 2000; backdrop-filter: blur(5px); 
+        }
+        
+        .modal-box { 
+            background: var(--card-bg); 
+            width: 90%; max-width: 550px; 
+            padding: 30px; 
+            border-radius: 20px; 
+            position: relative; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
+        }
+
+        /* --- INPUT AYARLARI --- */
+        .modern-input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            background: #f8f9fa; 
+            color: #333;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        body.dark-mode .modern-input {
+            background-color: #2b2b2b !important; 
+            color: #e0e0e0 !important; 
+            border-color: #444 !important;
+        }
+        
+        body.dark-mode .modern-input:focus {
+            border-color: var(--ytu-sari) !important;
+            background-color: #333 !important;
+        }
+
+        body.dark-mode .ad-cat-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--ytu-sari);
+        }
+
+        label { display: block; margin-bottom: 8px; color: var(--text-color); font-weight: 600; }
+
+        /* --- YUVARLAK EKLEME BUTONU (FAB) --- */
+        .fab-btn {
+            position: fixed; bottom: 35px; right: 35px;
+            width: 65px; height: 65px;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #0056b3);
+            color: white;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 8px 20px rgba(var(--ytu-lacivert-rgb), 0.5);
+            cursor: pointer; z-index: 1900; border: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .fab-btn:hover { transform: scale(1.1) rotate(90deg); box-shadow: 0 12px 25px rgba(0,0,0,0.4); }
+
+        /* --- ÜÇ NOKTA MENÜSÜ --- */
+        .ad-menu-btn {
+            position: absolute; top: 15px; right: 15px;
+            background: transparent; border: none;
+            color: var(--text-muted); font-size: 1.2rem;
+            cursor: pointer; padding: 5px; border-radius: 50%;
+            transition: 0.2s;
+        }
+        .ad-menu-btn:hover { background: rgba(0,0,0,0.05); color: var(--text-color); }
+        
+        .ad-dropdown {
+            position: absolute; top: 45px; right: 15px;
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none; z-index: 10; min-width: 140px; overflow: hidden;
+        }
+        
+        .ad-dropdown a, .ad-dropdown button {
+            display: flex; align-items: center; gap: 8px;
+            padding: 12px 15px; width: 100%;
+            text-decoration: none; font-size: 0.9rem; font-weight: 600;
+            background: none; border: none; text-align: left; cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .ad-dropdown .edit-btn { color: var(--text-color); }
+        .ad-dropdown .edit-btn:hover { background: rgba(var(--ytu-lacivert-rgb), 0.1); }
+        
+        .ad-dropdown .delete-btn { color: #ff4757; }
+        .ad-dropdown .delete-btn:hover { background: rgba(255, 71, 87, 0.1); }
+    </style>
+</head>
+<body>
+
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <div class="main-layout">
+        
+        <div style="margin-bottom: 25px;">
+            <h1 style="color: var(--text-color); font-size: 1.8rem; display: flex; align-items: center; gap: 12px;">
+                📢 İlan & Proje Pazarı
+            </h1>
+            <p style="color: var(--text-muted); margin-top: 5px;">Ekip arkadaşı bul, notlarını paylaş veya ikinci el eşya sat.</p>
+        </div>
+
+        <div class="filter-container">
+            <a href="{{ url_for('adverts') }}" class="filter-btn {{ 'active' if not selected_cat else '' }}">Tümü</a>
+            <a href="{{ url_for('adverts', category='Proje Arkadaşı') }}" class="filter-btn {{ 'active' if selected_cat == 'Proje Arkadaşı' else '' }}">🛠️ Proje Arkadaşı</a>
+            <a href="{{ url_for('adverts', category='Ders/Not') }}" class="filter-btn {{ 'active' if selected_cat == 'Ders/Not' else '' }}">📚 Ders/Not</a>
+            <a href="{{ url_for('adverts', category='Ev/Oda') }}" class="filter-btn {{ 'active' if selected_cat == 'Ev/Oda' else '' }}">🏠 Ev/Oda</a>
+            <a href="{{ url_for('adverts', category='İkinci El') }}" class="filter-btn {{ 'active' if selected_cat == 'İkinci El' else '' }}">🛒 İkinci El</a>
+            <a href="{{ url_for('adverts', category='Etkinlik') }}" class="filter-btn {{ 'active' if selected_cat == 'Etkinlik' else '' }}">🎉 Etkinlik</a>
+            <a href="{{ url_for('adverts', category='Diğer') }}" class="filter-btn {{ 'active' if selected_cat == 'Diğer' else '' }}">📌 Diğer</a>
+        </div>
+
+        <div class="ad-grid">
+            {% for ad in adverts %}
+            <div class="ad-card">
+                <span class="ad-cat-badge">{{ ad.category }}</span>
+                
+                {% if ad.author == current_user or current_user.is_admin %}
+                <button class="ad-menu-btn" onclick="toggleAdMenu('menu-{{ ad.id }}')">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <div id="menu-{{ ad.id }}" class="ad-dropdown">
+                    <button class="edit-btn" 
+                        data-id="{{ ad.id }}"
+                        data-title="{{ ad.title }}"
+                        data-cat="{{ ad.category }}"
+                        data-desc="{{ ad.description }}"
+                        data-contact="{{ ad.contact_info or '' }}"
+                        onclick="openEditModal(this)">
+                        <i class="fas fa-edit"></i> Düzenle
+                    </button>
+                    <a href="{{ url_for('delete_advert', adv_id=ad.id) }}" class="delete-btn" onclick="return confirm('Bu ilanı silmek istediğine emin misin?')">
+                        <i class="fas fa-trash-alt"></i> Sil
+                    </a>
+                </div>
+                {% endif %}
+
+                <div class="ad-title">{{ ad.title }}</div>
+                <div class="ad-desc" style="white-space: pre-line;">{{ ad.description }}</div>
+                
+                {% if ad.contact_info %}
+                <div style="font-size: 0.9rem; background: rgba(var(--ytu-lacivert-rgb), 0.05); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color); color: var(--text-color);">
+                    <i class="fas fa-phone-alt" style="margin-right: 5px; color: var(--ytu-lacivert);"></i> 
+                    <b>İletişim:</b> {{ ad.contact_info }}
+                </div>
+                {% endif %}
+
+                <div class="ad-footer">
+                    <a href="{{ url_for('user_profile', handle=ad.author.handle) }}" class="ad-author">
+                        <img src="/static/{{ ad.author.profile_pic }}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
+                        <span>{{ ad.author.username }}</span>
+                    </a>
+                    
+                    {% if ad.author != current_user %}
+                    <a href="/chat/{{ ad.author.handle }}" class="btn-vote" style="padding: 8px 18px; font-size: 0.85rem; border-radius: 20px; text-decoration:none;">
+                        <i class="far fa-paper-plane"></i> Mesaj
+                    </a>
+                    {% endif %}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; text-align: right; font-style: italic;">
+                    {{ ad.date_posted.strftime('%d %b %H:%M') }}
+                </div>
+            </div>
+            {% else %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--text-muted);">
+                <i class="fas fa-bullhorn" style="font-size: 4rem; margin-bottom: 25px; opacity: 0.3;"></i>
+                <h3>Henüz hiç ilan yok.</h3>
+                <p>Sağ alttaki <b>+</b> butonuna tıklayarak ilk ilanı sen ver!</p>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <button class="fab-btn" onclick="openCreateModal()" title="Yeni İlan Ekle">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <div id="adModal" class="modal-overlay" onclick="if(event.target === this) this.style.display='none'">
+        <div class="modal-box">
+            <span onclick="document.getElementById('adModal').style.display='none'" style="position: absolute; right: 25px; top: 25px; cursor: pointer; font-size: 1.8rem; color: var(--text-muted);">&times;</span>
+            
+            <h3 id="modalTitle" style="margin-bottom: 30px; color: var(--text-color); text-align: center; font-size: 1.5rem;">📝 Yeni İlan Oluştur</h3>
+            
+            <form id="adForm" action="{{ url_for('adverts') }}" method="POST">
+                <div style="margin-bottom: 18px;">
+                    <label>İlan Başlığı</label>
+                    <input type="text" name="title" id="inpTitle" required class="modern-input" placeholder="Örn: Teknofest Ekibi Kuruyoruz">
+                </div>
+
+                <div style="margin-bottom: 18px;">
+                    <label>Kategori</label>
+                    <select name="category" id="inpCat" class="modern-input" style="cursor: pointer;">
+                        <option value="Proje Arkadaşı">🛠️ Proje Arkadaşı Arıyorum</option>
+                        <option value="Ders/Not">📚 Ders Notu / Kitap</option>
+                        <option value="Ev/Oda">🏠 Ev Arkadaşı / Devir</option>
+                        <option value="İkinci El">🛒 İkinci El Eşya</option>
+                        <option value="Etkinlik">🎉 Etkinlik Duyurusu</option>
+                        <option value="Diğer">📌 Diğer</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 18px;">
+                    <label>Açıklama / Detaylar</label>
+                    <textarea name="description" id="inpDesc" rows="5" required class="modern-input" placeholder="Projenizden veya ilanınızdan bahsedin..."></textarea>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <label>İletişim (İsteğe Bağlı)</label>
+                    <input type="text" name="contact" id="inpContact" placeholder="Örn: 05xx... veya Instagram: @kullanici" class="modern-input">
+                </div>
+
+                <button type="submit" id="btnSubmit" class="btn-vote" style="width: 100%; padding: 15px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; background: var(--ytu-lacivert); border: none;">
+                    Yayınla <i class="fas fa-check-circle" style="margin-left: 8px;"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        // --- 1. MENÜ AÇMA/KAPAMA ---
+        function toggleAdMenu(menuId) {
+            document.querySelectorAll('.ad-dropdown').forEach(menu => {
+                if (menu.id !== menuId) menu.style.display = 'none';
+            });
+            const menu = document.getElementById(menuId);
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+
+        // Sayfada boşluğa tıklayınca menüyü kapat
+        window.addEventListener('click', function(event) {
+            if (!event.target.matches('.ad-menu-btn') && !event.target.closest('.ad-menu-btn')) {
+                document.querySelectorAll('.ad-dropdown').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            }
+        });
+
+        // --- 2. MODAL DÜZENLEME MANTIĞI ---
+        
+        // Yeni İlan Modu (Sıfırla ve Aç)
+        function openCreateModal() {
+            document.getElementById('adForm').action = "{{ url_for('adverts') }}"; // Ekleme URL'si
+            document.getElementById('adForm').reset(); // Kutuları temizle
+            document.getElementById('modalTitle').innerText = "📝 Yeni İlan Oluştur";
+            document.getElementById('btnSubmit').innerHTML = 'Yayınla <i class="fas fa-check-circle" style="margin-left: 8px;"></i>';
+            document.getElementById('adModal').style.display = 'flex';
+        }
+
+        // Düzenleme Modu (Verileri Doldur ve Aç)
+        function openEditModal(btn) {
+            // Butondaki verileri al (data- attributes)
+            const id = btn.getAttribute('data-id');
+            const title = btn.getAttribute('data-title');
+            const cat = btn.getAttribute('data-cat');
+            const desc = btn.getAttribute('data-desc');
+            const contact = btn.getAttribute('data-contact');
+
+            // Form action URL'sini güncelle
+            document.getElementById('adForm').action = "/edit_advert/" + id;
+
+            // Kutuları doldur
+            document.getElementById('inpTitle').value = title;
+            document.getElementById('inpCat').value = cat;
+            document.getElementById('inpDesc').value = desc;
+            document.getElementById('inpContact').value = contact;
+
+            // Başlıkları güncelle
+            document.getElementById('modalTitle').innerText = "✏️ İlanı Düzenle";
+            document.getElementById('btnSubmit').innerHTML = 'Güncelle <i class="fas fa-save" style="margin-left: 8px;"></i>';
+
+            // Menüyü kapat ve modalı aç
+            document.querySelectorAll('.ad-dropdown').forEach(m => m.style.display = 'none');
+            document.getElementById('adModal').style.display = 'flex';
+        }
+    </script>
+
+</body>
+</html>

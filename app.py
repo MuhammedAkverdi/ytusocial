@@ -321,6 +321,21 @@ class Note(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     author = db.relationship('User', backref='notes', lazy=True)
 
+
+# --- İLAN / PROJE PAZARI MODELİ ---
+class Advert(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False) # İlan Başlığı
+    category = db.Column(db.String(50), nullable=False) # Kategori (Proje, Ders, İkinci El, vb.)
+    description = db.Column(db.Text, nullable=False) # Detaylar
+    contact_info = db.Column(db.String(100), nullable=True) # İletişim (Tel/Mail/Instagram)
+    
+    date_posted = db.Column(db.DateTime, nullable=False, default=get_turkey_time)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # İlişki (İlan sahibine ulaşmak için)
+    author = db.relationship('User', backref='adverts', lazy=True)
+
     @property
     def average_rating(self):
         if self.rating_count == 0: return 0
@@ -1529,6 +1544,77 @@ def manual_fix_db():
         return f"<h3>✅ Veritabanı Tamir Edildi!</h3><p>Eklenen sütunlar: {len(added)} adet.</p><a href='/'>Ana Sayfaya Dön</a>"
     except Exception as e:
         return f"<h3>❌ Hata oluştu:</h3><p>{str(e)}</p>"
+    
+
+# ==========================================
+# İLAN / PROJE PAZARI ROTALARI
+# ==========================================
+
+@app.route('/adverts', methods=['GET', 'POST'])
+@login_required
+def adverts():
+    # İlan Ekleme İşlemi
+    if request.method == 'POST':
+        title = request.form.get('title')
+        category = request.form.get('category')
+        description = request.form.get('description')
+        contact = request.form.get('contact') # Opsiyonel
+
+        if title and description and category:
+            new_adv = Advert(
+                title=title,
+                category=category,
+                description=description,
+                contact_info=contact,
+                author=current_user
+            )
+            db.session.add(new_adv)
+            db.session.commit()
+            flash("İlanın başarıyla yayınlandı!", "success")
+            return redirect(url_for('adverts'))
+    
+    # İlanları Listeleme (Filtreleme varsa ona göre)
+    cat_filter = request.args.get('category')
+    if cat_filter:
+        ads = Advert.query.filter_by(category=cat_filter).order_by(Advert.date_posted.desc()).all()
+    else:
+        ads = Advert.query.order_by(Advert.date_posted.desc()).all()
+        
+    return render_template('adverts.html', adverts=ads, selected_cat=cat_filter)
+
+@app.route('/delete_advert/<int:adv_id>')
+@login_required
+def delete_advert(adv_id):
+    adv = Advert.query.get_or_404(adv_id)
+    # Sadece sahibi veya admin silebilir
+    if adv.author != current_user and not current_user.is_admin:
+        flash("Bu ilanı silme yetkiniz yok!", "danger")
+        return redirect(url_for('adverts'))
+        
+    db.session.delete(adv)
+    db.session.commit()
+    flash("İlan kaldırıldı.", "info")
+    return redirect(url_for('adverts'))
+
+@app.route('/edit_advert/<int:adv_id>', methods=['POST'])
+@login_required
+def edit_advert(adv_id):
+    adv = Advert.query.get_or_404(adv_id)
+    
+    # Güvenlik Kontrolü: Sadece sahibi veya admin düzenleyebilir
+    if adv.author != current_user and not current_user.is_admin:
+        flash("Bu ilanı düzenleme yetkiniz yok!", "danger")
+        return redirect(url_for('adverts'))
+    
+    # Formdan gelen yeni verileri al
+    adv.title = request.form.get('title')
+    adv.category = request.form.get('category')
+    adv.description = request.form.get('description')
+    adv.contact_info = request.form.get('contact')
+    
+    db.session.commit()
+    flash("İlan başarıyla güncellendi.", "success")
+    return redirect(url_for('adverts'))
 
 if __name__ == '__main__':
     with app.app_context():
