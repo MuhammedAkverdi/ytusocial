@@ -3,51 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gönderi Detayı | YTU Social</title>
+    <title>Gönderi | YTU Social</title>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: var(--bg-color); margin: 0; font-family: 'Inter', sans-serif; }
+        .page-layout { display: flex; justify-content: center; max-width: 1200px; margin: 0 auto; gap: 20px; padding-top: 20px; }
+        .sidebar-wrapper { width: 250px; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; }
+        .sidebar-container { width: 100%; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; position: sticky; top: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .sidebar-logo { font-size: 1.4rem; font-weight: 800; color: var(--text-color); text-decoration: none; margin-bottom: 15px; padding-left: 10px; display: block; }
+        .nav-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; color: var(--text-color); text-decoration: none; font-size: 1.05rem; border-radius: 30px; transition: 0.2s; font-weight: 500; }
+        .nav-item:hover { background-color: rgba(var(--ytu-lacivert-rgb), 0.1); color: var(--ytu-lacivert); }
+        .nav-item i { width: 24px; font-size: 1.3rem; text-align: center; }
+        
+        .main-content { width: 100%; max-width: 650px; padding-bottom: 100px; }
+        
+        /* POST DETAY KARTI */
+        .post-detail-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        .pd-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .pd-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+        .pd-user a { color: var(--text-color); text-decoration: none; font-weight: 700; font-size: 1rem; }
+        .pd-handle { color: var(--text-muted); font-size: 0.9rem; display: block; }
+        
+        .pd-text { font-size: 1.1rem; color: var(--text-color); line-height: 1.5; margin-bottom: 15px; white-space: pre-wrap; }
+        .pd-media { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); margin-bottom: 15px; }
+        .pd-media img, .pd-media video { width: 100%; display: block; }
+        
+        .pd-stats { border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 10px 0; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px; }
+        .pd-stats strong { color: var(--text-color); }
+        
+        .pd-actions { display: flex; justify-content: space-around; padding: 5px 0; }
+        .act-btn { background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+        .act-btn:hover { color: var(--ytu-lacivert); }
+
+        /* YORUMLAR */
+        .comment-section { margin-top: 20px; }
+        .comment-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .comment-input { flex-grow: 1; padding: 12px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); outline: none; }
+        .comment-btn { padding: 0 20px; border-radius: 20px; background: var(--ytu-lacivert); color: white; border: none; font-weight: 700; cursor: pointer; }
+        
+        .comment-item { display: flex; gap: 10px; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+    </style>
 </head>
 <body>
-    {% include 'navbar_partial.html' ignore missing %}
 
-    <div class="main-layout" style="justify-content: center;">
-        <main style="max-width: 600px; width: 100%; margin-top: 20px;">
-            <a href="/" class="back-btn" style="display:inline-block; margin-bottom:15px; color:var(--text-color); text-decoration:none;">
-                <i class="fas fa-arrow-left"></i> Ana Sayfaya Dön
+<div class="page-layout">
+    <div class="sidebar-wrapper">
+        <div class="sidebar-container">
+            <a href="/" class="sidebar-logo">YTU<span style="color:#ffc107;">SOCIAL</span></a>
+            <a href="/" class="nav-item"><i class="fas fa-home"></i> Ana Sayfa</a>
+            <a href="{{ url_for('explore') }}" class="nav-item"><i class="fas fa-compass"></i> Keşfet</a>
+            <a href="{{ url_for('messages_inbox') }}" class="nav-item"><i class="fas fa-paper-plane"></i> Mesajlar</a>
+            <a href="{{ url_for('notifications') }}" class="nav-item"><i class="fas fa-heart"></i> Bildirimler</a>
+            <a href="{{ url_for('adverts') }}" class="nav-item"><i class="fas fa-bullhorn"></i> İlanlar</a>
+            <a href="{{ url_for('notes_pool') }}" class="nav-item"><i class="fas fa-book"></i> Not Havuzu</a>
+            <a href="{{ url_for('user_profile', handle=current_user.handle) }}" class="nav-item">
+                <img src="/static/{{ current_user.profile_pic }}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;"> Profil
             </a>
+        </div>
+    </div>
 
-            <div class="post-card">
-                <div class="post-header">
-                    <div class="post-author-info">
-                        <img src="/static/{{ post.author.profile_pic }}" class="post-avatar">
-                        <div>
-                            <strong class="post-author-name">{{ post.author.username }}</strong>
-                            <span class="post-author-dept">{{ post.author.department }}</span>
-                        </div>
-                    </div>
-                    <small class="post-time">{{ post.date_posted.strftime('%d %b') }}</small>
-                </div>
+    <div class="main-content">
+        
+        <div style="margin-bottom: 15px;">
+            <a href="javascript:history.back()" style="color: var(--ytu-lacivert); text-decoration: none; font-weight: 600;">
+                <i class="fas fa-arrow-left"></i> Geri Dön
+            </a>
+        </div>
 
-                <div class="post-text">{{ post.content }}</div>
-
-                {% if post.image_file %}
-                    <div class="post-image-container">
-                        {% if post.is_video() %}
-                            <video controls class="post-image" style="max-height: 500px; background:black;">
-                                <source src="/static/post_images/{{ post.image_file }}" type="video/mp4">
-                            </video>
-                        {% else %}
-                            <img src="/static/post_images/{{ post.image_file }}" class="post-image">
-                        {% endif %}
-                    </div>
-                {% endif %}
-                
-                <div class="post-actions">
-                    <span class="action-item"><i class="far fa-heart"></i> {{ post.likes|length }}</span>
-                    <span class="action-item"><i class="far fa-comment"></i> {{ post.comments|length }}</span>
+        <div class="post-detail-card">
+            <div class="pd-header">
+                <img src="/static/{{ post.author.profile_pic }}" class="pd-avatar">
+                <div class="pd-user">
+                    <a href="{{ url_for('user_profile', handle=post.author.handle) }}">{{ post.author.username }}</a>
+                    <span class="pd-handle">@{{ post.author.handle }}</span>
                 </div>
             </div>
-        </main>
+
+            {% if post.content %}
+            <div class="pd-text">{{ post.content }}</div>
+            {% endif %}
+
+            {% if post.image_file %}
+            <div class="pd-media">
+                {% if post.is_video() %}
+                    <video src="/static/post_images/{{ post.image_file }}" controls autoplay muted></video>
+                {% else %}
+                    <img src="/static/post_images/{{ post.image_file }}">
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="pd-stats">
+                <strong>{{ post.liked_by|length }}</strong> Beğeni · <strong>{{ post.comments|length }}</strong> Yorum · {{ post.date_posted.strftime('%H:%M · %d %b %Y') }}
+            </div>
+
+            <div class="pd-actions">
+                <button class="act-btn" onclick="likePost({{ post.id }}, this)"><i class="{{ 'fas' if current_user in post.liked_by else 'far' }} fa-heart"></i></button>
+                <button class="act-btn"><i class="far fa-comment"></i></button>
+                <button class="act-btn" onclick="repostPost({{ post.id }})"><i class="fas fa-retweet"></i></button>
+                <button class="act-btn"><i class="far fa-share-square"></i></button>
+            </div>
+        </div>
+
+        <div class="post-detail-card">
+            <form action="{{ url_for('add_comment', post_id=post.id) }}" method="POST" class="comment-box">
+                <img src="/static/{{ current_user.profile_pic }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                <input type="text" name="comment_text" class="comment-input" placeholder="Yanıtını gönder..." required>
+                <button type="submit" class="comment-btn">Yanıtla</button>
+            </form>
+
+            <div class="comments-list">
+                {% for comment in post.comments|reverse %}
+                <div class="comment-item">
+                    <img src="/static/{{ comment.author.profile_pic }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                    <div>
+                        <div style="margin-bottom: 4px;">
+                            <a href="{{ url_for('user_profile', handle=comment.author.handle) }}" style="color: var(--text-color); text-decoration: none; font-weight: 700;">{{ comment.author.username }}</a>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">@{{ comment.author.handle }} · {{ comment.date_posted.strftime('%H:%M') }}</span>
+                        </div>
+                        <div style="color: var(--text-color); line-height: 1.4;">{{ comment.text }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
     </div>
+</div>
+
+<script src="/static/script.js"></script>
 </body>
 </html>

@@ -1,309 +1,396 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@{{ user.handle }} - Profil</title>
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+    <title>{{ user.username }} | Profil</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-</head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- GENEL --- */
+        body { 
+            background-color: var(--bg-color); 
+            margin: 0; font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+        }
 
+        .page-layout {
+            display: flex;
+            max-width: 1250px;
+            margin: 0 auto;
+            gap: 40px; 
+            padding: 20px;
+        }
+
+        /* --- 1. SOL MENÜ --- */
+        .sidebar-container {
+            width: 260px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 25px 20px;
+            position: sticky;
+            top: 30px;
+            margin-left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .sidebar-logo {
+            font-size: 1.6rem; font-weight: 900; color: var(--text-color);
+            text-decoration: none; margin-bottom: 25px; padding-left: 10px; display: block;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 15px;
+            padding: 14px 15px; color: var(--text-color); text-decoration: none;
+            font-size: 1.05rem; border-radius: 12px; transition: 0.3s; font-weight: 600;
+        }
+        .nav-item:hover, .nav-item.active { 
+            background-color: rgba(var(--ytu-lacivert-rgb), 0.08); 
+            color: var(--ytu-lacivert); 
+            transform: translateX(5px);
+        }
+        .nav-item i { width: 25px; text-align: center; font-size: 1.3rem; }
+
+        /* --- ORTA ALAN --- */
+        .profile-content {
+            flex-grow: 1;
+            max-width: 750px;
+            margin-top: 20px; /* Profili aşağı kaydırma */
+        }
+
+        /* --- YENİ PROFİL KARTI TASARIMI --- */
+        .profile-header-card {
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color);
+            border-radius: 24px; 
+            padding: 0;
+            margin-bottom: 25px;
+            overflow: visible; /* Avatar taşsın diye visible yaptık */
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+        }
+
+        /* Üstteki Hafif Renkli Alan (Banner) */
+        .profile-banner {
+            height: 120px; /* Banner yüksekliği */
+            background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.2), rgba(var(--ytu-lacivert-rgb), 0.05));
+            border-radius: 24px 24px 0 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-body {
+            padding: 10px 30px 30px 30px; /* Üst boşluk az, avatar orada */
+            position: relative;
+        }
+
+        /* Avatar (Sola Yaslı ve Daha Aşağıda) */
+        .profile-pic-container {
+            width: 130px; height: 130px;
+            position: absolute;
+            top: -65px; /* Banner'ın üstüne binsin */
+            left: 30px; /* Sola yaslı */
+            border-radius: 50%;
+            padding: 4px;
+            background: var(--card-bg);
+        }
+
+        .profile-pic {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+        }
+
+        /* Sağ Üst Butonlar */
+        .profile-actions {
+            display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; margin-bottom: 15px;
+        }
+
+        .btn-modern {
+            padding: 8px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;
+            text-decoration: none; border: 1px solid var(--border-color); color: var(--text-color);
+            transition: 0.2s; background: var(--bg-secondary);
+        }
+        .btn-modern:hover { background: var(--border-color); }
+        
+        .btn-logout { 
+            color: #ff4757; border-color: rgba(255, 71, 87, 0.3); background: rgba(255, 71, 87, 0.05); 
+        }
+        .btn-logout:hover { background: rgba(255, 71, 87, 0.15); }
+
+        /* İsim ve Bilgiler (Sola Yaslı) */
+        .profile-names {
+            margin-top: 15px; /* Avatar hizası */
+            text-align: left; /* SOLA YASLAMA */
+        }
+        .p-real-name { font-size: 1.8rem; font-weight: 800; color: var(--text-color); margin: 0; }
+        .p-username { font-size: 1rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+        
+        .p-bio { 
+            margin-top: 15px; font-size: 1rem; line-height: 1.5; color: var(--text-color); 
+            max-width: 90%; text-align: left; /* SOLA YASLAMA */
+        }
+
+        /* İstatistikler (Sola Yaslı ve Daha Düzenli) */
+        .profile-stats-grid {
+            display: flex; gap: 40px; margin-top: 25px; padding-top: 20px; 
+            border-top: 1px solid var(--border-color);
+            justify-content: flex-start; /* SOLA YASLAMA */
+        }
+        .stat-item { text-align: center; cursor: pointer; transition: 0.2s; }
+        .stat-item:hover { opacity: 0.7; }
+        .stat-val { font-size: 1.3rem; font-weight: 800; color: var(--text-color); display: block; }
+        .stat-lbl { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+
+        /* --- SEKMELER (TABS) --- */
+        .profile-tabs {
+            display: flex; border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1; padding: 15px; border: none; background: none;
+            font-size: 1rem; font-weight: 600; color: var(--text-muted);
+            cursor: pointer; transition: 0.2s; position: relative;
+        }
+        .tab-btn.active { color: var(--ytu-lacivert); }
+        .tab-btn.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
+            background: var(--ytu-lacivert); border-radius: 4px 4px 0 0;
+        }
+        .tab-btn:hover { background-color: rgba(var(--ytu-lacivert-rgb), 0.03); }
+
+        /* --- TWITTER TARZI POST --- */
+        .tweet-post {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 20px; margin-bottom: 20px;
+            display: flex; gap: 15px; cursor: pointer; transition: 0.2s;
+        }
+        .tweet-post:hover { background-color: rgba(var(--ytu-lacivert-rgb), 0.01); border-color: var(--ytu-lacivert); }
+
+        .t-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+        .t-content { flex-grow: 1; }
+        
+        .t-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .t-name { font-weight: 800; color: var(--text-color); }
+        .t-handle { color: var(--text-muted); font-size: 0.9rem; margin-left: 5px; }
+        
+        .t-text { color: var(--text-color); font-size: 1rem; line-height: 1.5; margin-bottom: 12px; }
+        
+        .t-media {
+            width: 100%; border-radius: 12px; border: 1px solid var(--border-color);
+            overflow: hidden; margin-top: 10px; max-height: 450px;
+        }
+        .t-media img, .t-media video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .t-actions { display: flex; gap: 40px; margin-top: 15px; color: var(--text-muted); }
+        .act-btn { background: none; border: none; color: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.9rem; transition: 0.2s; }
+        .act-btn:hover { color: var(--ytu-lacivert); }
+
+        /* --- İLAN KARTLARI --- */
+        .adverts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .ad-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 20px; position: relative; transition: 0.2s;
+        }
+        .ad-card:hover { transform: translateY(-3px); border-color: var(--ytu-lacivert); }
+        .ad-badge { 
+            position: absolute; top: 20px; left: 20px; 
+            font-size: 0.75rem; background: rgba(var(--ytu-lacivert-rgb), 0.1); 
+            color: var(--ytu-lacivert); padding: 5px 12px; border-radius: 20px; font-weight: 700; 
+        }
+        .ad-menu-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+        
+        .ad-title { font-weight: 800; font-size: 1.1rem; color: var(--text-color); margin-top: 30px; margin-bottom: 8px; }
+        .ad-desc { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4; }
+        .ad-contact { background: var(--bg-secondary); padding: 10px; border-radius: 8px; font-size: 0.9rem; color: var(--text-color); margin-bottom: 15px; }
+        .ad-footer { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 15px; }
+
+        /* MOBİL UYUM */
+        @media (max-width: 900px) {
+            .page-layout { display: block; padding: 10px; }
+            .sidebar-container { display: none; } /* Mobilde gizle */
+            .profile-header-card { text-align: center; }
+            .profile-pic-container { position: relative; top: -50px; margin: 0 auto; left: 0; }
+            .profile-actions { justify-content: center; margin-top: -30px; margin-bottom: 20px; }
+            .profile-stats-grid { justify-content: center; }
+            .profile-names, .p-bio { text-align: center; max-width: 100%; }
+        }
+    </style>
+</head>
 <body>
 
-    <script>
-        // Flicker önleyici
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-        }
-    </script>
+<div class="page-layout">
 
-    {% include 'navbar_partial.html' ignore missing %}
+    <div class="sidebar-container">
+        <a href="/" class="sidebar-logo">YTU<span style="color:#ffc107;">SOCIAL</span></a>
+        
+        <a href="/" class="nav-item"><i class="fas fa-home"></i> Ana Sayfa</a>
+        <a href="{{ url_for('explore') }}" class="nav-item"><i class="fas fa-compass"></i> Keşfet</a>
+        <a href="{{ url_for('messages_inbox') }}" class="nav-item"><i class="fas fa-paper-plane"></i> Mesajlar</a>
+        <a href="{{ url_for('notifications') }}" class="nav-item"><i class="fas fa-heart"></i> Bildirimler</a>
+        <a href="{{ url_for('adverts') }}" class="nav-item"><i class="fas fa-bullhorn"></i> İlanlar</a>
+        <a href="{{ url_for('notes_pool') }}" class="nav-item"><i class="fas fa-book"></i> Not Havuzu</a>
+        <a href="{{ url_for('user_profile', handle=current_user.handle) }}" class="nav-item active">
+            <img src="/static/{{ current_user.profile_pic }}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 2px solid var(--ytu-lacivert);"> Profil
+        </a>
+        
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('admin_panel') }}" class="nav-item" style="color:#ff4757;"><i class="fas fa-shield-alt"></i> Yönetim</a>
+        {% endif %}
+    </div>
 
-    <div class="main-layout">
-
-        <aside class="left-sidebar sticky-sidebar">
-            <div class="club-card" style="border: none; padding: 15px;">
-                <div
-                    style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
-                    <img src="/static/{{ current_user.profile_pic }}"
-                        style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ytu-lacivert);">
-                    <h3 style="margin-top: 8px; font-size: 1rem;">{{ current_user.username }}</h3>
-                </div>
-
-                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
-                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
-                <a href="{{ url_for('reels') }}" class="sidebar-link" style="color: #e1306c;"><span>🎬</span> Reels</a>
-                <a href="{{ url_for('saved_posts_list') }}" class="sidebar-link"><span>📌</span> Kaydedilenler</a>
-                <a href="{{ url_for('notifications') }}" class="sidebar-link"><span>🔔</span> Bildirimler</a>
-                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
-            </div>
-        </aside>
-
-        <main>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-            <div class="notification-area">
-                {% for category, message in messages %}
-                <div class="top-alert alert-{{ category }}">
-                    <div class="alert-content">
-                        <span class="alert-icon">{% if category == 'danger' %}⚠️{% else %}🔔{% endif %}</span>
-                        <span class="alert-text">{{ message }}</span>
-                    </div>
-                    <button class="alert-close" onclick="this.parentElement.style.display='none';">&times;</button>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-            {% endwith %}
-
-            <div class="profile-header-card">
-
-                <img src="/static/{{ user.profile_pic }}" class="profile-avatar-lg">
-
-                <h2 class="profile-name">{{ user.username or 'İsimsiz Yıldızlı' }}</h2>
-                <span class="profile-handle">@{{ user.handle }}</span>
-
-                <div class="profile-dept">
-                    🎓 {{ user.department or 'Bölüm Bilgisi Yok' }}
-                </div>
-
-                {% if user.bio %}
-                <p class="profile-bio">
-                    "{{ user.bio }}"
-                </p>
-                {% endif %}
-
-                <div class="profile-stats">
-                    <div class="stat-link">
-                        <strong class="stat-number">{{ posts|length }}</strong>
-                        <span class="stat-label">Gönderi</span>
-                    </div>
-                    <a href="{{ url_for('followers_list', handle=user.handle) }}" class="stat-link">
-                        <strong class="stat-number">{{ user.followers.count() }}</strong>
-                        <span class="stat-label">Takipçi</span>
-                    </a>
-                    <a href="{{ url_for('following_list', handle=user.handle) }}" class="stat-link">
-                        <strong class="stat-number">{{ user.followed.count() }}</strong>
-                        <span class="stat-label">Takip</span>
-                    </a>
+    <div class="profile-content">
+        
+        <div class="profile-header-card">
+            <div class="profile-banner"></div>
+            
+            <div class="profile-body">
+                <div class="profile-pic-container">
+                    <img src="/static/{{ user.profile_pic }}" class="profile-pic">
+                    {% if user.department %}
+                    <span style="position: absolute; bottom: 5px; right: 5px; background: var(--ytu-lacivert); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid var(--card-bg); font-size: 1rem;" title="{{ user.department }}">🎓</span>
+                    {% endif %}
                 </div>
 
                 <div class="profile-actions">
-                    {% if current_user.id != user.id %}
-                    {% if current_user.is_following(user) %}
-                    <a href="{{ url_for('unfollow', handle=user.handle) }}" class="btn-unfollow">
-                        Takibi Bırak
-                    </a>
+                    {% if user == current_user %}
+                        <a href="{{ url_for('edit_profile') }}" class="btn-modern"><i class="fas fa-pen"></i> Profili Düzenle</a>
+                        <a href="{{ url_for('logout') }}" class="btn-modern btn-logout"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
                     {% else %}
-                    <a href="{{ url_for('follow', handle=user.handle) }}" class="btn-follow">
-                        Takip Et
-                    </a>
+                        {% if current_user.is_following(user) %}
+                            <a href="{{ url_for('unfollow', handle=user.handle) }}" class="btn-modern">Takibi Bırak</a>
+                        {% else %}
+                            <a href="{{ url_for('follow', handle=user.handle) }}" class="btn-modern" style="background: var(--ytu-lacivert); color: white; border: none;">Takip Et</a>
+                        {% endif %}
+                        <a href="/chat/{{ user.handle }}" class="btn-modern"><i class="far fa-envelope"></i> Mesaj</a>
                     {% endif %}
-                    <a href="{{ url_for('chat', handle=user.handle) }}" class="btn-vote"
-                        style="background-color: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); text-decoration:none;">Mesaj
-                        At</a>
-                    {% else %}
-                    <a href="{{ url_for('edit_profile') }}" class="btn-edit-profile">Profili Düzenle</a>
-                    {% endif %}
+                </div>
+
+                <div class="profile-names">
+                    <h1 class="p-real-name">{{ user.username }}</h1>
+                    <div class="p-username">@{{ user.handle }}</div>
+                </div>
+
+                {% if user.bio %}
+                <div class="p-bio">{{ user.bio }}</div>
+                {% endif %}
+
+                <div class="profile-stats-grid">
+                    <div class="stat-item" onclick="switchTab('posts', document.querySelectorAll('.tab-btn')[0])">
+                        <span class="stat-val">{{ user.posts|length }}</span>
+                        <span class="stat-lbl">GÖNDERİ</span>
+                    </div>
+                    <div class="stat-item" onclick="location.href='{{ url_for('followers_list', handle=user.handle) }}'">
+                        <span class="stat-val">{{ user.followers.count() }}</span>
+                        <span class="stat-lbl">TAKİPÇİ</span>
+                    </div>
+                    <div class="stat-item" onclick="location.href='{{ url_for('following_list', handle=user.handle) }}'">
+                        <span class="stat-val">{{ user.followed.count() }}</span>
+                        <span class="stat-lbl">TAKİP</span>
+                    </div>
+                    <div class="stat-item" onclick="switchTab('adverts', document.querySelectorAll('.tab-btn')[1])">
+                        <span class="stat-val">{{ user.adverts|length }}</span>
+                        <span class="stat-lbl">İLAN</span>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <h3 class="section-title">Gönderiler</h3>
+        <div class="profile-tabs">
+            <button class="tab-btn active" onclick="switchTab('posts', this)">Gönderiler</button>
+            <button class="tab-btn" onclick="switchTab('adverts', this)">İlanlar</button>
+        </div>
 
+        <div id="tab-posts">
             {% for post in posts %}
-            <div class="post-card">
-
-                {% if post.repost_of %}
-                <div class="repost-header">
-                    <span>🔁</span>
-                    <b>{{ post.author.username or 'Bir Yıldızlı' }}</b> yeniden gönderdi
-                </div>
-                {% endif %}
-
-                {% set display_post = post.repost_of if post.repost_of else post %}
-
-                <div class="post-header">
-                    <div class="post-author-info">
-                        <img src="/static/{{ display_post.author.profile_pic }}" class="post-avatar">
+            <div class="tweet-post" onclick="location.href='/p/{{ post.id }}'">
+                <img src="/static/{{ user.profile_pic }}" class="t-avatar">
+                <div class="t-content">
+                    <div class="t-header">
                         <div>
-                            <strong class="post-author-name">{{ display_post.author.username or
-                                display_post.author.email.split('@')[0] }}</strong>
-                            <span class="post-author-dept">{{ display_post.author.department or 'Bölüm Yok' }}</span>
+                            <span class="t-name">{{ user.username }}</span>
+                            <span class="t-handle">@{{ user.handle }} · {{ post.date_posted.strftime('%d %b') }}</span>
                         </div>
-                    </div>
-
-                    <div class="post-meta">
-                        <small class="post-time">
-                            {{ display_post.date_posted.strftime('%H:%M') }}
-                        </small>
-
-                        {% if display_post.author == current_user %}
-                        <div style="position: relative;">
-                            <button class="comment-menu-btn"
-                                onclick="toggleMenu('post-menu-{{ display_post.id }}')">⋮</button>
-                            <div id="post-menu-{{ display_post.id }}" class="comment-dropdown">
-                                <button class="comment-action" onclick="openPostEditMode('{{ display_post.id }}')">✏️
-                                    Düzenle</button>
-                                <a href="{{ url_for('delete_post', post_id=display_post.id) }}"
-                                    class="comment-action delete"
-                                    onclick="return confirm('Bu gönderiyi silmek istediğine emin misin?')">🗑️ Sil</a>
-                            </div>
-                        </div>
+                        {% if user == current_user %}
+                        <a href="{{ url_for('delete_post', post_id=post.id) }}" onclick="event.stopPropagation(); return confirm('Silmek istiyor musun?')" style="color: var(--text-muted);"><i class="fas fa-trash"></i></a>
                         {% endif %}
                     </div>
-                </div>
 
-                <div id="post-content-{{ display_post.id }}" class="post-text">{{ display_post.content }}</div>
-
-                {% if display_post.image_file %}
-                <div class="post-image-container">
-                    {% if display_post.is_video() %}
-                    <video controls class="post-image" style="background: black;">
-                        <source src="/static/post_images/{{ display_post.image_file }}" type="video/mp4">
-                        Tarayıcınız video oynatmayı desteklemiyor.
-                    </video>
-                    {% else %}
-                    <img src="/static/post_images/{{ display_post.image_file }}" class="post-image"
-                        onclick="openLightbox(this.src)">
-                    {% endif %}
-                </div>
-                {% endif %}
-
-                {% if display_post.poll %}
-                <div class="poll-container">
-                    {% set user_vote = display_post.poll.user_voted(current_user) %}
-
-                    {% for option in display_post.poll.options %}
-                    <div class="poll-option" onclick="votePoll('{{ display_post.poll.id }}', '{{ option.id }}', this)">
-
-                        {% if user_vote %}
-                        <div class="poll-fill" data-initial-width="{{ option.percentage() }}%"></div>
-                        {% endif %}
-
-                        <div class="poll-text">
-                            <span>{{ option.text }}</span>
-                            {% if user_vote %}
-                            <span class="poll-percent">{{ option.percentage() }}%</span>
-                            {% endif %}
-                        </div>
-
-                        {% if user_vote and user_vote.option_id == option.id %}
-                        <span class="poll-check">✅</span>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-
-                    <div class="poll-meta">
-                        {{ display_post.poll.total_votes() }} oy • {% if user_vote %}Oy verildi{% else %}Anket devam
-                        ediyor{% endif %}
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if display_post.author == current_user %}
-                <form action="{{ url_for('edit_post', post_id=display_post.id) }}" method="POST"
-                    id="post-edit-form-{{ display_post.id }}" class="edit-post-form">
-                    <textarea name="new_content" class="post-input edit-textarea"
-                        rows="3">{{ display_post.content }}</textarea>
-                    <div class="edit-actions">
-                        <button type="button" onclick="closePostEditMode('{{ display_post.id }}')"
-                            class="btn-cancel">İptal</button>
-                        <button type="submit" class="btn-vote btn-sm">Kaydet</button>
-                    </div>
-                </form>
-                {% endif %}
-
-                <div class="post-actions">
-                    <span class="action-item" onclick="likePost('{{ display_post.id }}', this)">
-                        {% if current_user in display_post.liked_by %}❤️{% else %}🤍{% endif %}
-                        <span class="like-count">{{ display_post.liked_by|length }}</span>
-                    </span>
-
-                    <span class="action-item" onclick="toggleComments('comment-box-{{ post.id }}')">
-                        💬 {{ display_post.comments|length }}
-                    </span>
-
-                    {% if not post.repost_of %}
-                    <span class="action-item" onclick="repostPost('{{ display_post.id }}')">
-                        🔁 Paylaş
-                    </span>
+                    {% if post.content %}
+                    <div class="t-text">{{ post.content }}</div>
                     {% endif %}
 
-                    <span class="action-item" onclick="savePost('{{ display_post.id }}', this)">
-                        {% if current_user.has_saved(display_post) %}
-                        <span class="save-icon">✅ Kaydedildi</span>
+                    {% if post.image_file %}
+                    <div class="t-media">
+                        {% if post.is_video() %}
+                            <video src="/static/post_images/{{ post.image_file }}" controls onclick="event.stopPropagation()"></video>
                         {% else %}
-                        <span class="save-icon">🔖 Kaydet</span>
-                        {% endif %}
-                    </span>
-                </div>
-
-                <div id="comment-box-{{ post.id }}" class="comment-section" style="display: none;">
-
-                    {% for comment in display_post.comments %}
-                    <div class="comment-item" id="comment-container-{{ comment.id }}">
-                        <div class="comment-header">
-                            <div>
-                                <strong class="comment-author">{{ comment.author.username or 'Anonim' }}:</strong>
-                                <span class="comment-content" id="comment-text-{{ comment.id }}">{{ comment.text
-                                    }}</span>
-                            </div>
-                            <small class="comment-time">{{ comment.date_posted.strftime('%H:%M') }}</small>
-                        </div>
-
-                        {% if comment.author == current_user %}
-                        <button class="comment-menu-btn" onclick="toggleMenu('menu-{{ comment.id }}')">⋮</button>
-                        <div id="menu-{{ comment.id }}" class="comment-dropdown">
-                            <button class="comment-action" onclick="openEditMode('{{ comment.id }}')">✏️
-                                Düzenle</button>
-                            <a href="{{ url_for('delete_comment', comment_id=comment.id) }}"
-                                class="comment-action delete"
-                                onclick="return confirm('Bu yorumu silmek istediğine emin misin?')">🗑️ Sil</a>
-                        </div>
-                        <form action="{{ url_for('edit_comment', comment_id=comment.id) }}" method="POST"
-                            class="edit-comment-form" id="edit-form-{{ comment.id }}">
-                            <input type="text" name="new_text" value="{{ comment.text }}" class="edit-input">
-                            <button type="submit" class="btn-vote btn-sm">Kaydet</button>
-                            <button type="button" onclick="closeEditMode('{{ comment.id }}')"
-                                class="btn-cancel">İptal</button>
-                        </form>
+                            <img src="/static/post_images/{{ post.image_file }}">
                         {% endif %}
                     </div>
-                    {% endfor %}
+                    {% endif %}
 
-                    <form onsubmit="submitComment(event, '{{ display_post.id }}')" class="comment-form">
-                        <input type="text" name="comment_text" id="comment-input-{{ display_post.id }}"
-                            placeholder="Yorumun..." required class="comment-input">
-                        <button type="submit" class="comment-submit">Gönder</button>
-                    </form>
+                    <div class="t-actions">
+                        <button class="act-btn" onclick="event.stopPropagation(); likePost({{ post.id }}, this)">
+                            <i class="{{ 'fas' if current_user in post.liked_by else 'far' }} fa-heart"></i> {{ post.liked_by|length }}
+                        </button>
+                        <button class="act-btn"><i class="far fa-comment"></i> {{ post.comments|length }}</button>
+                        <button class="act-btn"><i class="far fa-share-square"></i></button>
+                    </div>
                 </div>
-
             </div>
             {% else %}
-            <div class="empty-state">
-                <p>Henüz gönderisi yok.</p>
+            <div style="text-align: center; padding: 50px; color: var(--text-muted);">
+                <p>Henüz gönderi yok.</p>
             </div>
             {% endfor %}
+        </div>
 
-        </main>
+        <div id="tab-adverts" style="display: none;">
+            <div class="adverts-grid">
+                {% for ad in user.adverts %}
+                <div class="ad-card">
+                    <span class="ad-badge">{{ ad.category }}</span>
+                    {% if user == current_user %}
+                    <a href="{{ url_for('delete_advert', adv_id=ad.id) }}" class="ad-menu-btn" onclick="return confirm('Silmek istiyor musun?')"><i class="fas fa-trash-alt"></i></a>
+                    {% endif %}
+                    
+                    <div class="ad-title">{{ ad.title }}</div>
+                    <div class="ad-desc">{{ ad.description }}</div>
+                    
+                    {% if ad.contact_info %}
+                    <div class="ad-contact"><i class="fas fa-phone"></i> {{ ad.contact_info }}</div>
+                    {% endif %}
+                    
+                    <div class="ad-footer">
+                        <img src="/static/{{ user.profile_pic }}" style="width: 20px; height: 20px; border-radius: 50%;">
+                        <span>{{ user.username }} · {{ ad.date_posted.strftime('%d %b') }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 50px; color: var(--text-muted); grid-column: 1/-1;">
+                    <p>Henüz ilan yok.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
 
-        <aside class="right-sidebar sticky-sidebar">
-        </aside>
     </div>
+</div>
 
-    <div id="lightboxModal" class="lightbox" onclick="closeLightbox()">
-        <span class="close-lightbox">&times;</span>
-        <img class="lightbox-content" id="lightboxImage" onclick="event.stopPropagation()">
-    </div>
-
-    <button onclick="topFunction()" id="scrollTopBtn" title="Yukarı Çık">⬆️</button>
-
-    <script src="/static/script.js"></script>
+<script src="/static/script.js"></script>
+<script>
+    function switchTab(tabId, btn) {
+        document.getElementById('tab-posts').style.display = 'none';
+        document.getElementById('tab-adverts').style.display = 'none';
+        document.getElementById('tab-' + tabId).style.display = 'block';
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+</script>
 
 </body>
-
 </html>
