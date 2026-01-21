@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesajlar | YTU Social</title>
+    
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
+
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <div class="inbox-layout">
+        
+        <aside class="left-sidebar sticky-sidebar">
+            <div class="club-card" style="border: none; padding: 15px;">
+                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
+                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
+                <a href="{{ url_for('reels') }}" class="sidebar-link"><span>🎬</span> Reels</a>
+                <a href="{{ url_for('notes_pool') }}" class="sidebar-link"><span>📚</span> Not Havuzu</a>
+                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link active-link">
+                    <span>📩</span> Mesajlar
+                    {% if unread_msg_count > 0 %}
+                        <span class="notification-badge" style="background:var(--ytu-lacivert);">{{ unread_msg_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+        </aside>
+
+        <main>
+            <div class="inbox-container">
+                
+                <div class="inbox-header">
+                    <div class="inbox-title-row">
+                        <h2>Mesajlar</h2>
+                        <a href="{{ url_for('explore') }}" class="btn-new-msg">
+                            <i class="fas fa-plus"></i> Yeni Mesaj
+                        </a>
+                    </div>
+                    
+                    <div class="inbox-search-wrapper">
+                        <i class="fas fa-search search-icon-pos"></i>
+                        <input type="text" id="chatSearch" class="inbox-search-input" placeholder="Sohbetlerde veya kişilerde ara..." onkeyup="searchChats()">
+                    </div>
+                </div>
+
+                <div class="inbox-list" id="inboxList">
+                    
+                    {% if conversations %}
+                        {% for conv in conversations %}
+                        <a href="{{ url_for('chat', handle=conv.user.handle) }}" class="inbox-item">
+                            
+                            <img src="/static/{{ conv.user.profile_pic }}" class="inbox-avatar" alt="{{ conv.user.username }}">
+                            
+                            <div class="inbox-info">
+                                <div class="inbox-top-row">
+                                    <span class="inbox-name">{{ conv.user.username }}</span>
+                                    <span class="inbox-time" id="time-{{ conv.user.id }}">
+                                        {% if conv.last_message %}
+                                            {{ conv.timestamp.strftime('%H:%M') }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <div class="inbox-preview-row">
+                                    <p class="inbox-preview" id="last-msg-{{ conv.user.id }}">
+                                        {% if conv.last_message %}
+                                            {% if conv.last_message.sender_id == current_user.id %}
+                                                <span style="color:var(--ytu-lacivert);">Sen:</span> 
+                                            {% endif %}
+                                            {% if conv.last_message.msg_type == 'audio' %}
+                                                🎤 Sesli Mesaj
+                                            {% else %}
+                                                {{ conv.last_message.body }}
+                                            {% endif %}
+                                        {% else %}
+                                            <i style="opacity:0.7;">Sohbeti başlat...</i>
+                                        {% endif %}
+                                    </p>
+                                    
+                                    <span class="unread-badge" id="badge-{{ conv.user.id }}" 
+                                          style="display: {% if conv.unread > 0 %}flex{% else %}none{% endif %};">
+                                        {{ conv.unread }}
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        
+                        <div class="inbox-empty">
+                            <i class="far fa-paper-plane"></i>
+                            <h3>Henüz Mesajın Yok</h3>
+                            <p>Arkadaşlarını bul ve onlara bir "Selam" çak! 👋</p>
+                            <a href="{{ url_for('explore') }}" class="btn-vote" style="margin-top:20px; text-decoration:none;">Kişileri Keşfet</a>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        // Basit Arama Fonksiyonu
+        function searchChats() {
+            var input, filter, list, items, name, i, txtValue;
+            input = document.getElementById('chatSearch');
+            filter = input.value.toUpperCase();
+            list = document.getElementById("inboxList");
+            items = list.getElementsByClassName('inbox-item');
+
+            for (i = 0; i < items.length; i++) {
+                name = items[i].getElementsByClassName("inbox-name")[0];
+                txtValue = name.textContent || name.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    items[i].style.display = "";
+                } else {
+                    items[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

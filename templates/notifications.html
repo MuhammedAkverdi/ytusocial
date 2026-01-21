@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bildirimler - YTU Social</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+
+<body>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <div class="main-layout">
+
+        <aside class="left-sidebar sticky-sidebar">
+            <div class="club-card" style="border: none; padding: 15px;">
+                <div style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <img src="/static/{{ current_user.profile_pic }}" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ytu-lacivert); object-fit: cover;">
+                    <h3 style="margin-top: 8px; font-size: 1rem;">{{ current_user.username }}</h3>
+                </div>
+
+                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
+                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
+                <a href="{{ url_for('reels') }}" class="sidebar-link" style="color: #e1306c;"><span>🎬</span> Reels</a>
+                <a href="{{ url_for('saved_posts_list') }}" class="sidebar-link"><span>📌</span> Kaydedilenler</a>
+
+                <a href="{{ url_for('notifications') }}" class="sidebar-link active-link">
+                    <span>🔔</span> Bildirimler
+                    {% if unread_count > 0 %}
+                    <span class="notification-badge">{{ unread_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link">
+                    <span>📩</span> Mesajlar
+                    {% if unread_msg_count > 0 %}
+                    <span class="notification-badge" style="background-color: var(--ytu-lacivert);">{{ unread_msg_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+        </aside>
+
+        <main>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: var(--text-color);">Bildirimler</h3>
+                </div>
+
+            <div class="notification-list">
+                {% for notif in notifications %}
+
+                {% set target_url = url_for('chat', handle=notif.actor.handle) if notif.verb == 'messaged' else url_for('user_profile', handle=notif.actor.handle) %}
+                
+                <div class="notif-card {{ 'unread' if not notif.is_read else '' }}" onclick="window.location.href='{{ target_url }}'">
+
+                    <div class="notif-icon-box 
+                        {% if notif.verb == 'liked' %}bg-like
+                        {% elif notif.verb == 'commented' %}bg-comment
+                        {% elif notif.verb == 'followed' %}bg-follow
+                        {% elif notif.verb == 'messaged' %}bg-msg
+                        {% endif %}">
+                        
+                        {% if notif.verb == 'liked' %} <i class="fas fa-heart"></i>
+                        {% elif notif.verb == 'commented' %} <i class="fas fa-comment-dots"></i>
+                        {% elif notif.verb == 'followed' %} <i class="fas fa-user-plus"></i>
+                        {% elif notif.verb == 'messaged' %} <i class="fas fa-envelope"></i>
+                        {% endif %}
+                    </div>
+
+                    <div class="notif-content">
+                        <div>
+                            <span class="notif-actor">{{ notif.actor.username }}</span>
+                            <span class="notif-text">
+                                {% if notif.verb == 'liked' %} gönderini beğendi.{% endif %}
+                                {% if notif.verb == 'commented' %} gönderine yorum yaptı.{% endif %}
+                                {% if notif.verb == 'followed' %} seni takip etmeye başladı.{% endif %}
+                                {% if notif.verb == 'messaged' %} sana bir mesaj gönderdi.{% endif %}
+                            </span>
+                        </div>
+                        <small class="notif-time">
+                            <i class="far fa-clock"></i> {{ notif.timestamp.strftime('%H:%M') }}
+                        </small>
+                    </div>
+
+                    {% if notif.post and notif.verb != 'messaged' %}
+                        <button class="btn-view">Gör</button>
+                    {% endif %}
+
+                    {% if notif.verb == 'messaged' %}
+                        <i class="fas fa-chevron-right" style="color: var(--text-muted); margin-right: 15px;"></i>
+                    {% endif %}
+
+                </div>
+                {% else %}
+                <div class="empty-notif" style="text-align: center; padding: 50px; color: var(--text-muted);">
+                    <i class="far fa-bell-slash" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                    <p>Henüz yeni bildirim yok.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+
+        <aside class="right-sidebar">
+            </aside>
+    </div>
+
+    <script>
+        const MY_USER_ID = "{{ current_user.id }}";
+    </script>
+    <script src="/static/script.js"></script>
+</body>
+
+</html>

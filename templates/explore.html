@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keşfet | YTU Social</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Explore Page Specific Styles */
+        .explore-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px; /* Sidebar - Content - Right Panel */
+            gap: 30px;
+            max-width: 1400px;
+            margin: 100px auto 40px;
+            padding: 0 20px;
+        }
+
+        .explore-main {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Search Section */
+        .search-hero {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .search-input-lg {
+            width: 100%;
+            max-width: 600px;
+            padding: 15px 20px;
+            border-radius: 30px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1.1rem;
+            transition: border-color 0.3s;
+        }
+        .search-input-lg:focus {
+            border-color: var(--ytu-lacivert);
+            outline: none;
+        }
+
+        /* User Results Grid */
+        .user-results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .user-card-explore {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .user-card-explore:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+        .user-explore-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--ytu-sari);
+            margin-bottom: 10px;
+        }
+
+        /* Post Masonry Grid */
+        .masonry-grid {
+            column-count: 2; /* 2 columns for posts */
+            column-gap: 20px;
+        }
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .masonry-img {
+            width: 100%;
+            display: block;
+            cursor: pointer;
+        }
+        .masonry-content {
+            padding: 15px;
+        }
+
+        @media (max-width: 1100px) {
+            .explore-layout { grid-template-columns: 1fr 300px; }
+            .left-sidebar { display: none; } /* Hide left sidebar on smaller screens */
+        }
+        @media (max-width: 800px) {
+            .explore-layout { grid-template-columns: 1fr; }
+            .right-sidebar { display: none; }
+            .masonry-grid { column-count: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'navbar_partial.html' ignore missing %} <div class="explore-layout">
+        
+        <aside class="left-sidebar sticky-sidebar">
+            <div class="club-card" style="border: none; padding: 15px;">
+                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
+                <a href="{{ url_for('explore') }}" class="sidebar-link active-link"><span>🔍</span> Keşfet</a>
+                <a href="{{ url_for('reels') }}" class="sidebar-link"><span>🎬</span> Reels</a>
+                <a href="{{ url_for('notes_pool') }}" class="sidebar-link"><span>📚</span> Not Havuzu</a>
+                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
+            </div>
+        </aside>
+
+        <main class="explore-main">
+            
+            <div class="search-hero">
+                <h2 style="margin-bottom: 20px; color: var(--text-color);">Yıldız'da Ne Var Ne Yok?</h2>
+                <form action="{{ url_for('explore') }}" method="GET">
+                    <input type="text" name="q" class="search-input-lg" placeholder="Kişi, etiket veya konu ara..." value="{{ request.args.get('q', '') }}">
+                </form>
+                
+                <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <a href="{{ url_for('explore', q='#itiraflar') }}" class="filter-chip">🔥 İtiraflar</a>
+                    <a href="{{ url_for('explore', q='#yazilim') }}" class="filter-chip">💻 Yazılım</a>
+                    <a href="{{ url_for('explore', q='#yemekhane') }}" class="filter-chip">🍔 Yemekhane</a>
+                    <a href="{{ url_for('explore', q='#etkinlik') }}" class="filter-chip">🗓️ Etkinlik</a>
+                </div>
+            </div>
+
+            {% if users %}
+            <h3 style="color: var(--text-muted); margin-left: 5px;">👤 Bulunan Kişiler</h3>
+            <div class="user-results-grid">
+                {% for user in users %}
+                <div class="user-card-explore">
+                    <img src="/static/{{ user.profile_pic }}" class="user-explore-avatar">
+                    <h4 style="margin: 5px 0; color: var(--text-color);">{{ user.username }}</h4>
+                    <small style="color: var(--text-muted); display: block; margin-bottom: 10px;">{{ user.department }}</small>
+                    <a href="{{ url_for('user_profile', handle=user.handle) }}" class="btn-primary" style="padding: 5px 15px; font-size: 0.9rem;">Profili Gör</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <h3 style="color: var(--text-muted); margin-left: 5px;">📸 Popüler Gönderiler</h3>
+            
+            {% if posts %}
+            <div class="masonry-grid">
+                {% for post in posts %}
+                <div class="masonry-item">
+                    {% if post.image_file %}
+                        {% if post.is_video() %}
+                            <video src="/static/post_images/{{ post.image_file }}" controls class="masonry-img"></video>
+                        {% else %}
+                            <img src="/static/post_images/{{ post.image_file }}" class="masonry-img" onclick="openLightbox(this.src)">
+                        {% endif %}
+                    {% endif %}
+                    <div class="masonry-content">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <img src="/static/{{ post.author.profile_pic }}" style="width: 30px; height: 30px; border-radius: 50%;">
+                            <span style="font-weight: bold; font-size: 0.9rem;">{{ post.author.username }}</span>
+                        </div>
+                        <p style="font-size: 0.9rem; color: var(--text-color); margin-bottom: 10px;">{{ post.content | truncate(100) }}</p>
+                        <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.8rem;">
+                            <span>❤️ {{ post.liked_by|length }}</span>
+                            <span>💬 {{ post.comments|length }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 50px; color: var(--text-muted);">
+                <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                <p>Aradığın kriterde içerik bulunamadı.</p>
+            </div>
+            {% endif %}
+
+        </main>
+
+        <aside class="right-sidebar sticky-sidebar">
+            <div class="club-card" style="margin-bottom: 20px;">
+                <h4 style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">Neler Oluyor?</h4>
+                {% for tag, count in trending_tags %} <div style="margin-bottom: 15px;">
+                    <small style="color: var(--text-muted);">Gündem</small>
+                    <div style="font-weight: bold;">#{{ tag }}</div>
+                    <small style="color: var(--text-muted);">{{ count }} gönderi</small>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="club-card">
+                <h4 style="margin-bottom: 15px;">✨ Önerilen Kişiler</h4>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <div style="width: 40px; height: 40px; background: #ddd; border-radius: 50%;"></div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; font-size: 0.9rem;">Ahmet Yılmaz</div>
+                        <small style="color: var(--text-muted);">Bilgisayar Müh.</small>
+                    </div>
+                    <button class="btn-vote" style="padding: 5px 10px; font-size: 0.8rem;">Takip Et</button>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

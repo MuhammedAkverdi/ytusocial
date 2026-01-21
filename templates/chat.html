@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sohbet: {{ user.username }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="auth-body">
+
+    <input type="hidden" id="currentUserId" value="{{ current_user.id }}">
+    <input type="hidden" id="currentUserName" value="{{ current_user.username }}">
+    <input type="hidden" id="currentUserPic" value="{{ current_user.profile_pic }}">
+    <input type="hidden" id="recipientId" value="{{ user.id }}">
+    <input type="hidden" id="recipientUserName" value="{{ user.username }}">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="notification-area">
+        {% for category, message in messages %}
+        <div class="top-alert alert-{{ category }}">
+            <span class="alert-text">{{ message }}</span>
+            <button class="alert-close" onclick="this.parentElement.style.display='none';">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="auth-card chat-card">
+
+        <div class="chat-header-bar">
+            <a href="{{ url_for('messages_inbox') }}" class="back-btn"
+                style="margin-right: 15px; color: var(--text-color); font-size: 1.2rem;">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+
+            <a href="{{ url_for('user_profile', handle=user.handle) }}"
+                style="display: flex; align-items: center; text-decoration: none; color: inherit; flex: 1;">
+                <div class="avatar-wrapper">
+                    <img src="/static/{{ user.profile_pic }}" class="chat-avatar-sm">
+                    <span id="status-dot-{{ user.id }}"
+                        class="status-dot {% if user.id in online_users %}online{% endif %}"></span>
+                </div>
+                <div style="margin-left: 10px;">
+                    <h3 class="chat-username">{{ user.username }}</h3>
+                    <span class="chat-status" id="user-status-text">
+                        {% if user.id in online_users %}
+                        <span style="color: #2ecc71;">● Çevrimiçi</span>
+                        {% else %}
+                        Çevrimdışı
+                        {% endif %}
+                    </span>
+                </div>
+            </a>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="call-btn" onclick="startCall(false)" title="Sesli Arama"><i
+                        class="fas fa-phone"></i></button>
+                <button class="call-btn" onclick="startCall(true)" title="Görüntülü Arama"><i
+                        class="fas fa-video"></i></button>
+            </div>
+        </div>
+
+        <div class="chat-area" id="messageArea">
+            {% for msg in messages %}
+            {% if msg.sender_id == current_user.id %}
+            <div class="message-row sent">
+                <div class="message-bubble bubble-sent">
+                    {% if msg.msg_type == 'audio' %}
+                    <audio controls controlsList="nodownload" class="audio-msg">
+                        <source src="/static/audio_files/{{ msg.file_path }}" type="audio/webm">
+                    </audio>
+                    {% else %}
+                    {{ msg.body }}
+                    {% endif %}
+                    <span class="msg-time">
+                        {{ msg.timestamp.strftime('%H:%M') }}
+                        {% if msg.is_read %} <i class="fas fa-check-double"></i> {% else %} <i class="fas fa-check"></i>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% else %}
+            <div class="message-row received">
+                <img src="/static/{{ user.profile_pic }}" class="msg-avatar">
+                <div class="message-bubble bubble-received">
+                    {% if msg.msg_type == 'audio' %}
+                    <audio controls controlsList="nodownload" class="audio-msg">
+                        <source src="/static/audio_files/{{ msg.file_path }}" type="audio/webm">
+                    </audio>
+                    {% else %}
+                    {{ msg.body }}
+                    {% endif %}
+                    <span class="msg-time">{{ msg.timestamp.strftime('%H:%M') }}</span>
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="empty-chat" style="margin-top: 50px;">
+                <p style="font-size: 3rem;">👋</p>
+                <p>Henüz mesaj yok. İlk adımı at!</p>
+            </div>
+            {% endfor %}{% for msg in messages %}
+            <div class="message-row {{ 'sent' if msg.sender_id == current_user.id else 'received' }}">
+
+                {% if msg.sender_id != current_user.id %}
+                <img src="/static/{{ user.profile_pic }}" class="chat-avatar-sm">
+                {% else %}
+                <a href="{{ url_for('delete_message', message_id=msg.id) }}" class="msg-delete"
+                    onclick="return confirm('Silmek istediğine emin misin?')">✕</a>
+                {% endif %}
+
+                <div class="message-bubble {{ 'bubble-sent' if msg.sender_id == current_user.id else 'bubble-received' }}"
+                    style="{{ 'padding:0; background:none; border:none;' if msg.msg_type == 'story' else '' }}">
+
+                    {% if msg.msg_type == 'story' %}
+                    <div class="story-share-card" onclick="viewSharedStory(event, '{{ msg.body }}')"
+                        style="cursor:pointer; width: 180px; position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+                        <div
+                            style="background: rgba(0,0,0,0.3); position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:white; z-index:2;">
+                            <i class="fas fa-play" style="font-size: 2rem; margin-bottom:8px;"></i>
+                            <span style="font-size:0.85rem; font-weight:600;">Hikayeyi İzle</span>
+                        </div>
+                        <img src="/static/story_images/{{ msg.file_path }}"
+                            style="width:100%; height: 240px; object-fit: cover; display:block;"
+                            onerror="this.src='/static/img/story_placeholder.jpg'">
+                    </div>
+
+                    {% elif msg.msg_type == 'audio' %}
+                    <audio controls controlsList="nodownload" class="audio-msg">
+                        <source src="/static/audio_files/{{ msg.file_path }}" type="audio/webm">
+                        Tarayıcınız sesi desteklemiyor.
+                    </audio>
+
+                    {% else %}
+                    {{ msg.body }}
+                    {% endif %}
+
+                    {% if msg.msg_type != 'story' %}
+                    <span class="msg-time">
+                        {{ msg.timestamp.strftime('%H:%M') }}
+                        {% if msg.sender_id == current_user.id %}
+                        <i class="fas fa-check"></i>
+                        {% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endfor %}
+            <div id="typingIndicator" class="typing-indicator" style="display: none;">
+                <span></span><span></span><span></span></div>
+        </div>
+
+        <div class="chat-form-container">
+            <form id="chatForm" onsubmit="sendMessage(event)"
+                style="flex: 1; display: flex; gap: 10px; margin: 0; align-items: center;">
+                <input type="text" id="messageInput" class="chat-input" placeholder="Bir mesaj yaz..."
+                    autocomplete="off">
+                <button type="submit" class="chat-send-btn"
+                    style="background: var(--ytu-lacivert); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+            <button id="recordBtn" class="mic-btn" title="Ses Kaydet" style="margin-left: 10px;"><i
+                    class="fas fa-microphone"></i></button>
+        </div>
+
+    </div>
+
+    <div id="callModal" class="call-modal">
+        <div class="video-grid">
+            <h3 id="callStatus">Aranıyor...</h3>
+            <video id="remoteVideo" autoplay playsinline class="remote-video"></video>
+            <video id="localVideo" autoplay playsinline muted class="local-video"></video>
+            <div class="call-controls">
+                <button onclick="toggleAudio()" class="control-btn" id="audioBtn"><i
+                        class="fas fa-microphone"></i></button>
+                <button onclick="endCall()" class="control-btn hangup-btn"><i class="fas fa-phone-slash"></i></button>
+                <button onclick="toggleVideo()" class="control-btn" id="videoBtn"><i class="fas fa-video"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="incomingCallBox" class="incoming-call-box">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div
+                style="width: 50px; height: 50px; background: #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                <i class="fas fa-phone"></i></div>
+            <div>
+                <strong id="callerName" style="font-size: 1.1rem;">Biri</strong>
+                <div id="callType" style="font-size: 0.9rem; color: #666;">Görüntülü Arıyor...</div>
+            </div>
+        </div>
+        <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: flex-end;">
+            <button onclick="acceptCall()" class="btn-vote"
+                style="background: #2ecc71; padding: 10px 25px;">Cevapla</button>
+            <button onclick="rejectCall()" class="btn-vote"
+                style="background: #e74c3c; padding: 10px 25px;">Reddet</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const MY_USERNAME = "{{ current_user.username }}";
+        const OTHER_USERNAME = "{{ user.username }}";
+        if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+        window.onload = function () {
+            var msgArea = document.getElementById("messageArea");
+            if (msgArea) msgArea.scrollTop = msgArea.scrollHeight;
+        };
+    </script>
+
+    <div id="storyModal" class="story-view-modal">
+        <div id="storyProgressContainer" class="story-progress-container"></div>
+        <span class="close-story" onclick="closeStory()">&times;</span>
+
+        <div class="story-header-info">
+            <img id="storyUserPic" src="" class="nav-avatar">
+            <span id="storyUserName" style="color: white; font-weight: bold; margin-left: 10px;"></span>
+            <span id="storyTime" style="color: #ddd; font-size: 0.8rem; margin-left: 10px;"></span>
+        </div>
+
+        <button onclick="shareActiveStory()" class="story-share-btn" title="Hikayeyi Paylaş" style="right: 75px;">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+
+        <a id="deleteStoryBtn" href="#" class="story-delete-btn"
+            onclick="return confirm('Silmek istediğine emin misin?')">🗑️</a>
+        <div id="storyViewers" class="story-viewers-badge">👁️ <span id="viewerCount">0</span></div>
+
+        <div class="story-media-wrapper">
+            <img id="storyImage" src="" class="story-full-img" style="display: none;">
+            <video id="storyVideo" class="story-full-img" style="display: none;" playsinline webkit-playsinline>
+                Tarayıcınız video oynatmayı desteklemiyor.
+            </video>
+            <div class="story-nav-left" onclick="navigateStory('prev')" onmousedown="pauseStory()"
+                onmouseup="resumeStory()" ontouchstart="pauseStory()" ontouchend="resumeStory()"></div>
+            <div class="story-nav-right" onclick="navigateStory('next')" onmousedown="pauseStory()"
+                onmouseup="resumeStory()" ontouchstart="pauseStory()" ontouchend="resumeStory()"></div>
+        </div>
+    </div>
+
+    <div id="advancedShareModal" class="share-modal-overlay">
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>

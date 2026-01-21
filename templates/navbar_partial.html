@@ -1,0 +1,41 @@
+<nav class="navbar">
+    <a href="/" class="nav-logo">YTU<span>SOCIAL</span></a>
+    
+    <button type="button" class="hamburger-btn" onclick="toggleMobileMenu()">
+        ☰
+    </button>
+    
+    <div class="nav-items" id="mobile-menu">
+        
+        <button type="button" onclick="toggleDarkMode()" id="theme-btn" title="Temayı Değiştir" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">
+            🌙
+        </button>
+
+        <div class="profile-menu" onclick="toggleProfileDropdown()">
+            {% if current_user.is_authenticated %}
+                <span style="font-weight: 600; font-size: 0.9rem;">{{ current_user.username }}</span>
+                <img src="/static/{{ current_user.profile_pic }}" class="nav-avatar" alt="Profil">
+            {% else %}
+                <span style="font-weight: 600;">Misafir</span>
+                <img src="/static/img/default_avatar.png" class="nav-avatar" alt="Misafir">
+            {% endif %}
+            
+            <div class="dropdown-content">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin_panel') }}" class="dropdown-item" style="color: var(--ytu-lacivert); font-weight: bold;">👑 Admin Paneli</a>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
+                    {% endif %}
+                    
+                    <a href="{{ url_for('user_profile', handle=current_user.handle) }}" class="dropdown-item">👤 Profilim</a>
+                    <a href="{{ url_for('edit_profile') }}" class="dropdown-item">⚙️ Profili Düzenle</a>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
+                    <a href="{{ url_for('logout') }}" class="dropdown-item" style="color: #e74c3c;">🚪 Çıkış Yap</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="dropdown-item">Giriş Yap</a>
+                    <a href="{{ url_for('register') }}" class="dropdown-item">Kayıt Ol</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>

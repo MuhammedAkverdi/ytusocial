@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Not Havuzu - YTU Social</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+            document.documentElement.style.backgroundColor = '#121212';
+        }
+    </script>
+</head>
+
+<body>
+
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <div class="main-layout">
+        <aside class="left-sidebar sticky-sidebar">
+            <div class="club-card">
+                <div
+                    style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <img src="/static/{{ current_user.profile_pic }}"
+                        style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ytu-lacivert);">
+                    <h3 style="margin-top: 8px; font-size: 1rem;">{{ current_user.username }}</h3>
+                    <div
+                        style="background: linear-gradient(90deg, #ffc107, #ff9800); color: black; display: inline-block; padding: 3px 10px; border-radius: 15px; font-weight: 800; font-size: 0.75rem; margin-top: 5px;">
+                        ⭐ {{ current_user.score }} Puan
+                    </div>
+                </div>
+                <a href="/" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
+                <a href="{{ url_for('notes_pool') }}" class="sidebar-link active"><span>📚</span> Not Havuzu</a>
+                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
+                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
+                <a href="javascript:history.back()" class="sidebar-link"
+                    style="margin-top: 15px; opacity: 0.7;"><span>⬅️</span> Geri</a>
+            </div>
+        </aside>
+
+        <main>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}{% for category, msg in messages %}
+            <div class="alert-box {% if category=='success' %}border-left-success{% else %}border-left-danger{% endif %}"
+                style="padding: 12px; border-radius: 10px; margin-bottom: 20px; background: var(--card-bg); font-size: 0.9rem;">
+                {{ msg }}</div>
+            {% endfor %}{% endif %}
+            {% endwith %}
+
+            <div class="notes-header">
+                <div class="header-content">
+                    <h2>Akademik Arşiv</h2>
+                    <p>Not yükle, puan kazan, kampüse destek ol.</p>
+                </div>
+                <button onclick="openModal()" class="btn-upload-hero">
+                    <i class="fas fa-plus"></i> Not Yükle
+                </button>
+            </div>
+
+            <div class="toolbar">
+                <div class="filter-group">
+                    <a href="/notes" class="filter-btn {% if not selected_dept %}active{% endif %}">Tümü</a>
+                    <a href="/notes?dept=Hazırlık"
+                        class="filter-btn {% if selected_dept=='Hazırlık' %}active{% endif %}">🇬🇧 Hazırlık</a>
+                    <a href="/notes?dept=Bilgisayar"
+                        class="filter-btn {% if selected_dept=='Bilgisayar' %}active{% endif %}">💻 Bilgisayar</a>
+                    <a href="/notes?dept=Makine" class="filter-btn {% if selected_dept=='Makine' %}active{% endif %}">⚙️
+                        Makine</a>
+                    <a href="/notes?dept=Ortak Dersler"
+                        class="filter-btn {% if selected_dept=='Ortak Dersler' %}active{% endif %}">📚 Ortak</a>
+                </div>
+                <select class="sort-select" onchange="location = this.value;">
+                    <option value="{{ url_for('notes_pool', dept=selected_dept, sort='newest') }}" {% if
+                        current_sort=='newest' %}selected{% endif %}>🕒 En Yeniler</option>
+                    <option value="{{ url_for('notes_pool', dept=selected_dept, sort='popular') }}" {% if
+                        current_sort=='popular' %}selected{% endif %}>🔥 Popüler</option>
+                    <option value="{{ url_for('notes_pool', dept=selected_dept, sort='rated') }}" {% if
+                        current_sort=='rated' %}selected{% endif %}>⭐ Puan</option>
+                </select>
+            </div>
+
+            <div class="notes-grid">
+                {% for note in notes %}
+                <div class="pro-card">
+                    <div class="card-header">
+                        {% if note.file_type in ['jpg', 'jpeg', 'png'] %}
+                        <img src="/static/note_files/{{ note.file_path }}" class="card-img"
+                            onclick="openPreview('/static/note_files/{{ note.file_path }}', 'image')">
+                        {% else %}
+                        <div class="card-icon-placeholder">
+                            {% if note.file_type == 'pdf' %}<i class="fas fa-file-pdf" style="color: #e74c3c;"></i>
+                            {% elif note.file_type == 'zip' %}<i class="fas fa-file-archive"
+                                style="color: #f1c40f;"></i>
+                            {% else %}<i class="fas fa-file-alt"></i>{% endif %}
+                        </div>
+                        {% endif %}
+                        <div class="badge-type">{% if note.file_type == 'pdf' %}P{% elif note.file_type == 'zip' %}Z{%
+                            else %}I{% endif %}</div>
+                        <div class="badge-file-size">{{ note.file_size }}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-badges">
+                            <span class="dept-tag">{{ note.course_code }}</span>
+                            <span class="dept-tag"
+                                style="background: rgba(128,128,128,0.1); color: var(--text-muted);">{{ note.department
+                                }}</span>
+                        </div>
+                        <h4 class="card-title" title="{{ note.title }}">{{ note.title }}</h4>
+                        <p class="card-desc">{{ note.description or "Açıklama yok." }}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="rating-stars" onclick="rateNote('{{ note.id }}', 5)">
+                                {% for i in range(1, 6) %}<i
+                                    class="fas fa-star {% if i <= note.average_rating %}star-filled{% else %}star-empty{% endif %}"></i>{%
+                                endfor %}
+                                <span style="color: var(--text-muted); margin-left: 3px;">({{ note.rating_count
+                                    }})</span>
+                            </div>
+                            <i class="fas fa-flag"
+                                style="color: var(--text-muted); cursor: pointer; opacity: 0.5; font-size: 0.8rem;"
+                                onclick="reportNote('{{ note.id }}')"></i>
+                        </div>
+                        <div class="card-footer">
+                            <div class="uploader-info">
+                                <img src="/static/{{ note.author.profile_pic }}">
+                                <span>{{ note.author.username }}</span>
+                            </div>
+                            <div class="action-buttons">
+                                {% if note.file_type in ['jpg', 'jpeg', 'png'] %}
+                                <button class="btn-icon btn-preview"
+                                    onclick="openPreview('/static/note_files/{{ note.file_path }}', 'image')"><i
+                                        class="fas fa-eye"></i></button>
+                                {% endif %}
+                                <a href="{{ url_for('download_note', note_id=note.id) }}" class="btn-icon btn-dl"
+                                    target="_blank"><i class="fas fa-download"></i> {{ note.downloads }}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px; color: var(--text-muted);">
+                    <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                    <h3>Henüz not yok.</h3>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+        <aside class="right-sidebar"></aside>
+    </div>
+
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Dosya Yükle</h3>
+                <span onclick="closeModal()" class="close-modal">&times;</span>
+            </div>
+
+            <form action="{{ url_for('upload_note') }}" method="POST" enctype="multipart/form-data">
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label">Başlık</label>
+                        <input type="text" name="title" class="modern-input" placeholder="Örn: Fizik Vize" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Ders Kodu</label>
+                        <input type="text" name="course_code" class="modern-input" placeholder="FIZ101" required>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label class="form-label">Bölüm</label>
+                    <select name="department" class="modern-input" required>
+                        <option value="">Seçiniz...</option>
+                        <option value="Hazırlık">Hazırlık</option>
+                        <option value="Bilgisayar">Bilgisayar Müh.</option>
+                        <option value="Makine">Makine Müh.</option>
+                        <option value="Elektrik">Elektrik Müh.</option>
+                        <option value="Mimarlık">Mimarlık</option>
+                        <option value="Ortak Dersler">Ortak Dersler</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label class="form-label">Açıklama</label>
+                    <textarea name="description" class="modern-input" rows="2"
+                        placeholder="İçerik hakkında kısa bilgi..."></textarea>
+                </div>
+
+                <label class="upload-zone" id="drop-area">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-color);">Dosya Seç</div>
+                    <div id="file-label" style="color: var(--text-muted); font-size: 0.8rem;">PDF, Resim, ZIP</div>
+                    <input type="file" name="note_file" id="file-input" style="display: none;"
+                        accept="image/*,.pdf,.zip" required onchange="updateFileName(this)">
+                </label>
+
+                <button type="submit" class="btn-submit">Yükle (+10 Puan)</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="previewModal" class="modal" onclick="if(event.target==this) this.style.display='none'">
+        <div class="modal-content"
+            style="background: transparent; border: none; box-shadow: none; text-align: center; max-width: 800px;">
+            <img id="previewImg" src="" style="max-width: 100%; max-height: 80vh; border-radius: 12px;">
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        function openModal() { document.getElementById('uploadModal').style.display = 'block'; }
+        function closeModal() { document.getElementById('uploadModal').style.display = 'none'; }
+
+        function updateFileName(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('file-label').innerText = "✅ " + input.files[0].name;
+                document.getElementById('drop-area').style.borderColor = "#2ecc71";
+            }
+        }
+        function openPreview(src, type) {
+            if (type !== 'image') return;
+            document.getElementById('previewImg').src = src;
+            document.getElementById('previewModal').style.display = 'block';
+        }
+
+        async function rateNote(id, score) {
+            if (!confirm(score + " Yıldız vermek istediğine emin misin?")) return;
+            try {
+                const res = await fetch(`/rate_note/${id}/${score}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Oylama başarılı! Ortalama: " + data.new_average);
+                    location.reload();
+                } else {
+                    alert("Hata: " + data.error);
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Bir hata oluştu.");
+            }
+        }
+
+        async function reportNote(id) {
+            if (!confirm("Bu içeriği bildirmek istediğine emin misin?")) return;
+            try {
+                const res = await fetch(`/report_note/${id}`, { method: 'POST' });
+                const data = await res.json();
+                alert(data.message);
+            } catch (e) {
+                alert("Bildirim gönderilemedi.");
+            }
+        }
+
+        window.onclick = function (e) { if (e.target == document.getElementById('uploadModal')) closeModal(); }
+    </script>
+</body>
+
+</html>

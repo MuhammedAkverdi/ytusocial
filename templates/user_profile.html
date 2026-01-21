@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@{{ user.handle }} - Profil</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+
+<body>
+
+    <script>
+        // Flicker önleyici
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <div class="main-layout">
+
+        <aside class="left-sidebar sticky-sidebar">
+            <div class="club-card" style="border: none; padding: 15px;">
+                <div
+                    style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <img src="/static/{{ current_user.profile_pic }}"
+                        style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ytu-lacivert);">
+                    <h3 style="margin-top: 8px; font-size: 1rem;">{{ current_user.username }}</h3>
+                </div>
+
+                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
+                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
+                <a href="{{ url_for('reels') }}" class="sidebar-link" style="color: #e1306c;"><span>🎬</span> Reels</a>
+                <a href="{{ url_for('saved_posts_list') }}" class="sidebar-link"><span>📌</span> Kaydedilenler</a>
+                <a href="{{ url_for('notifications') }}" class="sidebar-link"><span>🔔</span> Bildirimler</a>
+                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
+            </div>
+        </aside>
+
+        <main>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="notification-area">
+                {% for category, message in messages %}
+                <div class="top-alert alert-{{ category }}">
+                    <div class="alert-content">
+                        <span class="alert-icon">{% if category == 'danger' %}⚠️{% else %}🔔{% endif %}</span>
+                        <span class="alert-text">{{ message }}</span>
+                    </div>
+                    <button class="alert-close" onclick="this.parentElement.style.display='none';">&times;</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <div class="profile-header-card">
+
+                <img src="/static/{{ user.profile_pic }}" class="profile-avatar-lg">
+
+                <h2 class="profile-name">{{ user.username or 'İsimsiz Yıldızlı' }}</h2>
+                <span class="profile-handle">@{{ user.handle }}</span>
+
+                <div class="profile-dept">
+                    🎓 {{ user.department or 'Bölüm Bilgisi Yok' }}
+                </div>
+
+                {% if user.bio %}
+                <p class="profile-bio">
+                    "{{ user.bio }}"
+                </p>
+                {% endif %}
+
+                <div class="profile-stats">
+                    <div class="stat-link">
+                        <strong class="stat-number">{{ posts|length }}</strong>
+                        <span class="stat-label">Gönderi</span>
+                    </div>
+                    <a href="{{ url_for('followers_list', handle=user.handle) }}" class="stat-link">
+                        <strong class="stat-number">{{ user.followers.count() }}</strong>
+                        <span class="stat-label">Takipçi</span>
+                    </a>
+                    <a href="{{ url_for('following_list', handle=user.handle) }}" class="stat-link">
+                        <strong class="stat-number">{{ user.followed.count() }}</strong>
+                        <span class="stat-label">Takip</span>
+                    </a>
+                </div>
+
+                <div class="profile-actions">
+                    {% if current_user.id != user.id %}
+                    {% if current_user.is_following(user) %}
+                    <a href="{{ url_for('unfollow', handle=user.handle) }}" class="btn-unfollow">
+                        Takibi Bırak
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('follow', handle=user.handle) }}" class="btn-follow">
+                        Takip Et
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('chat', handle=user.handle) }}" class="btn-vote"
+                        style="background-color: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); text-decoration:none;">Mesaj
+                        At</a>
+                    {% else %}
+                    <a href="{{ url_for('edit_profile') }}" class="btn-edit-profile">Profili Düzenle</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <h3 class="section-title">Gönderiler</h3>
+
+            {% for post in posts %}
+            <div class="post-card">
+
+                {% if post.repost_of %}
+                <div class="repost-header">
+                    <span>🔁</span>
+                    <b>{{ post.author.username or 'Bir Yıldızlı' }}</b> yeniden gönderdi
+                </div>
+                {% endif %}
+
+                {% set display_post = post.repost_of if post.repost_of else post %}
+
+                <div class="post-header">
+                    <div class="post-author-info">
+                        <img src="/static/{{ display_post.author.profile_pic }}" class="post-avatar">
+                        <div>
+                            <strong class="post-author-name">{{ display_post.author.username or
+                                display_post.author.email.split('@')[0] }}</strong>
+                            <span class="post-author-dept">{{ display_post.author.department or 'Bölüm Yok' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="post-meta">
+                        <small class="post-time">
+                            {{ display_post.date_posted.strftime('%H:%M') }}
+                        </small>
+
+                        {% if display_post.author == current_user %}
+                        <div style="position: relative;">
+                            <button class="comment-menu-btn"
+                                onclick="toggleMenu('post-menu-{{ display_post.id }}')">⋮</button>
+                            <div id="post-menu-{{ display_post.id }}" class="comment-dropdown">
+                                <button class="comment-action" onclick="openPostEditMode('{{ display_post.id }}')">✏️
+                                    Düzenle</button>
+                                <a href="{{ url_for('delete_post', post_id=display_post.id) }}"
+                                    class="comment-action delete"
+                                    onclick="return confirm('Bu gönderiyi silmek istediğine emin misin?')">🗑️ Sil</a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div id="post-content-{{ display_post.id }}" class="post-text">{{ display_post.content }}</div>
+
+                {% if display_post.image_file %}
+                <div class="post-image-container">
+                    {% if display_post.is_video() %}
+                    <video controls class="post-image" style="background: black;">
+                        <source src="/static/post_images/{{ display_post.image_file }}" type="video/mp4">
+                        Tarayıcınız video oynatmayı desteklemiyor.
+                    </video>
+                    {% else %}
+                    <img src="/static/post_images/{{ display_post.image_file }}" class="post-image"
+                        onclick="openLightbox(this.src)">
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if display_post.poll %}
+                <div class="poll-container">
+                    {% set user_vote = display_post.poll.user_voted(current_user) %}
+
+                    {% for option in display_post.poll.options %}
+                    <div class="poll-option" onclick="votePoll('{{ display_post.poll.id }}', '{{ option.id }}', this)">
+
+                        {% if user_vote %}
+                        <div class="poll-fill" data-initial-width="{{ option.percentage() }}%"></div>
+                        {% endif %}
+
+                        <div class="poll-text">
+                            <span>{{ option.text }}</span>
+                            {% if user_vote %}
+                            <span class="poll-percent">{{ option.percentage() }}%</span>
+                            {% endif %}
+                        </div>
+
+                        {% if user_vote and user_vote.option_id == option.id %}
+                        <span class="poll-check">✅</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="poll-meta">
+                        {{ display_post.poll.total_votes() }} oy • {% if user_vote %}Oy verildi{% else %}Anket devam
+                        ediyor{% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if display_post.author == current_user %}
+                <form action="{{ url_for('edit_post', post_id=display_post.id) }}" method="POST"
+                    id="post-edit-form-{{ display_post.id }}" class="edit-post-form">
+                    <textarea name="new_content" class="post-input edit-textarea"
+                        rows="3">{{ display_post.content }}</textarea>
+                    <div class="edit-actions">
+                        <button type="button" onclick="closePostEditMode('{{ display_post.id }}')"
+                            class="btn-cancel">İptal</button>
+                        <button type="submit" class="btn-vote btn-sm">Kaydet</button>
+                    </div>
+                </form>
+                {% endif %}
+
+                <div class="post-actions">
+                    <span class="action-item" onclick="likePost('{{ display_post.id }}', this)">
+                        {% if current_user in display_post.liked_by %}❤️{% else %}🤍{% endif %}
+                        <span class="like-count">{{ display_post.liked_by|length }}</span>
+                    </span>
+
+                    <span class="action-item" onclick="toggleComments('comment-box-{{ post.id }}')">
+                        💬 {{ display_post.comments|length }}
+                    </span>
+
+                    {% if not post.repost_of %}
+                    <span class="action-item" onclick="repostPost('{{ display_post.id }}')">
+                        🔁 Paylaş
+                    </span>
+                    {% endif %}
+
+                    <span class="action-item" onclick="savePost('{{ display_post.id }}', this)">
+                        {% if current_user.has_saved(display_post) %}
+                        <span class="save-icon">✅ Kaydedildi</span>
+                        {% else %}
+                        <span class="save-icon">🔖 Kaydet</span>
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div id="comment-box-{{ post.id }}" class="comment-section" style="display: none;">
+
+                    {% for comment in display_post.comments %}
+                    <div class="comment-item" id="comment-container-{{ comment.id }}">
+                        <div class="comment-header">
+                            <div>
+                                <strong class="comment-author">{{ comment.author.username or 'Anonim' }}:</strong>
+                                <span class="comment-content" id="comment-text-{{ comment.id }}">{{ comment.text
+                                    }}</span>
+                            </div>
+                            <small class="comment-time">{{ comment.date_posted.strftime('%H:%M') }}</small>
+                        </div>
+
+                        {% if comment.author == current_user %}
+                        <button class="comment-menu-btn" onclick="toggleMenu('menu-{{ comment.id }}')">⋮</button>
+                        <div id="menu-{{ comment.id }}" class="comment-dropdown">
+                            <button class="comment-action" onclick="openEditMode('{{ comment.id }}')">✏️
+                                Düzenle</button>
+                            <a href="{{ url_for('delete_comment', comment_id=comment.id) }}"
+                                class="comment-action delete"
+                                onclick="return confirm('Bu yorumu silmek istediğine emin misin?')">🗑️ Sil</a>
+                        </div>
+                        <form action="{{ url_for('edit_comment', comment_id=comment.id) }}" method="POST"
+                            class="edit-comment-form" id="edit-form-{{ comment.id }}">
+                            <input type="text" name="new_text" value="{{ comment.text }}" class="edit-input">
+                            <button type="submit" class="btn-vote btn-sm">Kaydet</button>
+                            <button type="button" onclick="closeEditMode('{{ comment.id }}')"
+                                class="btn-cancel">İptal</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <form onsubmit="submitComment(event, '{{ display_post.id }}')" class="comment-form">
+                        <input type="text" name="comment_text" id="comment-input-{{ display_post.id }}"
+                            placeholder="Yorumun..." required class="comment-input">
+                        <button type="submit" class="comment-submit">Gönder</button>
+                    </form>
+                </div>
+
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>Henüz gönderisi yok.</p>
+            </div>
+            {% endfor %}
+
+        </main>
+
+        <aside class="right-sidebar sticky-sidebar">
+        </aside>
+    </div>
+
+    <div id="lightboxModal" class="lightbox" onclick="closeLightbox()">
+        <span class="close-lightbox">&times;</span>
+        <img class="lightbox-content" id="lightboxImage" onclick="event.stopPropagation()">
+    </div>
+
+    <button onclick="topFunction()" id="scrollTopBtn" title="Yukarı Çık">⬆️</button>
+
+    <script src="/static/script.js"></script>
+
+</body>
+
+</html>

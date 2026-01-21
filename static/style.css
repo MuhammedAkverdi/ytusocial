@@ -1,0 +1,3909 @@
+/* =========================================
+   1. DEĞİŞKENLER VE TEMEL AYARLAR
+   ========================================= */
+:root {
+    --ytu-lacivert: #003366;
+    --ytu-sari: #ffcc00;
+    --hata-kirmizi: #dc3545;
+    --bg-light: #fafafa;
+    --white: #ffffff;
+    --shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+
+    /* Varsayılan (Light Mode) */
+    --bg-color: #fafafa;
+    --card-bg: #ffffff;
+    --text-color: #333;
+    --text-muted: #666;
+    --border-color: #eee;
+    --input-bg: #fff;
+    --link-hover: #f5f5f5;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* =========================================
+   2. NAVBAR (ÜST MENÜ)
+   ========================================= */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 6%;
+    /* Kenarlara %6 boşluk (İdeal Ayar) */
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    transition: background-color 0.3s;
+}
+
+.nav-items {
+    display: flex;
+    /* İçindekileri yan yana dizer */
+    align-items: center;
+    /* Dikeyde tam ortalar */
+    gap: 20px;
+    /* Aralarına boşluk koyar */
+}
+
+.nav-logo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--ytu-lacivert);
+    letter-spacing: -1px;
+}
+
+.nav-logo span {
+    color: var(--ytu-sari);
+}
+
+/* Profil Menüsü */
+.profile-menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px 0 10px 10px;
+}
+
+.nav-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-left: 10px;
+    border: 2px solid var(--ytu-sari);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 220px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 2000;
+}
+
+.profile-menu:hover .dropdown-content {
+    display: flex;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dropdown-item:hover {
+    background-color: var(--link-hover);
+    color: var(--ytu-lacivert);
+    padding-left: 25px;
+}
+
+/* =========================================
+   3. GENEL DÜZEN (LAYOUT)
+   ========================================= */
+.main-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 30px;
+    max-width: 1250px;
+    margin: 90px auto 30px;
+    padding: 0 20px;
+}
+
+@media (max-width: 1100px) {
+    .main-layout {
+        grid-template-columns: 1fr 350px;
+    }
+
+    .left-sidebar {
+        display: none;
+    }
+}
+
+.sticky-sidebar {
+    position: sticky;
+    top: 90px;
+    height: fit-content;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: 12px;
+    transition: 0.3s;
+    margin-bottom: 5px;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active-link {
+    background-color: var(--link-hover);
+    color: var(--ytu-lacivert);
+    transform: translateX(5px);
+}
+
+/* =========================================
+   4. POST KARTLARI VE GİRİŞ ALANI
+   ========================================= */
+.post-input,
+.create-post-input {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    resize: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.15rem;
+    outline: none;
+    background: transparent;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.create-post-input:focus {
+    min-height: 100px;
+}
+
+.post-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-color);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* =========================================
+   5. BİLDİRİM SİSTEMİ
+   ========================================= */
+.notification-area {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    width: 90%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.top-alert {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+    background: white;
+    color: #333;
+    font-weight: 500;
+    animation: slideDown 0.5s;
+}
+
+.alert-danger {
+    border-left: 6px solid var(--hata-kirmizi);
+    background-color: #fff5f5;
+}
+
+.alert-success {
+    border-left: 6px solid #28a745;
+    background-color: #f0fff4;
+}
+
+.alert-info {
+    border-left: 6px solid var(--ytu-sari);
+    background-color: #fffbef;
+}
+
+.alert-close {
+    border: none;
+    background: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* =========================================
+   6. AUTH VE KULÜP KARTLARI
+   ========================================= */
+.auth-body {
+    background: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.auth-card {
+    background: var(--card-bg);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 420px;
+    border-top: 6px solid var(--ytu-sari);
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.club-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trending-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.trending-header {
+    padding: 15px 20px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.trending-item-wrapper {
+    position: relative;
+    transition: background 0.2s;
+}
+
+.trending-item-wrapper:hover {
+    background: var(--link-hover);
+}
+
+.trending-item {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 20px;
+    text-decoration: none;
+}
+
+.trending-category {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.trending-tag {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 2px 0;
+}
+
+.trending-count {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.create-post-card {
+    border-top: 4px solid var(--ytu-lacivert);
+    margin-bottom: 25px;
+}
+
+.create-post-card:focus-within {
+    box-shadow: 0 8px 25px rgba(0, 51, 102, 0.1);
+    transform: translateY(-2px);
+}
+
+.create-post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+    margin-top: 10px;
+}
+
+.file-upload-label {
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    display: inline-block;
+}
+
+.file-upload-label:hover {
+    transform: scale(1.2);
+}
+
+.btn-primary {
+    background: var(--ytu-sari);
+    color: #000;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 15px;
+}
+
+.btn-primary:hover {
+    background: #e6b800;
+    transform: translateY(-2px);
+}
+
+.btn-vote {
+    background: var(--ytu-lacivert);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-vote:hover {
+    background: #002244;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 3000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-icerik {
+    background: var(--card-bg);
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+
+.kapat {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 30px;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+/* --- YORUM MENÜSÜ --- */
+.comment-item {
+    position: relative;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.3s;
+}
+
+.comment-item:hover {
+    background: var(--link-hover);
+}
+
+.comment-menu-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #999;
+    cursor: pointer;
+    padding: 0 5px;
+    border-radius: 50%;
+}
+
+.comment-menu-btn:hover {
+    background: var(--border-color);
+    color: var(--text-color);
+}
+
+.comment-dropdown {
+    display: none;
+    position: absolute;
+    top: 25px;
+    right: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    width: 120px;
+    overflow: hidden;
+}
+
+.comment-action {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.comment-action:hover {
+    background: var(--link-hover);
+    color: var(--ytu-lacivert);
+}
+
+.comment-action.delete {
+    color: #dc3545;
+}
+
+.comment-action.delete:hover {
+    background: #fff5f5;
+}
+
+.edit-comment-form {
+    display: none;
+    margin-top: 5px;
+}
+
+/* FEED TABS */
+.feed-tabs {
+    display: flex;
+    background: var(--card-bg);
+    border-radius: 15px;
+    margin-bottom: 20px;
+    padding: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border-color);
+}
+
+.feed-tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.feed-tab:hover {
+    background-color: var(--link-hover);
+    color: var(--ytu-lacivert);
+}
+
+.feed-tab.active {
+    background-color: #e3f2fd;
+    color: var(--ytu-lacivert);
+    font-weight: 800;
+}
+
+/* KIRMIZI BİLDİRİM ROZETİ */
+.notification-badge {
+    background-color: #e74c3c;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 50%;
+    margin-left: 8px;
+    vertical-align: middle;
+    box-shadow: 0 2px 5px rgba(231, 76, 60, 0.4);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* =========================================
+   7. DARK MODE (GECE MODU) AYARLARI
+   ========================================= */
+
+body.dark-mode {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --text-muted: #aaa;
+    --border-color: #333;
+    --input-bg: #2c2c2c;
+    --link-hover: #333;
+}
+
+/* Navbar Logo Rengi */
+body.dark-mode .nav-logo {
+    color: #fff !important;
+}
+
+/* Admin panel logosunu beyaz tut */
+.nav-logo[style*="color: white"] {
+    color: white !important;
+}
+
+/* Bildirim Renkleri */
+.notif-unread {
+    background-color: #f0f8ff;
+}
+
+.notif-read {
+    background-color: #ffffff;
+}
+
+body.dark-mode .notif-unread {
+    background-color: #1e252b !important;
+    border-left: 4px solid var(--ytu-lacivert);
+}
+
+body.dark-mode .notif-read {
+    background-color: #1e1e1e !important;
+}
+
+/* Zorla Renk Uygulama (Kaçak style varsa ezer) */
+body.dark-mode .club-card,
+body.dark-mode .post-card,
+body.dark-mode .navbar,
+body.dark-mode .dropdown-content {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* =========================================
+   26. ADMIN PANELİ (YENİLENMİŞ TASARIM)
+   ========================================= */
+
+/* Admin Arka Planı */
+body.admin-mode {
+    background-color: #f4f6f9; /* Kurumsal Gri */
+    color: #333;
+}
+body.dark-mode.admin-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+/* Ana Taşıyıcı */
+.admin-container {
+    max-width: 1600px; /* Geniş ekran */
+    margin: 80px auto 50px auto; /* Üstten pay bırak (Buton için) */
+    padding: 0 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Sol Üst Sabit Buton */
+.admin-back-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: var(--ytu-lacivert);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: 0 5px 15px rgba(0, 51, 102, 0.3);
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.admin-back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 51, 102, 0.4);
+}
+
+/* İstatistik Kartları (4'lü Yan Yana) */
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.admin-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: 0.3s;
+}
+.admin-card:hover { transform: translateY(-5px); border-color: var(--ytu-lacivert); }
+
+.stat-icon {
+    font-size: 2.5rem;
+    color: var(--ytu-lacivert);
+    opacity: 0.8;
+}
+
+.stat-info h3 { margin: 0; font-size: 2rem; font-weight: 800; color: var(--text-color); }
+.stat-info p { margin: 0; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; }
+
+/* Tablolar */
+.admin-section-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    color: var(--ytu-lacivert);
+    border-left: 5px solid var(--ytu-sari);
+    padding-left: 15px;
+}
+body.dark-mode .admin-section-title { color: var(--ytu-sari); border-color: var(--ytu-lacivert); }
+
+.admin-table-wrapper {
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th { background: rgba(0,0,0,0.03); color: var(--text-muted); font-weight: 700; text-align: left; padding: 15px; }
+.admin-table td { padding: 15px; border-top: 1px solid var(--border-color); vertical-align: middle; color: var(--text-color); }
+.admin-table tr:hover { background: var(--link-hover); }
+
+/* Alt İmza */
+.admin-footer {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-muted);
+    font-family: monospace;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .admin-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .admin-stats-grid { grid-template-columns: 1fr; }
+    .admin-container { padding: 0 15px; margin-top: 80px; }
+}
+
+
+/* =========================================
+   9. PROFİL SAYFASI VE DETAYLAR
+   ========================================= */
+.profile-header-card {
+    text-align: center;
+    position: relative;
+    padding: 30px;
+    margin-bottom: 20px;
+}
+
+.profile-avatar-lg {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--ytu-sari);
+    margin-bottom: 15px;
+}
+
+.profile-name {
+    font-size: 1.5rem;
+    color: var(--ytu-lacivert);
+    margin: 0;
+}
+
+.profile-handle {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.profile-dept {
+    margin-top: 10px;
+    color: var(--text-muted);
+}
+
+.profile-bio {
+    margin-top: 15px;
+    color: var(--text-color);
+    font-style: italic;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 25px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+}
+
+.stat-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.2rem;
+    color: var(--text-color);
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.profile-actions {
+    margin-top: 20px;
+}
+
+.btn-follow {
+    padding: 10px 40px;
+    font-size: 1rem;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.btn-unfollow {
+    padding: 10px 40px;
+    font-size: 1rem;
+    background: #ffebee;
+    color: #c62828;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.btn-edit-profile {
+    display: inline-block;
+    padding: 10px 30px;
+    background: var(--link-hover);
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: 20px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-edit-profile:hover {
+    background: var(--border-color);
+}
+
+.section-title {
+    margin-bottom: 15px;
+    padding-left: 10px;
+    color: var(--text-color);
+}
+
+.repost-header {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.post-author-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.post-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-author-name {
+    font-size: 1rem;
+    color: var(--text-color);
+    display: block;
+}
+
+.post-author-dept {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.post-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    height: 100%;
+}
+
+.post-time {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin-top: 2px;
+}
+
+.post-text {
+    padding: 10px 0;
+    font-size: 1.05rem;
+    white-space: pre-wrap;
+    color: var(--text-color);
+}
+
+.post-image-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.post-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    /* Resimler için */
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+/* YENİ EKLENDİ: Video postlar için özel ayar */
+video.post-image {
+    background-color: #000;
+    object-fit: contain;
+    /* Videolar kesilmesin */
+}
+
+.post-actions {
+    display: flex;
+    gap: 25px;
+    margin-top: 15px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.action-item {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* YENİ EKLENDİ: Kaydet Butonu için Hover Efekti */
+.action-item .save-icon {
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.action-item:hover .save-icon {
+    color: var(--ytu-lacivert);
+}
+
+.comment-section {
+    background: var(--bg-color);
+    padding: 15px;
+    border-radius: 0 0 15px 15px;
+    margin-top: 0;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    padding-right: 20px;
+}
+
+.comment-author {
+    font-size: 0.85rem;
+    color: var(--ytu-lacivert);
+}
+
+.comment-content {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.comment-time {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.comment-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.comment-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    outline: none;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+.comment-submit {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ytu-lacivert);
+    font-weight: bold;
+}
+
+.edit-textarea {
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    width: 100%;
+}
+
+.edit-actions {
+    text-align: right;
+    margin-top: 5px;
+}
+
+.btn-cancel {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.btn-sm {
+    padding: 5px 15px;
+    font-size: 0.8rem;
+}
+
+.edit-input {
+    width: 70%;
+    padding: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-muted);
+}
+
+body.dark-mode .profile-name {
+    color: var(--text-color);
+}
+
+body.dark-mode .btn-unfollow {
+    background-color: #3e2723;
+    color: #ffcdd2;
+}
+
+/* =========================================
+   10. KULLANICI LİSTESİ SAYFASI
+   ========================================= */
+.page-title {
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+.link-danger {
+    color: var(--hata-kirmizi) !important;
+}
+
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.user-list-card {
+    text-align: center;
+    padding: 20px;
+}
+
+.user-list-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 2px solid var(--border-color);
+}
+
+.user-list-name {
+    font-size: 1rem;
+    margin-bottom: 2px;
+    color: var(--text-color);
+}
+
+.user-list-handle {
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.user-list-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.btn-sm-profile {
+    padding: 6px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    display: block;
+}
+
+.action-link {
+    font-size: 0.8rem;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.link-unfollow {
+    color: var(--hata-kirmizi);
+}
+
+.link-follow {
+    color: var(--ytu-lacivert);
+    font-weight: bold;
+}
+
+body.dark-mode .link-follow {
+    color: #4da3ff;
+}
+
+body.dark-mode .link-unfollow {
+    color: #ff6b6b;
+}
+
+/* =========================================
+   11. PROFİL DÜZENLEME SAYFASI
+   ========================================= */
+.edit-profile-card {
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 30px;
+    border-radius: 15px;
+}
+
+.edit-profile-form {
+    margin-top: 25px;
+    text-align: left;
+}
+
+.custom-notification-margin {
+    margin: 20px auto;
+    max-width: 500px;
+}
+
+.auth-title {
+    color: var(--ytu-lacivert);
+    margin-bottom: 10px;
+}
+
+.auth-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.profile-preview-container {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.profile-preview-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-preview-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--ytu-sari);
+}
+
+.preview-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.form-text-muted {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: block;
+}
+
+.file-input {
+    width: 100%;
+    padding: 10px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    border: 1px dashed var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    outline: none;
+    transition: 0.3s;
+}
+
+.form-control:focus {
+    border-color: var(--ytu-lacivert);
+}
+
+.input-group-row {
+    display: flex;
+    align-items: center;
+}
+
+.input-group-addon {
+    background: var(--input-bg);
+    padding: 12px;
+    border: 1.5px solid var(--border-color);
+    border-right: 0;
+    border-radius: 10px 0 0 10px;
+    color: var(--text-muted);
+}
+
+.input-with-addon {
+    border-left: 0;
+    border-radius: 0 10px 10px 0;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 10px;
+}
+
+.link-cancel {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+body.dark-mode .auth-title {
+    color: var(--ytu-lacivert);
+}
+
+/* =========================================
+   12. DOĞRULAMA SAYFASI
+   ========================================= */
+.verify-title {
+    color: var(--ytu-lacivert);
+    margin-bottom: 10px;
+}
+
+.verify-text {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.verify-email {
+    color: var(--ytu-lacivert);
+    font-weight: bold;
+}
+
+.verify-form {
+    margin-top: 25px;
+}
+
+.verify-input {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 8px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-weight: bold;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    outline: none;
+    transition: 0.3s;
+}
+
+.verify-input:focus {
+    border-color: var(--ytu-lacivert);
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+.verify-btn {
+    background-color: var(--ytu-sari);
+    color: black;
+    font-weight: bold;
+}
+
+.auth-footer-text {
+    margin-top: 25px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+body.dark-mode .verify-title {
+    color: var(--ytu-sari);
+}
+
+body.dark-mode .verify-email {
+    color: var(--text-color);
+}
+
+/* =========================================
+   13. KAYIT VE GİRİŞ EKRANLARI
+   ========================================= */
+.auth-logo {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--ytu-lacivert);
+    margin-bottom: 10px;
+    display: block;
+    text-decoration: none;
+}
+
+.auth-logo span {
+    color: var(--ytu-sari);
+}
+
+.auth-subtitle {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: 0.3s;
+    box-sizing: border-box;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+}
+
+.auth-input:focus {
+    border-color: var(--ytu-lacivert);
+    outline: none;
+}
+
+.auth-footer-link {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.link-highlight {
+    color: var(--ytu-lacivert);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+body.dark-mode .auth-logo {
+    color: #fff;
+}
+
+body.dark-mode .link-highlight {
+    color: #4da3ff;
+}
+
+/* =========================================
+   14. GİRİŞ SAYFASI EKLEMELERİ
+   ========================================= */
+.auth-header {
+    margin-bottom: 25px;
+}
+
+.auth-card .auth-title {
+    margin-bottom: 5px;
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+/* =========================================
+   15. KEŞFET SAYFASI
+   ========================================= */
+.search-form {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    background: var(--input-bg);
+    color: var(--text-color);
+    outline: none;
+}
+
+.search-btn {
+    padding: 0 25px;
+    border-radius: 10px;
+}
+
+.explore-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.explore-card {
+    text-align: center;
+    transition: 0.3s;
+    padding: 20px;
+    margin-bottom: 0;
+}
+
+.explore-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--ytu-sari);
+    margin-bottom: 10px;
+}
+
+.explore-name {
+    font-size: 1rem;
+    color: var(--ytu-lacivert);
+    margin-bottom: 2px;
+}
+
+.explore-handle {
+    display: block;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.explore-dept {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+    height: 20px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.explore-action-btn {
+    display: block;
+    padding: 8px 0;
+    text-decoration: none;
+    border-radius: 20px;
+}
+
+.explore-empty {
+    color: var(--text-muted);
+    grid-column: 1/-1;
+    text-align: center;
+}
+
+.explore-sidebar-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+body.dark-mode .explore-name {
+    color: var(--text-color);
+}
+
+/* =========================================
+   16. ANA SAYFA (index.html)
+   ========================================= */
+.create-post-card {
+    margin-bottom: 20px;
+}
+
+.create-post-input {
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0;
+    resize: none;
+    background: transparent;
+}
+
+.image-preview-container {
+    padding: 10px;
+}
+
+.preview-img-style {
+    max-height: 100px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.preview-close-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: var(--hata-kirmizi);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.create-post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+}
+
+.file-upload-label {
+    cursor: pointer;
+    font-size: 1.4rem;
+    color: var(--ytu-lacivert);
+    padding: 5px;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.file-upload-label:hover {
+    background-color: var(--link-hover);
+}
+
+.post-author-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.club-list-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+body.dark-mode .file-upload-label {
+    color: #4da3ff;
+}
+
+/* =========================================
+   17. SON RÖTUŞLAR (DÜZENLEME FORMU GİZLEME)
+   ========================================= */
+
+/* Post Düzenleme Formu Başlangıçta Gizli Olmalı */
+.edit-post-form {
+    display: none;
+    margin-top: 10px;
+}
+
+/* =========================================
+   18. MOBİL MENÜ (HAMBURGER) AYARLARI
+   ========================================= */
+
+/* Hamburger İkonu (Varsayılan: Gizli) */
+.hamburger-btn {
+    display: none;
+    /* Masaüstünde görünmesin */
+    font-size: 1.8rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    padding: 5px;
+}
+
+
+/* --- MOBİL GÖRÜNÜM (Tablet ve Telefon) --- */
+@media (max-width: 768px) {
+
+    /* 1. Navbar Kenar Boşluğunu Azalt */
+    .navbar {
+        padding: 0 20px;
+    }
+
+    /* 2. Hamburger İkonunu Göster */
+    .hamburger-btn {
+        display: block;
+    }
+
+    /* 3. Sağdaki Menü Grubunu (Nav Items) Gizle/Düzenle */
+    .nav-items {
+        display: none;
+        /* Başlangıçta gizli */
+        position: absolute;
+        top: 65px;
+        /* Navbar yüksekliği kadar aşağı */
+        left: 0;
+        width: 100%;
+        background-color: var(--card-bg);
+        border-bottom: 1px solid var(--border-color);
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 0;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    /* 4. Menü Açıldığında (JS ile 'active' sınıfı eklenince) */
+    .nav-items.active {
+        display: flex;
+        /* Görünür yap ve esnek kutu olsun */
+    }
+
+    /* 5. Mobilde Profil Menüsünü Düzenle */
+    .profile-menu {
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+    }
+
+    /* 6. Mobilde Dropdown (Açılır Menü) manuel ekleyelim. */
+    .dropdown-content {
+        position: static;
+        /* Mobilde kartın içine gömülsün */
+        width: 90%;
+        box-shadow: none;
+        border: 1px solid var(--border-color);
+        margin-top: 10px;
+        display: none;
+        /* JS ile açılır */
+    }
+
+    /* Profil üzerine tıklayınca açılsın (JS desteği ile) */
+    .profile-menu.active .dropdown-content {
+        display: flex;
+    }
+
+    /* Yan menüyü (Sidebar) Mobilde Gizle/Göster */
+    .left-sidebar {
+        display: none;
+        /* Zaten gizliydi ama garanti olsun */
+    }
+
+    /* Gece Modu Butonu Mobilde Menüye Girsin */
+    .nav-items #theme-btn {
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+    }
+}
+
+/* =========================================
+   19. LIGHTBOX (RESİM BÜYÜTME) MODALI
+   ========================================= */
+
+/* Arka Plan (Karanlık Perde) */
+.lightbox {
+    display: none;
+    /* Başlangıçta gizli */
+    position: fixed;
+    z-index: 5000;
+    /* Her şeyin üstünde olsun */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.9);
+    /* %90 Siyah */
+    backdrop-filter: blur(5px);
+    /* Arkadaki siteyi bulanıklaştır */
+    animation: fadeIn 0.3s;
+}
+
+/* Resmin Kendisi */
+.lightbox-content {
+    margin: auto;
+    display: block;
+    width: auto;
+    max-width: 90%;
+    max-height: 90vh;
+    /* Ekran boyunu taşmasın */
+    margin-top: 2%;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    animation: zoomIn 0.3s;
+}
+
+/* Kapatma Çarpısı (X) */
+.close-lightbox {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+    z-index: 5001;
+}
+
+.close-lightbox:hover {
+    color: var(--ytu-sari);
+}
+
+/* Resimlerin üzerine gelince büyüteç çıksın */
+.post-image {
+    cursor: zoom-in;
+    transition: transform 0.2s;
+}
+
+.post-image:active {
+    transform: scale(0.98);
+}
+
+/* Animasyonlar */
+@keyframes zoomIn {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* =========================================
+   20. YUKARI ÇIK BUTONU (SCROLL TO TOP)
+   ========================================= */
+#scrollTopBtn {
+    display: none;
+    /* Başlangıçta gizli */
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 900;
+    /* İçeriğin üstünde, Navbar'ın altında */
+    border: none;
+    outline: none;
+    background-color: var(--ytu-lacivert);
+    /* YTÜ Laciverti */
+    color: white;
+    cursor: pointer;
+    padding: 12px 16px;
+    border-radius: 50%;
+    /* Yuvarlak */
+    font-size: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: 0.3s;
+    opacity: 0.8;
+}
+
+#scrollTopBtn:hover {
+    background-color: var(--ytu-sari);
+    /* Hoverda Sarı */
+    color: #000;
+    transform: translateY(-5px);
+    /* Hafif zıplama efekti */
+    opacity: 1;
+}
+
+/* =========================================
+   21. MESAJLAŞMA VE SOHBET (chat.html / inbox.html)
+   ========================================= */
+
+/* --- INBOX (LİSTE) TASARIMI --- */
+.inbox-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inbox-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.inbox-item:hover {
+    background: var(--link-hover);
+    transform: translateX(5px);
+}
+
+.inbox-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.inbox-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.inbox-name {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.inbox-handle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.inbox-arrow {
+    font-size: 1.2rem;
+}
+
+/* --- CHAT EKRANI TASARIMI --- */
+.chat-card {
+    max-width: 600px;
+    padding: 0;
+    /* İçeriği kenarlara yapıştır */
+    overflow: hidden;
+    height: 85vh;
+    /* Ekranın %85'i kadar olsun */
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header-bar {
+    padding: 15px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.chat-avatar-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.chat-username {
+    font-size: 1rem;
+    margin: 0;
+    color: var(--ytu-lacivert);
+}
+
+.chat-status {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.back-btn {
+    font-size: 1.5rem;
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+/* Mesaj Alanı (Kaydırılabilir) */
+.chat-area {
+    flex: 1;
+    background-color: var(--bg-light);
+    /* Hafif gri zemin */
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.message-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    max-width: 80%;
+}
+
+/* Gönderilen Mesaj (SAĞ) */
+.sent {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+/* Gelen Mesaj (SOL) */
+.received {
+    align-self: flex-start;
+}
+
+.message-bubble {
+    padding: 10px 15px;
+    border-radius: 18px;
+    position: relative;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+/* Renkler */
+.bubble-sent {
+    background-color: var(--ytu-lacivert);
+    color: white;
+    border-bottom-right-radius: 4px;
+    /* Köşe efekti */
+}
+
+.bubble-received {
+    background-color: var(--input-bg);
+    /* Beyaz/Koyu */
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+}
+
+.msg-time {
+    display: block;
+    font-size: 0.65rem;
+    margin-top: 5px;
+    opacity: 0.7;
+    text-align: right;
+}
+
+.msg-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Mesaj Yazma Formu */
+.chat-form {
+    padding: 15px;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 25px;
+    outline: none;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+.chat-send-btn {
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.empty-chat {
+    text-align: center;
+    color: var(--text-muted);
+    margin-top: 50px;
+}
+
+/* Gece Modu Ayarı */
+body.dark-mode .chat-area {
+    background-color: #0f0f0f;
+    /* Sohbet zemini koyu olsun */
+}
+
+body.dark-mode .chat-username {
+    color: var(--ytu-sari);
+}
+
+/* Mesaj Silme Butonu */
+.msg-delete {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    opacity: 0;
+    /* Normalde görünmesin */
+    transition: 0.2s;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+/* Mesajın üzerine gelince silme butonu görünsün */
+.message-row:hover .msg-delete {
+    opacity: 1;
+}
+
+.msg-delete:hover {
+    color: var(--hata-kirmizi);
+    font-weight: bold;
+}
+
+/* =========================================
+   22. INBOX İYİLEŞTİRMELERİ
+   ========================================= */
+
+/* Okunmamış mesajı olan satırın arka planı */
+.unread-bg {
+    background-color: #f0f7ff !important;
+    /* Çok açık mavi */
+    border-left: 4px solid var(--ytu-lacivert) !important;
+}
+
+/* Avatar üzerindeki kırmızı sayı */
+.avatar-badge {
+    position: absolute;
+    top: -5px;
+    right: 10px;
+    background-color: var(--hata-kirmizi);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 50%;
+    border: 2px solid var(--card-bg);
+}
+
+/* Gece Modu Uyumu */
+body.dark-mode .unread-bg {
+    background-color: #1a2634 !important;
+    /* Koyu lacivert */
+    border-left: 4px solid var(--ytu-sari) !important;
+}
+
+body.dark-mode .avatar-badge {
+    border-color: #1e1e1e;
+}
+
+/* --- INBOX DÜZELTMELERİ (Hata Giderici) --- */
+.unread-name {
+    color: var(--ytu-lacivert) !important;
+    font-weight: 800 !important;
+}
+
+.unread-preview {
+    font-weight: 600 !important;
+    color: #333 !important;
+}
+
+/* =========================================
+   23. HİKAYELER (STORIES)
+   ========================================= */
+
+/* Kapsayıcı Kutu */
+.stories-container {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    /* Yan yana kaydırma */
+    white-space: nowrap;
+    border: 1px solid var(--border-color);
+
+    /* YENİ EKLENDİ: Kaydırma çubuğunu gizle (Mobilde daha şık) */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+/* Chrome, Safari ve Opera için */
+.stories-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Tekil Hikaye Elemanı */
+.story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    min-width: 70px;
+}
+
+/* Profil Resmi Çerçevesi */
+.story-ring {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    padding: 3px;
+    /* Halka ile resim arasındaki boşluk */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Hikaye Atanların Renkli Halkası (Instagram Pembesi/Turuncusu yerine YTÜ renkleri) */
+.has-story-ring {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    /* İstersen YTÜ renkleri: background: linear-gradient(45deg, var(--ytu-lacivert), var(--ytu-sari)); */
+}
+
+/* Kendi Hikaye Ekleme Halkan (Gri) */
+.add-story-ring {
+    border: 2px dashed var(--text-muted);
+}
+
+.story-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--card-bg);
+    /* Resmin etrafındaki beyaz boşluk */
+    object-fit: cover;
+}
+
+.add-story-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--ytu-lacivert);
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--card-bg);
+}
+
+.story-username {
+    font-size: 0.75rem;
+    margin-top: 5px;
+    color: var(--text-color);
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- HİKAYE İZLEME MODALI --- */
+.story-view-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.story-full-img {
+    max-height: 80vh;
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+.story-header-info {
+    position: absolute;
+    top: 30px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    z-index: 10001;
+}
+
+.close-story {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    z-index: 10001;
+}
+
+/* Süre Çubuğu (Animasyonlu) */
+.story-progress-bar {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: white;
+    width: 0%;
+}
+
+/* Görülen Hikaye Halkası (Gri/Soluk) */
+.seen-story-ring {
+    background: #ccc;
+    /* Gri renk */
+    /* Veya hafif renkli: background: linear-gradient(45deg, #ccc, #999); */
+}
+
+/* Hikaye İlerleme Çubuğu Kapsayıcısı */
+.story-progress-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+    /* Çubuklar arası boşluk */
+    z-index: 10002;
+}
+
+.story-progress-bar-item {
+    flex: 1;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: white;
+    width: 0%;
+}
+
+/* Silme Butonu */
+.story-delete-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    color: white;
+    font-size: 1.5rem;
+    z-index: 10002;
+    text-decoration: none;
+    display: none;
+    /* JS ile açılacak */
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 50%;
+}
+
+/* Görenler Rozeti */
+.story-viewers-badge {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+    font-size: 0.9rem;
+    z-index: 10002;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 15px;
+    display: none;
+    /* JS ile açılacak */
+}
+
+/* --- HİKAYE NAVİGASYON ALANLARI --- */
+.story-media-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Sol Taraf (%30 genişlik - Geri gitmek için) */
+.story-nav-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30%;
+    height: 80vh;
+    /* Ekranın çoğunu kaplasın */
+    z-index: 10005;
+    /* En üstte olsun */
+    cursor: pointer;
+    /* background: rgba(255,0,0,0.2); Test için açabilirsin */
+}
+
+/* Sağ Taraf (%70 genişlik - İleri gitmek için) */
+.story-nav-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 70%;
+    height: 80vh;
+    z-index: 10005;
+    cursor: pointer;
+}
+
+/* Duraklatıldığında (Paused Class'ı JS ile eklenir) */
+.paused .progress-fill {
+    animation-play-state: paused !important;
+    transition: none !important;
+}
+
+/* --- ANKET SİSTEMİ TASARIMI --- */
+.poll-creator {
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--bg-color);
+    border-radius: 10px;
+}
+
+.poll-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+.poll-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.poll-option {
+    position: relative;
+    border: 1px solid var(--ytu-lacivert);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: 0.2s;
+    background: var(--input-bg);
+}
+
+.poll-option:hover {
+    background: var(--link-hover);
+}
+
+.poll-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: rgba(0, 51, 102, 0.15);
+    /* YTÜ Laciverti Şeffaf */
+    z-index: 1;
+    transition: width 0.5s ease;
+}
+
+.poll-text {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Dikey ortala */
+    font-weight: 500;
+    color: var(--text-color);
+    padding-right: 30px;
+    /* Tik işareti için boşluk bırak, üst üste binmesin */
+}
+
+.poll-check {
+    position: absolute;
+    right: 15px;
+    /* En sağdan 15px içeride */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    /* Boyutu ideal */
+    z-index: 3;
+    /* Arka planı kaldırdık, sadece ikon kalsın */
+    color: var(--ytu-lacivert);
+    /* İkon rengi lacivert olsun */
+}
+
+/* Yüzde Yazısı */
+.poll-percent {
+    font-weight: bold;
+    margin-right: 15px;
+    /* Yüzde ile tik arasına mesafe koy */
+}
+
+.poll-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+    padding-left: 5px;
+}
+
+/* =========================================
+   14. VİDEO ARAMA (PREMIUM TASARIM)
+   ========================================= */
+
+/* --- ARAMA BUTONLARI (CHAT EKRANI) --- */
+.call-btn {
+    background: rgba(0, 51, 102, 0.1);
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.call-btn:hover {
+    background: var(--ytu-lacivert);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* --- TAM EKRAN MODAL --- */
+.call-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    /* Tam siyah arka plan */
+    z-index: 10000;
+    flex-direction: column;
+}
+
+/* --- VİDEO ALANI --- */
+.video-grid {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #1a1a1a;
+    overflow: hidden;
+}
+
+/* Karşı Tarafın Videosu (Ana Ekran) */
+.remote-video {
+    width: 100%;
+    height: 100%;
+    /* DEĞİŞTİ: cover yerine contain yaptık. Görüntü kesilmez, tam sığar. */
+    object-fit: contain;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    background-color: #000;
+    /* Boşluk kalırsa siyah olsun */
+}
+
+/* Benim Videom (Küçük Pencere) */
+.local-video {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 120px;
+    height: 180px;
+    /* Portre modu oranı */
+    background: #333;
+    border-radius: 15px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+/* Mobilde küçük ekranı alta alalım */
+@media (max-width: 768px) {
+    .local-video {
+        width: 90px;
+        height: 135px;
+        top: 20px;
+        right: 20px;
+    }
+}
+
+/* --- KONTROL BUTONLARI (ALT BAR) --- */
+.call-controls {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 25px;
+    z-index: 10;
+    padding: 15px 30px;
+    background: rgba(255, 255, 255, 0.15);
+    /* Cam Efekti */
+    backdrop-filter: blur(10px);
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.control-btn {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    background: white;
+    color: #333;
+    transition: 0.3s;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    transform: translateY(-5px);
+}
+
+.hangup-btn {
+    background: #ff4757 !important;
+    /* Canlı kırmızı */
+    color: white !important;
+    width: 65px;
+    /* Kapatma butonu biraz daha büyük */
+    height: 65px;
+    margin-top: -5px;
+    /* Hizalamayı ortalamak için */
+    font-size: 1.8rem;
+}
+
+/* Durum Yazısı (Ortadaki Leke Sorunu için ekstra önlem) */
+#callStatus {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 1.2rem;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 20px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+#callStatus:empty {
+    display: none;
+}
+
+/* --- GELEN ARAMA KUTUSU (POPUP) --- */
+.incoming-call-box {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 10001;
+    min-width: 300px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.5s;
+    backdrop-filter: blur(10px);
+}
+
+body.dark-mode .incoming-call-box {
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid #444;
+}
+
+
+.typing-indicator {
+    background-color: var(--input-bg);
+    padding: 10px 15px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    border: 1px solid var(--border-color);
+    width: fit-content;
+}
+
+.typing-indicator span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: var(--text-muted);
+    border-radius: 50%;
+    animation: typing 1s infinite;
+    margin-right: 3px;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* --- SESLİ MESAJ TASARIMI --- */
+.chat-form-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.mic-btn {
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mic-btn:hover {
+    background: var(--ytu-lacivert);
+    color: white;
+}
+
+.mic-btn.recording {
+    background: #e74c3c;
+    /* Kayıt yaparken kırmızı olsun */
+    color: white;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Audio Player Özelleştirme */
+.audio-msg {
+    max-width: 250px;
+    height: 40px;
+    border-radius: 20px;
+}
+
+/* =========================================
+   24. ONLINE DURUM GÖSTERGESİ (YEŞİL NOKTA)
+   ========================================= */
+.avatar-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.status-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 13px;
+    height: 13px;
+    background-color: #ccc;
+    /* Varsayılan: Gri (Offline) */
+    border: 2px solid var(--card-bg);
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+}
+
+/* Online olunca Yeşil olsun */
+.status-dot.online {
+    background-color: #2ecc71;
+    box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.3);
+    animation: heartbeat 2s infinite;
+}
+
+/* Sohbet Başlığındaki Yazı için */
+.status-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.status-text.online {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+/* Hafif yanıp sönme efekti */
+@keyframes heartbeat {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* =========================================
+   25. YTU REELS (TAM EKRAN SIĞDIRMA MODU)
+   ========================================= */
+
+/* Arka planı simsiyah yap */
+body.reels-mode {
+    background-color: #000 !important;
+    margin: 0;
+    overflow: hidden;
+    /* Sayfa kaydırmasını kapat, sadece container kayacak */
+}
+
+.reels-container {
+    height: 100vh;
+    width: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    /* Kaydırınca videoya yapışma efekti */
+    background-color: #000;
+}
+
+/* Scrollbar'ı gizle */
+.reels-container::-webkit-scrollbar {
+    display: none;
+}
+
+.reels-container {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.reel-item {
+    height: 100vh;
+    width: 100%;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+}
+
+.reel-video {
+    width: 100%;
+    height: 100%;
+    /* BURASI DEĞİŞTİ: 'cover' yerine 'contain' yaptık. */
+    /* Artık videoyu kesmeden ekranın içine maksimum boyutta sığdıracak */
+    object-fit: contain;
+}
+
+/* Geri Dön Butonu (Sabit Sol Üst) */
+.reels-back-btn {
+    position: fixed;
+    top: 25px;
+    left: 25px;
+    z-index: 1000;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.reels-back-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Sağ Menü (Kalp, Yorum) */
+.reel-sidebar {
+    position: absolute;
+    right: 20px;
+    bottom: 100px;
+    /* Biraz yukarı aldık */
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    z-index: 20;
+    align-items: center;
+    /* Butonların arkasına hafif gölge atalım ki video beyazsa görünsün */
+    filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+}
+
+.reel-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+    color: white;
+}
+
+.reel-action:active {
+    transform: scale(0.8);
+}
+
+/* Alt Bilgi (İsim, Açıklama) */
+.reel-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 20;
+    text-align: left;
+    /* Yazıların altına siyah degrade attık ki video açık renkse yazı okunsun */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    padding: 40px 20px 30px 20px;
+}
+
+.reel-follow-btn {
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    text-decoration: none;
+    background: rgba(0, 0, 0, 0.3);
+    margin-left: 10px;
+}
+
+/* X TARZI TRENDING KUTUSU */
+.trending-card {
+    background-color: var(--card-bg);
+    /* Dark mode uyumlu */
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.trending-header {
+    padding: 12px 16px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.trending-item {
+    padding: 12px 16px;
+    display: block;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: background 0.2s;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.trending-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .trending-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.trending-category {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.trending-tag {
+    font-weight: 700;
+    display: block;
+    margin: 2px 0;
+}
+
+.trending-count {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.trending-item {
+    position: relative;
+    /* Üç nokta için gerekli */
+}
+
+.trending-more {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 5px;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.trending-more:hover {
+    background: rgba(29, 155, 240, 0.1);
+    color: var(--ytu-lacivert);
+}
+
+/* Hashtaglerin post içindeki rengi */
+.hashtag-link {
+    color: #1d9bf0;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.hashtag-link:hover {
+    text-decoration: underline;
+}
+
+/* NOT HAVUZU STİLLERİ */
+
+.filter-chip {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: var(--text-color);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+.filter-chip.active,
+.filter-chip:hover {
+    background: var(--ytu-lacivert);
+    color: white;
+    border-color: var(--ytu-lacivert);
+}
+
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    /* Responsive Izgara */
+    gap: 20px;
+}
+
+.note-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    transition: transform 0.2s;
+}
+
+.note-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.note-icon {
+    font-size: 2.5rem;
+    background: rgba(var(--ytu-lacivert-rgb), 0.1);
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.note-info {
+    flex: 1;
+}
+
+.note-title {
+    font-size: 1rem;
+    margin: 0 0 5px 0;
+    font-weight: 700;
+}
+
+.note-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.badge-dept {
+    background: #e9ecef;
+    color: #333;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+body.dark-mode .badge-dept {
+    background: #333;
+    color: #ddd;
+}
+
+.note-uploader {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.small-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.btn-download {
+    display: inline-block;
+    padding: 8px 12px;
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+.btn-download:hover {
+    background: #218838;
+}
+
+/* =========================================
+   27. YTU REELS (GERÇEK FULL SCREEN MODU)
+   ========================================= */
+
+/* Reels sayfasında arka plan siyah olsun ve sayfa taşmasın */
+body.reels-mode {
+    background-color: #000 !important;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    /* Dış scrollu kapat */
+}
+
+/* Ana Taşıyıcı: Ekran boyunda ve kaydırılabilir */
+.reels-container {
+    height: 100vh;
+    width: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    /* Yapışkan kaydırma */
+    background-color: #000;
+    scrollbar-width: none;
+    /* Firefox scrollbar gizle */
+    position: relative;
+}
+
+.reels-container::-webkit-scrollbar {
+    display: none;
+}
+
+/* Chrome scrollbar gizle */
+
+/* Her bir Video Kartı */
+.reel-item {
+    height: 100vh;
+    /* Tam ekran yükseklik */
+    width: 100%;
+    max-width: 500px;
+    /* Mobilde tam, masaüstünde dar */
+    margin: 0 auto;
+    /* Ortala */
+    scroll-snap-align: start;
+    /* Kaydırınca başa yapış */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    border-right: 1px solid #222;
+    /* Masaüstü için sınır */
+    border-left: 1px solid #222;
+}
+
+/* Video */
+.reel-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Videoyu kesmeden sığdır (Cover yaparsan kenarlar kesilir) */
+    cursor: pointer;
+}
+
+/* Sol Üstteki Geri Dön Butonu */
+.reels-back-btn {
+    position: fixed;
+    top: 25px;
+    left: 25px;
+    z-index: 1000;
+    color: white;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 10px 20px;
+    border-radius: 30px;
+    backdrop-filter: blur(5px);
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.reels-back-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Sağdaki Etkileşim Butonları (Kalp, Yorum) */
+.reel-sidebar {
+    position: absolute;
+    right: 10px;
+    bottom: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    z-index: 100;
+    align-items: center;
+}
+
+.reel-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s;
+}
+
+.reel-action:active {
+    transform: scale(0.8);
+}
+
+.reel-action i {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.reel-action span {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Alt Kısımdaki Bilgiler (Kullanıcı adı, Açıklama) */
+.reel-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    padding-bottom: 40px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+    z-index: 90;
+    color: white;
+    pointer-events: none;
+    /* Tıklamayı engelleme ki videoya tıklanabilsin */
+}
+
+.reel-info * {
+    pointer-events: auto;
+}
+
+/* İçindeki linklere tıklanabilsin */
+
+.reel-user-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.reel-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.reel-username {
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.reel-desc {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #eee;
+    max-width: 85%;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.btn-follow-reel {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* =========================================
+   28. REELS GÜNCELLEME (YORUM & PAYLAŞ MODALLARI)
+   ========================================= */
+
+/* Profil Bilgisi - Biraz daha sola ve derli toplu */
+.reel-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 15px 30px 15px;
+    /* Soldan boşluğu kıstık */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 10%, transparent);
+    z-index: 90;
+    color: white;
+    text-align: left;
+    /* Sola yasla */
+    pointer-events: none;
+}
+
+.reel-info * {
+    pointer-events: auto;
+}
+
+.reel-user-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Avatar ile isim arası */
+    margin-bottom: 8px;
+}
+
+.reel-avatar {
+    width: 45px;
+    height: 45px;
+    border: 2px solid var(--ytu-sari);
+    /* Sarı çerçeve ile patlasın */
+}
+
+/* MODAL (Yorum ve Paylaş için Ortak Zemin) */
+.bottom-sheet-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    /* Arkası kararsın */
+    z-index: 2000;
+    display: none;
+    /* JS ile açılacak */
+    justify-content: center;
+    align-items: flex-end;
+    /* Aşağıdan çıksın */
+    backdrop-filter: blur(2px);
+}
+
+.bottom-sheet-content {
+    background: #1e1e1e;
+    /* Koyu Gri */
+    width: 100%;
+    max-width: 500px;
+    /* Mobilde tam, PC'de dar */
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    color: white;
+    animation: slideUp 0.3s ease-out;
+    max-height: 70vh;
+    /* Ekranın %70'ini kaplasın */
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* Yorum Listesi */
+.reel-comments-list {
+    flex: 1;
+    overflow-y: auto;
+    margin: 15px 0;
+    padding-right: 5px;
+}
+
+.reel-comment-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+}
+
+.reel-comment-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+/* Paylaşım Seçenekleri */
+.share-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.share-btn-option {
+    background: #333;
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: 0.2s;
+}
+
+.share-btn-option:hover {
+    background: #444;
+}
+
+.close-sheet-btn {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* ==================================================================== 
+   10. YARDIMCI SINIFLAR (UTILITIES) 
+   ==================================================================== */
+.d-none {
+    display: none !important;
+}
+
+.d-flex {
+    display: flex !important;
+}
+
+/* Reels Like Animation */
+.liked-heart {
+    color: #ff4757 !important;
+}
+
+/* Border Colors for Alerts/Notes */
+.border-left-success {
+    border-left: 6px solid #2ecc71 !important;
+}
+
+.border-left-danger {
+    border-left: 6px solid #e74c3c !important;
+}
+
+/* Star Rating Colors */
+.star-filled {
+    color: #ffc107 !important;
+}
+
+.star-empty {
+    color: #bdc3c7 !important;
+}
+
+/* --- ADMIN PANELİ GECE MODU BUTONU --- */
+.admin-theme-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-theme-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    border-color: var(--ytu-lacivert);
+}
+
+body.dark-mode .admin-theme-btn {
+    background: #333;
+    color: #ffcc00; /* Sarı Güneş */
+    border-color: #555;
+}
+
+/* =========================================
+   29. MESAJLAR KUTUSU (INBOX YENİ TASARIM)
+   ========================================= */
+
+/* Ana Düzen */
+.inbox-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr; /* Sol Menü - Mesaj Kutusu */
+    gap: 30px;
+    max-width: 1200px;
+    margin: 100px auto 40px;
+    padding: 0 20px;
+}
+
+/* Mesaj Kutusu Kartı */
+.inbox-container {
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    overflow: hidden; /* Köşelerden taşmasın */
+    display: flex;
+    flex-direction: column;
+    min-height: 600px; /* Dolu dursun */
+}
+
+/* Üst Başlık ve Arama */
+.inbox-header {
+    padding: 25px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(var(--ytu-lacivert-rgb), 0.03);
+}
+
+.inbox-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.inbox-title-row h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-color);
+}
+
+.btn-new-msg {
+    background: var(--ytu-lacivert);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+.btn-new-msg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 51, 102, 0.3);
+}
+
+/* Arama Inputu */
+.inbox-search-wrapper {
+    position: relative;
+}
+.inbox-search-input {
+    width: 100%;
+    padding: 12px 15px 12px 45px; /* İkon için soldan boşluk */
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-color);
+    outline: none;
+    transition: 0.3s;
+}
+.inbox-search-input:focus {
+    border-color: var(--ytu-lacivert);
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+.search-icon-pos {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+/* Mesaj Listesi */
+.inbox-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.inbox-item {
+    display: flex;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+.inbox-item:hover {
+    background-color: var(--link-hover);
+}
+.inbox-item.active {
+    background-color: rgba(var(--ytu-lacivert-rgb), 0.05);
+    border-left: 4px solid var(--ytu-lacivert);
+}
+
+.inbox-avatar {
+    width: 55px; height: 55px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+    border: 2px solid var(--border-color);
+}
+
+.inbox-info {
+    flex: 1;
+    min-width: 0; /* Uzun metin taşmasın */
+}
+
+.inbox-top-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.inbox-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+.inbox-time {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.inbox-preview-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.inbox-preview {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80%;
+}
+
+.unread-badge {
+    background: #ff4757;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+}
+
+/* Boş Durum (Empty State) */
+.inbox-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 50px;
+    text-align: center;
+    color: var(--text-muted);
+}
+.inbox-empty i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+    color: var(--ytu-lacivert);
+}
+
+/* Mobil Uyum */
+@media (max-width: 900px) {
+    .inbox-layout { grid-template-columns: 1fr; }
+    .left-sidebar { display: none; }
+}
+
+/* =========================================
+   30. BİLDİRİMLER (JİLET TASARIM & KIRMIZI UYARI)
+   ========================================= */
+
+/* Liste Düzeni */
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 800px; /* Çok yayılmasın */
+}
+
+/* Bildirim Kartı */
+.notif-card {
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative; /* Kırmızı nokta için referans */
+    overflow: hidden;
+}
+
+.notif-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--ytu-lacivert);
+}
+
+/* --- KIRMIZI UYARI SİSTEMİ (OKUNMAMIŞ) --- */
+.notif-card.unread {
+    background: rgba(var(--ytu-lacivert-rgb), 0.04); /* Çok hafif renkli arka plan */
+    border-left: 5px solid #ff4757; /* Sol kenarda kırmızı çizgi */
+}
+
+/* Yanıp Sönen Kırmızı Nokta */
+.notif-card.unread::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 10px;
+    height: 10px;
+    background-color: #ff4757;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
+    animation: pulseRed 2s infinite;
+}
+
+@keyframes pulseRed {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+}
+
+/* İkon Kutuları */
+.notif-icon-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+/* Renkler */
+.bg-like { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }    /* Kırmızı Kalp */
+.bg-comment { background: rgba(52, 152, 219, 0.1); color: #3498db; } /* Mavi Yorum */
+.bg-follow { background: rgba(46, 204, 113, 0.1); color: #2ecc71; }  /* Yeşil Takip */
+.bg-msg { background: rgba(241, 196, 15, 0.1); color: #f1c40f; }     /* Sarı Mesaj */
+
+/* İçerik Yazıları */
+.notif-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.notif-actor { font-weight: 700; color: var(--text-color); }
+.notif-text { font-size: 0.95rem; color: var(--text-color); }
+.notif-time { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+
+/* Buton */
+.btn-view {
+    padding: 6px 15px;
+    border-radius: 20px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    transition: 0.2s;
+}
+.notif-card:hover .btn-view {
+    background: var(--ytu-lacivert);
+    color: white;
+    border-color: var(--ytu-lacivert);
+}
+
+/* =========================================
+   31. GELİŞMİŞ PAYLAŞIM MODALI (INSTAGRAM TARZI)
+   ========================================= */
+
+.share-modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6); z-index: 10000;
+    display: none; align-items: center; justify-content: center;
+}
+
+.share-modal-content {
+    background: var(--card-bg);
+    width: 400px; max-width: 90%;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    max-height: 80vh;
+    animation: zoomIn 0.2s ease-out;
+}
+
+.share-header {
+    padding: 15px; border-bottom: 1px solid var(--border-color);
+    text-align: center; font-weight: bold; position: relative;
+    color: var(--text-color);
+}
+
+.share-search-box {
+    padding: 10px 15px; border-bottom: 1px solid var(--border-color);
+}
+.share-search-input {
+    width: 100%; padding: 8px 12px;
+    border-radius: 8px; border: none;
+    background: rgba(var(--ytu-lacivert-rgb), 0.1);
+    color: var(--text-color); outline: none;
+}
+
+.share-user-list {
+    flex: 1; overflow-y: auto; padding: 10px 0;
+}
+
+.share-user-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 15px; cursor: pointer;
+    transition: background 0.2s;
+}
+.share-user-item:hover { background: var(--hover-bg); }
+
+.share-user-info { display: flex; align-items: center; gap: 10px; }
+.share-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.share-btn-send {
+    background: var(--ytu-lacivert); color: white;
+    border: none; padding: 6px 15px; border-radius: 6px;
+    font-size: 0.85rem; cursor: pointer;
+}
+.share-btn-send.sent { background: #2ecc71; pointer-events: none; }
+
+.share-footer {
+    padding: 15px; border-top: 1px solid var(--border-color);
+    display: flex; gap: 15px; overflow-x: auto;
+    background: rgba(var(--ytu-lacivert-rgb), 0.02);
+}
+
+.share-app-icon {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 5px; min-width: 60px; cursor: pointer;
+}
+.app-icon-circle {
+    width: 45px; height: 45px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; color: white; transition: transform 0.2s;
+}
+.share-app-icon:hover .app-icon-circle { transform: scale(1.1); }
+
+/* Renkler */
+.bg-copy { background: #34495e; }
+.bg-whatsapp { background: #25D366; }
+.bg-twitter { background: #1DA1F2; }
+.bg-telegram { background: #0088cc; }
+
+@keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.story-share-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 75px; /* Sağ alt köşe */
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1001; /* Resmin üstünde dursun */
+    transition: 0.3s;
+}
+.story-share-btn:hover { background: rgba(255, 255, 255, 0.4); }
+
+/* static/style.css EN ALTA EKLE */
+
+/* Yuvarlakların içindeki ikonların rengini ve boyutunu garantiye al */
+.app-icon-circle i {
+    color: white !important; /* Kesinlikle beyaz olsun */
+    font-size: 1.4rem; /* Biraz büyütelim */
+}
+

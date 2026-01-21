@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaydedilenler - YTU Social</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <div class="main-layout">
+        
+        <aside class="left-sidebar sticky-sidebar">
+            <div class="club-card" style="border: none; padding: 15px;">
+                <div style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <img src="/static/{{ current_user.profile_pic }}" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ytu-lacivert);">
+                    <h3 style="margin-top: 8px; font-size: 1rem;">{{ current_user.username }}</h3>
+                </div>
+
+                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
+                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
+                <a href="{{ url_for('reels') }}" class="sidebar-link" style="color: #e1306c;"><span>🎬</span> Reels</a>
+
+                <a href="{{ url_for('saved_posts_list') }}" class="sidebar-link active-link"><span>📌</span> Kaydedilenler</a>
+
+                <a href="{{ url_for('notifications') }}" class="sidebar-link"><span>🔔</span> Bildirimler</a>
+                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
+                
+                <a href="javascript:history.back()" class="sidebar-link link-danger" style="margin-top: 10px;"><span>⬅️</span> Geri Dön</a>
+            </div>
+        </aside>
+
+        <main>
+            <h3 style="margin-bottom: 20px; color: var(--text-color); padding-left: 5px;">📌 Kaydettiklerin</h3>
+
+            {% for post in posts %}
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-author-info">
+                        <img src="/static/{{ post.author.profile_pic }}" class="post-avatar">
+                        <div>
+                            <a href="{{ url_for('user_profile', handle=post.author.handle) }}" class="post-author-link">
+                                <strong class="post-author-name">{{ post.author.username }}</strong>
+                            </a>
+                            <span class="post-author-dept">{{ post.author.department or 'Bölüm Yok' }}</span>
+                        </div>
+                    </div>
+                    <small class="post-time">{{ post.date_posted.strftime('%H:%M') }}</small>
+                </div>
+                
+                <div class="post-text">{{ post.content }}</div>
+
+                {% if post.image_file %}
+                <div class="post-image-container">
+                    {% if post.is_video() %}
+                        <video controls class="post-image" style="background: black;">
+                            <source src="/static/post_images/{{ post.image_file }}" type="video/mp4">
+                            Tarayıcınız video oynatmayı desteklemiyor.
+                        </video>
+                    {% else %}
+                        <img src="/static/post_images/{{ post.image_file }}" class="post-image" onclick="openLightbox(this.src)">
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="post-actions">
+                    <span class="action-item" onclick="likePost('{{ post.id }}', this)">
+                        {% if current_user in post.liked_by %}❤️{% else %}🤍{% endif %}
+                        <span class="like-count">{{ post.liked_by|length }}</span>
+                    </span>
+                    
+                    <a href="{{ url_for('index') }}#post-content-{{ post.id }}" class="action-item" style="text-decoration: none;">
+                        📝 Yorumlar
+                    </a>
+                    
+                    <span class="action-item" onclick="savePost('{{ post.id }}', this)">
+                        <span class="save-icon">✅ Kaydedildi</span>
+                    </span>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div style="font-size: 3rem; margin-bottom: 10px; opacity: 0.5;">🔖</div>
+                <p>Henüz hiçbir gönderiyi kaydetmedin.</p>
+                <a href="/" class="btn-vote" style="text-decoration: none; display:inline-block; margin-top:10px;">Ana Sayfaya Dön</a>
+            </div>
+            {% endfor %}
+        </main>
+
+        <aside class="right-sidebar sticky-sidebar">
+            </aside>
+    </div>
+
+    <div id="lightboxModal" class="lightbox" onclick="closeLightbox()">
+        <span class="close-lightbox">&times;</span>
+        <img class="lightbox-content" id="lightboxImage" onclick="event.stopPropagation()"> 
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

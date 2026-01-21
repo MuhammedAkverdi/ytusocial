@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kulüpler Ligi - YTU Social</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <div class="main-layout">
+        
+        <aside class="left-sidebar sticky-sidebar">
+            <div class="club-card" style="border: none; padding: 15px;">
+                <div style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <img src="/static/{{ current_user.profile_pic }}" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ytu-lacivert);">
+                    <h3 style="margin-top: 8px; font-size: 1rem;">{{ current_user.username }}</h3>
+                </div>
+
+                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
+                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
+                <a href="{{ url_for('reels') }}" class="sidebar-link" style="color: #e1306c;"><span>🎬</span> Reels</a>
+                <a href="{{ url_for('saved_posts_list') }}" class="sidebar-link"><span>📌</span> Kaydedilenler</a>
+                <a href="{{ url_for('notifications') }}" class="sidebar-link"><span>🔔</span> Bildirimler</a>
+                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
+
+                <a href="javascript:history.back()" class="sidebar-link link-danger" style="margin-top: 10px;"><span>⬅️</span> Geri Dön</a>
+            </div>
+        </aside>
+
+        <main>
+            <div class="section-header" style="margin-bottom: 25px;">
+                <h2 style="font-weight: 800; font-size: 1.8rem;">🏆 Kulüpler Ligi (Top 10)</h2>
+            </div>
+
+            <div class="club-full-card">
+                {% for club in clubs %}
+                <div class="club-row">
+                    <div class="club-rank">#{{ loop.index }}</div>
+                    
+                    <img src="/static/img/{{ club.image }}" class="club-logo-lg">
+                    
+                    <div class="club-info-main" style="flex: 1;">
+                        <h3>{{ club.name }}</h3>
+                        <div class="club-stats">
+                            <span>👥 {{ club.members }} Üye</span>
+                            <span>🚀 {{ club.projects }} Proje</span>
+                        </div>
+                    </div>
+
+                    <div class="club-action-area">
+                        <div class="club-votes">{{ club.votes }} Oy</div>
+                        <button class="btn-vote btn-club-vote" onclick="oyVer('{{ club.id }}', this)">OY VER</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="club-info-box">
+                <p class="club-info-text">💡 <b>Biliyor muydun?</b> Kulüpler Ligi puanları kampüsteki aktif etkileşime göre haftalık olarak güncellenir.</p>
+            </div>
+        </main>
+
+        <aside class="right-sidebar">
+            </aside>
+
+    </div>
+
+    <script src="/static/script.js"></script>
+    <button onclick="topFunction()" id="scrollTopBtn" title="Yukarı Çık">⬆️</button>
+</body>
+</html>

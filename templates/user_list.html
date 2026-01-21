@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - YTU Social</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+
+    <script>
+        // Flicker önleyici
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <div class="main-layout">
+        
+        <aside class="left-sidebar sticky-sidebar">
+            <div class="club-card" style="border: none; padding: 15px;">
+                <div style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+                    <img src="/static/{{ current_user.profile_pic }}" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ytu-lacivert);">
+                    <h3 style="margin-top: 8px; font-size: 1rem;">{{ current_user.username }}</h3>
+                </div>
+
+                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
+                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
+                <a href="{{ url_for('reels') }}" class="sidebar-link" style="color: #e1306c;"><span>🎬</span> Reels</a>
+                
+                <a href="{{ url_for('saved_posts_list') }}" class="sidebar-link"><span>📌</span> Kaydedilenler</a>
+
+                <a href="{{ url_for('notifications') }}" class="sidebar-link"><span>🔔</span> Bildirimler</a>
+                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
+
+                <a href="javascript:history.back()" class="sidebar-link link-danger" style="margin-top: 10px;"><span>⬅️</span> Geri Dön</a>
+            </div>
+        </aside>
+
+        <main>
+            <h3 class="page-title">{{ title }}</h3>
+
+            <div class="user-grid">
+                {% for user in users %}
+                <div class="user-list-card">
+                    <img src="/static/{{ user.profile_pic }}" class="user-list-avatar">
+                    
+                    <h4 class="user-list-name">{{ user.username or 'İsimsiz' }}</h4>
+                    <small class="user-list-handle">@{{ user.handle }}</small>
+                    
+                    <div class="user-list-actions">
+                        <a href="{{ url_for('user_profile', handle=user.handle) }}" class="btn-sm-profile">Profili Gör</a>
+                        
+                        {% if user.id != current_user.id %}
+                            {% if current_user.is_following(user) %}
+                            <a href="{{ url_for('unfollow', handle=user.handle) }}" class="action-link link-unfollow">Takibi Bırak</a>
+                            {% else %}
+                            <a href="{{ url_for('follow', handle=user.handle) }}" class="action-link link-follow">+ Takip Et</a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">
+                    <p>Bu listede henüz kimse yok.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+        
+        <aside class="sticky-sidebar">
+            </aside>
+    </div>
+
+    <button onclick="topFunction()" id="scrollTopBtn" title="Yukarı Çık">⬆️</button>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

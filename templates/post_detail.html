@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gönderi Detayı | YTU Social</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <div class="main-layout" style="justify-content: center;">
+        <main style="max-width: 600px; width: 100%; margin-top: 20px;">
+            <a href="/" class="back-btn" style="display:inline-block; margin-bottom:15px; color:var(--text-color); text-decoration:none;">
+                <i class="fas fa-arrow-left"></i> Ana Sayfaya Dön
+            </a>
+
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-author-info">
+                        <img src="/static/{{ post.author.profile_pic }}" class="post-avatar">
+                        <div>
+                            <strong class="post-author-name">{{ post.author.username }}</strong>
+                            <span class="post-author-dept">{{ post.author.department }}</span>
+                        </div>
+                    </div>
+                    <small class="post-time">{{ post.date_posted.strftime('%d %b') }}</small>
+                </div>
+
+                <div class="post-text">{{ post.content }}</div>
+
+                {% if post.image_file %}
+                    <div class="post-image-container">
+                        {% if post.is_video() %}
+                            <video controls class="post-image" style="max-height: 500px; background:black;">
+                                <source src="/static/post_images/{{ post.image_file }}" type="video/mp4">
+                            </video>
+                        {% else %}
+                            <img src="/static/post_images/{{ post.image_file }}" class="post-image">
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                <div class="post-actions">
+                    <span class="action-item"><i class="far fa-heart"></i> {{ post.likes|length }}</span>
+                    <span class="action-item"><i class="far fa-comment"></i> {{ post.comments|length }}</span>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

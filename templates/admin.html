@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zabıta Merkezi | YTU Social</title>
+    
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
+
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="admin-mode">
+
+    <a href="/" class="admin-back-btn">
+        <i class="fas fa-arrow-left"></i> Ana Sayfaya Dön
+    </a>
+
+    <button onclick="toggleAdminTheme()" id="adminThemeBtn" class="admin-theme-btn" title="Temayı Değiştir">
+        🌙
+    </button>
+
+    <div class="admin-container">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="font-weight: 900; font-size: 2.2rem; color: var(--text-color); margin: 0;">Zabıta Merkezi 👮‍♂️</h1>
+                <p style="color: var(--text-muted);">YTÜ Portal Yönetim Paneli</p>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge bg-green" style="font-size: 1rem; padding: 10px;">🟢 Sistem Aktif</span>
+            </div>
+        </div>
+
+        <div class="admin-stats-grid">
+            <div class="admin-card">
+                <i class="fas fa-users stat-icon"></i>
+                <div class="stat-info">
+                    <h3>{{ total_users }}</h3>
+                    <p>Toplam Üye</p>
+                </div>
+            </div>
+            <div class="admin-card">
+                <i class="fas fa-file-alt stat-icon" style="color: var(--ytu-sari);"></i>
+                <div class="stat-info">
+                    <h3>{{ total_posts }}</h3>
+                    <p>Toplam İçerik</p>
+                </div>
+            </div>
+            <div class="admin-card">
+                <i class="fas fa-flag stat-icon" style="color: #e74c3c;"></i>
+                <div class="stat-info">
+                    <h3>{{ reported_posts|length }}</h3>
+                    <p>Bekleyen Şikayet</p>
+                </div>
+            </div>
+            <div class="admin-card">
+                <i class="fas fa-bolt stat-icon" style="color: #2ecc71;"></i>
+                <div class="stat-info">
+                    <h3>{{ active_count }}</h3>
+                    <p>Online Kullanıcı</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 class="admin-section-title" style="margin:0;">🚨 Şikayet Edilen İçerikler</h2>
+                <span class="badge bg-red">{{ reported_posts|length }} Dosya</span>
+            </div>
+
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Önizleme</th>
+                            <th>İçerik Sahibi</th>
+                            <th>Şikayet Sayısı</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in reported_posts %}
+                        <tr>
+                            <td style="width: 40%;">
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    {% if post.image_file %}
+                                        {% if post.is_video() %}
+                                            <video src="/static/post_images/{{ post.image_file }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);"></video>
+                                        {% else %}
+                                            <img src="/static/post_images/{{ post.image_file }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);">
+                                        {% endif %}
+                                    {% endif %}
+                                    <p style="margin: 0; font-size: 0.9rem; color: var(--text-color);">{{ post.content | truncate(80) }}</p>
+                                </div>
+                            </td>
+                            <td>
+                                <b>{{ post.author.username }}</b><br>
+                                <small style="color:var(--text-muted);">{{ post.author.email }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-red" style="font-size: 1rem;">{{ post.report_count }} 🚩</span>
+                            </td>
+                            <td style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                <a href="{{ url_for('admin_delete_content', type='post', id=post.id) }}" class="btn-action btn-ban" onclick="return confirm('Bu içerik silinecek!')">🗑️ Sil</a>
+                                <a href="{{ url_for('admin_ban_user', user_id=post.author.id, action='temp_24h') }}" class="btn-action btn-view">🕒 24s</a>
+                                <a href="{{ url_for('admin_ban_user', user_id=post.author.id, action='perm') }}" class="btn-action btn-ban" style="background: black; color: white;" onclick="return confirm('Kullanıcı kalıcı olarak engellenecek!')">🚫 PERMA</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                <i class="fas fa-check-circle" style="font-size: 3rem; color: #2ecc71; margin-bottom: 10px;"></i><br>
+                                Tertemiz! Hiç şikayet yok. 🦅
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="admin-section-title">🛠️ Hızlı Kullanıcı Oluştur</h2>
+            <div class="admin-card" style="display: block;">
+                <form action="{{ url_for('admin_create_user') }}" method="POST" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
+                    
+                    <div>
+                        <label style="font-weight: bold; font-size: 0.8rem; color: var(--text-muted);">E-Mail</label>
+                        <input type="text" name="email" placeholder="test@yildiz.edu.tr" required 
+                               style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+
+                    <div>
+                        <label style="font-weight: bold; font-size: 0.8rem; color: var(--text-muted);">Kullanıcı Adı</label>
+                        <input type="text" name="username" placeholder="Tester01" required 
+                               style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+
+                    <div>
+                        <label style="font-weight: bold; font-size: 0.8rem; color: var(--text-muted);">Şifre</label>
+                        <input type="text" name="password" placeholder="123456" required 
+                               style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); color: var(--text-color);">
+                    </div>
+
+                    <div>
+                        <label style="font-weight: bold; font-size: 0.8rem; color: var(--text-muted);">Bölüm</label>
+                        <select name="department" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-color); color: var(--text-color);">
+                            <option value="Bilgisayar Müh.">Bilgisayar Müh.</option>
+                            <option value="Makine Müh.">Makine Müh.</option>
+                            <option value="Endüstri Müh.">Endüstri Müh.</option>
+                            <option value="Mimarlık">Mimarlık</option>
+                            <option value="Admin">Yönetici (Admin)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" style="background: var(--ytu-lacivert); color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; height: 40px;">
+                        + Oluştur
+                    </button>
+
+                </form>
+                <small style="color: var(--text-muted); margin-top: 10px; display: block;">* Bu panelden oluşturulan kullanıcılar otomatik olarak <b>Onaylı (Verified)</b> sayılır.</small>
+            </div>
+            
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="admin-card" style="justify-content: center; flex-direction: column;">
+                <span style="font-size: 0.9rem; font-weight: bold; color: var(--text-muted);">CPU Kullanımı</span>
+                <div style="width: 100%; background: #eee; height: 10px; border-radius: 5px; overflow: hidden; margin: 10px 0;">
+                    <div style="height: 100%; width: {{ cpu }}%; background: var(--ytu-lacivert);"></div>
+                </div>
+                <b style="color:var(--text-color);">%{{ cpu }}</b>
+            </div>
+            <div class="admin-card" style="justify-content: center; flex-direction: column;">
+                <span style="font-size: 0.9rem; font-weight: bold; color: var(--text-muted);">RAM Kullanımı</span>
+                <div style="width: 100%; background: #eee; height: 10px; border-radius: 5px; overflow: hidden; margin: 10px 0;">
+                    <div style="height: 100%; width: {{ ram }}%; background: var(--ytu-sari);"></div>
+                </div>
+                <b style="color:var(--text-color);">%{{ ram }}</b>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="admin-footer">
+        Created By Ebu Ubeyde &copy; 2026
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        // Sayfa Yüklendiğinde İkonu Ayarla
+        document.addEventListener("DOMContentLoaded", () => {
+            const btn = document.getElementById('adminThemeBtn');
+            if(document.body.classList.contains('dark-mode')){
+                btn.innerText = '☀️';
+            } else {
+                btn.innerText = '🌙';
+            }
+        });
+
+        // Admin Özel Tema Değiştirici
+        function toggleAdminTheme() {
+            toggleDarkMode(); // Script.js içindeki ana fonksiyonu çağır
+            
+            const btn = document.getElementById('adminThemeBtn');
+            if (document.body.classList.contains('dark-mode')) {
+                btn.innerText = '☀️';
+            } else {
+                btn.innerText = '🌙';
+            }
+        }
+    </script>
+
+</body>
+</html>
