@@ -10,7 +10,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 
-<body class="auth-body">
+<body>
+
+    {% include 'navbar_partial.html' ignore missing %}
 
     <input type="hidden" id="currentUserId" value="{{ current_user.id }}">
     <input type="hidden" id="currentUserName" value="{{ current_user.username }}">
@@ -31,15 +33,36 @@
     {% endif %}
     {% endwith %}
 
-    <div class="auth-card chat-card">
+    <div class="main-layout" style="grid-template-columns: 280px 1fr; max-width: 1200px;">
+        
+        <!-- SOL MENÜ (SIDEBAR) -->
+        <aside class="left-sidebar sticky-sidebar">
+            {% if current_user.is_authenticated %}
+            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px 20px; border: 1px solid var(--border-color);">
+                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
+                    <img src="/static/{{ current_user.profile_pic }}" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ytu-lacivert); object-fit: cover; margin-bottom: 12px;">
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{ current_user.username }}</h3>
+                    <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
+                </div>
+                <nav style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="{{ url_for('main.index') }}" class="sidebar-link"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}" class="sidebar-link"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link active-link"><i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar</a>
+                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link"><i class="fa-regular fa-heart" style="width: 20px; text-align: center;"></i> Bildirimler</a>
+                </nav>
+            </div>
+            {% endif %}
+        </aside>
 
+        <!-- SOHBET KARTI -->
+        <div class="chat-card" style="background: var(--card-bg); border-radius: 16px;">
         <div class="chat-header-bar">
-            <a href="{{ url_for('messages_inbox') }}" class="back-btn"
+            <a href="{{ url_for('main.messages_inbox') }}" class="back-btn"
                 style="margin-right: 15px; color: var(--text-color); font-size: 1.2rem;">
                 <i class="fas fa-chevron-left"></i>
             </a>
 
-            <a href="{{ url_for('user_profile', handle=user.handle) }}"
+            <a href="{{ url_for('main.user_profile', handle=user.handle) }}"
                 style="display: flex; align-items: center; text-decoration: none; color: inherit; flex: 1;">
                 <div class="avatar-wrapper">
                     <img src="/static/{{ user.profile_pic }}" class="chat-avatar-sm">
@@ -68,50 +91,12 @@
 
         <div class="chat-area" id="messageArea">
             {% for msg in messages %}
-            {% if msg.sender_id == current_user.id %}
-            <div class="message-row sent">
-                <div class="message-bubble bubble-sent">
-                    {% if msg.msg_type == 'audio' %}
-                    <audio controls controlsList="nodownload" class="audio-msg">
-                        <source src="/static/audio_files/{{ msg.file_path }}" type="audio/webm">
-                    </audio>
-                    {% else %}
-                    {{ msg.body }}
-                    {% endif %}
-                    <span class="msg-time">
-                        {{ msg.timestamp.strftime('%H:%M') }}
-                        {% if msg.is_read %} <i class="fas fa-check-double"></i> {% else %} <i class="fas fa-check"></i>
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-            {% else %}
-            <div class="message-row received">
-                <img src="/static/{{ user.profile_pic }}" class="msg-avatar">
-                <div class="message-bubble bubble-received">
-                    {% if msg.msg_type == 'audio' %}
-                    <audio controls controlsList="nodownload" class="audio-msg">
-                        <source src="/static/audio_files/{{ msg.file_path }}" type="audio/webm">
-                    </audio>
-                    {% else %}
-                    {{ msg.body }}
-                    {% endif %}
-                    <span class="msg-time">{{ msg.timestamp.strftime('%H:%M') }}</span>
-                </div>
-            </div>
-            {% endif %}
-            {% else %}
-            <div class="empty-chat" style="margin-top: 50px;">
-                <p style="font-size: 3rem;">👋</p>
-                <p>Henüz mesaj yok. İlk adımı at!</p>
-            </div>
-            {% endfor %}{% for msg in messages %}
             <div class="message-row {{ 'sent' if msg.sender_id == current_user.id else 'received' }}">
 
                 {% if msg.sender_id != current_user.id %}
                 <img src="/static/{{ user.profile_pic }}" class="chat-avatar-sm">
                 {% else %}
-                <a href="{{ url_for('delete_message', message_id=msg.id) }}" class="msg-delete"
+                <a href="{{ url_for('main.delete_message', message_id=msg.id) }}" class="msg-delete"
                     onclick="return confirm('Silmek istediğine emin misin?')">✕</a>
                 {% endif %}
 
@@ -152,6 +137,11 @@
                 </div>
 
             </div>
+            {% else %}
+            <div class="empty-chat" style="margin-top: 50px;">
+                <p style="font-size: 3rem;">👋</p>
+                <p>Henüz mesaj yok. İlk adımı at!</p>
+            </div>
             {% endfor %}
             <div id="typingIndicator" class="typing-indicator" style="display: none;">
                 <span></span><span></span><span></span></div>
@@ -160,6 +150,10 @@
         <div class="chat-form-container">
             <form id="chatForm" onsubmit="sendMessage(event)"
                 style="flex: 1; display: flex; gap: 10px; margin: 0; align-items: center;">
+                
+                <label for="chatFileInput" class="chat-attach-btn"><i class="fas fa-paperclip"></i></label>
+                <input type="file" id="chatFileInput" style="display: none;" onchange="document.getElementById('messageInput').focus()">
+                
                 <input type="text" id="messageInput" class="chat-input" placeholder="Bir mesaj yaz..."
                     autocomplete="off">
                 <button type="submit" class="chat-send-btn"
@@ -169,6 +163,7 @@
             </form>
             <button id="recordBtn" class="mic-btn" title="Ses Kaydet" style="margin-left: 10px;"><i
                     class="fas fa-microphone"></i></button>
+        </div>
         </div>
 
     </div>

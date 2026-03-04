@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YTU Social - Yıldız'ın Sosyal Ağı</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -13,7 +14,6 @@
 </head>
 
 <body>
-
     <script>
         // Sayfa yüklenmeden karanlık modu uygula
         if (localStorage.getItem('theme') === 'dark') {
@@ -30,7 +30,8 @@
                 <span class="alert-icon">{% if category == 'danger' %}⚠️{% else %}🔔{% endif %}</span>
                 <span class="alert-text">{{ message }}</span>
             </div>
-            <button type="button" class="alert-close" onclick="this.parentElement.style.display='none';">&times;</button>
+            <button type="button" class="alert-close"
+                onclick="this.parentElement.style.display='none';">&times;</button>
         </div>
         {% endfor %}
     </div>
@@ -42,23 +43,57 @@
     <div class="main-layout">
 
         <aside class="left-sidebar sticky-sidebar">
-            <div class="club-card" style="border: none; padding: 15px;">
-                <div style="text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
-                    <img src="/static/{{ current_user.profile_pic }}" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ytu-lacivert); object-fit: cover;">
-                    <h3 style="font-size: 1rem; margin-top: 5px;">{{ current_user.username }}</h3>
-                    <span class="badge-dept" style="background: #ffc107; color: #333; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem;">
+            <div
+                style="background: var(--card-bg); border-radius: 20px; padding: 25px 20px; border: 1px solid var(--border-color);">
+                <div
+                    style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
+                    <img src="/static/{{ current_user.profile_pic }}"
+                        style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ytu-lacivert); object-fit: cover; margin-bottom: 12px;">
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{
+                        current_user.username }}</h3>
+                    <span
+                        style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">
                         ⭐ {{ current_user.score }} Puan
                     </span>
                 </div>
 
-                <a href="/" class="sidebar-link active-link"><span>🏠</span> Ana Sayfa</a>
-                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
-                <a href="{{ url_for('reels') }}" class="sidebar-link"><span>🎬</span> Reels</a>
-                <a href="{{ url_for('saved_posts_list') }}" class="sidebar-link"><span>📌</span> Kaydedilenler</a>
-                <a href="{{ url_for('notes_pool') }}" class="sidebar-link"><span>📚</span> Not Havuzu</a>
-                <a href="{{ url_for('adverts') }}" class="sidebar-link"><span>📢</span> İlanlar</a>
-                <a href="{{ url_for('notifications') }}" class="sidebar-link"><span>🔔</span> Bildirimler</a>
-                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
+                <nav style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="/" class="sidebar-link"
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert);"><i
+                            class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}" class="sidebar-link"
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
+                            class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
+                    <a href="{{ url_for('main.reels') }}" class="sidebar-link"
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
+                            class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
+                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link"
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
+                            class="fa-regular fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
+                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link"
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
+                            class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
+                    <a href="{{ url_for('main.clubs_full_list') }}" class="nav-item"
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
+                            class="fa-solid fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi
+                    </a>
+                    <a href="{{ url_for('main.adverts') }}" class="sidebar-link"
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
+                            class="fa-solid fa-bullhorn" style="width: 20px; text-align: center;"></i> İlanlar</a>
+                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link"
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
+                        {% if unread_count > 0 %}
+                        <span class="notification-badge">{{ unread_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
+                        {% if unread_msg_count > 0 %}
+                        <span class="msg-badge">{{ unread_msg_count }}</span>
+                        {% endif %}
+                    </a>
+                </nav>
             </div>
         </aside>
 
@@ -72,13 +107,18 @@
                     </div>
                     <span class="story-username">Hikayen</span>
                 </div>
-                <form action="{{ url_for('upload_story') }}" method="POST" enctype="multipart/form-data" id="storyForm">
-                    <input type="file" name="story_image" id="storyInput" style="display: none;" accept="image/*,video/*" onchange="document.getElementById('storyForm').submit()">
+                <form action="{{ url_for('main.upload_story') }}" method="POST" enctype="multipart/form-data" id="storyForm">
+                    <input type="file" name="story_image" id="storyInput" style="display: none;"
+                        accept="image/*,video/*" onchange="document.getElementById('storyForm').submit()">
                 </form>
 
                 {% for author, data in stories.items() %}
-                <div class="story-item" data-stories='{{ data.stories | tojson | safe }}' data-username="{{ author.username }}" data-userpic="/static/{{ author.profile_pic }}" data-isowner="{{ 'true' if author == current_user else 'false' }}" onclick="openStoryGalleryWrapper(this)">
-                    <div class="story-ring {{ 'seen-story-ring' if data.all_seen and author != current_user else 'has-story-ring' }}">
+                <div class="story-item" data-stories='{{ data.stories | tojson | safe }}'
+                    data-username="{{ author.username }}" data-userpic="/static/{{ author.profile_pic }}"
+                    data-isowner="{{ 'true' if author == current_user else 'false' }}"
+                    onclick="openStoryGalleryWrapper(this)">
+                    <div
+                        class="story-ring {{ 'seen-story-ring' if data.all_seen and author != current_user else 'has-story-ring' }}">
                         <img src="/static/{{ author.profile_pic }}" class="story-avatar">
                     </div>
                     <span class="story-username">{{ author.username }}</span>
@@ -97,35 +137,48 @@
 
             <div class="club-card create-post-card">
                 <form id="ajaxPostForm" enctype="multipart/form-data">
-                    <textarea name="content" id="postTextarea" class="create-post-input" rows="2" placeholder="Neler oluyor Yıldız?"></textarea>
+                    <textarea name="content" id="postTextarea" class="create-post-input" rows="2"
+                        placeholder="Neler oluyor Yıldız?"></textarea>
 
                     <div id="image-preview" class="image-preview-container" style="display: none;">
                         <div style="position: relative; display: inline-block;">
                             <img id="preview-img" src="" class="preview-img-style" style="display: none;">
-                            <video id="preview-video" class="preview-img-style" controls style="display: none; height: 150px; background: black;"></video>
+                            <video id="preview-video" class="preview-img-style" controls
+                                style="display: none; height: 150px; background: black;"></video>
                             <span onclick="clearImage()" class="preview-close-btn">✕</span>
                         </div>
                     </div>
 
-                    <div id="poll-creator" class="poll-creator" style="display: none;">
+                    <div id="file-preview" class="image-preview-container" style="display: none;">
+                        <div class="file-preview-box">
+                            <i class="fas fa-file-alt"></i> <span id="preview-filename">dosya.pdf</span>
+                            <span onclick="clearFile()" class="preview-close-btn" style="position:static; margin-left:10px;">✕</span>
+                        </div>
+                    </div>
+
+                    <div id="poll-creator" class="poll-creator">
                         <input type="text" name="poll_opt1" class="poll-input" placeholder="Seçenek 1">
                         <input type="text" name="poll_opt2" class="poll-input" placeholder="Seçenek 2">
                     </div>
 
                     <div class="create-post-footer">
                         <div style="display: flex; gap: 15px;">
-                            <label for="file-upload" class="file-upload-label" title="Medya Ekle">🖼️ / 🎥</label>
-                            <input id="file-upload" type="file" name="image" accept="image/*,video/*" style="display: none;" onchange="previewImage(this)">
-                            <span class="file-upload-label" title="Anket Ekle" onclick="togglePollCreator()">📊</span>
+                            <label for="file-upload" class="file-upload-label" title="Medya Ekle"><i class="fa-regular fa-image" style="color: #2ecc71;"></i></label>
+                            <input id="file-upload" type="file" name="image" accept="image/*,video/*"
+                                style="display: none;" onchange="previewImage(this)">
+                            <label for="doc-upload" class="file-upload-label" title="Dosya Ekle"><i class="fa-solid fa-paperclip" style="color: #3498db;"></i></label>
+                            <input id="doc-upload" type="file" name="doc" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" style="display: none;" onchange="previewFile(this)">
+                            <span class="file-upload-label" title="Anket Ekle" onclick="togglePollCreator()"><i class="fa-solid fa-square-poll-vertical" style="color: #f1c40f;"></i></span>
                         </div>
-                        <button type="submit" class="btn-vote" style="padding: 8px 25px; border-radius: 20px;">Paylaş</button>
+                        <button type="submit" class="btn-vote"
+                            style="padding: 8px 25px; border-radius: 20px;">Paylaş</button>
                     </div>
                 </form>
             </div>
 
             <div id="feedContainer">
                 {% for post in posts %}
-                <div class="post-card">
+                <div class="post-card" id="post-card-{{ post.id }}">
 
                     {% if post.repost_of %}
                     <div class="repost-header">
@@ -140,10 +193,13 @@
                         <div class="post-author-info">
                             <img src="/static/{{ display_post.author.profile_pic }}" class="post-avatar">
                             <div>
-                                <a href="{{ url_for('user_profile', handle=display_post.author.handle) }}" class="post-author-link">
-                                    <strong class="post-author-name">{{ display_post.author.username or display_post.author.email.split('@')[0] }}</strong>
+                                <a href="{{ url_for('main.user_profile', handle=display_post.author.handle) }}"
+                                    class="post-author-link">
+                                    <strong class="post-author-name">{{ display_post.author.username or
+                                        display_post.author.email.split('@')[0] }}</strong>
                                 </a>
-                                <span class="post-author-dept">{{ display_post.author.department or 'Bölüm Yok' }}</span>
+                                <span class="post-author-dept">{{ display_post.author.department or 'Bölüm Yok'
+                                    }}</span>
                             </div>
                         </div>
 
@@ -151,30 +207,27 @@
                             <small class="post-time">
                                 {{ display_post.date_posted.strftime('%H:%M') }}
                             </small>
-
-                            {% if display_post.author == current_user %}
-                            <div style="position: relative;">
-                                <button type="button" class="comment-menu-btn" onclick="toggleMenu('post-menu-{{ display_post.id }}')">⋮</button>
-                                <div id="post-menu-{{ display_post.id }}" class="comment-dropdown">
-                                    <button type="button" class="comment-action" onclick="openPostEditMode('{{ display_post.id }}')">✏️ Düzenle</button>
-                                    <a href="{{ url_for('delete_post', post_id=display_post.id) }}" class="comment-action delete" onclick="return confirm('Bu gönderiyi silmek istediğine emin misin?')">🗑️ Sil</a>
-                                </div>
-                            </div>
-                            {% endif %}
                         </div>
                     </div>
 
-                    <div id="post-content-{{ display_post.id }}" class="post-text">{{ display_post.content | format_tags }}</div>
+                    <div id="post-content-{{ display_post.id }}" class="post-text">{{ display_post.content | format_tags
+                        }}</div>
 
-                    {% if display_post.image_file %}
+                    {% set ftype = display_post.get_file_type() %}
+                    {% if ftype != 'none' %}
                     <div class="post-image-container">
-                        {% if display_post.is_video() %}
+                        {% if ftype == 'video' %}
                         <video controls playsinline class="post-image" style="background: black;">
                             <source src="/static/post_images/{{ display_post.image_file }}" type="video/mp4">
                             Tarayıcınız video oynatmayı desteklemiyor.
                         </video>
+                        {% elif ftype == 'image' %}
+                        <img src="/static/post_images/{{ display_post.image_file }}" class="post-image"
+                            onclick="openLightbox(this.src)">
                         {% else %}
-                        <img src="/static/post_images/{{ display_post.image_file }}" class="post-image" onclick="openLightbox(this.src)">
+                        <a href="/static/post_images/{{ display_post.image_file }}" target="_blank" class="post-file-link">
+                            <i class="fas fa-file-alt"></i> {{ display_post.image_file.split('_', 1)[1] if '_' in display_post.image_file else display_post.image_file }}
+                        </a>
                         {% endif %}
                     </div>
                     {% endif %}
@@ -183,7 +236,8 @@
                     <div class="poll-container">
                         {% set user_vote = display_post.poll.user_voted(current_user) %}
                         {% for option in display_post.poll.options %}
-                        <div class="poll-option" onclick="votePoll('{{ display_post.poll.id }}', '{{ option.id }}', this)">
+                        <div class="poll-option"
+                            onclick="votePoll('{{ display_post.poll.id }}', '{{ option.id }}', this)">
                             {% if user_vote %}
                             <div class="poll-fill" data-initial-width="{{ option.percentage() }}%"></div>
                             {% endif %}
@@ -199,16 +253,20 @@
                         </div>
                         {% endfor %}
                         <div class="poll-meta">
-                            {{ display_post.poll.total_votes() }} oy • {% if user_vote %}Oy verildi{% else %}Anket devam ediyor{% endif %}
+                            {{ display_post.poll.total_votes() }} oy • {% if user_vote %}Oy verildi{% else %}Anket devam
+                            ediyor{% endif %}
                         </div>
                     </div>
                     {% endif %}
 
                     {% if display_post.author == current_user %}
-                    <form action="{{ url_for('edit_post', post_id=display_post.id) }}" method="POST" id="post-edit-form-{{ display_post.id }}" class="edit-post-form" style="display: none;">
-                        <textarea name="new_content" class="create-post-input" rows="3" style="border:1px solid #ddd; border-radius:10px;">{{ display_post.content }}</textarea>
+                    <form action="{{ url_for('main.edit_post', post_id=display_post.id) }}" method="POST"
+                        id="post-edit-form-{{ display_post.id }}" class="edit-post-form" style="display: none;">
+                        <textarea name="new_content" class="create-post-input" rows="3"
+                            style="border:1px solid #ddd; border-radius:10px;">{{ display_post.content }}</textarea>
                         <div class="edit-actions">
-                            <button type="button" onclick="closePostEditMode('{{ display_post.id }}')" class="btn-cancel">İptal</button>
+                            <button type="button" onclick="closePostEditMode('{{ display_post.id }}')"
+                                class="btn-cancel">İptal</button>
                             <button type="submit" class="btn-vote btn-sm">Kaydet</button>
                         </div>
                     </form>
@@ -216,27 +274,47 @@
 
                     <div class="post-actions">
                         <span class="action-item" onclick="likePost('{{ display_post.id }}', this)">
-                            {% if current_user in display_post.liked_by %}❤️{% else %}🤍{% endif %}
+                            {% if current_user in display_post.liked_by %}
+                            <i class="fa-solid fa-heart" style="color: #ff4757;"></i>
+                            {% else %}
+                            <i class="fa-regular fa-heart"></i>
+                            {% endif %}
                             <span class="like-count">{{ display_post.liked_by|length }}</span>
                         </span>
-                        <span class="action-item" onclick="toggleComments('comment-box-{{ post.id }}')">
-                            💬 {{ display_post.comments|length }}
+                        <span class="action-item js-comment-count-{{ display_post.id }}" onclick="toggleComments('comment-box-{{ post.id }}')">
+                            <i class="fa-regular fa-comment"></i> {{ display_post.comments|length }}
                         </span>
-                        {% if not post.repost_of %}
-                        <span class="action-item" onclick="repostPost('{{ display_post.id }}')">
-                            🔁 Yeniden Gönder
+                        <span class="action-item" onclick="repostPost('{{ display_post.id }}', this)" data-reposted="{{ 'true' if display_post.has_reposted(current_user) else 'false' }}">
+                            {% if display_post.has_reposted(current_user) %}
+                            <i class="fa-solid fa-retweet" style="color: #2ecc71;"></i> <span style="color: #2ecc71;">Yeniden Gönderildi</span>
+                            {% else %}
+                            <i class="fa-solid fa-retweet"></i> Yeniden Gönder
+                            {% endif %}
                         </span>
-                        {% endif %}
                         <span class="action-item" onclick="savePost('{{ display_post.id }}', this)">
                             {% if current_user.has_saved(display_post) %}
-                            <span class="save-icon">✅ Kaydedildi</span>
+                            <span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><i class="fa-solid fa-bookmark"></i> Kaydedildi</span>
                             {% else %}
-                            <span class="save-icon">🔖 Kaydet</span>
+                            <span class="save-icon"><i class="fa-regular fa-bookmark"></i> Kaydet</span>
                             {% endif %}
                         </span>
                         <span class="action-item" onclick="openShareModal('post', '{{ post.id }}')">
-                            <i class="fas fa-paper-plane"></i> Paylaş
+                            <i class="fa-regular fa-paper-plane"></i> Paylaş
                         </span>
+
+                        <!-- MENÜ BURAYA TAŞINDI -->
+                        {% if display_post.author == current_user %}
+                        <div class="action-menu-wrapper">
+                            <button type="button" class="comment-menu-btn"
+                                onclick="toggleMenu('post-menu-{{ display_post.id }}')">⋮</button>
+                            <div id="post-menu-{{ display_post.id }}" class="comment-dropdown" style="bottom: 30px; top: auto; right: 0;">
+                                <button type="button" class="comment-action"
+                                    onclick="openPostEditMode('{{ display_post.id }}')">✏️ Düzenle</button>
+                                <button type="button" class="comment-action delete"
+                                    onclick="deletePostJS('{{ display_post.id }}')">🗑️ Sil</button>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
 
                     <div id="comment-box-{{ post.id }}" class="comment-section" style="display: none;">
@@ -245,28 +323,36 @@
                             <div class="comment-header">
                                 <div>
                                     <strong class="comment-author">{{ comment.author.username or 'Anonim' }}:</strong>
-                                    <span class="comment-content" id="comment-text-{{ comment.id }}">{{ comment.text }}</span>
+                                    <span class="comment-content" id="comment-text-{{ comment.id }}">{{ comment.text
+                                        }}</span>
                                 </div>
                                 <small class="comment-time">{{ comment.date_posted.strftime('%H:%M') }}</small>
                             </div>
 
                             {% if comment.author == current_user %}
-                            <button type="button" class="comment-menu-btn" onclick="toggleMenu('menu-{{ comment.id }}')">⋮</button>
+                            <button type="button" class="comment-menu-btn"
+                                onclick="toggleMenu('menu-{{ comment.id }}')">⋮</button>
                             <div id="menu-{{ comment.id }}" class="comment-dropdown">
-                                <button type="button" class="comment-action" onclick="openEditMode('{{ comment.id }}')">✏️ Düzenle</button>
-                                <a href="{{ url_for('delete_comment', comment_id=comment.id) }}" class="comment-action delete" onclick="return confirm('Bu yorumu silmek istediğine emin misin?')">🗑️ Sil</a>
+                                <button type="button" class="comment-action"
+                                    onclick="openEditMode('{{ comment.id }}')">✏️ Düzenle</button>
+
+                                <button type="button" class="comment-action delete"
+                                    onclick="deleteCommentJS('{{ comment.id }}', '{{ display_post.id }}', this)">🗑️ Sil</button>
                             </div>
-                            <form action="{{ url_for('edit_comment', comment_id=comment.id) }}" method="POST" class="edit-comment-form" id="edit-form-{{ comment.id }}">
+                            <form action="{{ url_for('main.edit_comment', comment_id=comment.id) }}" method="POST"
+                                class="edit-comment-form" id="edit-form-{{ comment.id }}">
                                 <input type="text" name="new_text" value="{{ comment.text }}" class="comment-input">
                                 <button type="submit" class="btn-vote btn-sm">Kaydet</button>
-                                <button type="button" onclick="closeEditMode('{{ comment.id }}')" class="btn-cancel">İptal</button>
+                                <button type="button" onclick="closeEditMode('{{ comment.id }}')"
+                                    class="btn-cancel">İptal</button>
                             </form>
                             {% endif %}
                         </div>
                         {% endfor %}
 
                         <form onsubmit="submitComment(event, '{{ display_post.id }}')" class="comment-form">
-                            <input type="text" name="comment_text" id="comment-input-{{ display_post.id }}" placeholder="Yorumun..." required class="comment-input">
+                            <input type="text" name="comment_text" id="comment-input-{{ display_post.id }}"
+                                placeholder="Yorumun..." required class="comment-input">
                             <button type="submit" class="comment-submit">Gönder</button>
                         </form>
                     </div>
@@ -278,7 +364,8 @@
             {% if not posts %}
             <div class="empty-state">
                 {% if active_tab == 'following' %}
-                <p>Henüz kimseyi takip etmiyorsun. <br> <a href="{{ url_for('explore') }}" style="color:var(--ytu-lacivert); font-weight:bold;">Keşfet</a>'e gidip arkadaşlarını bul!</p>
+                <p>Henüz kimseyi takip etmiyorsun. <br> <a href="{{ url_for('main.explore') }}"
+                        style="color:var(--ytu-lacivert); font-weight:bold;">Keşfet</a>'e gidip arkadaşlarını bul!</p>
                 {% else %}
                 <p>Henüz gönderi yok. Sessizliği bozan ilk kişi sen ol! 🚀</p>
                 {% endif %}
@@ -287,60 +374,70 @@
 
         </main>
 
-        <aside class="right-sidebar sticky-sidebar" style="align-self: flex-start;">
-
-            <div class="trending-card">
-                <div class="trending-header" style="cursor: pointer;" onclick="location.href='/trending'">Neler oluyor?</div>
-
-                {% for tag, count in trending_tags[:3] %}
-                <div class="trending-item-wrapper" id="tag-wrapper-{{ tag }}">
-                    <a href="{{ url_for('explore', q='#' + tag) }}" class="trending-item">
-                        <span class="trending-category">Gündemdekiler</span>
-                        <span class="trending-tag">#{{ tag }}</span>
-                        <span class="trending-count">{{ count }} gönderi</span>
-                    </a>
-                    <div class="trending-more" onclick="toggleTagMenu('{{ tag }}')">⋮
-                        <div id="tag-menu-{{ tag }}" class="comment-dropdown" style="right: 0; top: 30px;">
-                            <button type="button" class="comment-action" onclick="dismissTag('{{ tag }}')">😒 İlgilenmiyorum</button>
+        <aside class="right-sidebar sticky-sidebar">
+            <!-- YENİ GÜNDEM (TRENDING TAGS) WIDGET'I -->
+            <div class="right-widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">🔥 Gündem</h3>
+                </div>
+                <div class="club-list">
+                    {% for tag, count in trending_tags %}
+                    <div class="club-list-item">
+                        <div style="display: flex; flex-direction: column;">
+                            <a href="{{ url_for('main.explore', q='#' + tag) }}" style="text-decoration: none; color: var(--text-color); font-weight: 700; font-size: 0.95rem;">
+                                #{{ tag }}
+                            </a>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">{{ count }} gönderi</span>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-
-                <a href="/trending" class="trending-item" style="color: var(--ytu-lacivert); font-weight: 600; text-align: center; border: none; display:block;">
-                    Daha fazla göster
-                </a>
             </div>
 
-            <div class="club-card" style="border: none; border-radius: 15px; margin-top: 15px; padding: 15px;">
-                <h3 style="font-size: 1.1rem; margin-bottom: 15px; cursor: pointer;" onclick="location.href='/clubs_league'">🏆 Kulüpler Ligi</h3>
+            <div class="right-widget" style="margin-top: 20px;">
+                <div class="widget-header">
+                    <h3 class="widget-title">🏆 Kulüpler Ligi</h3>
+                    <i class="fa-solid fa-chart-line" style="color: var(--ytu-lacivert); opacity: 0.5;"></i>
+                </div>
 
-                {% for club in clubs[:3] %}
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                    <img src="/static/img/{{ club.image }}" class="club-list-img" style="width: 35px; height: 35px; border-radius: 8px;">
-                    <div style="flex: 1;">
-                        <h4 style="font-size: 0.85rem; margin: 0;">{{ club.name }}</h4>
-                        <span style="font-size: 0.7rem; color: var(--text-muted);">{{ club.votes }} Oy</span>
+                <div class="club-list">
+                    {% for club in top_clubs %}
+                    <div class="club-list-item">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="club-rank rank-{{ loop.index }}">{{ loop.index }}</span>
+                            <img src="/static/img/{{ club.logo_file }}" class="club-logo-sm">
+
+                            
+                            <div style="display: flex; flex-direction: column;">
+                                <a href="{{ url_for('main.clubs_full_list') }}" style="text-decoration: none; color: var(--text-color); font-weight: 700; font-size: 0.9rem; line-height: 1.2;">
+                                    {{ club.name }}
+                                </a>
+                                <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ club.votes }} Oy</span>
+                            </div>
+                        </div>
+
+                        {% if current_user.is_authenticated %}
+                        <a href="javascript:void(0)" onclick="oyVer('{{ club.id }}', this)" class="btn-vote-sm">
+                            OY
+                        </a>
+                        {% endif %}
                     </div>
-                    <button type="button" class="btn-vote" style="padding: 4px 10px; font-size: 0.65rem;" onclick="oyVer('{{ club.id }}', this)">OY</button>
+                    {% else %}
+                    <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Henüz veri yok.</div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
 
-                <a href="/clubs_league" style="font-size: 0.85rem; color: var(--ytu-lacivert); font-weight: 600; text-decoration: none; display: block; margin-top: 10px; text-align: center;">
-                    Lig tablosunu gör
-                </a>
+                <div style="padding: 12px; text-align: center; background: var(--bg-light); border-top: 1px solid var(--border-color);">
+                    <a href="{{ url_for('main.clubs_full_list') }}" style="font-size: 0.85rem; color: var(--ytu-lacivert); text-decoration: none; font-weight: 700; display: block; transition: 0.2s;">
+                        Tüm Sıralamayı Gör →
+                    </a>
+                </div>
             </div>
-
         </aside>
 
-    </div>
 
     <button type="button" onclick="topFunction()" id="scrollTopBtn" title="Yukarı Çık">⬆️</button>
 
-    <div id="lightboxModal" class="lightbox" onclick="closeLightbox()">
-        <span class="close-lightbox">&times;</span>
-        <img class="lightbox-content" id="lightboxImage" onclick="event.stopPropagation()">
-    </div>
 
     <div id="storyModal" class="story-view-modal">
         <div id="storyProgressContainer" class="story-progress-container"></div>
@@ -352,11 +449,12 @@
             <span id="storyTime" style="color: #ddd; font-size: 0.8rem; margin-left: 10px;"></span>
         </div>
 
-        <a id="deleteStoryBtn" href="#" class="story-delete-btn" onclick="return confirm('Silmek istediğine emin misin?')">🗑️</a>
+        <a id="deleteStoryBtn" href="#" class="story-delete-btn"
+            onclick="return confirm('Silmek istediğine emin misin?')">🗑️</a>
         <div id="storyViewers" class="story-viewers-badge">👁️ <span id="viewerCount">0</span></div>
 
         <button onclick="shareActiveStory()" class="story-share-btn" title="Hikayeyi Paylaş">
-            <i class="fas fa-paper-plane"></i>
+            <i class="fa-regular fa-paper-plane"></i>
         </button>
 
         <div class="story-media-wrapper">
@@ -364,15 +462,17 @@
             <video id="storyVideo" class="story-full-img" style="display: none;" playsinline webkit-playsinline>
                 Tarayıcınız video oynatmayı desteklemiyor.
             </video>
-            <div class="story-nav-left" onclick="navigateStory('prev')" onmousedown="pauseStory()" onmouseup="resumeStory()" ontouchstart="pauseStory()" ontouchend="resumeStory()"></div>
-            <div class="story-nav-right" onclick="navigateStory('next')" onmousedown="pauseStory()" onmouseup="resumeStory()" ontouchstart="pauseStory()" ontouchend="resumeStory()"></div>
+            <div class="story-nav-left" onclick="navigateStory('prev')" onmousedown="pauseStory()"
+                onmouseup="resumeStory()" ontouchstart="pauseStory()" ontouchend="resumeStory()"></div>
+            <div class="story-nav-right" onclick="navigateStory('next')" onmousedown="pauseStory()"
+                onmouseup="resumeStory()" ontouchstart="pauseStory()" ontouchend="resumeStory()"></div>
         </div>
     </div>
 
-    <script src="/static/script.js"></script>
+    <script src="/static/script.js" defer></script>
 
     <script>
-        document.getElementById('postTextarea').addEventListener('keydown', function(e) {
+        document.getElementById('postTextarea').addEventListener('keydown', function (e) {
             // Shift+Enter ise yeni satır yap, sadece Enter ise gönder
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -383,46 +483,30 @@
         });
     </script>
 
-    <div id="advancedShareModal" class="share-modal-overlay">
-        <div class="share-modal-content">
+    <!-- Share Modal artık navbar_partial.html içinde -->
 
-            <div class="share-header">
-                Paylaş
-                <span onclick="closeAdvancedShare()" style="position: absolute; right: 15px; cursor: pointer;">✕</span>
+    <!-- Mobil Alt Menü (Sadece Mobilde Görünür) -->
+    <div class="mobile-bottom-nav">
+        <a href="/" class="nav-item {{ 'active' if request.path == '/' else '' }}">
+            <i class="fa-solid fa-house"></i>
+        </a>
+        <a href="{{ url_for('main.explore') }}" class="nav-item {{ 'active' if 'explore' in request.path else '' }}">
+            <i class="fa-regular fa-compass"></i>
+        </a>
+        <a href="{{ url_for('main.reels') }}" class="nav-item {{ 'active' if 'reels' in request.path else '' }}">
+            <i class="fa-solid fa-clapperboard"></i>
+        </a>
+        <a href="{{ url_for('main.notifications') }}" class="nav-item {{ 'active' if 'notifications' in request.path else '' }}">
+            <div style="position: relative;">
+                <i class="fa-regular fa-bell"></i>
+                {% if unread_count > 0 %}
+                <span class="mobile-badge" style="position: absolute; top: -5px; right: -5px; background: #ff4757; color: white; font-size: 0.6rem; padding: 2px 5px; border-radius: 50%;">{{ unread_count }}</span>
+                {% endif %}
             </div>
-
-            <div class="share-search-box">
-                <input type="text" id="shareSearchInput" class="share-search-input" placeholder="Arama yap..." onkeyup="filterShareUsers()">
-            </div>
-
-            <div class="share-user-list" id="shareUserListContainer">
-                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-                    Kişiler yükleniyor...
-                </div>
-            </div>
-
-            <div class="share-footer">
-                <div class="share-app-icon" onclick="copyShareLinkPro()">
-                    <div class="app-icon-circle bg-copy"><i class="fas fa-link"></i></div>
-                    <small style="font-size: 0.75rem; color: var(--text-muted);">Kopyala</small>
-                </div>
-
-                <div class="share-app-icon" onclick="shareExternal('whatsapp')">
-                    <div class="app-icon-circle bg-whatsapp"><i class="fab fa-whatsapp"></i></div>
-                    <small style="font-size: 0.75rem; color: var(--text-muted);">WhatsApp</small>
-                </div>
-
-                <div class="share-app-icon" onclick="shareExternal('twitter')">
-                    <div class="app-icon-circle bg-twitter"><i class="fab fa-twitter"></i></div>
-                    <small style="font-size: 0.75rem; color: var(--text-muted);">Twitter</small>
-                </div>
-
-                <div class="share-app-icon" onclick="shareExternal('telegram')">
-                    <div class="app-icon-circle bg-telegram"><i class="fab fa-telegram-plane"></i></div>
-                    <small style="font-size: 0.75rem; color: var(--text-muted);">Telegram</small>
-                </div>
-            </div>
-        </div>
+        </a>
+        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="nav-item {{ 'active' if current_user.handle in request.path else '' }}">
+            <img src="/static/{{ current_user.profile_pic }}" class="nav-avatar-small">
+        </a>
     </div>
 
 </body>

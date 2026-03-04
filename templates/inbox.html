@@ -23,17 +23,27 @@
     <div class="inbox-layout">
         
         <aside class="left-sidebar sticky-sidebar">
-            <div class="club-card" style="border: none; padding: 15px;">
-                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
-                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
-                <a href="{{ url_for('reels') }}" class="sidebar-link"><span>🎬</span> Reels</a>
-                <a href="{{ url_for('notes_pool') }}" class="sidebar-link"><span>📚</span> Not Havuzu</a>
-                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link active-link">
-                    <span>📩</span> Mesajlar
-                    {% if unread_msg_count > 0 %}
-                        <span class="notification-badge" style="background:var(--ytu-lacivert);">{{ unread_msg_count }}</span>
-                    {% endif %}
-                </a>
+            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px 20px; border: 1px solid var(--border-color);">
+                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
+                    <img src="/static/{{ current_user.profile_pic }}" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ytu-lacivert); object-fit: cover; margin-bottom: 12px;">
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{ current_user.username }}</h3>
+                    <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
+                </div>
+
+                <nav style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="{{ url_for('main.index') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
+                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
+                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
+                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
+                        {% if unread_count > 0 %}
+                        <span class="notification-badge">{{ unread_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert);"><i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
+                    </a>
+                </nav>
             </div>
         </aside>
 
@@ -43,13 +53,13 @@
                 <div class="inbox-header">
                     <div class="inbox-title-row">
                         <h2>Mesajlar</h2>
-                        <a href="{{ url_for('explore') }}" class="btn-new-msg">
-                            <i class="fas fa-plus"></i> Yeni Mesaj
+                        <a href="{{ url_for('main.explore') }}" class="btn-new-msg">
+                            <i class="fa-solid fa-plus"></i> Yeni Mesaj
                         </a>
                     </div>
                     
                     <div class="inbox-search-wrapper">
-                        <i class="fas fa-search search-icon-pos"></i>
+                        <i class="fa-solid fa-magnifying-glass search-icon-pos"></i>
                         <input type="text" id="chatSearch" class="inbox-search-input" placeholder="Sohbetlerde veya kişilerde ara..." onkeyup="searchChats()">
                     </div>
                 </div>
@@ -58,7 +68,8 @@
                     
                     {% if conversations %}
                         {% for conv in conversations %}
-                        <a href="{{ url_for('chat', handle=conv.user.handle) }}" class="inbox-item">
+                        <div class="inbox-row">
+                        <a href="{{ url_for('main.chat', handle=conv.user.handle) }}" class="inbox-item {% if conv.unread > 0 %}unread-bg{% endif %}" id="conv-{{ conv.user.id }}">
                             
                             <img src="/static/{{ conv.user.profile_pic }}" class="inbox-avatar" alt="{{ conv.user.username }}">
                             
@@ -95,14 +106,18 @@
                                 </div>
                             </div>
                         </a>
+                        <a href="{{ url_for('main.delete_conversation', partner_id=conv.user.id) }}" class="delete-conv-btn" onclick="return confirm('Bu kişiyle olan tüm mesajlaşmalar silinecek. Emin misin?');" title="Sohbeti Sil">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                        </div>
                         {% endfor %}
                     {% else %}
                         
                         <div class="inbox-empty">
-                            <i class="far fa-paper-plane"></i>
+                            <i class="fa-regular fa-paper-plane"></i>
                             <h3>Henüz Mesajın Yok</h3>
                             <p>Arkadaşlarını bul ve onlara bir "Selam" çak! 👋</p>
-                            <a href="{{ url_for('explore') }}" class="btn-vote" style="margin-top:20px; text-decoration:none;">Kişileri Keşfet</a>
+                                <a href="{{ url_for('main.explore') }}" class="btn-vote" style="margin-top:20px; text-decoration:none;">Kişileri Keşfet</a>
                         </div>
 
                     {% endif %}

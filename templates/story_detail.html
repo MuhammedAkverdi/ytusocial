@@ -115,7 +115,7 @@
         <div class="story-header">
             <img src="/static/{{ story.author.profile_pic }}" class="user-avatar" onerror="this.src='/static/img/default_avatar.png'">
             <div class="user-info">
-                <a href="{{ url_for('user_profile', handle=story.author.handle) }}" class="username">{{ story.author.username }}</a>
+                <a href="{{ url_for('main.user_profile', handle=story.author.handle) }}" class="username">{{ story.author.username }}</a>
                 <span class="timestamp">{{ story.timestamp.strftime('%H:%M') }}</span>
             </div>
         </div>

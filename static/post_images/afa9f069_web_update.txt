@@ -1,0 +1,23 @@
+VS Code'da Kaydet: Kodunu düzenle ve Ctrl + S ile kaydet.
+
+Terminalden Gönder (Push): Terminale şu üçlü komutu yaz:
+
+git add . (Değişiklikleri pakete koy.)
+
+git commit -m "Sitedeki başlık değiştirildi" (Paketin üzerine not yaz.)
+
+git push (Paketi GitHub'a fırlat.)
+
+DigitalOcean'ı İzle: Sen git push yaptığın anda DigitalOcean'daki "Push işleminde otomatik dağıtım" özelliği tetiklenir. Sistem yeni kodu GitHub'dan çeker ve siteyi senin yerine otomatik olarak günceller.
+
+
+
+site_anahtar:i8Hlt/qtzqogmNEsENlBPsVyn4eXNCOTptKtfpTpOlA
+
+Access erişim_anahtarı_kimliği: DO801U3G3VALAG83CM6E
+
+db
+psql 'postgresql://neondb_owner:npg_4ykF5goPZjME@ep-cold-math-aisczebd-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+
+db
+postgresql://doadmin:AVNS_M9K4h44Anf7gucDDghN@sehitler-db-do-user-33023628-0.i.db.ondigitalocean.com:25060/defaultdb?sslmode=require

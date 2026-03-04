@@ -49,6 +49,7 @@
         </div>
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label class="form-label">YTÜ E-posta</label>
                 <input type="email" name="email" placeholder="isim@std.yildiz.edu.tr" required 
@@ -69,7 +70,11 @@
         <div class="auth-footer-link">
             <p style="margin: 0;">
                 Hesabın yok mu? 
-                <a href="{{ url_for('register') }}" class="link-highlight">Kayıt Ol</a>
+                <a href="{{ url_for('auth.register') }}" class="link-highlight">Kayıt Ol</a>
+            </p>
+            <p style="margin: 8px 0 0 0; font-size: 0.9rem;">
+                Şifreni mi unuttun?
+                <a href="{{ url_for('auth.forgot_password') }}" class="link-highlight">Şifre Sıfırla</a>
             </p>
         </div>
     </div>

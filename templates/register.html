@@ -45,6 +45,7 @@
         <h2 class="auth-subtitle">Yıldızlıların Buluşma Noktası</h2>
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label class="form-label">Öğrenci Maili</label>
                 <input type="email" name="email" class="auth-input" placeholder="ogrenci@std.yildiz.edu.tr" 
@@ -63,7 +64,7 @@
         </form>
 
         <div class="auth-footer-link">
-            Zaten hesabın var mı? <a href="{{ url_for('login') }}" class="link-highlight">Giriş Yap</a>
+            Zaten hesabın var mı? <a href="{{ url_for('auth.login') }}" class="link-highlight">Giriş Yap</a>
         </div>
     </div>
 

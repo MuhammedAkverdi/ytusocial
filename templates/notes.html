@@ -15,6 +15,733 @@
             document.documentElement.style.backgroundColor = '#121212';
         }
     </script>
+
+    <style>
+        /* --- NOT HAVUZU ÖZEL STİLLERİ --- */
+        .notes-header {
+            background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.1), rgba(var(--ytu-lacivert-rgb), 0.05));
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notes-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0 0 8px 0;
+        }
+
+        .notes-header p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .btn-upload-hero {
+            background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 4px 15px rgba(var(--ytu-lacivert-rgb), 0.3);
+        }
+
+        .btn-upload-hero:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(var(--ytu-lacivert-rgb), 0.4);
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--ytu-lacivert);
+            color: var(--ytu-lacivert);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7));
+            color: white;
+            border-color: var(--ytu-lacivert);
+        }
+
+        .sort-select {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sort-select:hover {
+            border-color: var(--ytu-lacivert);
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .pro-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pro-card:hover {
+            border-color: var(--ytu-lacivert);
+            box-shadow: 0 10px 30px rgba(var(--ytu-lacivert-rgb), 0.1);
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            position: relative;
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.08), rgba(var(--ytu-lacivert-rgb), 0.02));
+            overflow: hidden;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .card-img:hover {
+            transform: scale(1.05);
+        }
+
+        .card-icon-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: rgba(var(--ytu-lacivert-rgb), 0.3);
+        }
+
+        .badge-type, .badge-file-size {
+            position: absolute;
+            background: var(--ytu-lacivert);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .badge-type {
+            top: 10px;
+            left: 10px;
+        }
+
+        .badge-file-size {
+            top: 10px;
+            right: 10px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.8);
+        }
+
+        .card-body {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-badges {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .dept-tag {
+            background: rgba(var(--ytu-lacivert-rgb), 0.1);
+            color: var(--ytu-lacivert);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0 0 8px 0;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0 0 12px 0;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            flex-grow: 1;
+        }
+
+        .rating-stars {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .rating-stars:hover {
+            opacity: 0.8;
+        }
+
+        .fa-star {
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .star-filled {
+            color: #ffc107;
+        }
+
+        .star-empty {
+            color: var(--border-color);
+        }
+
+        .rating-stars:hover .star-empty {
+            color: rgba(255, 193, 7, 0.5);
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .uploader-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .uploader-info img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .btn-icon:hover {
+            color: var(--ytu-lacivert);
+            background: rgba(var(--ytu-lacivert-rgb), 0.1);
+        }
+
+        .btn-preview, .btn-dl {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* --- SIDEBAR ÖZEL --- */
+        .notes-sidebar {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 25px 20px;
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+            max-height: calc(100vh - 130px);
+            overflow-y: auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+        }
+
+        .notes-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notes-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .notes-sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .notes-sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        .sidebar-profile-section {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-profile-pic {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid var(--ytu-lacivert);
+            object-fit: cover;
+            margin: 0 auto 12px;
+            display: block;
+        }
+
+        .sidebar-profile-name {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0 0 8px 0;
+        }
+
+        .sidebar-profile-score {
+            background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7));
+            color: white;
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .sidebar-nav-item:hover {
+            background-color: rgba(var(--ytu-lacivert-rgb), 0.08);
+            color: var(--ytu-lacivert);
+        }
+
+        .sidebar-nav-item.active {
+            background-color: rgba(var(--ytu-lacivert-rgb), 0.12);
+            color: var(--ytu-lacivert);
+            font-weight: 700;
+        }
+
+        .sidebar-nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* --- RIGHT SIDEBAR --- */
+        .right-sidebar {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 25px;
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+            max-height: calc(100vh - 130px);
+            overflow-y: auto;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+        }
+
+        .right-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .right-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .right-sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .right-sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        .info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.08), rgba(var(--ytu-lacivert-rgb), 0.02));
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.15);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .info-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-stat:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: var(--ytu-lacivert);
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        @keyframes bounce-tip {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* --- MODAL TASARIMI --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.1), rgba(var(--ytu-lacivert-rgb), 0.05));
+            padding: 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .close-modal {
+            color: var(--text-muted);
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+
+        .close-modal:hover {
+            color: var(--ytu-lacivert);
+            transform: rotate(90deg);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .modern-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .modern-input:focus {
+            outline: none;
+            border-color: var(--ytu-lacivert);
+            box-shadow: 0 0 0 3px rgba(var(--ytu-lacivert-rgb), 0.1);
+            background: var(--card-bg);
+        }
+
+        .upload-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 40px;
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg-secondary);
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--ytu-lacivert);
+            background: rgba(var(--ytu-lacivert-rgb), 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--ytu-lacivert);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(var(--ytu-lacivert-rgb), 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(var(--ytu-lacivert-rgb), 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        /* --- TİP MODAL --- */
+        .tip-modal-content {
+            background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.05), rgba(var(--ytu-lacivert-rgb), 0.02));
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.2);
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .tip-modal-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .tip-modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin-bottom: 15px;
+        }
+
+        .tip-modal-text {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .tip-modal-highlight {
+            background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .tip-modal-list {
+            text-align: left;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .tip-modal-list li {
+            margin-bottom: 12px;
+            color: var(--text-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        .tip-modal-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .tip-modal-list strong {
+            color: var(--ytu-lacivert);
+            min-width: 80px;
+        }
+
+        @media (max-width: 1100px) {
+            .notes-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .toolbar {
+                justify-content: center;
+            }
+
+            .notes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .notes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -22,25 +749,30 @@
     {% include 'navbar_partial.html' ignore missing %}
 
     <div class="main-layout">
-        <aside class="left-sidebar sticky-sidebar">
-            <div class="club-card">
-                <div
-                    style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
-                    <img src="/static/{{ current_user.profile_pic }}"
-                        style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ytu-lacivert);">
-                    <h3 style="margin-top: 8px; font-size: 1rem;">{{ current_user.username }}</h3>
-                    <div
-                        style="background: linear-gradient(90deg, #ffc107, #ff9800); color: black; display: inline-block; padding: 3px 10px; border-radius: 15px; font-weight: 800; font-size: 0.75rem; margin-top: 5px;">
-                        ⭐ {{ current_user.score }} Puan
-                    </div>
-                </div>
-                <a href="/" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
-                <a href="{{ url_for('notes_pool') }}" class="sidebar-link active"><span>📚</span> Not Havuzu</a>
-                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
-                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
-                <a href="javascript:history.back()" class="sidebar-link"
-                    style="margin-top: 15px; opacity: 0.7;"><span>⬅️</span> Geri</a>
+        <aside class="notes-sidebar">
+            <div class="sidebar-profile-section">
+                <img src="/static/{{ current_user.profile_pic }}" class="sidebar-profile-pic">
+                <h3 class="sidebar-profile-name">{{ current_user.username }}</h3>
+                <span class="sidebar-profile-score">⭐ {{ current_user.score }} Puan</span>
             </div>
+
+            <nav class="sidebar-nav">
+                <a href="/" class="sidebar-nav-item">
+                    <i class="fas fa-home"></i> Ana Sayfa
+                </a>
+                <a href="{{ url_for('main.notes_pool') }}" class="sidebar-nav-item active">
+                    <i class="fas fa-book"></i> Not Havuzu
+                </a>
+                <a href="{{ url_for('main.explore') }}" class="sidebar-nav-item">
+                    <i class="fas fa-compass"></i> Keşfet
+                </a>
+                <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-nav-item">
+                    <i class="fas fa-envelope"></i> Mesajlar
+                </a>
+                <a href="javascript:history.back()" class="sidebar-nav-item" style="margin-top: 12px; opacity: 0.7;">
+                    <i class="fas fa-arrow-left"></i> Geri
+                </a>
+            </nav>
         </aside>
 
         <main>
@@ -75,11 +807,11 @@
                         class="filter-btn {% if selected_dept=='Ortak Dersler' %}active{% endif %}">📚 Ortak</a>
                 </div>
                 <select class="sort-select" onchange="location = this.value;">
-                    <option value="{{ url_for('notes_pool', dept=selected_dept, sort='newest') }}" {% if
+                    <option value="{{ url_for('main.notes_pool', dept=selected_dept, sort='newest') }}" {% if
                         current_sort=='newest' %}selected{% endif %}>🕒 En Yeniler</option>
-                    <option value="{{ url_for('notes_pool', dept=selected_dept, sort='popular') }}" {% if
+                    <option value="{{ url_for('main.notes_pool', dept=selected_dept, sort='popular') }}" {% if
                         current_sort=='popular' %}selected{% endif %}>🔥 Popüler</option>
-                    <option value="{{ url_for('notes_pool', dept=selected_dept, sort='rated') }}" {% if
+                    <option value="{{ url_for('main.notes_pool', dept=selected_dept, sort='rated') }}" {% if
                         current_sort=='rated' %}selected{% endif %}>⭐ Puan</option>
                 </select>
             </div>
@@ -135,7 +867,7 @@
                                     onclick="openPreview('/static/note_files/{{ note.file_path }}', 'image')"><i
                                         class="fas fa-eye"></i></button>
                                 {% endif %}
-                                <a href="{{ url_for('download_note', note_id=note.id) }}" class="btn-icon btn-dl"
+                                <a href="{{ url_for('main.download_note', note_id=note.id) }}" class="btn-icon btn-dl"
                                     target="_blank"><i class="fas fa-download"></i> {{ note.downloads }}</a>
                             </div>
                         </div>
@@ -149,17 +881,74 @@
                 {% endfor %}
             </div>
         </main>
-        <aside class="right-sidebar"></aside>
+
+        <aside class="right-sidebar">
+            <!-- Minimal İpucu Kartı -->
+            <div id="tipBoxContainer" style="background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.1), rgba(var(--ytu-lacivert-rgb), 0.05)); border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.2); border-radius: 16px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 25px;">
+                <div id="tipBoxToggle" style="display: flex; flex-direction: column; align-items: center;" onclick="toggleTipDetails()">
+                    <div style="font-size: 3rem; margin-bottom: 10px; display: inline-block; animation: bounce-tip 2s infinite;">💡</div>
+                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-color);">İpucu</div>
+                </div>
+                <div id="tipBoxDetails" style="display: none; margin-top: 18px; text-align: left;">
+                    <div style="margin-bottom: 18px;">
+                        <span style="font-weight: bold; font-size: 1.1rem; display: flex; align-items: center;"><i class="fas fa-chart-bar" style="margin-right: 8px;"></i> İstatistikler</span>
+                        <div style="margin-top: 10px; display: flex; justify-content: space-between;">
+                            <span>Toplam Notlar</span>
+                            <span style="color: #ffd700;">{{ notes|length }}</span>
+                        </div>
+                        <div style="margin-top: 6px; display: flex; justify-content: space-between;">
+                            <span>Sizin Yüklemeleriniz</span>
+                            <span style="color: #ffd700;">{{ (notes|selectattr('author.id', 'equalto', current_user.id)|list)|length }}</span>
+                        </div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid #333; margin: 12px 0;">
+                    <div style="margin-bottom: 18px;">
+                        <span style="font-weight: bold; font-size: 1.1rem; display: flex; align-items: center;"><i class="fas fa-info-circle" style="margin-right: 8px;"></i> Bilgi</span>
+                        <div style="margin-top: 10px;">
+                            <span style="font-weight: 500;">Desteklenen Formatlar:</span>
+                            <ul style="margin: 8px 0 0 18px; padding: 0; list-style: none;">
+                                <li><i class="fas fa-file-alt" style="margin-right: 6px;"></i>PDF</li>
+                                <li><i class="fas fa-image" style="margin-right: 6px;"></i>JPG, PNG</li>
+                                <li><i class="fas fa-cube" style="margin-right: 6px;"></i>ZIP</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid #333; margin: 12px 0;">
+                    <div>
+                        <span style="font-weight: bold; font-size: 1.1rem; display: flex; align-items: center;"><i class="fas fa-flag" style="margin-right: 8px;"></i> Kategoriler</span>
+                        <ul style="margin: 8px 0 0 18px; padding: 0; list-style: none;">
+                            <li>🇬🇧 Hazırlık</li>
+                            <li>💻 Bilgisayar</li>
+                            <li>⚙️ Makine</li>
+                            <li>⚡ Elektrik</li>
+                            <li>🏢 Mimarlık</li>
+                            <li>📚 Ortak</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <script>
+                function toggleTipDetails() {
+                    var details = document.getElementById('tipBoxDetails');
+                    if (details.style.display === 'none' || details.style.display === '') {
+                        details.style.display = 'block';
+                    } else {
+                        details.style.display = 'none';
+                    }
+                }
+            </script>
+        </aside>
     </div>
 
     <div id="uploadModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Dosya Yükle</h3>
+                <h3>📤 Dosya Yükle</h3>
                 <span onclick="closeModal()" class="close-modal">&times;</span>
             </div>
 
-            <form action="{{ url_for('upload_note') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ url_for('main.upload_note') }}" method="POST" enctype="multipart/form-data" style="padding: 30px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-grid">
                     <div>
                         <label class="form-label">Başlık</label>
@@ -171,35 +960,58 @@
                     </div>
                 </div>
 
-                <div style="margin-bottom: 12px;">
+                <div style="margin-bottom: 15px;">
                     <label class="form-label">Bölüm</label>
                     <select name="department" class="modern-input" required>
                         <option value="">Seçiniz...</option>
-                        <option value="Hazırlık">Hazırlık</option>
-                        <option value="Bilgisayar">Bilgisayar Müh.</option>
-                        <option value="Makine">Makine Müh.</option>
-                        <option value="Elektrik">Elektrik Müh.</option>
-                        <option value="Mimarlık">Mimarlık</option>
-                        <option value="Ortak Dersler">Ortak Dersler</option>
+                        <option value="Hazırlık">🇬🇧 Hazırlık</option>
+                        <option value="Bilgisayar">💻 Bilgisayar Müh.</option>
+                        <option value="Makine">⚙️ Makine Müh.</option>
+                        <option value="Elektrik">⚡ Elektrik Müh.</option>
+                        <option value="Mimarlık">🏢 Mimarlık</option>
+                        <option value="Ortak Dersler">📚 Ortak Dersler</option>
                     </select>
                 </div>
 
-                <div style="margin-bottom: 12px;">
+                <div style="margin-bottom: 15px;">
                     <label class="form-label">Açıklama</label>
-                    <textarea name="description" class="modern-input" rows="2"
-                        placeholder="İçerik hakkında kısa bilgi..."></textarea>
+                    <textarea name="description" class="modern-input" rows="3" placeholder="İçerik hakkında kısa bilgi..."></textarea>
                 </div>
 
                 <label class="upload-zone" id="drop-area">
                     <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                    <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-color);">Dosya Seç</div>
-                    <div id="file-label" style="color: var(--text-muted); font-size: 0.8rem;">PDF, Resim, ZIP</div>
-                    <input type="file" name="note_file" id="file-input" style="display: none;"
-                        accept="image/*,.pdf,.zip" required onchange="updateFileName(this)">
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-color);">Dosya Seç veya Sürükle</div>
+                    <div id="file-label" style="color: var(--text-muted); font-size: 0.85rem;">PDF, JPG, PNG, ZIP</div>
+                    <input type="file" name="note_file" id="file-input" style="display: none;" accept="image/*,.pdf,.zip" required onchange="updateFileName(this)">
                 </label>
 
-                <button type="submit" class="btn-submit">Yükle (+10 Puan)</button>
+                <button type="submit" class="btn-submit">✨ Yükle (+10 Puan)</button>
             </form>
+        </div>
+    </div>
+
+    <div id="tipModal" class="modal" onclick="if(event.target==this) closeTipModal()">
+        <div class="modal-content tip-modal-content">
+            <div class="tip-modal-icon">💡</div>
+            <h2 class="tip-modal-title">Not Paylaşmak Neden Önemli?</h2>
+            <p class="tip-modal-text">
+                Kampüs topluluğuna katkı sağla, diğer öğrencilere yardım et ve puan kazan!
+            </p>
+            
+            <div class="tip-modal-highlight">
+                🎯 Her başarılı yüklemede +10 Puan!
+            </div>
+
+            <ul class="tip-modal-list">
+                <li><strong>📚 Paylaş:</strong> Hazırladığın notları yükle</li>
+                <li><strong>⭐ Puanlan:</strong> Diğer kullanıcılar oyversin</li>
+                <li><strong>🏆 Kazan:</strong> Puan biriktir ve seviyelen</li>
+                <li><strong>👥 Yardım Et:</strong> Topluluğu güçlendir</li>
+            </ul>
+
+            <button onclick="closeTipModal()" style="margin-top: 25px; padding: 10px 25px; background: var(--ytu-lacivert); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                Anladım! 👍
+            </button>
         </div>
     </div>
 
@@ -214,11 +1026,13 @@
     <script>
         function openModal() { document.getElementById('uploadModal').style.display = 'block'; }
         function closeModal() { document.getElementById('uploadModal').style.display = 'none'; }
+        function openTipModal() { document.getElementById('tipModal').style.display = 'block'; }
+        function closeTipModal() { document.getElementById('tipModal').style.display = 'none'; }
 
         function updateFileName(input) {
             if (input.files && input.files[0]) {
                 document.getElementById('file-label').innerText = "✅ " + input.files[0].name;
-                document.getElementById('drop-area').style.borderColor = "#2ecc71";
+                document.getElementById('drop-area').style.borderColor = var(--ytu-lacivert);
             }
         }
         function openPreview(src, type) {
@@ -255,7 +1069,10 @@
             }
         }
 
-        window.onclick = function (e) { if (e.target == document.getElementById('uploadModal')) closeModal(); }
+        window.onclick = function (e) { 
+            if (e.target == document.getElementById('uploadModal')) closeModal();
+            if (e.target == document.getElementById('tipModal')) closeTipModal();
+        }
     </script>
 </body>
 

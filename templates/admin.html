@@ -18,7 +18,7 @@
 <body class="admin-mode">
 
     <a href="/" class="admin-back-btn">
-        <i class="fas fa-arrow-left"></i> Ana Sayfaya Dön
+        <i class="fa-solid fa-arrow-left"></i> Ana Sayfaya Dön
     </a>
 
     <button onclick="toggleAdminTheme()" id="adminThemeBtn" class="admin-theme-btn" title="Temayı Değiştir">
@@ -39,28 +39,28 @@
 
         <div class="admin-stats-grid">
             <div class="admin-card">
-                <i class="fas fa-users stat-icon"></i>
+                <i class="fa-solid fa-users stat-icon"></i>
                 <div class="stat-info">
                     <h3>{{ total_users }}</h3>
                     <p>Toplam Üye</p>
                 </div>
             </div>
             <div class="admin-card">
-                <i class="fas fa-file-alt stat-icon" style="color: var(--ytu-sari);"></i>
+                <i class="fa-solid fa-file-lines stat-icon" style="color: var(--ytu-sari);"></i>
                 <div class="stat-info">
                     <h3>{{ total_posts }}</h3>
                     <p>Toplam İçerik</p>
                 </div>
             </div>
             <div class="admin-card">
-                <i class="fas fa-flag stat-icon" style="color: #e74c3c;"></i>
+                <i class="fa-solid fa-flag stat-icon" style="color: #e74c3c;"></i>
                 <div class="stat-info">
                     <h3>{{ reported_posts|length }}</h3>
                     <p>Bekleyen Şikayet</p>
                 </div>
             </div>
             <div class="admin-card">
-                <i class="fas fa-bolt stat-icon" style="color: #2ecc71;"></i>
+                <i class="fa-solid fa-bolt stat-icon" style="color: #2ecc71;"></i>
                 <div class="stat-info">
                     <h3>{{ active_count }}</h3>
                     <p>Online Kullanıcı</p>
@@ -107,16 +107,98 @@
                                 <span class="badge bg-red" style="font-size: 1rem;">{{ post.report_count }} 🚩</span>
                             </td>
                             <td style="display: flex; gap: 5px; flex-wrap: wrap;">
-                                <a href="{{ url_for('admin_delete_content', type='post', id=post.id) }}" class="btn-action btn-ban" onclick="return confirm('Bu içerik silinecek!')">🗑️ Sil</a>
-                                <a href="{{ url_for('admin_ban_user', user_id=post.author.id, action='temp_24h') }}" class="btn-action btn-view">🕒 24s</a>
-                                <a href="{{ url_for('admin_ban_user', user_id=post.author.id, action='perm') }}" class="btn-action btn-ban" style="background: black; color: white;" onclick="return confirm('Kullanıcı kalıcı olarak engellenecek!')">🚫 PERMA</a>
+                                <a href="{{ url_for('admin.admin_delete_content', type='post', id=post.id) }}" class="btn-action btn-ban" onclick="return confirm('Bu içerik silinecek!')">🗑️ Sil</a>
+                                <a href="{{ url_for('admin.admin_ban_user', user_id=post.author.id, action='temp_24h') }}" class="btn-action btn-view">🕒 24s</a>
+                                <a href="{{ url_for('admin.admin_ban_user', user_id=post.author.id, action='perm') }}" class="btn-action btn-ban" style="background: black; color: white;" onclick="return confirm('Kullanıcı kalıcı olarak engellenecek!')">🚫 PERMA</a>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                <i class="fas fa-check-circle" style="font-size: 3rem; color: #2ecc71; margin-bottom: 10px;"></i><br>
+                                <i class="fa-solid fa-circle-check" style="font-size: 3rem; color: #2ecc71; margin-bottom: 10px;"></i><br>
                                 Tertemiz! Hiç şikayet yok. 🦅
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="admin-section-title" style="margin-top: 30px;">📬 Gelen Geri Bildirimler</h2>
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Kullanıcı</th>
+                            <th>Tür</th>
+                            <th>Mesaj</th>
+                            <th>Tarih</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fb in feedbacks %}
+                        <tr>
+                            <td><b>{{ fb.user.username }}</b></td>
+                            <td>
+                                {% if fb.type == 'Öneri' %}
+                                <span class="badge" style="background: #f1c40f; color: black; padding: 5px 10px; border-radius: 10px;">💡 Öneri</span>
+                                {% elif fb.type == 'Şikayet' %}
+                                <span class="badge" style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 10px;">🚨 Şikayet</span>
+                                {% else %}
+                                <span class="badge" style="background: #3498db; color: white; padding: 5px 10px; border-radius: 10px;">📌 Diğer</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ fb.message }}</td>
+                            <td>{{ fb.date_sent.strftime('%d %b %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.admin_delete_content', type='feedback', id=fb.id) }}" class="btn-action btn-ban" onclick="return confirm('Bu geri bildirimi silmek istediğine emin misin?')">🗑️</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">Henüz geri bildirim yok.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 class="admin-section-title" style="margin-top: 30px;">👥 Kullanıcı Yönetimi</h2>
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Kullanıcı</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <img src="/static/{{ user.profile_pic }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                    <div>
+                                        <b>{{ user.username }}</b><br>
+                                        <small style="color:var(--text-muted);">{{ user.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if user.is_banned %}
+                                <span class="badge bg-red" style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 10px;">Yasaklı</span>
+                                {% else %}
+                                <span class="badge bg-green" style="background: #2ecc71; color: white; padding: 5px 10px; border-radius: 10px;">Aktif</span>
+                                {% endif %}
+                            </td>
+                            <td style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                {% if user.is_banned %}
+                                <a href="{{ url_for('admin.admin_ban_user', user_id=user.id, action='unban') }}" class="btn-action" style="background: #2ecc71; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;">Yasağı Kaldır</a>
+                                {% else %}
+                                <a href="{{ url_for('admin.admin_ban_user', user_id=user.id, action='perm') }}" class="btn-action" style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('Kullanıcı kalıcı olarak engellenecek!')">Banla</a>
+                                {% endif %}
+                                <a href="{{ url_for('admin.admin_reset_bio', user_id=user.id) }}" class="btn-action" style="background: #f39c12; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('Bio sıfırlansın mı?')">Bio Sıfırla</a>
+                                <a href="{{ url_for('admin.admin_delete_user_posts', user_id=user.id) }}" class="btn-action" style="background: #34495e; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('Tüm postlar silinsin mi?')">Postları Sil</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -126,7 +208,7 @@
 
             <h2 class="admin-section-title">🛠️ Hızlı Kullanıcı Oluştur</h2>
             <div class="admin-card" style="display: block;">
-                <form action="{{ url_for('admin_create_user') }}" method="POST" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
+                <form action="{{ url_for('admin.admin_create_user') }}" method="POST" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
                     
                     <div>
                         <label style="font-weight: bold; font-size: 0.8rem; color: var(--text-muted);">E-Mail</label>
@@ -165,6 +247,34 @@
                 <small style="color: var(--text-muted); margin-top: 10px; display: block;">* Bu panelden oluşturulan kullanıcılar otomatik olarak <b>Onaylı (Verified)</b> sayılır.</small>
             </div>
             
+            <h2 class="admin-section-title" style="margin-top: 30px;">🏆 Yeni Kulüp Oluştur</h2>
+            <div class="admin-card" style="display:block;">
+                <form action="{{ url_for('admin.admin_create_club') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Kulüp Adı</label>
+                        <input type="text" name="name" class="modern-input" required placeholder="Örn: IEEE YTU">
+                    </div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <label class="form-label">Açıklama</label>
+                        <textarea name="description" class="modern-input" rows="3" required placeholder="Kulüp hakkında kısa bilgi..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Başkan Kullanıcı Adı</label>
+                        <input type="text" name="leader_username" class="modern-input" placeholder="Lider olacak kişinin kullanıcı adı">
+                    </div>
+
+                    <div>
+                        <label class="form-label">Kulüp Logosu</label>
+                        <input type="file" name="logo" class="file-input">
+                    </div>
+
+                    <button type="submit" class="btn-submit" style="grid-column: 1 / -1;">Kulübü Oluştur</button>
+                </form>
+            </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -190,7 +300,7 @@
         Created By Ebu Ubeyde &copy; 2026
     </div>
 
-    <script src="/static/script.js"></script>
+    <script src="/static/script.js" defer></script>
     <script>
         // Sayfa Yüklendiğinde İkonu Ayarla
         document.addEventListener("DOMContentLoaded", () => {

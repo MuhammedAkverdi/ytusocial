@@ -236,13 +236,13 @@
         </div>
 
         <div class="filter-container">
-            <a href="{{ url_for('adverts') }}" class="filter-btn {{ 'active' if not selected_cat else '' }}">Tümü</a>
-            <a href="{{ url_for('adverts', category='Proje Arkadaşı') }}" class="filter-btn {{ 'active' if selected_cat == 'Proje Arkadaşı' else '' }}">🛠️ Proje Arkadaşı</a>
-            <a href="{{ url_for('adverts', category='Ders/Not') }}" class="filter-btn {{ 'active' if selected_cat == 'Ders/Not' else '' }}">📚 Ders/Not</a>
-            <a href="{{ url_for('adverts', category='Ev/Oda') }}" class="filter-btn {{ 'active' if selected_cat == 'Ev/Oda' else '' }}">🏠 Ev/Oda</a>
-            <a href="{{ url_for('adverts', category='İkinci El') }}" class="filter-btn {{ 'active' if selected_cat == 'İkinci El' else '' }}">🛒 İkinci El</a>
-            <a href="{{ url_for('adverts', category='Etkinlik') }}" class="filter-btn {{ 'active' if selected_cat == 'Etkinlik' else '' }}">🎉 Etkinlik</a>
-            <a href="{{ url_for('adverts', category='Diğer') }}" class="filter-btn {{ 'active' if selected_cat == 'Diğer' else '' }}">📌 Diğer</a>
+            <a href="{{ url_for('main.adverts') }}" class="filter-btn {{ 'active' if not selected_cat else '' }}">Tümü</a>
+            <a href="{{ url_for('main.adverts', category='Proje Arkadaşı') }}" class="filter-btn {{ 'active' if selected_cat == 'Proje Arkadaşı' else '' }}">🛠️ Proje Arkadaşı</a>
+            <a href="{{ url_for('main.adverts', category='Ders/Not') }}" class="filter-btn {{ 'active' if selected_cat == 'Ders/Not' else '' }}">📚 Ders/Not</a>
+            <a href="{{ url_for('main.adverts', category='Ev/Oda') }}" class="filter-btn {{ 'active' if selected_cat == 'Ev/Oda' else '' }}">🏠 Ev/Oda</a>
+            <a href="{{ url_for('main.adverts', category='İkinci El') }}" class="filter-btn {{ 'active' if selected_cat == 'İkinci El' else '' }}">🛒 İkinci El</a>
+            <a href="{{ url_for('main.adverts', category='Etkinlik') }}" class="filter-btn {{ 'active' if selected_cat == 'Etkinlik' else '' }}">🎉 Etkinlik</a>
+            <a href="{{ url_for('main.adverts', category='Diğer') }}" class="filter-btn {{ 'active' if selected_cat == 'Diğer' else '' }}">📌 Diğer</a>
         </div>
 
         <div class="ad-grid">
@@ -264,7 +264,7 @@
                         onclick="openEditModal(this)">
                         <i class="fas fa-edit"></i> Düzenle
                     </button>
-                    <a href="{{ url_for('delete_advert', adv_id=ad.id) }}" class="delete-btn" onclick="return confirm('Bu ilanı silmek istediğine emin misin?')">
+                    <a href="{{ url_for('main.delete_advert', adv_id=ad.id) }}" class="delete-btn" onclick="return confirm('Bu ilanı silmek istediğine emin misin?')">
                         <i class="fas fa-trash-alt"></i> Sil
                     </a>
                 </div>
@@ -281,7 +281,7 @@
                 {% endif %}
 
                 <div class="ad-footer">
-                    <a href="{{ url_for('user_profile', handle=ad.author.handle) }}" class="ad-author">
+                    <a href="{{ url_for('main.user_profile', handle=ad.author.handle) }}" class="ad-author">
                         <img src="/static/{{ ad.author.profile_pic }}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
                         <span>{{ ad.author.username }}</span>
                     </a>
@@ -317,7 +317,8 @@
             
             <h3 id="modalTitle" style="margin-bottom: 30px; color: var(--text-color); text-align: center; font-size: 1.5rem;">📝 Yeni İlan Oluştur</h3>
             
-            <form id="adForm" action="{{ url_for('adverts') }}" method="POST">
+            <form id="adForm" action="{{ url_for('main.adverts') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div style="margin-bottom: 18px;">
                     <label>İlan Başlığı</label>
                     <input type="text" name="title" id="inpTitle" required class="modern-input" placeholder="Örn: Teknofest Ekibi Kuruyoruz">
@@ -376,7 +377,7 @@
         
         // Yeni İlan Modu (Sıfırla ve Aç)
         function openCreateModal() {
-            document.getElementById('adForm').action = "{{ url_for('adverts') }}"; // Ekleme URL'si
+            document.getElementById('adForm').action = "{{ url_for('main.adverts') }}"; // Ekleme URL'si
             document.getElementById('adForm').reset(); // Kutuları temizle
             document.getElementById('modalTitle').innerText = "📝 Yeni İlan Oluştur";
             document.getElementById('btnSubmit').innerHTML = 'Yayınla <i class="fas fa-check-circle" style="margin-left: 8px;"></i>';

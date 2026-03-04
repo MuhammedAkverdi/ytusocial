@@ -8,6 +8,7 @@
     --bg-light: #fafafa;
     --white: #ffffff;
     --shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    --ytu-lacivert-rgb: 0, 51, 102; /* RGB Tanımı eklendi */
 
     /* Varsayılan (Light Mode) */
     --bg-color: #fafafa;
@@ -30,7 +31,6 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     line-height: 1.6;
-    transition: background-color 0.3s, color 0.3s;
 }
 
 a {
@@ -56,7 +56,6 @@ a {
     /* Kenarlara %6 boşluk (İdeal Ayar) */
     z-index: 1000;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-    transition: background-color 0.3s;
 }
 
 .nav-items {
@@ -159,6 +158,26 @@ a {
     position: sticky;
     top: 90px;
     height: fit-content;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.sticky-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sticky-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sticky-sidebar::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.sticky-sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 }
 
 .sidebar-link {
@@ -174,11 +193,17 @@ a {
     margin-bottom: 5px;
 }
 
-.sidebar-link:hover,
-.sidebar-link.active-link {
-    background-color: var(--link-hover);
+.sidebar-link:hover {
+    background-color: rgba(var(--ytu-lacivert-rgb), 0.08);
     color: var(--ytu-lacivert);
     transform: translateX(5px);
+}
+
+.sidebar-link.active-link {
+    background-color: rgba(var(--ytu-lacivert-rgb), 0.12);
+    color: var(--ytu-lacivert);
+    transform: translateX(5px);
+    font-weight: 700;
 }
 
 /* =========================================
@@ -576,16 +601,14 @@ a {
 
 /* KIRMIZI BİLDİRİM ROZETİ */
 .notification-badge {
-    background-color: #e74c3c;
+    background-color: #ff4757;
     color: white;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 50%;
-    margin-left: 8px;
-    vertical-align: middle;
-    box-shadow: 0 2px 5px rgba(231, 76, 60, 0.4);
-    animation: pulse 2s infinite;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: auto;
+    display: inline-block;
 }
 
 @keyframes pulse {
@@ -606,7 +629,7 @@ a {
    7. DARK MODE (GECE MODU) AYARLARI
    ========================================= */
 
-body.dark-mode {
+html.dark-mode {
     --bg-color: #121212;
     --card-bg: #1e1e1e;
     --text-color: #e0e0e0;
@@ -614,10 +637,11 @@ body.dark-mode {
     --border-color: #333;
     --input-bg: #2c2c2c;
     --link-hover: #333;
+    --bg-light: #252525;
 }
 
 /* Navbar Logo Rengi */
-body.dark-mode .nav-logo {
+html.dark-mode .nav-logo {
     color: #fff !important;
 }
 
@@ -635,23 +659,28 @@ body.dark-mode .nav-logo {
     background-color: #ffffff;
 }
 
-body.dark-mode .notif-unread {
+html.dark-mode .notif-unread {
     background-color: #1e252b !important;
     border-left: 4px solid var(--ytu-lacivert);
 }
 
-body.dark-mode .notif-read {
+html.dark-mode .notif-read {
     background-color: #1e1e1e !important;
 }
 
 /* Zorla Renk Uygulama (Kaçak style varsa ezer) */
-body.dark-mode .club-card,
-body.dark-mode .post-card,
-body.dark-mode .navbar,
-body.dark-mode .dropdown-content {
+html.dark-mode .club-card,
+html.dark-mode .post-card,
+html.dark-mode .navbar,
+html.dark-mode .dropdown-content {
     background-color: var(--card-bg) !important;
     color: var(--text-color) !important;
     border-color: var(--border-color) !important;
+}
+/* Kulüpler Ligi Karanlık Mod Yazı Rengi Düzeltmesi */
+html.dark-mode .club-list-item a,
+html.dark-mode .club-list-item span {
+    color: var(--text-color);
 }
 
 /* =========================================
@@ -663,7 +692,7 @@ body.admin-mode {
     background-color: #f4f6f9; /* Kurumsal Gri */
     color: #333;
 }
-body.dark-mode.admin-mode {
+html.dark-mode body.admin-mode {
     background-color: #121212;
     color: #e0e0e0;
 }
@@ -739,7 +768,7 @@ body.dark-mode.admin-mode {
     border-left: 5px solid var(--ytu-sari);
     padding-left: 15px;
 }
-body.dark-mode .admin-section-title { color: var(--ytu-sari); border-color: var(--ytu-lacivert); }
+html.dark-mode .admin-section-title { color: var(--ytu-sari); border-color: var(--ytu-lacivert); }
 
 .admin-table-wrapper {
     background: var(--card-bg);
@@ -970,6 +999,7 @@ video.post-image {
     font-size: 0.9rem;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
+    align-items: center; /* İkonları ortala */
 }
 
 .action-item {
@@ -977,6 +1007,18 @@ video.post-image {
     display: flex;
     align-items: center;
     gap: 5px;
+}
+
+/* Menü butonunu en sağa itmek için */
+.action-menu-wrapper {
+    margin-left: auto;
+    position: relative;
+}
+
+/* Menü butonu hizalama düzeltmesi */
+.action-menu-wrapper .comment-menu-btn {
+    position: static;
+    margin-top: -2px;
 }
 
 /* YENİ EKLENDİ: Kaydet Butonu için Hover Efekti */
@@ -1081,11 +1123,11 @@ video.post-image {
     color: var(--text-muted);
 }
 
-body.dark-mode .profile-name {
+html.dark-mode .profile-name {
     color: var(--text-color);
 }
 
-body.dark-mode .btn-unfollow {
+html.dark-mode .btn-unfollow {
     background-color: #3e2723;
     color: #ffcdd2;
 }
@@ -1163,11 +1205,11 @@ body.dark-mode .btn-unfollow {
     font-weight: bold;
 }
 
-body.dark-mode .link-follow {
+html.dark-mode .link-follow {
     color: #4da3ff;
 }
 
-body.dark-mode .link-unfollow {
+html.dark-mode .link-unfollow {
     color: #ff6b6b;
 }
 
@@ -1304,7 +1346,7 @@ body.dark-mode .link-unfollow {
     font-size: 0.9rem;
 }
 
-body.dark-mode .auth-title {
+html.dark-mode .auth-title {
     color: var(--ytu-lacivert);
 }
 
@@ -1365,11 +1407,11 @@ body.dark-mode .auth-title {
     padding-top: 20px;
 }
 
-body.dark-mode .verify-title {
+html.dark-mode .verify-title {
     color: var(--ytu-sari);
 }
 
-body.dark-mode .verify-email {
+html.dark-mode .verify-email {
     color: var(--text-color);
 }
 
@@ -1425,11 +1467,11 @@ body.dark-mode .verify-email {
     text-decoration: none;
 }
 
-body.dark-mode .auth-logo {
+html.dark-mode .auth-logo {
     color: #fff;
 }
 
-body.dark-mode .link-highlight {
+html.dark-mode .link-highlight {
     color: #4da3ff;
 }
 
@@ -1536,7 +1578,7 @@ body.dark-mode .link-highlight {
     color: var(--text-muted);
 }
 
-body.dark-mode .explore-name {
+html.dark-mode .explore-name {
     color: var(--text-color);
 }
 
@@ -1613,7 +1655,7 @@ body.dark-mode .explore-name {
     object-fit: cover;
 }
 
-body.dark-mode .file-upload-label {
+html.dark-mode .file-upload-label {
     color: #4da3ff;
 }
 
@@ -1887,14 +1929,16 @@ body.dark-mode .file-upload-label {
 
 /* --- CHAT EKRANI TASARIMI --- */
 .chat-card {
-    max-width: 600px;
+    width: 100%;
+    max-width: 100%;
     padding: 0;
     /* İçeriği kenarlara yapıştır */
     overflow: hidden;
-    height: 85vh;
-    /* Ekranın %85'i kadar olsun */
+    height: calc(100vh - 120px);
     display: flex;
     flex-direction: column;
+    margin: 0;
+    border: 1px solid var(--border-color);
 }
 
 .chat-header-bar {
@@ -2037,12 +2081,12 @@ body.dark-mode .file-upload-label {
 }
 
 /* Gece Modu Ayarı */
-body.dark-mode .chat-area {
+html.dark-mode .chat-area {
     background-color: #0f0f0f;
     /* Sohbet zemini koyu olsun */
 }
 
-body.dark-mode .chat-username {
+html.dark-mode .chat-username {
     color: var(--ytu-sari);
 }
 
@@ -2094,13 +2138,13 @@ body.dark-mode .chat-username {
 }
 
 /* Gece Modu Uyumu */
-body.dark-mode .unread-bg {
+html.dark-mode .unread-bg {
     background-color: #1a2634 !important;
     /* Koyu lacivert */
     border-left: 4px solid var(--ytu-sari) !important;
 }
 
-body.dark-mode .avatar-badge {
+html.dark-mode .avatar-badge {
     border-color: #1e1e1e;
 }
 
@@ -2227,9 +2271,14 @@ body.dark-mode .avatar-badge {
 }
 
 .story-full-img {
-    max-height: 80vh;
-    max-width: 100%;
-    border-radius: 10px;
+    width: 100%;
+    height: 100%;
+    max-width: 500px; /* Instagram Web Boyutu */
+    max-height: 90vh;
+    object-fit: contain; /* Resmi bozmadan kutuya sığdır */
+    background: #000; /* Kenar boşlukları siyah olsun */
+    border-radius: 12px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.8); /* Öne çıkması için gölge */
 }
 
 .story-header-info {
@@ -2244,12 +2293,21 @@ body.dark-mode .avatar-badge {
 .close-story {
     position: absolute;
     top: 20px;
-    right: 30px;
+    right: 20px;
     color: white;
-    font-size: 40px;
+    background: rgba(255, 255, 255, 0.15);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     cursor: pointer;
     z-index: 10001;
+    transition: 0.2s;
 }
+.close-story:hover { background: rgba(255, 255, 255, 0.3); }
 
 /* Süre Çubuğu (Animasyonlu) */
 .story-progress-bar {
@@ -2312,10 +2370,16 @@ body.dark-mode .avatar-badge {
     text-decoration: none;
     display: none;
     /* JS ile açılacak */
-    background: rgba(0, 0, 0, 0.5);
-    padding: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 45px;
+    height: 45px;
+    display: flex; align-items: center; justify-content: center;
     border-radius: 50%;
+    transition: 0.2s;
 }
+.story-delete-btn:hover { background: rgba(255, 255, 255, 0.3); }
 
 /* Görenler Rozeti */
 .story-viewers-badge {
@@ -2325,9 +2389,12 @@ body.dark-mode .avatar-badge {
     color: white;
     font-size: 0.9rem;
     z-index: 10002;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 5px 10px;
-    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 600;
     display: none;
     /* JS ile açılacak */
 }
@@ -2375,10 +2442,21 @@ body.dark-mode .avatar-badge {
 
 /* --- ANKET SİSTEMİ TASARIMI --- */
 .poll-creator {
-    margin-top: 10px;
-    padding: 10px;
+    margin-top: 0;
+    padding: 0 10px;
     background: var(--bg-color);
     border-radius: 10px;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.poll-creator.active {
+    margin-top: 10px;
+    padding: 10px;
+    max-height: 200px;
+    opacity: 1;
 }
 
 .poll-input {
@@ -2638,7 +2716,7 @@ body.dark-mode .avatar-badge {
     backdrop-filter: blur(10px);
 }
 
-body.dark-mode .incoming-call-box {
+html.dark-mode .incoming-call-box {
     background: rgba(30, 30, 30, 0.95);
     border: 1px solid #444;
 }
@@ -2741,6 +2819,58 @@ body.dark-mode .incoming-call-box {
     border-radius: 20px;
 }
 
+/* Dosya Mesajı Stili */
+.file-msg-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+    background: rgba(0,0,0,0.05);
+    padding: 10px;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+.file-msg-link:hover {
+    background: rgba(0,0,0,0.1);
+}
+.file-msg-icon { font-size: 1.5rem; color: var(--ytu-lacivert); }
+.file-msg-name { font-weight: 600; font-size: 0.9rem; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-msg-download { font-size: 1rem; color: var(--text-muted); margin-left: auto; }
+
+.bubble-sent .file-msg-icon { color: white; }
+.bubble-sent .file-msg-download { color: rgba(255,255,255,0.8); }
+
+/* Sohbet Ataç Butonu */
+.chat-attach-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+.chat-attach-btn:hover {
+    color: var(--ytu-lacivert);
+    transform: scale(1.1);
+}
+
+.chat-image {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: block;
+}
+.chat-image:hover {
+    opacity: 0.9;
+}
+
 /* =========================================
    24. ONLINE DURUM GÖSTERGESİ (YEŞİL NOKTA)
    ========================================= */
@@ -2796,133 +2926,7 @@ body.dark-mode .incoming-call-box {
     }
 }
 
-/* =========================================
-   25. YTU REELS (TAM EKRAN SIĞDIRMA MODU)
-   ========================================= */
-
-/* Arka planı simsiyah yap */
-body.reels-mode {
-    background-color: #000 !important;
-    margin: 0;
-    overflow: hidden;
-    /* Sayfa kaydırmasını kapat, sadece container kayacak */
-}
-
-.reels-container {
-    height: 100vh;
-    width: 100%;
-    overflow-y: scroll;
-    scroll-snap-type: y mandatory;
-    /* Kaydırınca videoya yapışma efekti */
-    background-color: #000;
-}
-
-/* Scrollbar'ı gizle */
-.reels-container::-webkit-scrollbar {
-    display: none;
-}
-
-.reels-container {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-.reel-item {
-    height: 100vh;
-    width: 100%;
-    scroll-snap-align: start;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #000;
-}
-
-.reel-video {
-    width: 100%;
-    height: 100%;
-    /* BURASI DEĞİŞTİ: 'cover' yerine 'contain' yaptık. */
-    /* Artık videoyu kesmeden ekranın içine maksimum boyutta sığdıracak */
-    object-fit: contain;
-}
-
-/* Geri Dön Butonu (Sabit Sol Üst) */
-.reels-back-btn {
-    position: fixed;
-    top: 25px;
-    left: 25px;
-    z-index: 1000;
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 10px 20px;
-    border-radius: 30px;
-    backdrop-filter: blur(10px);
-    transition: 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.reels-back-btn:hover {
-    background: rgba(255, 255, 255, 0.4);
-}
-
-/* Sağ Menü (Kalp, Yorum) */
-.reel-sidebar {
-    position: absolute;
-    right: 20px;
-    bottom: 100px;
-    /* Biraz yukarı aldık */
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    z-index: 20;
-    align-items: center;
-    /* Butonların arkasına hafif gölge atalım ki video beyazsa görünsün */
-    filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
-}
-
-.reel-action {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    transition: transform 0.2s;
-    color: white;
-}
-
-.reel-action:active {
-    transform: scale(0.8);
-}
-
-/* Alt Bilgi (İsim, Açıklama) */
-.reel-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 20;
-    text-align: left;
-    /* Yazıların altına siyah degrade attık ki video açık renkse yazı okunsun */
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
-    padding: 40px 20px 30px 20px;
-}
-
-.reel-follow-btn {
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 15px;
-    font-size: 0.75rem;
-    text-decoration: none;
-    background: rgba(0, 0, 0, 0.3);
-    margin-left: 10px;
-}
-
-/* X TARZI TRENDING KUTUSU */
-.trending-card {
+trending-card {
     background-color: var(--card-bg);
     /* Dark mode uyumlu */
     border-radius: 16px;
@@ -2951,7 +2955,7 @@ body.reels-mode {
     background-color: rgba(0, 0, 0, 0.05);
 }
 
-body.dark-mode .trending-item:hover {
+html.dark-mode .trending-item:hover {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
@@ -3081,7 +3085,7 @@ body.dark-mode .trending-item:hover {
     font-weight: 600;
 }
 
-body.dark-mode .badge-dept {
+html.dark-mode .badge-dept {
     background: #333;
     color: #ddd;
 }
@@ -3141,6 +3145,7 @@ body.reels-mode {
     scrollbar-width: none;
     /* Firefox scrollbar gizle */
     position: relative;
+    scroll-behavior: smooth;
 }
 
 .reels-container::-webkit-scrollbar {
@@ -3154,20 +3159,22 @@ body.reels-mode {
     height: 100vh;
     /* Tam ekran yükseklik */
     width: 100%;
-    max-width: 500px;
+    max-width: 420px;
     /* Mobilde tam, masaüstünde dar */
     margin: 0 auto;
     /* Ortala */
     scroll-snap-align: start;
+    scroll-snap-stop: always;
     /* Kaydırınca başa yapış */
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     background: #000;
-    border-right: 1px solid #222;
-    /* Masaüstü için sınır */
-    border-left: 1px solid #222;
+    border: 1px solid #262626;
+    border-top: none;
+    border-bottom: 1px solid #262626;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
 }
 
 /* Video */
@@ -3297,6 +3304,14 @@ body.reels-mode {
     text-decoration: none;
 }
 
+/* Reels Kullanıcı Linki */
+.reel-user-link {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 /* =========================================
    28. REELS GÜNCELLEME (YORUM & PAYLAŞ MODALLARI)
    ========================================= */
@@ -3334,6 +3349,33 @@ body.reels-mode {
     height: 45px;
     border: 2px solid var(--ytu-sari);
     /* Sarı çerçeve ile patlasın */
+}
+
+/* Reels Açıklama Kısaltma */
+.reel-desc.collapsed {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.read-more-btn {
+    color: #aaa;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 5px;
+    display: inline-block;
+    font-weight: 600;
+}
+
+/* Takip Et Butonu Başarılı Animasyonu */
+.followed-success {
+    background: #2ecc71 !important;
+    border-color: #2ecc71 !important;
+    color: white !important;
+    width: 35px !important;
+    padding: 0 !important;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 
 /* MODAL (Yorum ve Paylaş için Ortak Zemin) */
@@ -3496,7 +3538,7 @@ body.reels-mode {
     border-color: var(--ytu-lacivert);
 }
 
-body.dark-mode .admin-theme-btn {
+html.dark-mode .admin-theme-btn {
     background: #333;
     color: #ffcc00; /* Sarı Güneş */
     border-color: #555;
@@ -3886,6 +3928,7 @@ body.dark-mode .admin-theme-btn {
     bottom: 20px;
     right: 75px; /* Sağ alt köşe */
     background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
     border: none;
     color: white;
     width: 45px;
@@ -3907,3 +3950,1039 @@ body.dark-mode .admin-theme-btn {
     font-size: 1.4rem; /* Biraz büyütelim */
 }
 
+/* Sayfa yüklendikten sonra geçişleri aktif et (Flicker önleme) */
+body.transition-active,
+body.transition-active .navbar {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* =========================================
+   32. MOBİL ALT MENÜ (BOTTOM NAVIGATION)
+   ========================================= */
+.mobile-bottom-nav {
+    display: none; /* Masaüstünde gizli */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 65px;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    justify-content: space-around;
+    align-items: center;
+    z-index: 9999;
+    padding-bottom: env(safe-area-inset-bottom); /* iPhone X+ uyumu */
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+
+.mobile-bottom-nav .nav-item {
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.mobile-bottom-nav .nav-item.active {
+    color: var(--ytu-lacivert);
+}
+
+.mobile-bottom-nav .nav-avatar-small {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    object-fit: cover;
+}
+
+.mobile-bottom-nav .nav-item.active .nav-avatar-small {
+    border-color: var(--ytu-lacivert);
+}
+
+/* Mobilde yukarı çık butonu alt menünün üstünde kalsın */
+@media (max-width: 768px) {
+    .mobile-bottom-nav { display: flex; }
+    .main-layout { margin-bottom: 80px; } /* İçerik altta kalmasın */
+    #scrollTopBtn { bottom: 80px; }
+}
+
+/* Uçuşan Kalp Animasyonu */
+.floating-heart {
+    position: absolute;
+    font-size: 1.5rem;
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+    z-index: 9999;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-60px) scale(1.5); opacity: 0; }
+}
+
+/* =========================================
+   33. SAĞ WIDGET TASARIMI (KULÜPLER LİGİ)
+   ========================================= */
+.right-widget {
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 25px;
+    transition: transform 0.3s;
+}
+
+.right-widget:hover {
+    transform: translateY(-2px);
+}
+
+.widget-header {
+    padding: 18px 25px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.widget-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--ytu-lacivert);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.club-list-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+    gap: 15px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.club-list-item:hover {
+    background-color: var(--link-hover);
+}
+
+/* Son elemanın alt çizgisini kaldır */
+.club-list-item:last-child {
+    border-bottom: none;
+}
+
+.club-rank {
+    font-size: 0.9rem;
+    font-weight: 800;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--bg-light);
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+/* --- ANASAYFA WIDGET MADALYA TASARIMI --- */
+/* HTML'de class olmasa bile listenin sırasına göre renk ver */
+
+/* 1. Altın */
+.right-widget .club-list-item:nth-of-type(1) .club-rank {
+    background: linear-gradient(135deg, #FFD700, #FDB931);
+    color: white;
+    box-shadow: 0 2px 6px rgba(255, 215, 0, 0.4);
+    border: 2px solid #fff;
+    font-size: 1rem;
+    width: 32px; height: 32px;
+}
+/* 2. Gümüş */
+.right-widget .club-list-item:nth-of-type(2) .club-rank {
+    background: linear-gradient(135deg, #E0E0E0, #BDBDBD);
+    color: white;
+    box-shadow: 0 2px 6px rgba(189, 189, 189, 0.4);
+    border: 2px solid #fff;
+}
+/* 3. Bronz */
+.right-widget .club-list-item:nth-of-type(3) .club-rank {
+    background: linear-gradient(135deg, #CD7F32, #A0522D);
+    color: white;
+    box-shadow: 0 2px 6px rgba(205, 127, 50, 0.4);
+    border: 2px solid #fff;
+}
+
+.club-logo-sm {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    object-fit: contain;
+    background: white;
+    border: 1px solid var(--border-color);
+    padding: 3px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    flex-shrink: 0;
+}
+
+/* İsim ve oy bilgisini kapsayan alan */
+.club-info {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.club-name-link {
+    font-weight: 700;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    text-decoration: none;
+}
+
+.club-votes-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.btn-vote-sm {
+    background: rgba(var(--ytu-lacivert-rgb), 0.1);
+    color: var(--ytu-lacivert);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-vote-sm:hover {
+    background: var(--ytu-lacivert);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(var(--ytu-lacivert-rgb), 0.3);
+}
+
+/* --- MESAJ BİLDİRİM ROZETİ --- */
+.msg-badge {
+    display: inline-block;
+    margin-left: auto;
+    background: #ff4757; /* Kırmızı */
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+/* --- SOHBET SİLME BUTONU --- */
+.inbox-row {
+    position: relative;
+    transition: background 0.2s;
+}
+
+.delete-conv-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #fff;
+    color: #dc3545; /* Kırmızı */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    opacity: 0; /* Başlangıçta gizli */
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.inbox-row:hover .delete-conv-btn {
+    opacity: 1; /* Üzerine gelince göster */
+}
+
+.delete-conv-btn:hover {
+    background: #dc3545;
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+}
+
+html.dark-mode .delete-conv-btn {
+    background: #2c2c2c;
+}
+html.dark-mode .delete-conv-btn:hover {
+    background: #dc3545;
+}
+
+/* --- HASHTAG İSTATİSTİK KARTI --- */
+.hashtag-stats-card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 25px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    animation: fadeIn 0.5s;
+}
+
+.hashtag-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--ytu-lacivert);
+    margin-bottom: 5px;
+}
+
+.hashtag-subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+}
+
+.stats-grid {
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.stat-box strong { display: block; font-size: 1.4rem; color: var(--text-color); font-weight: 800; }
+.stat-box span { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+html.dark-mode .hashtag-title { color: var(--ytu-sari); }
+
+/* =========================================
+   34. GÖNDERİ DETAY SAYFASI (POST DETAIL)
+   ========================================= */
+.post-detail-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px); /* Navbar payı */
+    padding: 20px;
+    margin-top: 65px;
+}
+
+.post-detail-card {
+    display: flex;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    box-shadow: var(--shadow);
+    max-width: 1000px;
+    width: 100%;
+    height: 600px; /* Sabit yükseklik */
+    overflow: hidden;
+}
+
+/* Sol Taraf: Medya Kutusu */
+.post-detail-media-box {
+    flex: 1.5; /* Daha geniş alan */
+    background-color: #000; /* Video/Resim kenarları siyah olsun */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.post-detail-content {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Kutuya sığdır, kesme yapma */
+    display: block;
+}
+
+.post-detail-text-only {
+    padding: 40px;
+    color: white;
+    font-size: 1.5rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: linear-gradient(135deg, var(--ytu-lacivert), #000);
+}
+
+/* Sağ Taraf: Bilgi Paneli */
+.post-detail-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border-color);
+    background: var(--card-bg);
+    min-width: 350px;
+}
+
+/* Header */
+.post-detail-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.post-detail-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+.post-detail-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.post-detail-username {
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: block;
+}
+
+.post-detail-dept {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.post-detail-delete {
+    color: var(--text-muted);
+    transition: 0.2s;
+}
+.post-detail-delete:hover { color: var(--hata-kirmizi); }
+
+/* Yorumlar Alanı */
+.post-detail-comments {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.comment-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.comment-avatar-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.comment-bubble {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.comment-bubble strong {
+    margin-right: 5px;
+}
+
+/* Alt Kısım */
+.post-detail-actions {
+    padding: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    color: var(--text-color);
+    transition: transform 0.2s;
+}
+.action-btn:hover { transform: scale(1.1); }
+
+.like-count-text {
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.post-date-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.detail-comment-form {
+    display: flex;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+}
+
+.detail-comment-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+.detail-comment-btn {
+    background: none;
+    border: none;
+    color: var(--ytu-lacivert);
+    font-weight: 700;
+    cursor: pointer;
+}
+.detail-comment-btn:disabled { opacity: 0.5; }
+
+/* Mobil Uyum */
+@media (max-width: 800px) {
+    .post-detail-card {
+        flex-direction: column;
+        height: auto;
+        max-height: none;
+    }
+    .post-detail-media-box {
+        height: 400px; /* Mobilde medya yüksekliği */
+        flex: none;
+    }
+    .post-detail-info {
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        min-width: auto;
+        height: 400px; /* Yorumlar için alan */
+    }
+}
+
+/* --- ETİKETLEME (MENTION) DROPDOWN --- */
+.mention-dropdown {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    display: none;
+    animation: slideUp 0.2s ease-out;
+}
+
+.mention-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    padding: 12px 15px; 
+    cursor: pointer; 
+    border-bottom: 1px solid var(--border-color); 
+    transition: background 0.2s; 
+}
+.mention-item:last-child { border-bottom: none; }
+.mention-item:hover { background: var(--link-hover); }
+
+.mention-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+.mention-info { display: flex; flex-direction: column; justify-content: center; }
+.mention-name { font-weight: 600; font-size: 0.9rem; color: var(--text-color); }
+.mention-handle { font-size: 0.8rem; color: var(--text-muted); }
+
+
+/* --- SIRALAMA DROPDOWN --- */
+.sort-dropdown {
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    cursor: pointer;
+    outline: none;
+    font-weight: 600;
+}
+
+/* =========================================
+   37. KULÜP DETAY SAYFASI (YENİ TASARIM)
+   ========================================= */
+.club-detail-hero {
+    background: var(--card-bg);
+    border-radius: 0 0 20px 20px;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    margin-bottom: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow);
+}
+
+.club-cover-image {
+    height: 200px;
+    background: linear-gradient(135deg, var(--ytu-lacivert), #0056b3);
+    position: relative;
+}
+
+.club-header-content {
+    padding: 20px 30px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    margin-top: -60px; /* Logo yukarı taşsın */
+}
+
+.club-big-logo {
+    width: 120px;
+    height: 120px;
+    background: white;
+    border-radius: 20px;
+    padding: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    object-fit: contain;
+    z-index: 2;
+}
+
+.club-info-block {
+    flex: 1;
+    padding-bottom: 10px;
+}
+
+.club-title-large {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--text-color);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.club-badges {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.c-badge {
+    background: rgba(var(--ytu-lacivert-rgb), 0.1);
+    color: var(--ytu-lacivert);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.club-action-area {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding-bottom: 15px;
+}
+
+.club-desc-box {
+    background: var(--bg-light);
+    padding: 20px;
+    border-radius: 12px;
+    margin: 0 30px 30px 30px;
+    border-left: 4px solid var(--ytu-lacivert);
+    font-size: 1rem;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* =========================================
+   38. KULÜPLER LİGİ TAM LİSTE (YENİ TASARIM)
+   ========================================= */
+.league-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.league-card-row {
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    margin-bottom: 15px;
+    padding: 20px;
+    border-radius: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.league-card-row:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    border-color: var(--ytu-lacivert);
+}
+
+.l-rank {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: rgba(0,0,0,0.1);
+    width: 60px;
+    text-align: center;
+    margin-right: 20px;
+    font-style: italic;
+}
+
+.rank-1 .l-rank { color: #FFD700; opacity: 1; text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3); }
+.rank-2 .l-rank { color: #C0C0C0; opacity: 1; }
+.rank-3 .l-rank { color: #CD7F32; opacity: 1; }
+
+.l-logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
+    object-fit: contain;
+    background: white;
+    border: 1px solid var(--border-color);
+    padding: 5px;
+    margin-right: 20px;
+}
+
+.l-info {
+    flex: 1;
+}
+
+.l-name {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-color);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.l-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.l-stats {
+    text-align: right;
+    min-width: 120px;
+}
+
+.l-score {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--ytu-lacivert);
+    display: block;
+}
+
+.l-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Mobil Uyum */
+@media (max-width: 768px) {
+    .club-header-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-top: -40px;
+    }
+    .club-action-area {
+        justify-content: center;
+    }
+    .league-card-row {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    .l-rank { margin: 0; font-size: 2rem; }
+    .l-logo { margin: 0; }
+    .l-stats { text-align: center; }
+}
+
+/* =========================================
+   35. GLOBAL MODAL STYLES (Feedback & Others)
+   ========================================= */
+.modal-content {
+    background: var(--card-bg);
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    position: relative;
+    animation: modalSlideUp 0.3s ease;
+}
+
+@keyframes modalSlideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.1), rgba(var(--ytu-lacivert-rgb), 0.05));
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 20px 20px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-color);
+    font-weight: 800;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.close-modal {
+    color: var(--text-muted);
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    transition: 0.2s;
+}
+
+.close-modal:hover {
+    color: var(--ytu-lacivert);
+    transform: rotate(90deg);
+}
+
+.modern-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.modern-input:focus {
+    border-color: var(--ytu-lacivert);
+    box-shadow: 0 0 0 3px rgba(var(--ytu-lacivert-rgb), 0.1);
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.8));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(var(--ytu-lacivert-rgb), 0.3);
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--ytu-lacivert-rgb), 0.4);
+}
+
+/* =========================================
+   36. PROFİL MEDYA SEKMESİ
+   ========================================= */
+.profile-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+.profile-tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 15px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    transition: 0.2s;
+}
+.profile-tab-btn:hover {
+    background: var(--link-hover);
+}
+.profile-tab-btn.active {
+    color: var(--text-color);
+    border-bottom-color: var(--text-color);
+}
+
+.media-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+}
+.media-item {
+    position: relative;
+    padding-bottom: 100%;
+    overflow: hidden;
+    cursor: pointer;
+}
+.media-item img, .media-item video {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: 0.2s;
+}
+.media-item:hover img, .media-item:hover video {
+    opacity: 0.9;
+}
+
+/* Post Dosya Önizleme ve Gösterim */
+.file-preview-box {
+    background: var(--bg-light);
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.post-file-link {
+    display: block;
+    background: var(--bg-light);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 600;
+    transition: 0.2s;
+    margin-top: 10px;
+}
+.post-file-link:hover {
+    background: var(--link-hover);
+    border-color: var(--ytu-lacivert);
+    color: var(--ytu-lacivert);
+}
+
+/* KULÜP DÜZENLEME ALANI */
+.club-edit-box {
+    background: var(--bg-light);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px dashed var(--ytu-lacivert);
+    margin-bottom: 20px;
+}
+.club-edit-title {
+    font-weight: bold; margin-bottom: 10px; color: var(--ytu-lacivert);
+}
+
+/* MODERN LİDER PANELİ */
+.leader-panel-modern {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow);
+}
+.lp-header {
+    background: linear-gradient(90deg, var(--ytu-lacivert), #0056b3);
+    color: white;
+    padding: 15px 20px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    display: flex; align-items: center; gap: 10px;
+}
+.lp-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-light);
+}
+.lp-tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: none;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: 0.2s;
+}
+.lp-tab.active {
+    background: var(--card-bg);
+    color: var(--ytu-lacivert);
+    border-bottom: 3px solid var(--ytu-lacivert);
+}
+.lp-content { padding: 20px; }
+.lp-input-modern {
+    width: 100%; padding: 12px; margin-bottom: 15px;
+    border: 1px solid var(--border-color); border-radius: 10px;
+    background: var(--input-bg); color: var(--text-color);
+    font-family: inherit; outline: none;
+}
+.lp-input-modern:focus { border-color: var(--ytu-lacivert); }
+.lp-actions { display: flex; justify-content: space-between; align-items: center; }
+.lp-file-label {
+    cursor: pointer; color: var(--text-muted); font-size: 0.9rem;
+    display: flex; align-items: center; gap: 5px; transition: 0.2s;
+}
+.lp-file-label:hover { color: var(--ytu-lacivert); }
+.lp-btn-submit {
+    background: var(--ytu-lacivert); color: white; border: none;
+    padding: 10px 25px; border-radius: 20px; font-weight: bold; cursor: pointer;
+}
+
+/* ETKİNLİK MEDYA */
+.event-media {
+    width: 100%; max-height: 400px; object-fit: cover;
+    border-radius: 12px; margin-top: 15px; border: 1px solid var(--border-color);
+}
+.event-text a { color: var(--ytu-lacivert); text-decoration: underline; }
+.event-delete-btn {
+    display: inline-block; margin-top: 10px; color: #dc3545; font-size: 0.85rem; text-decoration: none;
+}

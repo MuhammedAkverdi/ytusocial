@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kulüpler Ligi | YTU Social</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- SAYFA ÖZEL STİLLERİ --- */
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; font-family: 'Inter', sans-serif; }
+
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Başlık Alanı */
+        .league-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .league-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 0;
+            background: linear-gradient(45deg, var(--ytu-lacivert), #00a8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .league-desc {
+            color: var(--text-muted);
+            margin-top: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* Grid Yapısı */
+        .clubs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        /* KULÜP KARTI */
+        .club-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .club-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border-color: var(--ytu-lacivert);
+        }
+
+        /* Sıralama Rozeti (Sol Üst) */
+        .rank-badge {
+            position: absolute; top: 15px; left: 15px;
+            background: var(--ytu-lacivert); color: white;
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.9rem; z-index: 2;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Kart Üst (Banner) */
+        .club-banner {
+            height: 100px;
+            background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.8), #00a8ff);
+            position: relative;
+        }
+
+        /* Logo (Ortalanmış) */
+        .club-logo {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--card-bg);
+            position: absolute;
+            bottom: -40px; left: 50%;
+            transform: translateX(-50%);
+            background: white;
+        }
+
+        /* Kart İçerik */
+        .club-body {
+            padding: 50px 20px 20px 20px; /* Üstten logoya yer aç */
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .club-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        .club-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        /* İstatistikler */
+        .club-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 15px 0;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .club-stats strong { color: var(--text-color); font-size: 1rem; }
+
+        /* Butonlar */
+        .club-actions {
+            display: flex; gap: 10px;
+        }
+
+        .btn-view {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            border: 1px solid var(--border-color);
+        }
+        .btn-view:hover { background: var(--border-color); }
+
+        .btn-icon {
+            width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: 0.2s;
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-icon:hover { color: var(--text-color); border-color: var(--text-color); }
+        .btn-icon.active { background: var(--ytu-lacivert); color: white; border-color: var(--ytu-lacivert); }
+        .btn-icon.vote:hover { background: #ff4757; color: white; border-color: #ff4757; }
+
+    </style>
+</head>
+<body>
+
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <div class="page-container">
+        
+        <div class="league-header">
+            <h1 class="league-title">🏆 KULÜPLER LİGİ</h1>
+            <p class="league-desc">YTÜ'nün en aktif kulüplerini keşfet, takip et ve oy vererek sıralamayı değiştir.</p>
+        </div>
+
+        <div class="clubs-grid">
+            {% for club in clubs %}
+            <div class="club-card">
+                <div class="rank-badge">#{{ loop.index }}</div>
+
+                <div class="club-banner">
+                    <img src="/static/img/{{ club.logo_file }}" class="club-logo">
+                </div>
+
+                <div class="club-body">
+                    <div class="club-name">{{ club.name }}</div>
+                    <div class="club-desc">{{ club.description[:90] }}...</div>
+
+                    <div class="club-stats">
+                        <div>
+                            <strong>{{ club.followers.count() }}</strong><br>Takipçi
+                        </div>
+                        <div>
+                            <strong>{{ club.total_votes() }}</strong><br>Lig Puanı
+                        </div>
+                    </div>
+
+                    <div class="club-actions">
+                        <a href="{{ url_for('club_detail', slug=club.slug) }}" class="btn-view">Profili İncele</a>
+                        
+                        {% if current_user.is_authenticated %}
+                            {% if current_user in club.followers %}
+                            <a href="{{ url_for('follow_club', club_id=club.id) }}" class="btn-icon active" title="Takipten Çık"><i class="fas fa-check"></i></a>
+                            {% else %}
+                            <a href="{{ url_for('follow_club', club_id=club.id) }}" class="btn-icon" title="Takip Et"><i class="fas fa-plus"></i></a>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('vote_club', club_id=club.id) }}" class="btn-icon vote" title="Oy Ver"><i class="fas fa-heart"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

@@ -39,6 +39,26 @@ def veritabani_tamir_et():
         except sqlite3.OperationalError:
             print("ℹ️ 'user.ban_expiration' zaten var.")
 
+        # 4. Message tablosuna reactions ekle
+        try:
+            cursor.execute("ALTER TABLE message ADD COLUMN reactions TEXT DEFAULT '{}'")
+            print("✅ 'message' tablosuna 'reactions' eklendi.")
+        except sqlite3.OperationalError:
+            print("ℹ️ 'message.reactions' zaten var.")
+
+        # 5. Message tablosuna msg_type ve file_path ekle (Eksikse diye kontrol)
+        try:
+            cursor.execute("ALTER TABLE message ADD COLUMN msg_type VARCHAR(10) DEFAULT 'text'")
+            print("✅ 'message' tablosuna 'msg_type' eklendi.")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            cursor.execute("ALTER TABLE message ADD COLUMN file_path VARCHAR(255)")
+            print("✅ 'message' tablosuna 'file_path' eklendi.")
+        except sqlite3.OperationalError:
+            pass
+
         conn.commit()
         conn.close()
         print("\n🚀 TAMİR TAMAMLANDI! Şimdi 'python app.py' çalıştırabilirsin.")

@@ -7,6 +7,158 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Bu sayfaya özel stiller */
+        .league-container {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+        .club-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .club-card:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border-color: var(--ytu-lacivert);
+            z-index: 2;
+        }
+        
+        /* Sıralama Numarası */
+        .rank-badge {
+            font-size: 1.8rem;
+            font-weight: 900;
+            width: 60px;
+            text-align: center;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            opacity: 0.5;
+        }
+
+        /* İlk 3 Özel Tasarım */
+        .club-card.rank-1 {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), var(--card-bg));
+            border: 2px solid #FFD700;
+        }
+        .club-card.rank-1 .rank-badge { color: #FFD700; opacity: 1; text-shadow: 0 2px 10px rgba(255, 215, 0, 0.4); font-size: 2.2rem; }
+        
+        .club-card.rank-2 {
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.1), var(--card-bg));
+            border: 2px solid #C0C0C0;
+        }
+        .club-card.rank-2 .rank-badge { color: #C0C0C0; opacity: 1; text-shadow: 0 2px 10px rgba(192, 192, 192, 0.4); font-size: 2rem; }
+
+        .club-card.rank-3 {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.1), var(--card-bg));
+            border: 2px solid #CD7F32;
+        }
+        .club-card.rank-3 .rank-badge { color: #CD7F32; opacity: 1; text-shadow: 0 2px 10px rgba(205, 127, 50, 0.4); font-size: 2rem; }
+
+        /* Logo */
+        .club-logo-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            overflow: hidden;
+            margin: 0 25px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            padding: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .club-logo-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Detaylar */
+        .club-details { flex: 1; }
+        .club-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+        }
+        .club-name:hover { color: var(--ytu-lacivert); text-decoration: underline; }
+        
+        .club-meta {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .club-meta i { color: var(--ytu-lacivert); opacity: 0.7; margin-right: 5px; }
+
+        /* Oy Kısmı */
+        .vote-section {
+            text-align: center;
+            min-width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding-left: 20px;
+            border-left: 1px solid var(--border-color);
+        }
+        .vote-count {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--text-color);
+            line-height: 1;
+        }
+        .vote-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        
+        .vote-btn {
+            background: var(--ytu-lacivert);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 51, 102, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .vote-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 51, 102, 0.3);
+            background: #004080;
+        }
+        .vote-btn:active { transform: translateY(0); }
+
+        /* Mobil Uyum */
+        @media (max-width: 600px) {
+            .club-card { flex-wrap: wrap; padding: 15px; }
+            .rank-badge { width: 40px; font-size: 1.2rem; }
+            .club-logo-wrapper { width: 50px; height: 50px; margin: 0 15px; }
+            .vote-section { 
+                width: 100%; 
+                border-left: none; 
+                border-top: 1px solid var(--border-color); 
+                padding-top: 15px; 
+                margin-top: 15px; 
+                flex-direction: row; 
+                justify-content: space-between; 
+            }
+            .club-meta { font-size: 0.8rem; gap: 10px; }
+        }
+    </style>
 </head>
 <body>
 
@@ -21,54 +173,52 @@
     <div class="main-layout">
         
         <aside class="left-sidebar sticky-sidebar">
-            <div class="club-card" style="border: none; padding: 15px;">
-                <div style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
-                    <img src="/static/{{ current_user.profile_pic }}" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--ytu-lacivert);">
-                    <h3 style="margin-top: 8px; font-size: 1rem;">{{ current_user.username }}</h3>
+            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px 20px; border: 1px solid var(--border-color);">
+                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
+                    <img src="/static/{{ current_user.profile_pic }}" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ytu-lacivert); object-fit: cover; margin-bottom: 12px;">
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{ current_user.username }}</h3>
+                    <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
                 </div>
-
-                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
-                <a href="{{ url_for('explore') }}" class="sidebar-link"><span>🔍</span> Keşfet</a>
-                <a href="{{ url_for('reels') }}" class="sidebar-link" style="color: #e1306c;"><span>🎬</span> Reels</a>
-                <a href="{{ url_for('saved_posts_list') }}" class="sidebar-link"><span>📌</span> Kaydedilenler</a>
-                <a href="{{ url_for('notifications') }}" class="sidebar-link"><span>🔔</span> Bildirimler</a>
-                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
-
-                <a href="javascript:history.back()" class="sidebar-link link-danger" style="margin-top: 10px;"><span>⬅️</span> Geri Dön</a>
+                <nav style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="{{ url_for('main.index') }}" class="sidebar-link" style="padding:12px; border-radius:12px; font-weight:600; color:var(--text-muted); display:flex; gap:10px;"><i class="fas fa-arrow-left"></i> Geri Dön</a>
+                </nav>
             </div>
         </aside>
 
         <main>
-            <div class="section-header" style="margin-bottom: 25px;">
-                <h2 style="font-weight: 800; font-size: 1.8rem;">🏆 Kulüpler Ligi (Top 10)</h2>
+            <div class="section-header" style="margin-bottom: 25px; text-align:center;">
+                <h2 style="font-weight: 800; font-size: 2rem;">🏆 Kulüpler Ligi</h2>
+                <p style="color: var(--text-muted);">Kampüsün en aktif kulüpleri burada yarışıyor!</p>
             </div>
 
-            <div class="club-full-card">
+            <div class="league-container">
                 {% for club in clubs %}
-                <div class="club-row">
-                    <div class="club-rank">#{{ loop.index }}</div>
+                <div class="club-card rank-{{ loop.index }}">
+                    <div class="rank-badge">
+                        {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}#{{ loop.index }}{% endif %}
+                    </div>
                     
-                    <img src="/static/img/{{ club.image }}" class="club-logo-lg">
+                    <div class="club-logo-wrapper">
+                        <img src="/static/img/{{ club.logo_file }}" alt="{{ club.name }}">
+                    </div>
                     
-                    <div class="club-info-main" style="flex: 1;">
-                        <h3>{{ club.name }}</h3>
-                        <div class="club-stats">
-                            <span>👥 {{ club.members }} Üye</span>
-                            <span>🚀 {{ club.projects }} Proje</span>
+                    <div class="club-details">
+                        <a href="{{ url_for('main.club_detail', slug=club.slug) }}" class="club-name">{{ club.name }}</a>
+                        <div class="club-meta">
+                            <span><i class="fas fa-users"></i> {{ club.members }}</span>
+                            <span><i class="fas fa-rocket"></i> {{ club.projects }} Proje</span>
                         </div>
                     </div>
 
-                    <div class="club-action-area">
-                        <div class="club-votes">{{ club.votes }} Oy</div>
-                        <button class="btn-vote btn-club-vote" onclick="oyVer('{{ club.id }}', this)">OY VER</button>
+                    <div class="vote-section">
+                        <span class="vote-count" id="vote-count-{{ club.id }}">{{ club.votes }}</span>
+                        <span class="vote-label">OY</span>
+                        <button class="vote-btn" onclick="oyVer('{{ club.id }}', this)">OY VER</button>
                     </div>
                 </div>
                 {% endfor %}
             </div>
 
-            <div class="club-info-box">
-                <p class="club-info-text">💡 <b>Biliyor muydun?</b> Kulüpler Ligi puanları kampüsteki aktif etkileşime göre haftalık olarak güncellenir.</p>
-            </div>
         </main>
 
         <aside class="right-sidebar">

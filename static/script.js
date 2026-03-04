@@ -2,6 +2,15 @@
 // 0. GECE MODU VE BAŞLANGIÇ AYARLARI
 // ==========================================
 
+// Sayfa yüklenmeden hemen çalışarak beyaz ekran (FOUC) sorununu önler
+(function() {
+    const theme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (theme === 'dark' || (!theme && systemDark)) {
+        document.documentElement.classList.add('dark-mode');
+    }
+})();
+
 // Türkçe karakter destekli hashtag fonksiyonu
 function linkifyHashtags(text) {
     if (!text) return "";
@@ -12,13 +21,17 @@ function linkifyHashtags(text) {
 
 document.addEventListener('DOMContentLoaded', (event) => {
     // 1. Tema Kontrolü
-    const theme = localStorage.getItem('theme');
     const btn = document.getElementById('theme-btn');
 
-    if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
+    // Sınıf zaten html etiketine eklendi, sadece butonu güncelle
+    if (document.documentElement.classList.contains('dark-mode')) {
         if (btn) btn.innerText = '☀️';
     }
+
+    // Geçiş efektlerini sayfa yüklendikten sonra aktif et (Beyaz ekran sorununu çözer)
+    setTimeout(() => {
+        document.body.classList.add('transition-active');
+    }, 100);
 
     // 2. Oylama Durumunu Kontrol Et
     const buttons = document.querySelectorAll('.btn-vote');
@@ -30,6 +43,23 @@ document.addEventListener('DOMContentLoaded', (event) => {
             }
         }
     });
+    
+    // 2.5 Sunucudan Güncel Oy Bilgisini Çek (LocalStorage yetersiz kalabilir)
+    fetch('/api/my_votes')
+        .then(response => {
+            if(response.ok) return response.json();
+            throw new Error('Auth error');
+        })
+        .then(data => {
+            if (data.success) {
+                data.votes.forEach(clubId => {
+                    const btn = document.getElementById('btn-' + clubId);
+                    if (btn) oyVerildiGorseli(btn);
+                    localStorage.setItem('oy_verildi_' + clubId, 'true');
+                });
+            }
+        })
+        .catch(e => console.log("Oy bilgisi güncellenemedi (Giriş yapılmamış olabilir)"));
 
     // 3. Bildirimleri Otomatik Kapat (4 Saniye Sonra)
     setTimeout(() => {
@@ -62,16 +92,44 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.querySelectorAll('[data-initial-width]').forEach(el => {
         el.style.width = el.getAttribute('data-initial-width');
     });
+
+    // 7. Chat Dosya Yukleme Butonu Entegrasyonu
+    // HTML'e taşındı.
+
+    // 8. SENKRONİZASYON İÇİN MEVCUT POSTLARA CLASS EKLEME (Server-Side Rendered)
+    document.querySelectorAll('.action-item').forEach(item => {
+        const onclick = item.getAttribute('onclick');
+        if (!onclick) return;
+
+        if (onclick.includes('likePost')) {
+            const match = onclick.match(/likePost\('(\d+)'/);
+            if (match) item.classList.add(`js-like-${match[1]}`);
+        } else if (onclick.includes('savePost')) {
+            const match = onclick.match(/savePost\('(\d+)'/);
+            if (match) item.classList.add(`js-save-${match[1]}`);
+        } else if (onclick.includes('repostPost')) {
+            const match = onclick.match(/repostPost\('(\d+)'/);
+            if (match) item.classList.add(`js-repost-${match[1]}`);
+        }
+    });
+
+    document.querySelectorAll('form.comment-form').forEach(form => {
+        const onsubmit = form.getAttribute('onsubmit');
+        if (onsubmit && onsubmit.includes('submitComment')) {
+            const match = onsubmit.match(/submitComment\(event, '(\d+)'\)/);
+            if (match) form.classList.add(`js-comment-form-${match[1]}`);
+        }
+    });
 });
 
 // Temayı Değiştir
 function toggleDarkMode() {
-    const body = document.body;
+    const html = document.documentElement;
     const btn = document.getElementById('theme-btn');
 
-    body.classList.toggle('dark-mode');
+    html.classList.toggle('dark-mode');
 
-    if (body.classList.contains('dark-mode')) {
+    if (html.classList.contains('dark-mode')) {
         localStorage.setItem('theme', 'dark');
         if (btn) btn.innerText = '☀️';
     } else {
@@ -87,18 +145,12 @@ const bilgiler = {
     'ieee': {
         baslik: "IEEE YTÜ Projeleri",
         metin: "Teknoloji ve mühendislik dünyasına yön veren projelerimiz:",
-        projeler: [
-            { ad: "Otonom İHA", resim: "projects/ieee/iha.jpg", ozet: "Teknofest 2024 Yüksek İrtifa Birincisi." },
-            { ad: "Sualtı Aracı (ROV)", resim: "projects/ieee/rov.jpg", ozet: "MATE ROV Yarışması finalist aracı." }
-        ]
+        projeler: [] // Projeler geçici olarak kaldırıldı
     },
     'fark': {
         baslik: "FARK Kulübü Etkinlikleri",
         metin: "Sosyal farkındalık ve entelektüel gelişim çalışmalarımız:",
-        projeler: [
-            { ad: "Köy Okulları Projesi", resim: "koyokulu.jpg", ozet: "Anadolu'daki 5 okula kütüphane kurulumu." },
-            { ad: "Fikir Atölyesi", resim: "atolye.jpg", ozet: "Haftalık felsefe ve sanat tartışmaları." }
-        ]
+        projeler: [] // Projeler geçici olarak kaldırıldı
     },
     'girisim': {
         baslik: "Girişimcilik Kulübü",
@@ -217,10 +269,8 @@ async function oyVer(kulupKey, buton) {
 
 function oyVerildiGorseli(btn) {
     btn.innerText = "OY VERİLDİ";
-    btn.style.backgroundColor = "#28a745";
-    btn.style.borderColor = "#28a745";
-    btn.style.color = "white";
     btn.style.cursor = "default";
+    btn.style.pointerEvents = "none";
     btn.disabled = true;
 }
 
@@ -237,18 +287,57 @@ function toggleComments(elementId) {
     }
 }
 
-async function repostPost(postId) {
-    if (!confirm("Bu gönderiyi kendi profilinde yeniden paylaşmak istiyor musun?")) return;
+async function repostPost(postId, element) {
+    // Butonun içindeki ikona bakarak durumu anla (Basit kontrol)
+    const icon = element.querySelector('i');
+    const isReposted = icon.style.color === 'rgb(46, 204, 113)' || icon.style.color === '#2ecc71';
+    
+    // Kullanıcı onayı
+    const confirmMsg = isReposted ? "Yeniden gönderimi geri almak istiyor musun?" : "Bu gönderiyi yeniden paylaşmak istiyor musun?";
+    if (!confirm(confirmMsg)) return;
 
     try {
         const response = await fetch(`/repost/${postId}`, { method: 'POST' });
         const result = await response.json();
 
         if (result.success) {
-            alert("Başarıyla paylaşıldı! 🔁");
-            location.reload();
+            // Sayfadaki AYNI ID'ye sahip tüm repost butonlarını bul ve güncelle
+            const allRepostBtns = document.querySelectorAll(`.js-repost-${postId}`);
+            
+            if (result.action === 'reposted') {
+                allRepostBtns.forEach(btn => {
+                    btn.innerHTML = '<i class="fa-solid fa-retweet" style="color: #2ecc71;"></i> <span style="color: #2ecc71;">Yeniden Gönderildi</span>';
+                });
+                
+                // Sayfayı yenilemeden akışa ekle
+                if (result.post) {
+                    const feed = document.getElementById('feedContainer');
+                    if (feed) {
+                        const newPostDiv = document.createElement('div');
+                        newPostDiv.className = 'post-card animate-post';
+                        newPostDiv.id = `post-card-${result.post.id}`; // SİLME İŞLEMİ İÇİN ID EKLENDİ
+                        newPostDiv.innerHTML = createPostHTML(result.post);
+                        feed.prepend(newPostDiv);
+                    }
+                }
+            } else {
+                allRepostBtns.forEach(btn => {
+                    btn.innerHTML = '<i class="fa-solid fa-retweet"></i> Yeniden Gönder';
+                });
+                
+                // REPOST GERİ ALINDIĞINDA KARTI SAYFADAN SİL
+                if (result.repost_id) {
+                    const repostCard = document.getElementById(`post-card-${result.repost_id}`);
+                    if (repostCard) {
+                        repostCard.style.transition = "all 0.5s ease";
+                        repostCard.style.opacity = "0";
+                        repostCard.style.transform = "translateX(100px)";
+                        setTimeout(() => repostCard.remove(), 500);
+                    }
+                }
+            }
         } else {
-            alert("Bir hata oluştu.");
+            alert(result.error || "Bir hata oluştu.");
         }
     } catch (error) {
         console.error("Repost hatası:", error);
@@ -261,10 +350,19 @@ async function likePost(postId, element) {
 
         if (response.ok) {
             const data = await response.json();
-            const icon = data.action === 'liked' ? '❤️' : '🤍';
-            element.innerHTML = `${icon} <span class="like-count">${data.likes_count}</span>`;
-            element.style.transform = "scale(1.3)";
-            setTimeout(() => { element.style.transform = "scale(1)"; }, 200);
+            
+            // Sayfadaki AYNI ID'ye sahip tüm beğeni butonlarını güncelle (Senkronizasyon)
+            const allLikeBtns = document.querySelectorAll(`.js-like-${postId}`);
+            const iconHtml = data.action === 'liked' ? '<i class="fa-solid fa-heart" style="color: #ff4757;"></i>' : '<i class="fa-regular fa-heart"></i>';
+            
+            allLikeBtns.forEach(btn => {
+                btn.innerHTML = `${iconHtml} <span class="like-count">${data.likes_count}</span>`;
+            });
+
+            // Eğer beğenildiyse uçuşan kalp animasyonu ekle
+            if (data.action === 'liked') {
+                createFloatingHeart(element);
+            }
         }
     } catch (error) {
         console.error('Beğeni işleminde hata:', error);
@@ -277,16 +375,51 @@ async function savePost(postId, element) {
 
         if (response.ok) {
             const data = await response.json();
+            // Sayfadaki AYNI ID'ye sahip tüm kaydet butonlarını güncelle
+            const allSaveBtns = document.querySelectorAll(`.js-save-${postId}`);
+            
             if (data.action === 'saved') {
-                element.innerHTML = '<span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;">✅ Kaydedildi</span>';
+                allSaveBtns.forEach(btn => btn.innerHTML = '<span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><i class="fa-solid fa-bookmark"></i> Kaydedildi</span>');
             } else {
-                element.innerHTML = '<span class="save-icon">🔖 Kaydet</span>';
+                allSaveBtns.forEach(btn => btn.innerHTML = '<span class="save-icon"><i class="fa-regular fa-bookmark"></i> Kaydet</span>');
             }
-            element.style.transform = "scale(1.1)";
-            setTimeout(() => { element.style.transform = "scale(1)"; }, 200);
         }
     } catch (error) {
         console.error('Kaydetme işleminde hata:', error);
+    }
+}
+
+// GÖNDERİ SİLME (SAYFA YENİLEMEDEN)
+async function deletePostJS(postId, element) {
+    if (!confirm("Bu gönderiyi silmek istediğine emin misin?")) return;
+
+    // Inline çağrılarda 'this' gönderilmediyse event'ten bulmaya çalış
+    const targetEl = element || (window.event ? window.event.target : null);
+
+    try {
+        const response = await fetch(`/delete_post/${postId}`);
+        // Backend redirect dönse bile fetch bunu takip eder, biz sonuca bakarız.
+        // Ancak backend'de redirect yerine JSON dönmek daha sağlıklı olurdu.
+        // Mevcut yapıda backend redirect yapıyor, bu yüzden status 200 ise siliyoruz.
+        if (response.ok) {
+            let postCard = document.getElementById(`post-card-${postId}`);
+            
+            if (!postCard && targetEl) {
+                postCard = targetEl.closest('.post-card');
+            }
+
+            if (postCard) {
+                postCard.style.transition = "all 0.5s ease";
+                postCard.style.opacity = "0";
+                postCard.style.transform = "translateX(100px)";
+                setTimeout(() => postCard.remove(), 500);
+                showToast("Gönderi silindi. 🗑️");
+            } else {
+                location.reload();
+            }
+        }
+    } catch (error) {
+        console.error("Silme hatası:", error);
     }
 }
 
@@ -477,6 +610,20 @@ function loadStoryItem(isOwner) {
         if (!story.seen) {
             fetch(`/mark_story_seen/${story.id}`, { method: 'POST' });
             story.seen = true;
+
+            // CANLI GÜNCELLEME: Eğer tüm hikayeler izlendiyse halkayı gri yap
+            const allSeen = currentStories.every(s => s.seen);
+            if (allSeen) {
+                const username = document.getElementById('storyUserName').innerText
+                const storyItem = document.querySelector(`.story-item[data-username="${username}"]`);
+                if (storyItem) {
+                    const ring = storyItem.querySelector('.story-ring');
+                    if (ring) {
+                        ring.classList.remove('has-story-ring');
+                        ring.classList.add('seen-story-ring');
+                    }
+                }
+            }
         }
     }
 
@@ -605,11 +752,12 @@ function closeStory() {
 // ==========================================
 function togglePollCreator() {
     const creator = document.getElementById('poll-creator');
-    if (creator.style.display === 'none') {
-        creator.style.display = 'block';
-    } else {
-        creator.style.display = 'none';
-        document.querySelectorAll('.poll-input').forEach(i => i.value = '');
+    creator.classList.toggle('active');
+    
+    if (!creator.classList.contains('active')) {
+        setTimeout(() => {
+            document.querySelectorAll('.poll-input').forEach(i => i.value = '');
+        }, 400);
     }
 }
 
@@ -692,6 +840,13 @@ if (typeof io !== 'undefined') {
 async function startCall(isVideo) {
     isCaller = true;
     currentCallUser = typeof OTHER_USERNAME !== 'undefined' ? OTHER_USERNAME : null;
+    
+    // HATA DÜZELTME: Eğer global değişken yoksa DOM'dan al
+    if (!currentCallUser) {
+        const nameEl = document.querySelector('.chat-username');
+        if (nameEl) currentCallUser = nameEl.innerText.trim();
+    }
+    
     iceCandidatesQueue = [];
 
     if (!currentCallUser) {
@@ -862,6 +1017,20 @@ function clearImage() {
     document.getElementById('preview-video').src = "";
 }
 
+function previewFile(input) {
+    const container = document.getElementById('file-preview');
+    const nameSpan = document.getElementById('preview-filename');
+    if (input.files && input.files[0]) {
+        nameSpan.innerText = input.files[0].name;
+        container.style.display = 'block';
+    }
+}
+
+function clearFile() {
+    document.getElementById('doc-upload').value = "";
+    document.getElementById('file-preview').style.display = 'none';
+}
+
 // ==========================================
 // 13. "YAZIYOR..." İNDİKATÖRÜ
 // ==========================================
@@ -894,6 +1063,17 @@ if (chatInput && typeof socket !== 'undefined') {
         const indicator = document.getElementById('typingIndicator');
         if (indicator) indicator.style.display = 'none';
     });
+}
+
+// Profil Sekme Değiştirme (Global Scope'a taşındı)
+function switchProfileTab(tabName) {
+    document.querySelectorAll('.profile-tab-content').forEach(el => el.style.display = 'none');
+    const target = document.getElementById(tabName + '-content');
+    if(target) target.style.display = 'block';
+    
+    document.querySelectorAll('.profile-tab-btn').forEach(btn => btn.classList.remove('active'));
+    const btn = document.getElementById('tab-btn-' + tabName);
+    if(btn) btn.classList.add('active');
 }
 
 // ==========================================
@@ -978,7 +1158,8 @@ if (ajaxPostForm) {
             if (result.success) {
                 ajaxPostForm.reset();
                 clearImage();
-                document.getElementById('poll-creator').style.display = 'none';
+                clearFile();
+                document.getElementById('poll-creator').classList.remove('active');
             } else alert("Hata: " + result.error);
         } catch (err) { alert("Sunucu hatası."); } 
         finally {
@@ -992,12 +1173,36 @@ if (ajaxPostForm) {
 
 function createPostHTML(data) {
     const formattedContent = linkifyHashtags(data.content);
+    const targetId = data.original_id || data.id;
     let mediaHTML = '';
+    
+    let repostHeader = '';
+    if (data.repost_of) {
+        repostHeader = `
+        <div class="repost-header">
+            <span>🔁</span>
+            <b>${data.reposter_name}</b> yeniden gönderdi
+        </div>`;
+    }
+
     if (data.image_file) {
-        if (data.is_video) {
+        const ext = data.image_file.split('.').pop().toLowerCase();
+        if (['mp4', 'mov', 'avi', 'webm'].includes(ext)) {
             mediaHTML = `<div class="post-image-container"><video controls class="post-image" style="background:black;"><source src="/static/post_images/${data.image_file}" type="video/mp4"></video></div>`;
-        } else {
+        } else if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
             mediaHTML = `<div class="post-image-container"><img src="/static/post_images/${data.image_file}" class="post-image" onclick="openLightbox(this.src)"></div>`;
+        } else {
+            mediaHTML = `
+            <div class="post-file-container" style="margin: 10px 0;">
+                <a href="/static/post_images/${data.image_file}" download class="post-file-link" style="display: flex; align-items: center; gap: 10px; padding: 15px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 12px; text-decoration: none; color: var(--text-color); transition: 0.2s;">
+                    <i class="fas fa-file-alt" style="font-size: 2rem; color: var(--ytu-lacivert);"></i>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600;">Dosya Eki</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${data.image_file.split('_').slice(1).join('_') || data.image_file}</div>
+                    </div>
+                    <i class="fas fa-download" style="color: var(--text-muted);"></i>
+                </a>
+            </div>`;
         }
     }
     let pollHTML = '';
@@ -1009,7 +1214,15 @@ function createPostHTML(data) {
         pollHTML = `<div class="poll-container">${optionsHTML}</div>`;
     }
 
+    // Repost butonu durumu (Eğer kullanıcı zaten repostladıysa yeşil gelsin)
+    let repostBtnHTML = `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><i class="fa-solid fa-retweet"></i> Yeniden Gönder</span>`;
+    
+    if (data.user_has_reposted) {
+        repostBtnHTML = `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><i class="fa-solid fa-retweet" style="color: #2ecc71;"></i> <span style="color: #2ecc71;">Yeniden Gönderildi</span></span>`;
+    }
+
     return `
+        ${repostHeader}
         <div class="post-header">
             <div class="post-author-info">
                 <img src="/static/${data.author_pic}" class="post-avatar">
@@ -1018,20 +1231,45 @@ function createPostHTML(data) {
                     <span class="post-author-dept">${data.author_dept}</span>
                 </div>
             </div>
-            <small class="post-time">${data.date} <span class="badge-new" style="background:red; color:white; padding:2px 5px;">YENİ</span></small>
+            <small class="post-time">${data.date}</small>
         </div>
-        <div class="post-text">${formattedContent}</div>
+        <div id="post-content-${data.id}" class="post-text">${formattedContent}</div>
         ${mediaHTML} ${pollHTML}
+        
+        <form action="/edit_post/${data.id}" method="POST" id="post-edit-form-${data.id}" class="edit-post-form" style="display: none;">
+            <textarea name="new_content" class="create-post-input" rows="3" style="border:1px solid #ddd; border-radius:10px;">${data.content || ''}</textarea>
+            <div class="edit-actions">
+                <button type="button" onclick="closePostEditMode('${data.id}')" class="btn-cancel">İptal</button>
+                <button type="submit" class="btn-vote btn-sm">Kaydet</button>
+            </div>
+        </form>
+
         <div class="post-actions">
-            <span class="action-item">🤍 0</span> <span class="action-item">💬 0</span>
+            <span class="action-item js-like-${targetId}" onclick="likePost('${targetId}', this)">
+                <i class="fa-regular fa-heart"></i> <span class="like-count">${data.likes_count || 0}</span>
+            </span>
+            <span class="action-item js-comment-count-${targetId}" onclick="toggleComments('comment-box-${data.id}')">
+                <i class="fa-regular fa-comment"></i> 0
+            </span>
+            ${repostBtnHTML}
+            <span class="action-item js-save-${targetId}" onclick="savePost('${targetId}', this)">
+                <span class="save-icon"><i class="fa-regular fa-bookmark"></i> Kaydet</span>
+            </span>
+            
+            <div class="action-menu-wrapper">
+                <button type="button" class="comment-menu-btn" onclick="toggleMenu('post-menu-${data.id}')">⋮</button>
+                <div id="post-menu-${data.id}" class="comment-dropdown" style="bottom: 30px; top: auto; right: 0;">
+                    <button type="button" class="comment-action delete" onclick="deletePostJS('${data.id}', this)">🗑️ Sil</button>
+                </div>
+            </div>
         </div>
+
         <div id="comment-box-${data.id}" class="comment-section" style="display:none;">
-             <form onsubmit="submitComment(event, '${data.id}')" class="comment-form">
+             <form onsubmit="submitComment(event, '${targetId}')" class="comment-form js-comment-form-${targetId}">
                 <input type="text" id="comment-input-${data.id}" placeholder="Yorumun..." required class="comment-input">
                 <button type="submit" class="comment-submit">Gönder</button>
             </form>
-        </div>
-    `;
+        </div>`;
 }
 
 if (typeof socket !== 'undefined') {
@@ -1048,7 +1286,8 @@ if (typeof socket !== 'undefined') {
 
 async function submitComment(e, postId) {
     e.preventDefault();
-    const input = document.getElementById(`comment-input-${postId}`);
+    const form = e.target;
+    const input = form.querySelector('input[name="comment_text"]') || form.querySelector('.comment-input');
     const text = input.value;
     if (!text) return;
 
@@ -1060,12 +1299,94 @@ async function submitComment(e, postId) {
         const result = await response.json();
         if (result.success) {
             input.value = "";
-            const commentBox = document.getElementById(`comment-box-${postId}`);
-            const commentHTML = `<div class="comment-item"><strong class="comment-author">${result.comment.author_name}:</strong> <span class="comment-content">${result.comment.text}</span></div>`;
-            const form = commentBox.querySelector('form');
-            form.insertAdjacentHTML('beforebegin', commentHTML);
+            
+            // 1. Anasayfa (Feed) İçin - TÜM KOPYALARI GÜNCELLE (Senkronizasyon)
+            const allForms = document.querySelectorAll(`.js-comment-form-${postId}`);
+            allForms.forEach(f => {
+                const commentHTML = `<div class="comment-item"><strong class="comment-author">${result.comment.author_name}:</strong> <span class="comment-content">${result.comment.text}</span></div>`;
+                f.insertAdjacentHTML('beforebegin', commentHTML);
+                
+                // Inputları temizle
+                const fInput = f.querySelector('.comment-input');
+                if(fInput) fInput.value = "";
+            });
+
+            // Yorum Sayılarını Güncelle (Senkronizasyon)
+            const countSpans = document.querySelectorAll(`.js-comment-count-${postId}`);
+            countSpans.forEach(span => {
+                const currentText = span.innerText.trim();
+                const currentCount = parseInt(currentText) || 0;
+                span.innerHTML = `<i class="fa-regular fa-comment"></i> ${currentCount + 1}`;
+            });
+
+            // 2. Detay Sayfası İçin (YENİ)
+            const detailComments = document.querySelector('.post-detail-comments');
+            if (detailComments) {
+                // Yorum metnindeki etiketleri linke çevir (Basit regex)
+                let formattedText = result.comment.text.replace(/@(\w+)/g, '<a href="/u/$1" class="mention-link" style="color: var(--ytu-lacivert); font-weight: bold; text-decoration:none;">@$1</a>');
+                
+                const commentHTML = `
+                <div class="comment-item" data-timestamp="${Date.now() / 1000}" data-likes="0">
+                    <img src="/static/${result.comment.author_pic}" class="comment-avatar-sm">
+                    <div class="comment-bubble" style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <strong>${result.comment.author_name}</strong>
+                            <div style="position: relative;">
+                                <button type="button" class="comment-menu-btn" onclick="toggleMenu('menu-${result.comment.id}')" style="position: static; padding: 0 5px; color: var(--text-muted);">⋮</button>
+                                <div id="menu-${result.comment.id}" class="comment-dropdown" style="right: 0; top: 20px; width: 120px;">
+                                    <button type="button" class="comment-action" onclick="openEditMode('${result.comment.id}')">✏️ Düzenle</button>
+                                    <a href="/delete_comment/${result.comment.id}" class="comment-action delete" onclick="return confirm('Bu yorumu silmek istediğine emin misin?')">🗑️ Sil</a>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="comment-text-${result.comment.id}" style="margin: 4px 0;">${formattedText}</p>
+                        <form action="/edit_comment/${result.comment.id}" method="POST" class="edit-comment-form" id="edit-form-${result.comment.id}" style="margin-bottom: 10px;">
+                            <input type="text" name="new_text" value="${result.comment.text}" class="comment-input" style="width: 100%; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                                <button type="button" onclick="closeEditMode('${result.comment.id}')" class="btn-cancel" style="font-size: 0.8rem;">İptal</button>
+                                <button type="submit" class="btn-vote btn-sm">Kaydet</button>
+                            </div>
+                        </form>
+                        <small class="text-muted">Şimdi</small>
+                    </div>
+                </div>`;
+                detailComments.insertAdjacentHTML('beforeend', commentHTML);
+                detailComments.scrollTop = detailComments.scrollHeight;
+            }
+            
         } else alert(result.error);
     } catch (err) { console.error(err); }
+}
+
+// YORUM SİLME (SAYFA YENİLEMEDEN)
+async function deleteCommentJS(commentId, postId, element) {
+    if (!confirm('Bu yorumu silmek istediğine emin misin?')) return;
+
+    try {
+        const response = await fetch(`/delete_comment/${commentId}`);
+        const result = await response.json();
+
+        if (result.success) {
+            // 1. Yorum elementini sayfadan kaldır
+            const commentItem = document.getElementById(`comment-container-${commentId}`) || element.closest('.comment-item');
+            if (commentItem) {
+                commentItem.style.opacity = '0';
+                setTimeout(() => commentItem.remove(), 300);
+            }
+
+            // 2. Yorum sayılarını güncelle (Senkronizasyon)
+            const countSpans = document.querySelectorAll(`.js-comment-count-${postId}`);
+            countSpans.forEach(span => {
+                const currentText = span.innerText.trim();
+                const currentCount = parseInt(currentText) || 0;
+                span.innerHTML = `<i class="fa-regular fa-comment"></i> ${Math.max(0, currentCount - 1)}`;
+            });
+        } else {
+            alert(result.error || "Silinemedi.");
+        }
+    } catch (error) {
+        console.error("Yorum silme hatası:", error);
+    }
 }
 
 // ==========================================
@@ -1075,22 +1396,40 @@ async function sendMessage(event) {
     if (event) event.preventDefault(); // Sayfa yenilenmesini engelle
 
     const input = document.getElementById('messageInput');
+    const fileInput = document.getElementById('chatFileInput');
     const text = input.value.trim();
     const recipientId = document.getElementById('recipientId')?.value;
+    const hasFile = fileInput && fileInput.files.length > 0;
 
-    if (!text || !recipientId) return;
+    if ((!text && !hasFile) || !recipientId) return;
+
+    let msgType = 'text';
+    let localFilePath = null;
+
+    if (hasFile) {
+        const file = fileInput.files[0];
+        if (file.type.startsWith('image/')) {
+            msgType = 'image';
+            localFilePath = URL.createObjectURL(file);
+        } else {
+            msgType = 'file';
+        }
+    }
 
     // 1. UI'da göster
     const myData = {
-        body: text,
+        body: text || (hasFile ? fileInput.files[0].name : ""),
         sender_id: document.getElementById('currentUserId').value,
         sender_pic: document.getElementById('currentUserPic').value,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        msg_type: 'text'
+        msg_type: msgType,
+        file_path: localFilePath,
+        is_local: true
     };
     appendMessageToChat(myData);
     
     input.value = "";
+    if (fileInput) fileInput.value = "";
     const messageArea = document.getElementById("messageArea");
     messageArea.scrollTop = messageArea.scrollHeight;
 
@@ -1098,6 +1437,9 @@ async function sendMessage(event) {
     try {
         const formData = new FormData();
         formData.append('body', text);
+        if (hasFile) {
+            formData.append('file', fileInput.files[0]);
+        }
         await fetch(`/send_message/${recipientId}`, { method: 'POST', body: formData });
     } catch (err) {
         console.error("Mesaj gönderilemedi:", err);
@@ -1121,16 +1463,19 @@ if (typeof socket !== 'undefined') {
         } else {
             const msgPreview = data.msg_type === 'audio' ? '🎤 Sesli Mesaj' : data.body;
             showToast("Yeni Mesaj: " + msgPreview, data.sender_pic);
+            
+            // YENİ: Mesaj rozetini güncelle
+            updateMessageBadge();
         }
     });
 
     socket.on('new_notification', (data) => {
-        const notifBadge = document.querySelector('.nav-items a[href="/notifications"] .notification-badge');
-        if (notifBadge) {
+        const badges = document.querySelectorAll('.notification-badge, .mobile-badge');
+        badges.forEach(notifBadge => {
             let count = parseInt(notifBadge.innerText) || 0;
             notifBadge.innerText = data.count !== undefined ? data.count : count + 1;
-            notifBadge.style.display = 'flex';
-        }
+            notifBadge.style.display = 'inline-block';
+        });
         showToast(data.text, data.actor_pic);
     });
 }
@@ -1141,7 +1486,7 @@ function updateInboxRow(msg) {
 
     const rowId = `conv-${msg.sender_id}`;
     let row = document.getElementById(rowId);
-    let previewText = msg.msg_type === 'audio' ? '🎤 Sesli Mesaj' : msg.body;
+    let previewText = msg.msg_type === 'audio' ? '🎤 Sesli Mesaj' : (msg.msg_type === 'image' ? '📷 Resim' : (msg.msg_type === 'file' ? '📎 Dosya' : msg.body));
     if (previewText && previewText.length > 30) previewText = previewText.substring(0, 30) + "...";
     const picPath = msg.sender_pic ? `/static/${msg.sender_pic}` : '/static/img/default_avatar.png';
 
@@ -1157,11 +1502,20 @@ function updateInboxRow(msg) {
             badgeEl.innerText = count + 1;
             badgeEl.style.display = 'flex';
         }
-        list.prepend(row);
+        row.classList.add('unread-bg'); // Okunmamış stilini ekle
+        
+        // Parent wrapper'ı (inbox-row) bul ve en üste taşı
+        const parentRow = row.closest('.inbox-row');
+        if (parentRow) {
+            list.prepend(parentRow);
+        } else {
+            list.prepend(row);
+        }
     } else {
         const handle = msg.sender_handle || msg.sender_username || '#'; 
         const newRowHTML = `
-        <a href="/chat/${handle}" class="inbox-item" id="conv-${msg.sender_id}" style="background-color: rgba(var(--ytu-lacivert-rgb), 0.05);">
+        <div class="inbox-row">
+        <a href="/chat/${handle}" class="inbox-item unread-bg" id="conv-${msg.sender_id}">
             <div class="avatar-wrapper"><img src="${picPath}" class="inbox-avatar" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover;"></div>
             <div class="inbox-info" style="flex: 1;">
                 <div class="inbox-top-row" style="display: flex; justify-content: space-between;">
@@ -1173,9 +1527,41 @@ function updateInboxRow(msg) {
                     <span class="unread-badge" id="badge-${msg.sender_id}" style="display: flex; background: #ff4757; color: white; padding: 2px 8px; border-radius: 10px;">1</span>
                 </div>
             </div>
-        </a>`;
+        </a>
+        <a href="/delete_conversation/${msg.sender_id}" class="delete-conv-btn" onclick="return confirm('Bu kişiyle olan tüm mesajlaşmalar silinecek. Emin misin?');" title="Sohbeti Sil">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        </div>`;
         list.insertAdjacentHTML('afterbegin', newRowHTML);
     }
+}
+
+// MESAJ ROZETİNİ GÜNCELLEME FONKSİYONU
+function updateMessageBadge() {
+    const links = document.querySelectorAll('a[href="/messages"]');
+    links.forEach(link => {
+        let badge = link.querySelector('.msg-badge');
+        
+        // Eğer badge yoksa ama span varsa (eski yapıdan kalma), onu badge yap
+        if (!badge) {
+            const spans = link.querySelectorAll('span');
+            if (spans.length > 0 && !isNaN(parseInt(spans[spans.length - 1].innerText))) {
+                badge = spans[spans.length - 1];
+                badge.classList.add('msg-badge');
+            }
+        }
+        
+        if (badge) {
+            let count = parseInt(badge.innerText) || 0;
+            badge.innerText = count + 1;
+            badge.style.display = 'inline-block';
+        } else {
+            badge = document.createElement('span');
+            badge.className = 'msg-badge';
+            badge.innerText = '1';
+            link.appendChild(badge);
+        }
+    });
 }
 
 // SOHBETE MESAJ EKLEME FONKSİYONU (GÜNCELLENMİŞ HALİ)
@@ -1205,7 +1591,7 @@ function appendMessageToChat(msg) {
                     <i class="fas fa-play-circle" style="font-size: 3rem; margin-bottom:10px; opacity:0.9; text-shadow: 0 2px 10px rgba(0,0,0,0.5);"></i>
                     <span style="font-size:0.9rem; font-weight:bold; text-shadow: 0 1px 5px rgba(0,0,0,0.8);">Hikayeyi İzle</span>
                 </div>
-                <img src="${imgPath}" style="width:100%; height: 280px; object-fit: cover; display:block;" onerror="this.src='/static/img/story_placeholder.jpg'">
+                <img src="${imgPath}" style="width:100%; height: 280px; object-fit: cover; display:block;" onerror="this.onerror=null; this.src='/static/img/default_avatar.png'">
             </div>
         `;
     } 
@@ -1217,6 +1603,25 @@ function appendMessageToChat(msg) {
                 <source src="/static/audio_files/${msg.file_path ? msg.file_path.replace('.webm', '.mp4') : ''}" type="audio/mp4">
             </audio>`;
     } 
+    // --- YENI: RESIM MESAJI ---
+    else if (msg.msg_type === 'image') {
+        const imgPath = (msg.is_local && msg.file_path) ? msg.file_path : `/static/message_files/${msg.file_path}`;
+        contentHtml = `
+            <div class="chat-image-container">
+                <img src="${imgPath}" class="chat-image" onclick="openLightbox(this.src)">
+            </div>`;
+    }
+    // --- 4. EĞER DOSYA İSE ---
+    else if (msg.msg_type === 'file') {
+        const fileName = msg.body;
+        const downloadLink = msg.file_path ? `/static/message_files/${msg.file_path}` : '#';
+        contentHtml = `
+            <a href="${downloadLink}" target="_blank" class="file-msg-link">
+                <i class="fas fa-file-alt file-msg-icon"></i>
+                <span class="file-msg-name">${fileName}</span>
+                <i class="fas fa-download file-msg-download"></i>
+            </a>`;
+    }
     // --- 3. EĞER NORMAL METİN İSE ---
     else {
         contentHtml = msg.body;
@@ -1301,6 +1706,14 @@ if (typeof socket !== 'undefined') {
     });
 }
 
+// GERİ BİLDİRİM MODALI
+function openFeedbackModal() {
+    document.getElementById('feedbackModal').style.display = 'block';
+}
+function closeFeedbackModal() {
+    document.getElementById('feedbackModal').style.display = 'none';
+}
+
 // GLOBAL EVENT LISTENERS
 window.addEventListener('click', function (event) {
     const modal = document.getElementById("detayModal");
@@ -1308,6 +1721,7 @@ window.addEventListener('click', function (event) {
     if (!event.target.matches('.comment-menu-btn')) {
         document.querySelectorAll('.comment-dropdown').forEach(menu => { if (!menu.id.startsWith('tag-menu')) menu.style.display = 'none'; });
     }
+    if (event.target == document.getElementById('feedbackModal')) closeFeedbackModal();
 });
 
 // REELS SAYFASI ETKİLEŞİMLERİ
@@ -1318,22 +1732,107 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
             const userId = this.dataset.userId;
-            const action = this.classList.contains('following') ? 'unfollow' : 'follow';
-            fetch(`/user/${userId}/${action}`, { method: 'POST' }).then(r => r.json()).then(d => {
+            
+            fetch(`/api/follow_user/${userId}`, { method: 'POST' }).then(r => r.json()).then(d => {
                 if (d.success) {
-                    if (action === 'follow') { this.classList.add('following'); this.textContent = 'Takip Ediliyor'; }
-                    else { this.classList.remove('following'); this.textContent = '+ Takip Et'; }
+                    if (d.action === 'followed') { 
+                        // Animasyonlu Tik İşareti
+                        this.innerHTML = '<i class="fas fa-check"></i>';
+                        this.classList.add('followed-success');
+                        setTimeout(() => {
+                            this.style.opacity = '0';
+                            setTimeout(() => this.style.display = 'none', 500);
+                        }, 1000);
+                    }
                 }
             });
         });
     });
+
+    // 2. Beğeni Butonları (Görsel Toggle)
     const likeBtns = document.querySelectorAll('.reel-action.like-btn');
     likeBtns.forEach(btn => {
         btn.addEventListener('click', function () {
             const icon = this.querySelector('i');
-            if (icon.classList.contains('fa-regular')) { icon.classList.replace('fa-regular', 'fa-solid'); }
-            else { icon.classList.replace('fa-solid', 'fa-regular'); }
+            if (icon.classList.contains('fa-regular')) { 
+                icon.classList.replace('fa-regular', 'fa-solid'); 
+                icon.style.color = '#ff4757'; // Kırmızı
+            } else { 
+                icon.classList.replace('fa-solid', 'fa-regular'); 
+                icon.style.color = 'white'; // Beyaz
+            }
         });
+    });
+
+    // 3. Otomatik Oynatma ve Durdurma (Intersection Observer)
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const video = entry.target.querySelector('video');
+            if (!video) return;
+
+            if (entry.isIntersecting) {
+                video.play().catch(e => console.log("Otomatik oynatma engellendi:", e));
+            } else {
+                video.pause();
+            }
+        });
+    }, { threshold: 0.6 }); // %60'ı görünüyorsa oynat
+
+    document.querySelectorAll('.reel-item').forEach(item => {
+        observer.observe(item);
+
+        // 4. Çift Tıklama ile Beğeni (Instagram Tarzı)
+        item.addEventListener('dblclick', function(e) {
+            const likeBtn = this.querySelector('.reel-action.like-btn');
+            if (likeBtn) {
+                showReelsHeart(e.clientX, e.clientY); // Animasyon
+                
+                // Eğer beğenilmemişse beğen (İkon kontrolü)
+                const icon = likeBtn.querySelector('i');
+                if (icon && icon.classList.contains('fa-regular')) {
+                    likeBtn.click();
+                }
+            }
+        });
+
+        // 5. Tek Tıklama ile Oynat/Durdur
+        item.addEventListener('click', function(e) {
+            // Eğer tıklanan yer butonlar veya interaktif elemanlar değilse işlem yapma
+            if (e.target.closest('.reel-sidebar') || e.target.closest('.reel-info') || e.target.closest('.reels-back-btn')) return;
+
+            const video = this.querySelector('video');
+            if (video) {
+                if (video.paused) {
+                    video.play().catch(err => console.log("Oynatma hatası:", err));
+                } else {
+                    video.pause();
+                }
+            }
+        });
+    });
+
+    // Klavye ile Reels Kaydırma (Yumuşak Geçiş)
+    document.addEventListener('keydown', function(e) {
+        const container = document.querySelector('.reels-container');
+        if (!container) return;
+
+        const itemHeight = window.innerHeight;
+        const currentScroll = container.scrollTop;
+        const index = Math.round(currentScroll / itemHeight);
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            container.scrollTo({
+                top: (index + 1) * itemHeight,
+                behavior: 'smooth'
+            });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            container.scrollTo({
+                top: (index - 1) * itemHeight,
+                behavior: 'smooth'
+            });
+        }
     });
 });
 
@@ -1469,6 +1968,14 @@ function filterShareUsers() {
     });
 }
 
+function scrollToNextReel(element) {
+    const currentReel = element.closest('.reel-item');
+    const nextReel = currentReel.nextElementSibling;
+    if (nextReel) {
+        nextReel.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
 // Bağlantıyı Kopyala
 function copyShareLinkPro() {
     navigator.clipboard.writeText(globalShareLink).then(() => {
@@ -1557,5 +2064,426 @@ async function viewSharedStory(event, storyId) {
         }
     } catch (err) {
         console.error("Hikaye açma hatası:", err);
+    }
+}
+
+// ==========================================
+// 25. UÇUŞAN KALP ANİMASYONU
+// ==========================================
+function createFloatingHeart(element) {
+    const heart = document.createElement('div');
+    heart.innerText = '❤️';
+    heart.classList.add('floating-heart');
+    
+    const rect = element.getBoundingClientRect();
+    heart.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
+    heart.style.top = (rect.top + window.scrollY) + 'px';
+    
+    document.body.appendChild(heart);
+    
+    setTimeout(() => {
+        heart.remove();
+    }, 1000);
+}
+
+// Reels İçin Özel Büyük Kalp Animasyonu
+function showReelsHeart(x, y) {
+    const heart = document.createElement('i');
+    heart.className = 'fas fa-heart';
+    heart.style.position = 'fixed';
+    heart.style.left = x + 'px';
+    heart.style.top = y + 'px';
+    heart.style.transform = 'translate(-50%, -50%) scale(0)';
+    heart.style.color = 'white';
+    heart.style.fontSize = '6rem';
+    heart.style.zIndex = '9999';
+    heart.style.pointerEvents = 'none';
+    heart.style.textShadow = '0 10px 20px rgba(0,0,0,0.3)';
+    heart.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease-in';
+    
+    document.body.appendChild(heart);
+    
+    requestAnimationFrame(() => { heart.style.transform = 'translate(-50%, -50%) scale(1)'; });
+    
+    setTimeout(() => {
+        heart.style.opacity = '0';
+        heart.style.transform = 'translate(-50%, -50%) scale(1.2)';
+        setTimeout(() => heart.remove(), 300);
+    }, 800);
+}
+
+// ==========================================
+// 26. REELS YORUM SİSTEMİ (BOTTOM SHEET)
+// ==========================================
+async function openReelComments(postId) {
+    const modal = document.getElementById('reelCommentModal');
+    const list = document.getElementById('reelCommentsList');
+    const inputId = document.getElementById('currentReelId');
+    
+    if(!modal || !list) return;
+
+    inputId.value = postId;
+    list.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa;">Yükleniyor...</div>';
+    modal.style.display = 'flex';
+
+    try {
+        const response = await fetch(`/api/get_comments/${postId}`);
+        const data = await response.json();
+
+        if(data.success) {
+            list.innerHTML = '';
+            if(data.comments.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa;">Henüz yorum yok. İlk yorumu sen yap!</div>';
+            } else {
+                data.comments.forEach(comment => {
+                    const html = `
+                        <div class="reel-comment-item">
+                            <img src="/static/${comment.author_pic}" class="reel-comment-avatar">
+                            <div>
+                                <div style="font-weight:bold; font-size:0.9rem;">${comment.author_name} <span style="font-weight:normal; color:#aaa; font-size:0.75rem; margin-left:5px;">${comment.timestamp}</span></div>
+                                <div style="color:#ddd;">${comment.text}</div>
+                            </div>
+                        </div>
+                    `;
+                    list.insertAdjacentHTML('beforeend', html);
+                });
+            }
+            // En alta kaydır
+            list.scrollTop = list.scrollHeight;
+        }
+    } catch(e) {
+        console.error(e);
+        list.innerHTML = '<div style="text-align:center; color:red;">Yorumlar yüklenemedi.</div>';
+    }
+}
+
+function closeReelComments() {
+    document.getElementById('reelCommentModal').style.display = 'none';
+}
+
+async function submitReelComment(event) {
+    event.preventDefault();
+    const postId = document.getElementById('currentReelId').value;
+    const input = document.getElementById('reelCommentInput');
+    const text = input.value.trim();
+    
+    if(!text) return;
+
+    const formData = new FormData();
+    formData.append('comment_text', text);
+
+    try {
+        const response = await fetch(`/api/add_comment/${postId}`, { method: 'POST', body: formData });
+        const result = await response.json();
+
+        if(result.success) {
+            input.value = '';
+            const list = document.getElementById('reelCommentsList');
+            
+            // "Henüz yorum yok" yazısını kaldır
+            if(list.innerText.includes('Henüz yorum yok')) list.innerHTML = '';
+
+            const html = `
+                <div class="reel-comment-item animate-post">
+                    <img src="/static/${result.comment.author_pic}" class="reel-comment-avatar">
+                    <div>
+                        <div style="font-weight:bold; font-size:0.9rem;">${result.comment.author_name} <span style="font-weight:normal; color:#aaa; font-size:0.75rem; margin-left:5px;">Şimdi</span></div>
+                        <div style="color:#ddd;">${result.comment.text}</div>
+                    </div>
+                </div>
+            `;
+            list.insertAdjacentHTML('beforeend', html);
+            list.scrollTop = list.scrollHeight;
+
+            // Sağ menüdeki yorum sayısını güncelle
+            const countSpan = document.getElementById(`reel-comment-count-${postId}`);
+            if(countSpan) {
+                countSpan.innerText = parseInt(countSpan.innerText) + 1;
+            }
+        }
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+// ==========================================
+// 27. YORUM SIRALAMA VE ETİKETLEME
+// ==========================================
+
+// Yorumları Sırala
+function sortComments(order) {
+    const container = document.getElementById('commentsContainer');
+    if (!container) return;
+
+    // Sadece yorum olanları al (açıklama kısmı hariç)
+    const items = Array.from(container.querySelectorAll('.comment-item[data-timestamp]'));
+    
+    items.sort((a, b) => {
+        const timeA = parseFloat(a.getAttribute('data-timestamp'));
+        const timeB = parseFloat(b.getAttribute('data-timestamp'));
+        const likeA = parseInt(a.getAttribute('data-likes')) || 0;
+        const likeB = parseInt(b.getAttribute('data-likes')) || 0;
+
+        if (order === 'newest') return timeB - timeA;
+        if (order === 'oldest') return timeA - timeB;
+        if (order === 'popular') return likeB - likeA;
+    });
+
+    // Mevcut yorumları geçici olarak kaldır ve sıralı ekle
+    items.forEach(item => item.remove());
+    items.forEach(item => container.appendChild(item));
+}
+
+// Sayfa yüklendiğinde varsayılan olarak "En Yeniler" yap
+document.addEventListener('DOMContentLoaded', () => {
+    if(document.getElementById('commentsContainer')) {
+        sortComments('newest');
+    }
+    // Initialize mention system on all pages (will bind to any inputs present)
+    setupMentionSystem();
+});
+
+// Etiketleme Sistemi (@username)
+function setupMentionSystem() {
+    // Create a single floating suggestion box if not present
+    let suggestionBox = document.getElementById('mention-suggestions-global');
+    if (!suggestionBox) {
+        suggestionBox = document.createElement('div');
+        suggestionBox.id = 'mention-suggestions-global';
+        suggestionBox.className = 'mention-dropdown';
+        suggestionBox.style.position = 'absolute';
+        suggestionBox.style.display = 'none';
+        suggestionBox.style.zIndex = 99999;
+        document.body.appendChild(suggestionBox);
+    }
+
+    const DEBOUNCE_MS = 260;
+    function debounce(fn, wait) {
+        let t;
+        return (...args) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn(...args), wait);
+        };
+    }
+
+    // Attach mention handlers to an input/textarea
+    function bindInput(input) {
+        if (input._mentionBound) return;
+        input._mentionBound = true;
+
+        let currentItems = [];
+        let selectedIndex = -1;
+
+        async function fetchAndShow(query, caretRect) {
+            try {
+                const res = await fetch(`/api/search_users?q=${encodeURIComponent(query)}`);
+                if (!res.ok) throw new Error('Network');
+                const data = await res.json();
+                if (!data.success || !data.users || data.users.length === 0) {
+                    suggestionBox.style.display = 'none';
+                    return;
+                }
+
+                suggestionBox.innerHTML = '';
+                currentItems = data.users;
+                selectedIndex = -1;
+
+                data.users.forEach((user, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'mention-item';
+                    div.dataset.index = idx;
+                    div.innerHTML = `
+                        <img src="/static/${user.profile_pic}" class="mention-avatar">
+                        <div class="mention-info">
+                            <span class="mention-name">${user.username}</span>
+                            <span class="mention-handle">@${user.handle}</span>
+                        </div>`;
+                    div.addEventListener('mousedown', (ev) => {
+                        // use mousedown to avoid blur before click
+                        ev.preventDefault();
+                        applySelection(input, user);
+                    });
+                    suggestionBox.appendChild(div);
+                });
+
+                // Position suggestion box under input caret (approx)
+                if (caretRect) {
+                    suggestionBox.style.left = (window.scrollX + caretRect.left) + 'px';
+                    suggestionBox.style.top = (window.scrollY + caretRect.bottom + 6) + 'px';
+                    suggestionBox.style.minWidth = Math.max(220, caretRect.width) + 'px';
+                } else {
+                    const rect = input.getBoundingClientRect();
+                    suggestionBox.style.left = (window.scrollX + rect.left) + 'px';
+                    suggestionBox.style.top = (window.scrollY + rect.bottom + 6) + 'px';
+                    suggestionBox.style.minWidth = Math.max(220, rect.width) + 'px';
+                }
+
+                suggestionBox.style.display = 'block';
+            } catch (e) {
+                console.error('Mention fetch error', e);
+                suggestionBox.style.display = 'none';
+            }
+        }
+
+        const debouncedFetch = debounce(fetchAndShow, DEBOUNCE_MS);
+
+        function getCaretCoordinates(el, position) {
+            // Best-effort: use range on textarea/input via mirror div fallback
+            try {
+                if (el.selectionEnd !== undefined) {
+                    // For inputs/textareas, approximate using getBoundingClientRect of input
+                    const rect = el.getBoundingClientRect();
+                    return { left: rect.left + 8, bottom: rect.top + rect.height, width: rect.width };
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        function applySelection(inputEl, user) {
+            const val = inputEl.value;
+            const cursor = inputEl.selectionStart || val.length;
+            const textBeforeCursor = val.substring(0, cursor);
+            const match = textBeforeCursor.match(/(^|\s)@([\wğüşöçıİĞÜŞÖÇ-]+)$/i);
+            if (!match) return;
+            const prefix = textBeforeCursor.substring(0, match.index + match[1].length);
+            const newText = prefix + '@' + user.handle + ' ' + val.substring(cursor);
+            inputEl.value = newText;
+            // move caret after inserted handle + space
+            const newPos = (prefix + '@' + user.handle + ' ').length;
+            inputEl.setSelectionRange(newPos, newPos);
+            suggestionBox.style.display = 'none';
+            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+            inputEl.focus();
+        }
+
+        input.addEventListener('keydown', (e) => {
+            if (suggestionBox.style.display === 'block') {
+                const items = suggestionBox.querySelectorAll('.mention-item');
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    items.forEach((it, i) => it.classList.toggle('selected', i === selectedIndex));
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                    items.forEach((it, i) => it.classList.toggle('selected', i === selectedIndex));
+                } else if (e.key === 'Enter') {
+                    if (selectedIndex >= 0 && items[selectedIndex]) {
+                        e.preventDefault();
+                        const u = currentItems[selectedIndex];
+                        applySelection(input, u);
+                    }
+                } else if (e.key === 'Escape') {
+                    suggestionBox.style.display = 'none';
+                }
+            }
+        });
+
+        input.addEventListener('input', function () {
+            const val = this.value;
+            const cursor = this.selectionStart;
+            const textBeforeCursor = val.substring(0, cursor);
+            const m = textBeforeCursor.match(/(^|\s)@([\wğüşöçıİĞÜŞÖÇ-]{1,})$/i);
+            if (m) {
+                const query = m[2];
+                const caretRect = getCaretCoordinates(this, cursor);
+                debouncedFetch(query, caretRect);
+            } else {
+                suggestionBox.style.display = 'none';
+            }
+        });
+
+        // Hide suggestions on blur (small delay to allow click)
+        input.addEventListener('blur', () => setTimeout(() => suggestionBox.style.display = 'none', 120));
+    }
+
+    // Bind existing and future inputs
+    function bindAll() {
+        document.querySelectorAll('.detail-comment-input, .comment-input, input[data-mention], textarea[data-mention]').forEach(bindInput);
+    }
+
+    bindAll();
+
+    // Watch for dynamically added comment inputs
+    const mo = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            if (m.addedNodes && m.addedNodes.length) {
+                m.addedNodes.forEach(node => {
+                    if (node.querySelectorAll) {
+                        node.querySelectorAll('.detail-comment-input, .comment-input, input[data-mention], textarea[data-mention]').forEach(bindInput);
+                    }
+                    if (node.classList && (node.classList.contains('detail-comment-input') || node.classList.contains('comment-input'))) {
+                        bindInput(node);
+                    }
+                });
+            }
+        }
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+
+    // Global click to hide when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.mention-item') && !e.target.closest('.detail-comment-input') && !e.target.closest('.comment-input')) {
+            suggestionBox.style.display = 'none';
+        }
+    });
+}
+
+// ==========================================
+// 28. KULÜP TAKİP VE OYLAMA (AJAX)
+// ==========================================
+async function toggleClubFollow(clubId, btn) {
+    try {
+        const response = await fetch(`/follow_club/${clubId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const countSpan = document.querySelector('.c-meta span:first-child');
+            if (data.action === 'followed') {
+                btn.classList.add('active');
+                btn.innerHTML = '<i class="fas fa-check"></i> Takip Ediliyor';
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '<i class="fas fa-plus"></i> Takip Et';
+            }
+            if(countSpan) countSpan.innerHTML = `<i class="fas fa-users"></i> ${data.count} Takipçi`;
+        }
+    } catch (error) {
+        console.error('Takip hatası:', error);
+    }
+}
+
+async function voteClub(clubId, btn) {
+    if (btn.disabled) return;
+    
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+    
+    try {
+        const response = await fetch(`/vote_club/${clubId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            btn.innerHTML = '<i class="fas fa-check"></i> Oy Verildi';
+            btn.style.backgroundColor = '#28a745';
+            btn.style.transform = 'scale(1.1)';
+            setTimeout(() => btn.style.transform = 'scale(1)', 200);
+            btn.disabled = true;
+            btn.style.cursor = 'default';
+            
+            const countSpan = document.querySelector('.c-meta span:last-child');
+            if(countSpan) countSpan.innerHTML = `<i class="fas fa-trophy"></i> ${data.new_total} Lig Puanı`;
+            
+            // Uçuşan kalp animasyonu
+            if (typeof createFloatingHeart === 'function') {
+                createFloatingHeart(btn);
+            }
+        } else {
+            btn.innerHTML = originalContent;
+            alert(data.message);
+        }
+    } catch (error) {
+        console.error('Oylama hatası:', error);
+        btn.innerHTML = originalContent;
     }
 }

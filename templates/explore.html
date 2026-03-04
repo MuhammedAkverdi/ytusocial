@@ -77,26 +77,69 @@
             margin-bottom: 10px;
         }
 
-        /* Post Masonry Grid */
-        .masonry-grid {
-            column-count: 2; /* 2 columns for posts */
-            column-gap: 20px;
+        /* Instagram Style Grid */
+        .insta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
         }
-        .masonry-item {
-            break-inside: avoid;
-            margin-bottom: 20px;
+        .insta-item {
+            position: relative;
+            aspect-ratio: 1 / 1;
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
             border-radius: 12px;
             overflow: hidden;
-        }
-        .masonry-img {
-            width: 100%;
-            display: block;
             cursor: pointer;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s;
         }
-        .masonry-content {
-            padding: 15px;
+        .insta-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+        .insta-media {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .insta-item:hover .insta-media {
+            transform: scale(1.05);
+        }
+        .insta-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .insta-item:hover .insta-overlay {
+            opacity: 1;
+        }
+        .insta-text-card {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #0056b3);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .video-icon {
+            position: absolute;
+            top: 10px; right: 10px;
+            color: white;
+            font-size: 1.2rem;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 2;
         }
 
         @media (max-width: 1100px) {
@@ -106,8 +149,26 @@
         @media (max-width: 800px) {
             .explore-layout { grid-template-columns: 1fr; }
             .right-sidebar { display: none; }
-            .masonry-grid { column-count: 1; }
         }
+
+        /* Arama Sonuçları Dropdown */
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .search-result-item { display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid var(--border-color); cursor: pointer; text-decoration: none; color: var(--text-color); transition: background 0.2s; }
+        .search-result-item:hover { background: var(--link-hover); }
+        .search-result-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
@@ -115,75 +176,86 @@
     {% include 'navbar_partial.html' ignore missing %} <div class="explore-layout">
         
         <aside class="left-sidebar sticky-sidebar">
-            <div class="club-card" style="border: none; padding: 15px;">
-                <a href="{{ url_for('index') }}" class="sidebar-link"><span>🏠</span> Ana Sayfa</a>
-                <a href="{{ url_for('explore') }}" class="sidebar-link active-link"><span>🔍</span> Keşfet</a>
-                <a href="{{ url_for('reels') }}" class="sidebar-link"><span>🎬</span> Reels</a>
-                <a href="{{ url_for('notes_pool') }}" class="sidebar-link"><span>📚</span> Not Havuzu</a>
-                <a href="{{ url_for('messages_inbox') }}" class="sidebar-link"><span>📩</span> Mesajlar</a>
+            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px 20px; border: 1px solid var(--border-color);">
+                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
+                    <img src="/static/{{ current_user.profile_pic }}" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ytu-lacivert); object-fit: cover; margin-bottom: 12px;">
+                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{ current_user.username }}</h3>
+                    <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
+                </div>
+
+                <nav style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="{{ url_for('main.index') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert);"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
+                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
+                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
+                        {% if unread_count > 0 %}
+                        <span class="notification-badge">{{ unread_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar</a>
+                </nav>
             </div>
         </aside>
 
         <main class="explore-main">
             
-            <div class="search-hero">
-                <h2 style="margin-bottom: 20px; color: var(--text-color);">Yıldız'da Ne Var Ne Yok?</h2>
-                <form action="{{ url_for('explore') }}" method="GET">
-                    <input type="text" name="q" class="search-input-lg" placeholder="Kişi, etiket veya konu ara..." value="{{ request.args.get('q', '') }}">
+            <div class="search-hero" style="padding: 0; background: transparent; border: none; box-shadow: none; margin-bottom: 10px;">
+                <form action="{{ url_for('main.explore') }}" method="GET">
+                    <div style="position: relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                        <input type="text" name="q" id="exploreSearchInput" class="search-input-lg" placeholder="Kullanıcı ara..." value="{{ request.args.get('q', '') }}" style="padding-left: 50px; width: 100%; max-width: 100%; background: var(--input-bg); border: 1px solid var(--border-color);" autocomplete="off">
+                        <div id="searchResults" class="search-dropdown"></div>
+                    </div>
                 </form>
-                
-                <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                    <a href="{{ url_for('explore', q='#itiraflar') }}" class="filter-chip">🔥 İtiraflar</a>
-                    <a href="{{ url_for('explore', q='#yazilim') }}" class="filter-chip">💻 Yazılım</a>
-                    <a href="{{ url_for('explore', q='#yemekhane') }}" class="filter-chip">🍔 Yemekhane</a>
-                    <a href="{{ url_for('explore', q='#etkinlik') }}" class="filter-chip">🗓️ Etkinlik</a>
-                </div>
             </div>
 
             {% if users %}
-            <h3 style="color: var(--text-muted); margin-left: 5px;">👤 Bulunan Kişiler</h3>
+            <h3 style="color: var(--text-muted); margin-left: 5px;">👤 Arama Sonuçları</h3>
             <div class="user-results-grid">
                 {% for user in users %}
                 <div class="user-card-explore">
                     <img src="/static/{{ user.profile_pic }}" class="user-explore-avatar">
                     <h4 style="margin: 5px 0; color: var(--text-color);">{{ user.username }}</h4>
                     <small style="color: var(--text-muted); display: block; margin-bottom: 10px;">{{ user.department }}</small>
-                    <a href="{{ url_for('user_profile', handle=user.handle) }}" class="btn-primary" style="padding: 5px 15px; font-size: 0.9rem;">Profili Gör</a>
+                    <a href="{{ url_for('main.user_profile', handle=user.handle) }}" class="btn-primary" style="padding: 5px 15px; font-size: 0.9rem;">Profili Gör</a>
                 </div>
                 {% endfor %}
             </div>
             {% endif %}
 
-            <h3 style="color: var(--text-muted); margin-left: 5px;">📸 Popüler Gönderiler</h3>
+            {% if not search_query %}
+            <h3 style="color: var(--text-muted); margin-left: 5px; margin-top: 10px;">🔥 Trend Olanlar (Top 10)</h3>
+            {% endif %}
             
             {% if posts %}
-            <div class="masonry-grid">
+            <div class="insta-grid">
                 {% for post in posts %}
-                <div class="masonry-item">
+                <div class="insta-item" onclick="window.location.href='{{ url_for('main.post_detail', post_id=post.id) }}'">
                     {% if post.image_file %}
                         {% if post.is_video() %}
-                            <video src="/static/post_images/{{ post.image_file }}" controls class="masonry-img"></video>
+                            <video src="/static/post_images/{{ post.image_file }}" class="insta-media"></video>
+                            <i class="fa-solid fa-video video-icon"></i>
                         {% else %}
-                            <img src="/static/post_images/{{ post.image_file }}" class="masonry-img" onclick="openLightbox(this.src)">
+                            <img src="/static/post_images/{{ post.image_file }}" class="insta-media">
                         {% endif %}
+                    {% else %}
+                        <div class="insta-text-card">
+                            <p>{{ (post.content or '') | truncate(80) }}</p>
+                        </div>
                     {% endif %}
-                    <div class="masonry-content">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <img src="/static/{{ post.author.profile_pic }}" style="width: 30px; height: 30px; border-radius: 50%;">
-                            <span style="font-weight: bold; font-size: 0.9rem;">{{ post.author.username }}</span>
-                        </div>
-                        <p style="font-size: 0.9rem; color: var(--text-color); margin-bottom: 10px;">{{ post.content | truncate(100) }}</p>
-                        <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.8rem;">
-                            <span>❤️ {{ post.liked_by|length }}</span>
-                            <span>💬 {{ post.comments|length }}</span>
-                        </div>
+                    
+                    <div class="insta-overlay">
+                        <span><i class="fa-solid fa-heart"></i> {{ post.liked_by|length }}</span>
+                        <span><i class="fa-solid fa-comment"></i> {{ post.comments|length }}</span>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-            {% else %}
+            {% elif search_query %}
             <div style="text-align: center; padding: 50px; color: var(--text-muted);">
-                <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                <i class="fa-solid fa-magnifying-glass" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
                 <p>Aradığın kriterde içerik bulunamadı.</p>
             </div>
             {% endif %}
@@ -195,7 +267,9 @@
                 <h4 style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">Neler Oluyor?</h4>
                 {% for tag, count in trending_tags %} <div style="margin-bottom: 15px;">
                     <small style="color: var(--text-muted);">Gündem</small>
-                    <div style="font-weight: bold;">#{{ tag }}</div>
+                    <a href="{{ url_for('main.explore', q='#' + tag) }}" style="text-decoration: none; color: inherit;">
+                        <div style="font-weight: bold;">#{{ tag }}</div>
+                    </a>
                     <small style="color: var(--text-muted);">{{ count }} gönderi</small>
                 </div>
                 {% endfor %}
@@ -203,19 +277,70 @@
 
             <div class="club-card">
                 <h4 style="margin-bottom: 15px;">✨ Önerilen Kişiler</h4>
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-                    <div style="width: 40px; height: 40px; background: #ddd; border-radius: 50%;"></div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: bold; font-size: 0.9rem;">Ahmet Yılmaz</div>
-                        <small style="color: var(--text-muted);">Bilgisayar Müh.</small>
+                {% for user in suggested_users %}
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <a href="{{ url_for('main.user_profile', handle=user.handle) }}">
+                            <img src="/static/{{ user.profile_pic }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        </a>
+                        <div style="display: flex; flex-direction: column;">
+                            <a href="{{ url_for('main.user_profile', handle=user.handle) }}" style="font-weight: bold; font-size: 0.9rem; color: var(--text-color); text-decoration: none;">{{ user.username }}</a>
+                            <small style="color: var(--text-muted); font-size: 0.8rem;">{{ user.department or 'Öğrenci' }}</small>
+                        </div>
                     </div>
-                    <button class="btn-vote" style="padding: 5px 10px; font-size: 0.8rem;">Takip Et</button>
+                    <a href="{{ url_for('main.follow', handle=user.handle) }}" style="color: var(--ytu-lacivert); font-size: 1.2rem;" title="Takip Et"><i class="fa-solid fa-user-plus"></i></a>
                 </div>
+                {% else %}
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Şimdilik öneri yok.</p>
+                {% endfor %}
             </div>
         </aside>
 
     </div>
 
     <script src="/static/script.js"></script>
+    <script>
+        // Anlık Kullanıcı Arama
+        const searchInput = document.getElementById('exploreSearchInput');
+        const resultsBox = document.getElementById('searchResults');
+
+        searchInput.addEventListener('input', async function() {
+            const query = this.value.trim();
+            if (query.length < 1) {
+                resultsBox.style.display = 'none';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/search_users?q=${query}`);
+                const data = await res.json();
+                
+                if (data.success && data.users.length > 0) {
+                    resultsBox.innerHTML = '';
+                    data.users.forEach(user => {
+                        const html = `
+                        <a href="/u/${user.handle}" class="search-result-item">
+                            <img src="/static/${user.profile_pic}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:12px;">
+                            <div>
+                                <div style="font-weight:bold; font-size:0.95rem;">${user.username}</div>
+                                <small style="color:var(--text-muted); font-size:0.8rem;">@${user.handle} • ${user.department || 'Öğrenci'}</small>
+                            </div>
+                        </a>`;
+                        resultsBox.insertAdjacentHTML('beforeend', html);
+                    });
+                    resultsBox.style.display = 'block';
+                } else {
+                    resultsBox.style.display = 'none';
+                }
+            } catch (e) { console.error(e); }
+        });
+
+        // Dışarı tıklayınca kapat
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !resultsBox.contains(e.target)) {
+                resultsBox.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
