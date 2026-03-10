@@ -5,10 +5,191 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kulüpler Ligi | YTU Social</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* --- SAYFA ÖZEL STİLLERİ --- */
         body { background-color: var(--bg-color); color: var(--text-color); margin: 0; font-family: 'Inter', sans-serif; }
+
+        /* ===== MOBİL (≤768px) ===== */
+        @media (max-width: 768px) {
+
+            /* --- ÜST NAVBAR --- */
+            .navbar { display: none !important; }
+            .cl-top-bar {
+                display: flex !important;
+                position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+                height: 54px;
+                background: var(--card-bg);
+                border-bottom: 1px solid var(--border-color);
+                align-items: center;
+                padding: 0 14px;
+                gap: 10px;
+                box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            }
+            .cl-top-back {
+                width: 36px; height: 36px; border-radius: 50%;
+                border: none; background: var(--hover-bg);
+                color: var(--text-color); font-size: 1rem;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; flex-shrink: 0; text-decoration: none;
+            }
+            .cl-top-title {
+                flex: 1;
+                font-size: 1rem; font-weight: 900;
+                color: var(--text-color); letter-spacing: -0.3px;
+            }
+            .cl-top-trophy {
+                font-size: 1.3rem;
+            }
+
+            /* --- LAYOUT --- */
+            body { padding-top: 54px; padding-bottom: 68px; }
+            .page-container {
+                padding: 12px 12px 8px !important;
+                max-width: 100% !important;
+            }
+
+            /* Başlık alanını gizle (top bar'da var) */
+            .league-header { display: none !important; }
+
+            /* Grid → dikey liste */
+            .clubs-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+
+            /* Kart → yatay kompakt satır */
+            .club-card {
+                border-radius: 16px !important;
+                flex-direction: row !important;
+                overflow: hidden !important;
+                align-items: stretch;
+                min-height: 0;
+            }
+            .club-card:hover { transform: none !important; }
+
+            /* Banner → sol renk çubuğu */
+            .club-banner {
+                width: 6px !important;
+                height: auto !important;
+                flex-shrink: 0;
+                border-radius: 0 !important;
+            }
+            .club-logo { display: none !important; }
+
+            /* Sıra rozeti */
+            .rank-badge {
+                top: 50% !important;
+                left: 18px !important;
+                transform: translateY(-50%) !important;
+                width: 26px !important; height: 26px !important;
+                font-size: 0.75rem !important;
+            }
+
+            /* Kart içerik */
+            .club-body {
+                padding: 12px 12px 12px 44px !important; /* rank badge için sol boşluk */
+                text-align: left !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                flex-grow: 1;
+                gap: 10px;
+            }
+
+            /* Sol: logo + isim + açıklama */
+            .cl-mob-info {
+                flex: 1; min-width: 0;
+                display: flex; align-items: center; gap: 10px;
+            }
+            .cl-mob-logo {
+                width: 44px; height: 44px;
+                border-radius: 12px;
+                object-fit: cover;
+                border: 1px solid var(--border-color);
+                background: #fff;
+                flex-shrink: 0;
+            }
+            .cl-mob-text { flex: 1; min-width: 0; }
+            .club-name {
+                font-size: 0.9rem !important;
+                margin-bottom: 2px !important;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            }
+            .club-desc {
+                font-size: 0.75rem !important;
+                margin-bottom: 4px !important;
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                color: var(--text-muted);
+            }
+            .cl-mob-stats {
+                display: flex; gap: 10px;
+                font-size: 0.72rem; color: var(--text-muted);
+            }
+            .cl-mob-stats strong { color: var(--text-color); font-weight: 700; }
+
+            /* Sağ: butonlar */
+            .cl-mob-actions {
+                display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;
+                align-items: flex-end;
+            }
+            .cl-mob-vote {
+                padding: 6px 12px;
+                border-radius: 20px;
+                border: 1.5px solid #ff4757;
+                background: transparent;
+                color: #ff4757;
+                font-size: 0.72rem; font-weight: 700;
+                cursor: pointer; white-space: nowrap;
+                text-decoration: none; display: inline-block;
+            }
+            .cl-mob-vote.voted {
+                background: #ff4757; color: #fff;
+            }
+            .cl-mob-view {
+                padding: 5px 10px;
+                border-radius: 20px;
+                border: 1px solid var(--border-color);
+                background: var(--bg-secondary);
+                color: var(--text-color);
+                font-size: 0.72rem; font-weight: 600;
+                text-decoration: none; display: inline-block;
+                white-space: nowrap;
+            }
+
+            /* Orijinal elemanları gizle */
+            .club-stats { display: none !important; }
+            .club-actions { display: none !important; }
+            .club-body > .club-name,
+            .club-body > .club-desc { display: none !important; }
+
+            /* --- ALT NAVBAR --- */
+            .cl-bottom-nav {
+                display: flex !important;
+                position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+                height: 60px;
+                background: var(--card-bg);
+                border-top: 1px solid var(--border-color);
+                align-items: center;
+                justify-content: space-around;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+            }
+            .cl-nav-item {
+                display: flex; flex-direction: column; align-items: center;
+                gap: 3px; flex: 1;
+                text-decoration: none;
+                color: var(--text-muted);
+                font-size: 0.6rem; font-weight: 600;
+                padding: 6px 0;
+                transition: color 0.15s;
+            }
+            .cl-nav-item i { font-size: 1.15rem; }
+            .cl-nav-item.active { color: var(--ytu-lacivert); }
+            .cl-nav-item:active { opacity: 0.7; }
+        }
 
         .page-container {
             max-width: 1200px;
@@ -162,11 +343,22 @@
         .btn-icon.active { background: var(--ytu-lacivert); color: white; border-color: var(--ytu-lacivert); }
         .btn-icon.vote:hover { background: #ff4757; color: white; border-color: #ff4757; }
 
+        /* Mobil-only elemanları masaüstünde gizle */
+        .cl-top-bar, .cl-bottom-nav,
+        .cl-mob-info, .cl-mob-actions { display: none; }
+
     </style>
 </head>
 <body>
 
     {% include 'navbar_partial.html' ignore missing %}
+
+    <!-- MOBİL ÜST BAR -->
+    <div class="cl-top-bar" style="display:none;">
+        <a href="{{ url_for('main.index') }}" class="cl-top-back"><i class="fas fa-arrow-left"></i></a>
+        <span class="cl-top-title">🏆 Kulüpler Ligi</span>
+        <span class="cl-top-trophy"></span>
+    </div>
 
     <div class="page-container">
         
@@ -185,6 +377,28 @@
                 </div>
 
                 <div class="club-body">
+                    <!-- MOBİL GÖRÜNÜM -->
+                    <div class="cl-mob-info">
+                        <img src="/static/img/{{ club.logo_file }}" class="cl-mob-logo" onerror="this.style.display='none'">
+                        <div class="cl-mob-text">
+                            <div class="club-name">{{ club.name }}</div>
+                            <div class="club-desc">{{ club.description[:80] }}</div>
+                            <div class="cl-mob-stats">
+                                <span><strong>{{ club.followers.count() }}</strong> Takipçi</span>
+                                <span><strong>{{ club.total_votes() }}</strong> Puan</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cl-mob-actions">
+                        {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('vote_club', club_id=club.id) }}" class="cl-mob-vote {% if current_user in club.voted_by %}voted{% endif %}">
+                            <i class="fas fa-trophy"></i> Oy
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('club_detail', slug=club.slug) }}" class="cl-mob-view">Gör</a>
+                    </div>
+
+                    <!-- MASAÜSTÜ GÖRÜNÜM -->
                     <div class="club-name">{{ club.name }}</div>
                     <div class="club-desc">{{ club.description[:90] }}...</div>
 
@@ -217,6 +431,23 @@
 
     </div>
 
-    <script src="/static/script.js"></script>
+    <!-- MOBİL ALT NAVBAR -->
+    <nav class="cl-bottom-nav" style="display:none;">
+        <a href="{{ url_for('main.index') }}" class="cl-nav-item">
+            <i class="fas fa-house"></i> Ana Sayfa
+        </a>
+        <a href="{{ url_for('main.explore') }}" class="cl-nav-item">
+            <i class="fas fa-compass"></i> Keşfet
+        </a>
+        <a href="{{ url_for('main.clubs') }}" class="cl-nav-item active">
+            <i class="fas fa-trophy"></i> Kulüpler
+        </a>
+        <a href="{{ url_for('main.notifications') }}" class="cl-nav-item">
+            <i class="fas fa-bell"></i> Bildirim
+        </a>
+        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="cl-nav-item">
+            <i class="fas fa-user"></i> Profil
+        </a>
+    </nav>
 </body>
 </html>

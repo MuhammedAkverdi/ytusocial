@@ -21,11 +21,77 @@ ONLINE_USERS = set()
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi', 'webm', 'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'}
 DATA_FILE = 'votes.json'
 
+# Not havuzu için izin verilen uzantılar (sadece belge formatları)
+ALLOWED_NOTE_EXTENSIONS = {'pdf', 'txt', 'doc', 'docx', 'ppt', 'pptx'}
+
+# Dosya imzaları (magic bytes) - dosyanın gerçekten ne olduğunu doğrula
+FILE_MAGIC_SIGNATURES = {
+    'pdf':  [(0, b'%PDF')],
+    'docx': [(0, b'PK\x03\x04')],
+    'pptx': [(0, b'PK\x03\x04')],
+    'doc':  [(0, b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1')],
+    'ppt':  [(0, b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1')],
+    'txt':  None,  # Sabit imza yok; null byte kontrolü yapılır
+}
+
+MAX_NOTE_SIZE_BYTES = 15 * 1024 * 1024  # 15 MB
+
 def get_turkey_time():
     return datetime.utcnow() + timedelta(hours=3)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def scan_file_safety(file_path, ext):
+    """
+    Yüklenen dosyanın güvenli olup olmadığını kontrol eder:
+    1. Uzantı izin verilenler listesinde mi?
+    2. Dosya boyutu 15 MB'ı aşıyor mu?
+    3. Magic bytes, uzantıyla eşleşiyor mu?
+    4. TXT dosyaları binary içerik barındırıyor mu?
+    """
+    ext = ext.lower().strip('.')
+
+    if ext not in ALLOWED_NOTE_EXTENSIONS:
+        return False, f"İzin verilmeyen dosya türü: .{ext}. İzin verilenler: PDF, TXT, DOC, DOCX, PPT, PPTX"
+
+    try:
+        file_size = os.path.getsize(file_path)
+    except OSError:
+        return False, "Dosya boyutu okunamadı."
+
+    if file_size > MAX_NOTE_SIZE_BYTES:
+        return False, f"Dosya boyutu 15 MB sınırını aşıyor ({round(file_size / (1024*1024), 1)} MB)."
+
+    if file_size == 0:
+        return False, "Dosya boş."
+
+    try:
+        with open(file_path, 'rb') as f:
+            header = f.read(8)
+
+        signatures = FILE_MAGIC_SIGNATURES.get(ext)
+
+        if signatures is None:
+            # TXT: null byte kontrolü
+            with open(file_path, 'rb') as f:
+                chunk = f.read(4096)
+            if b'\x00' in chunk:
+                return False, "TXT dosyası geçersiz binary içerik barındırıyor."
+        else:
+            matched = False
+            for offset, sig in signatures:
+                if header[offset:offset + len(sig)] == sig:
+                    matched = True
+                    break
+            if not matched:
+                return False, f"Dosya içeriği .{ext} formatıyla uyuşmuyor. Dosya bozuk veya sahte olabilir."
+
+    except Exception as e:
+        print(f"Dosya tarama hatası: {e}")
+        return False, "Dosya taranamadı."
+
+    return True, "Dosya güvenli."
 
 def not_icerigi_dogru_mu(resim_yolu, bolum):
     try:
@@ -118,7 +184,7 @@ def get_trending_hashtags():
     hashtags = {}
     for post in posts:
         if post.content:
-            found_tags = re.findall(r"#(\w+)", post.content.lower())
+            found_tags = set(re.findall(r"#(\w+)", post.content.lower()))
             for tag in found_tags:
                 hashtags[tag] = hashtags.get(tag, 0) + 1
     sorted_tags = sorted(hashtags.items(), key=lambda x: x[1], reverse=True)

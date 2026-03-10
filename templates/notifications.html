@@ -1,19 +1,205 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bildirimler - YTU Social</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" defer></script>
+    <style>
+    /* Drawer + overlay masaüstünde tamamen gizli */
+    .mob-header, .mob-left-overlay, .mob-left-drawer { display: none; }
+
+    @media (max-width: 768px) {
+        .mob-header       { display: flex; }
+        .mob-left-overlay { display: block; }
+        .mob-left-drawer  { display: flex; }
+    }
+
+    @media (max-width: 768px) {
+        .navbar { display: none !important; }
+
+        .mob-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            height: 54px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            padding: 0 14px;
+            justify-content: space-between;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+        }
+        .mob-header-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            object-fit: cover; border: 2px solid var(--ytu-lacivert);
+            cursor: pointer;
+        }
+        .mob-header-logo {
+            font-size: 1.1rem; font-weight: 900;
+            color: var(--ytu-lacivert); letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+        .mob-header-logo span { color: var(--ytu-sari); }
+        .mob-header-right { display: flex; align-items: center; gap: 10px; }
+        .mob-header-icon {
+            background: none; border: none;
+            color: var(--text-color); font-size: 1.15rem;
+            cursor: pointer; padding: 6px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .mob-left-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+        }
+        .mob-left-overlay.open { display: block; }
+
+        .mob-left-drawer {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 82%; max-width: 320px;
+            background: var(--card-bg);
+            z-index: 2001;
+            flex-direction: column;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        .mob-left-drawer.open { transform: translateX(0); }
+        .mob-drawer-profile { padding: 28px 22px 16px; }
+        .mob-drawer-avatar {
+            width: 62px; height: 62px; border-radius: 50%;
+            object-fit: cover; border: 3px solid var(--ytu-lacivert);
+            margin-bottom: 12px; display: block;
+        }
+        .mob-drawer-name { font-size: 1.05rem; font-weight: 800; color: var(--text-color); margin: 0 0 2px; }
+        .mob-drawer-score {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb),.7));
+            color: #fff; padding: 3px 12px; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 700; margin-top: 6px;
+        }
+        .mob-drawer-nav { padding: 8px 0; border-top: 1px solid var(--border-color); }
+        .mob-drawer-link {
+            display: flex; align-items: center; gap: 18px;
+            padding: 14px 22px;
+            text-decoration: none; color: var(--text-color);
+            font-size: 1.05rem; font-weight: 700;
+            transition: background 0.15s;
+        }
+        .mob-drawer-link:active { background: var(--bg-light); }
+        .mob-drawer-link i { width: 26px; text-align: center; font-size: 1.2rem; color: var(--text-color); }
+        .mob-drawer-link.active, .mob-drawer-link.active i { color: var(--ytu-lacivert); }
+        .mob-drawer-sep { height: 1px; background: var(--border-color); margin: 8px 0; }
+        .mob-drawer-section-title {
+            padding: 12px 22px 4px;
+            font-size: 0.78rem; font-weight: 800;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .mob-drawer-section-title a {
+            font-size: 0.78rem; font-weight: 700; color: var(--ytu-lacivert);
+            text-transform: none; letter-spacing: 0; text-decoration: none;
+        }
+        .mob-drawer-trend {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 22px;
+            text-decoration: none; color: var(--text-color);
+            transition: background 0.15s;
+        }
+        .mob-drawer-trend:active { background: var(--bg-light); }
+        .mob-drawer-trend-tag { font-weight: 700; font-size: 0.9rem; color: var(--ytu-lacivert); }
+        .mob-drawer-trend-count { font-size: 0.72rem; color: var(--text-muted); }
+        .mob-drawer-logout {
+            display: flex; align-items: center; gap: 18px;
+            padding: 14px 22px;
+            text-decoration: none; color: #e74c3c;
+            font-size: 1.05rem; font-weight: 700;
+        }
+        .mob-drawer-logout i { width: 26px; text-align: center; font-size: 1.2rem; }
+
+        .main-layout {
+            grid-template-columns: 1fr !important;
+            margin: 58px 0 70px !important;
+            padding: 0 !important;
+            gap: 0 !important;
+            max-width: 100% !important;
+        }
+        .left-sidebar  { display: none !important; }
+        .right-sidebar { display: none !important; }
+
+        .notif-page-header {
+            position: sticky; top: 54px; z-index: 100;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 16px 10px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .notif-page-header h3 { font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--text-color); }
+        .notif-page-header a { font-size: 0.8rem; font-weight: 700; color: var(--ytu-lacivert); text-decoration: none; }
+
+        .notification-list { padding: 0; }
+        .notif-card {
+            border-radius: 0 !important;
+            border-left: none !important;
+            border-right: none !important;
+            margin: 0 !important;
+            padding: 14px 16px !important;
+            display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid var(--border-color) !important;
+            cursor: pointer;
+            transition: background 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .notif-card:active { background: var(--bg-light); }
+        .notif-card.unread { background: rgba(var(--ytu-lacivert-rgb), 0.05); }
+        .notif-card.unread:active { background: rgba(var(--ytu-lacivert-rgb), 0.1); }
+        .notif-icon-box {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.05rem; flex-shrink: 0;
+        }
+        .notif-content { flex: 1; min-width: 0; }
+        .notif-actor { font-weight: 800; font-size: 0.9rem; }
+        .notif-text { font-size: 0.88rem; color: var(--text-muted); }
+        .notif-time { font-size: 0.73rem; color: var(--text-muted); display: block; margin-top: 3px; }
+        .btn-view {
+            padding: 6px 14px; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 700;
+            background: var(--ytu-lacivert); color: #fff;
+            border: none; cursor: pointer; flex-shrink: 0;
+        }
+
+        .mobile-bottom-nav {
+            height: 56px;
+            padding: 0 4px;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -1px 10px rgba(0,0,0,0.06);
+        }
+        .mobile-bottom-nav .nav-item {
+            flex: 1;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; padding: 8px 0;
+            color: var(--text-color); text-decoration: none; position: relative;
+        }
+        .mobile-bottom-nav .nav-item.active { color: var(--ytu-lacivert); }
+        .mob-nav-badge {
+            position: absolute; top: 4px; right: calc(50% - 18px);
+            background: #ff4757; color: #fff;
+            font-size: 0.55rem; padding: 1px 5px;
+            border-radius: 10px; font-weight: 700;
+            min-width: 16px; text-align: center;
+        }
+    }
+    </style>
 </head>
-
 <body>
-
     <script>
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
@@ -22,6 +208,77 @@
 
     {% include 'navbar_partial.html' ignore missing %}
 
+    <!-- MOBİL HEADER -->
+    <div class="mob-header" id="mobHeader">
+        <img src="/static/{{ current_user.profile_pic }}" class="mob-header-avatar" onclick="openMobileDrawer()" alt="Profil">
+        <a href="/" class="mob-header-logo">YTU<span>SOCIAL</span></a>
+        <div class="mob-header-right">
+            <button class="mob-header-icon" onclick="toggleDarkMode()" title="Tema">🌙</button>
+        </div>
+    </div>
+
+    <!-- MOBİL OVERLAY -->
+    <div class="mob-left-overlay" id="mobOverlay" onclick="closeMobileDrawer()"></div>
+
+    <!-- MOBİL DRAWER -->
+    <div class="mob-left-drawer" id="mobDrawer">
+        <div class="mob-drawer-profile">
+            <img src="/static/{{ current_user.profile_pic }}" class="mob-drawer-avatar" alt="{{ current_user.username }}">
+            <div class="mob-drawer-name">{{ current_user.username }}</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);">@{{ current_user.handle }}</div>
+            <span class="mob-drawer-score">⭐ {{ current_user.score }} Puan</span>
+        </div>
+        <nav class="mob-drawer-nav">
+            <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-user"></i> Profil
+            </a>
+            <a href="{{ url_for('main.messages_inbox') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-envelope"></i>
+                <span>Mesajlar{% if unread_msg_count > 0 %} <span style="background:#ff4757;color:#fff;border-radius:10px;font-size:0.7rem;padding:2px 7px;margin-left:6px;">{{ unread_msg_count }}</span>{% endif %}</span>
+            </a>
+            <a href="{{ url_for('main.notifications') }}" class="mob-drawer-link active" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-bell"></i> Bildirimler
+            </a>
+            <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-book-open"></i> Not Havuzu
+            </a>
+            <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-bookmark"></i> Kaydedilenler
+            </a>
+            <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-trophy"></i> Kulüpler Ligi
+            </a>
+            <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-bullhorn"></i> İlanlar
+            </a>
+            <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-bus"></i> Ulaşım
+            </a>
+            <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-gear"></i> Profili Düzenle
+            </a>
+        </nav>
+        <div class="mob-drawer-sep"></div>
+        <div class="mob-drawer-section-title">
+            🔥 Gündem
+            <a href="{{ url_for('main.explore') }}">Tümünü Keşfet</a>
+        </div>
+        {% for tag, count in trending_tags[:5] %}
+        <a href="{{ url_for('main.explore', q='#' + tag) }}" class="mob-drawer-trend" onclick="closeMobileDrawer()">
+            <div>
+                <div class="mob-drawer-trend-tag">#{{ tag }}</div>
+                <div class="mob-drawer-trend-count">{{ count }} gönderi</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);"></i>
+        </a>
+        {% endfor %}
+        <div class="mob-drawer-sep"></div>
+        <a href="{{ url_for('auth.logout') }}" class="mob-drawer-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+        </a>
+    </div>
+
+    <!-- ANA LAYOUT -->
     <div class="main-layout">
 
         <aside class="left-sidebar sticky-sidebar">
@@ -31,53 +288,49 @@
                     <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{ current_user.username }}</h3>
                     <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
                 </div>
-
                 <nav style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="{{ url_for('main.index') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-home" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
-                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
-                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-film" style="width: 20px; text-align: center;"></i> Reels</a>
-                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
-                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-book" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
-                    <a href="{{ url_for('main.clubs_full_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi</a>
-                    <a href="{{ url_for('main.adverts') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-bullhorn" style="width: 20px; text-align: center;"></i> İlanlar</a>
-                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert);">
-                        <i class="fas fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
-                        {% if unread_count > 0 %}
-                        <span class="notification-badge">{{ unread_count }}</span>
-                        {% endif %}
+                    <a href="/" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
+                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
+                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
+                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
+                    <a href="{{ url_for('main.clubs_full_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi</a>
+                    <a href="{{ url_for('main.adverts') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bullhorn" style="width: 20px; text-align: center;"></i> İlanlar</a>
+                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-solid fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
+                        {% if unread_count > 0 %}<span class="notification-badge">{{ unread_count }}</span>{% endif %}
                     </a>
-                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar</a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
+                        {% if unread_msg_count > 0 %}<span class="msg-badge">{{ unread_msg_count }}</span>{% endif %}
+                    </a>
+                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bus" style="width: 20px; text-align: center;"></i> Ulaşım</a>
                 </nav>
             </div>
         </aside>
 
         <main>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="margin: 0; color: var(--text-color);">Bildirimler</h3>
-                </div>
+            <div class="notif-page-header">
+                <h3>🔔 Bildirimler</h3>
+            </div>
 
             <div class="notification-list">
                 {% for notif in notifications %}
                 {% if notif.actor %}
-
                 {% set target_url = url_for('main.chat', handle=notif.actor.handle) if notif.verb == 'messaged' else url_for('main.user_profile', handle=notif.actor.handle) %}
-                
                 <div class="notif-card {{ 'unread' if not notif.is_read else '' }}" onclick="window.location.href='{{ target_url }}'">
-
-                    <div class="notif-icon-box 
+                    <div class="notif-icon-box
                         {% if notif.verb == 'liked' %}bg-like
                         {% elif notif.verb == 'commented' %}bg-comment
                         {% elif notif.verb == 'followed' %}bg-follow
                         {% elif notif.verb == 'messaged' %}bg-msg
                         {% endif %}">
-                        
-                        {% if notif.verb == 'liked' %} <i class="fas fa-heart"></i>
-                        {% elif notif.verb == 'commented' %} <i class="fas fa-comment-dots"></i>
-                        {% elif notif.verb == 'followed' %} <i class="fas fa-user-plus"></i>
-                        {% elif notif.verb == 'messaged' %} <i class="fas fa-envelope"></i>
+                        {% if notif.verb == 'liked' %}<i class="fas fa-heart"></i>
+                        {% elif notif.verb == 'commented' %}<i class="fas fa-comment-dots"></i>
+                        {% elif notif.verb == 'followed' %}<i class="fas fa-user-plus"></i>
+                        {% elif notif.verb == 'messaged' %}<i class="fas fa-envelope"></i>
                         {% endif %}
                     </div>
-
                     <div class="notif-content">
                         <div>
                             <span class="notif-actor">{{ notif.actor.username }}</span>
@@ -88,71 +341,41 @@
                                 {% if notif.verb == 'messaged' %} sana bir mesaj gönderdi.{% endif %}
                             </span>
                         </div>
-                        <small class="notif-time">
-                            <i class="far fa-clock"></i> {{ notif.timestamp.strftime('%H:%M') }}
-                        </small>
+                        <small class="notif-time"><i class="far fa-clock"></i> {{ notif.timestamp.strftime('%H:%M') }}</small>
                     </div>
-
                     {% if notif.post and notif.verb != 'messaged' %}
                         <button class="btn-view">Gör</button>
+                    {% elif notif.verb == 'messaged' %}
+                        <i class="fas fa-chevron-right" style="color: var(--text-muted); font-size: 0.85rem; flex-shrink:0;"></i>
                     {% endif %}
-
-                    {% if notif.verb == 'messaged' %}
-                        <i class="fas fa-chevron-right" style="color: var(--text-muted); margin-right: 15px;"></i>
-                    {% endif %}
-
                 </div>
                 {% endif %}
                 {% else %}
-                <div class="empty-notif" style="text-align: center; padding: 50px; color: var(--text-muted);">
-                    <i class="far fa-bell-slash" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
-                    <p>Henüz yeni bildirim yok.</p>
+                <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                    <i class="far fa-bell-slash" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.4; display: block;"></i>
+                    <p style="font-weight: 600; font-size: 1rem; margin: 0 0 6px;">Henüz bildirim yok</p>
+                    <p style="font-size: 0.85rem; margin: 0;">Birisi seni takip ettiğinde veya gönderine etkileşim gösterdiğinde burada görünecek.</p>
                 </div>
                 {% endfor %}
             </div>
         </main>
 
-        <aside class="right-sidebar sticky-sidebar">
-            <div class="right-widget">
-                <div class="widget-header">
-                    <h3 class="widget-title">🏆 Kulüpler Ligi</h3>
-                    <i class="fas fa-chart-line" style="color: var(--ytu-lacivert); opacity: 0.5;"></i>
-                </div>
+        <aside class="right-sidebar sticky-sidebar"></aside>
+    </div>
 
-                <div class="club-list">
-                    {% for club in top_clubs %}
-                    <div class="club-list-item">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span class="club-rank rank-{{ loop.index }}">{{ loop.index }}</span>
-                            
-                            <img src="/static/img/{{ club.logo_file }}" class="club-logo-sm">
-                            
-                            <div style="display: flex; flex-direction: column;">
-                                <a href="{{ url_for('main.clubs_full_list') }}" style="text-decoration: none; color: var(--text-color); font-weight: 700; font-size: 0.9rem; line-height: 1.2;">
-                                    {{ club.name }}
-                                </a>
-                                <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ club.votes }} Oy</span>
-                            </div>
-                        </div>
-
-                        {% if current_user.is_authenticated %}
-                        <a href="javascript:void(0)" onclick="oyVer('{{ club.id }}', this)" class="btn-vote-sm">
-                            OY
-                        </a>
-                        {% endif %}
-                    </div>
-                    {% else %}
-                    <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Henüz veri yok.</div>
-                    {% endfor %}
-                </div>
-
-                <div style="padding: 12px; text-align: center; background: var(--bg-light); border-top: 1px solid var(--border-color);">
-                    <a href="{{ url_for('main.clubs_full_list') }}" style="font-size: 0.85rem; color: var(--ytu-lacivert); text-decoration: none; font-weight: 700; display: block; transition: 0.2s;">
-                        Tüm Sıralamayı Gör →
-                    </a>
-                </div>
-            </div>
-        </aside>
+    <!-- MOBİL ALT NAV -->
+    <div class="mobile-bottom-nav">
+        <a href="{{ url_for('main.index') }}" class="nav-item"><i class="fa-solid fa-house"></i></a>
+        <a href="{{ url_for('main.explore') }}" class="nav-item"><i class="fa-regular fa-compass"></i></a>
+        <a href="{{ url_for('main.reels') }}" class="nav-item"><i class="fa-solid fa-clapperboard"></i></a>
+        <a href="{{ url_for('main.notifications') }}" class="nav-item active">
+            <i class="fa-solid fa-bell"></i>
+            {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('main.messages_inbox') }}" class="nav-item">
+            <i class="fa-regular fa-envelope"></i>
+            {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
+        </a>
     </div>
 
     <script>
@@ -160,26 +383,22 @@
     </script>
     <script src="/static/script.js"></script>
 
-    <!-- Mobil Alt Menü -->
-    <div class="mobile-bottom-nav">
-        <a href="/" class="nav-item">
-            <i class="fas fa-home"></i>
-        </a>
-        <a href="{{ url_for('main.explore') }}" class="nav-item">
-            <i class="fas fa-compass"></i>
-        </a>
-        <a href="{{ url_for('main.reels') }}" class="nav-item">
-            <i class="fas fa-film"></i>
-        </a>
-        <a href="{{ url_for('main.notifications') }}" class="nav-item active">
-            <div style="position: relative;">
-                <i class="fas fa-bell"></i>
-            </div>
-        </a>
-        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="nav-item">
-            <img src="/static/{{ current_user.profile_pic }}" class="nav-avatar-small">
-        </a>
-    </div>
+    <script>
+        function openMobileDrawer() {
+            document.getElementById('mobDrawer').classList.add('open');
+            document.getElementById('mobOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileDrawer() {
+            document.getElementById('mobDrawer').classList.remove('open');
+            document.getElementById('mobOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        (function () {
+            var d = document.getElementById('mobDrawer'), sx = 0;
+            d.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+            d.addEventListener('touchend', function (e) { if (sx - e.changedTouches[0].clientX > 70) closeMobileDrawer(); }, { passive: true });
+        })();
+    </script>
 </body>
-
 </html>

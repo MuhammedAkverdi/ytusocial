@@ -25,6 +25,9 @@
                     {% if current_user.is_admin %}
                     <a href="{{ url_for('admin.admin_panel') }}" class="dropdown-item" style="color: var(--ytu-lacivert); font-weight: bold;">👑 Admin Paneli</a>
                     <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
+                    {% elif current_user.is_moderator %}
+                    <a href="{{ url_for('admin.moderator_panel') }}" class="dropdown-item" style="color: #27ae60; font-weight: bold;">🛡️ Moderatör Paneli</a>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
                     {% endif %}
                     
                     <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="dropdown-item">👤 Profilim</a>

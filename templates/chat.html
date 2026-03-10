@@ -1,202 +1,501 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sohbet: {{ user.username }}</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>{{ user.username }} ile Sohbet</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark-mode");</script>
+    <style>
+        body{margin:0;font-family:"Inter",sans-serif;}
+        .ig-chat-wrapper{display:grid;grid-template-columns:280px 1fr;max-width:1150px;margin:90px auto 30px;padding:0 20px;gap:24px;min-height:calc(100vh - 120px);box-sizing:border-box;}
+        .ig-sidebar{position:sticky;top:90px;align-self:start;max-height:calc(100vh - 120px);overflow-y:auto;padding-right:6px;}.ig-sidebar::-webkit-scrollbar{width:4px;}.ig-sidebar::-webkit-scrollbar-track{background:transparent;}.ig-sidebar::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:4px;}
+        .ig-sidebar-card{background:var(--card-bg);border-radius:20px;padding:25px 20px;border:1px solid var(--border-color);}
+        .ig-sidebar-user{text-align:center;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--border-color);}
+        .ig-sidebar-user img{width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid var(--ytu-lacivert);margin-bottom:12px;}
+        .ig-sidebar-user h3{margin:0 0 8px;font-size:1.1rem;font-weight:800;color:var(--text-color);}
+        .ig-sidebar-score{display:inline-block;background:linear-gradient(135deg,var(--ytu-lacivert),rgba(var(--ytu-lacivert-rgb),.7));color:#fff;padding:6px 14px;border-radius:20px;font-size:.85rem;font-weight:700;box-shadow:0 2px 8px rgba(var(--ytu-lacivert-rgb),.3);}
+        .ig-sidebar nav{display:flex;flex-direction:column;gap:8px;}
+        .ig-sidebar nav a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;text-decoration:none;color:var(--text-muted);font-weight:600;font-size:.95rem;transition:all .2s;}
+        .ig-sidebar nav a:hover,.ig-sidebar nav a.active{background:rgba(var(--ytu-lacivert-rgb),.12);color:var(--ytu-lacivert);}
+        .ig-sidebar nav a i{width:20px;text-align:center;}
+        .ig-chat-panel{display:flex;flex-direction:column;height:calc(100vh - 140px);background:var(--card-bg);border-radius:20px;border:1px solid var(--border-color);overflow:hidden;}
+        .ig-chat-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border-color);background:var(--card-bg);flex-shrink:0;}
+        .ig-back-btn{text-decoration:none;color:var(--text-color);font-size:1.2rem;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .2s;}
+        .ig-back-btn:hover{background:var(--border-color);}
+        .ig-header-user{display:flex;align-items:center;gap:10px;flex:1;text-decoration:none;color:inherit;}
+        .ig-header-avatar-wrap{position:relative;flex-shrink:0;}
+        .ig-header-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--border-color);}
+        .ig-status-dot{position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#ccc;border:2px solid var(--card-bg);}
+        .ig-status-dot.online{background:#2ecc71;}
+        .ig-header-info h4{margin:0 0 1px;font-size:.97rem;font-weight:700;color:var(--text-color);}
+        .ig-header-info span{font-size:.78rem;color:var(--text-muted);}
+        .ig-header-actions{display:flex;gap:6px;}
+        .ig-action-btn{width:38px;height:38px;border-radius:50%;background:transparent;border:none;color:var(--text-color);font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+        .ig-action-btn:hover{background:var(--border-color);}
+        .ig-messages{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:4px;background:var(--bg-light);scroll-behavior:smooth;}
+        html.dark-mode .ig-messages{background:#0a0a0a;}
+        .ig-messages::-webkit-scrollbar{width:4px;}
+        .ig-messages::-webkit-scrollbar-track{background:transparent;}
+        .ig-messages::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:4px;}
+        .ig-msg-row{display:flex;align-items:flex-end;gap:8px;max-width:72%;animation:msgFadeIn .18s ease;}
+        @keyframes msgFadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+        .ig-msg-row.sent{align-self:flex-end;flex-direction:row-reverse;}
+        .ig-msg-row.received{align-self:flex-start;}
+        .ig-msg-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-bottom:2px;}
+        .ig-msg-row.sent .ig-msg-avatar{display:none;}
+        .ig-bubble{position:relative;padding:10px 14px;border-radius:20px;font-size:.93rem;line-height:1.45;word-break:break-word;max-width:100%;}
+        .ig-bubble.sent{background:linear-gradient(135deg,#003366,#0055a5);color:#fff;border-bottom-right-radius:5px;}
+        html.dark-mode .ig-bubble.sent{background:linear-gradient(135deg,#003366,#0a4a8f);}
+        .ig-bubble.received{background:var(--input-bg);color:var(--text-color);border:1px solid var(--border-color);border-bottom-left-radius:5px;}
+        .ig-msg-time{font-size:.68rem;opacity:.65;display:block;margin-top:4px;text-align:right;}
+        .ig-bubble.received .ig-msg-time{text-align:left;}
+        .ig-delete-btn{opacity:0;background:none;border:none;color:var(--text-muted);font-size:.8rem;cursor:pointer;padding:4px 6px;border-radius:50%;transition:opacity .15s,color .15s,background .15s;flex-shrink:0;align-self:center;}
+        .ig-msg-row:hover .ig-delete-btn{opacity:1;}
+        .ig-delete-btn:hover{color:#e74c3c;background:rgba(231,76,60,.1);}
+        .ig-img-msg{max-width:220px;max-height:260px;width:100%;border-radius:16px;object-fit:cover;display:block;cursor:pointer;transition:opacity .2s;}
+        .ig-img-msg:hover{opacity:.92;}
+        .ig-bubble.media{padding:3px;background:transparent!important;border:none!important;}
+        .ig-video-msg{max-width:260px;max-height:200px;border-radius:16px;display:block;background:#000;}
+        .ig-file-msg{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(var(--ytu-lacivert-rgb),.08);border:1px solid rgba(var(--ytu-lacivert-rgb),.2);border-radius:14px;text-decoration:none;color:var(--text-color);min-width:160px;transition:background .2s;}
+        .ig-file-msg:hover{background:rgba(var(--ytu-lacivert-rgb),.15);}
+        .ig-file-icon{font-size:1.6rem;color:var(--ytu-lacivert);}
+        .ig-file-name{font-size:.85rem;font-weight:600;word-break:break-all;}
+        .ig-file-dl{font-size:.85rem;color:var(--ytu-lacivert);margin-left:auto;}
+        .ig-audio-msg{width:220px;height:36px;border-radius:20px;}
+        .ig-story-card{width:160px;position:relative;border-radius:14px;overflow:hidden;cursor:pointer;border:2px solid rgba(255,255,255,.15);}
+        .ig-story-overlay{position:absolute;inset:0;background:rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:2;}
+        .ig-story-img{width:100%;height:220px;object-fit:cover;display:block;}
+        .ig-empty-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-muted);gap:10px;}
+        .ig-empty-avatar{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border-color);}
+        .ig-empty-chat h3{margin:0;font-size:1.1rem;color:var(--text-color);}
+        .ig-empty-chat p{margin:0;font-size:.85rem;}
+        .ig-typing-row{align-self:flex-start;display:flex;gap:8px;align-items:flex-end;}
+        .ig-typing{display:flex;align-items:center;gap:4px;padding:10px 16px;border-radius:20px;background:var(--input-bg);border:1px solid var(--border-color);}
+        .ig-typing span{width:7px;height:7px;border-radius:50%;background:var(--text-muted);display:block;animation:igTyping 1.2s infinite;}
+        .ig-typing span:nth-child(2){animation-delay:.2s;}
+        .ig-typing span:nth-child(3){animation-delay:.4s;}
+        @keyframes igTyping{0%,60%,100%{transform:scale(1);opacity:.5;}30%{transform:scale(1.3);opacity:1;}}
+        /* Dosya Önizleme (mesaj alanını alıp tam alan kaplar) */
+        .ig-file-preview-area{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;background:#000;position:relative;overflow:hidden;}
+        .ig-file-preview-area.visible{display:flex;}
+        .ig-file-preview-area img{max-height:100%;max-width:100%;object-fit:contain;}
+        .ig-file-preview-area video{max-height:100%;max-width:100%;object-fit:contain;background:#000;}
+        .ig-preview-file-big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+        .ig-preview-file-big i{font-size:4rem;color:#fff;opacity:.7;}
+        .ig-preview-file-big span{font-size:1rem;font-weight:600;color:#fff;text-align:center;word-break:break-all;max-width:260px;}
+        .ig-preview-close-btn{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:background .2s;z-index:5;}
+        .ig-preview-close-btn:hover{background:rgba(255,255,255,0.3);}
+        .ig-input-bar{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid var(--border-color);background:var(--card-bg);flex-shrink:0;}
+        .ig-attach-btn{width:40px;height:40px;border-radius:50%;background:none;border:none;color:var(--text-muted);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,background .2s;flex-shrink:0;}
+        .ig-attach-btn:hover{color:var(--ytu-lacivert);background:rgba(var(--ytu-lacivert-rgb),.08);}
+        .ig-text-field{flex:1;padding:10px 16px;border:1.5px solid var(--border-color);border-radius:24px;background:var(--input-bg);color:var(--text-color);font-size:.93rem;outline:none;transition:border-color .2s;font-family:inherit;}
+        .ig-text-field:focus{border-color:var(--ytu-lacivert);}
+        .ig-text-field::placeholder{color:var(--text-muted);}
+        .ig-send-btn{width:40px;height:40px;border-radius:50%;border:none;background:linear-gradient(135deg,#003366,#0055a5);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .2s,transform .15s;flex-shrink:0;}
+        .ig-send-btn:hover{opacity:.85;transform:scale(1.05);}
+        .ig-mic-btn{width:40px;height:40px;border-radius:50%;border:none;background:none;color:var(--text-muted);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,background .2s;flex-shrink:0;}
+        .ig-mic-btn:hover,.ig-mic-btn.recording{color:#e74c3c;background:rgba(231,76,60,.1);}
+        /* X-style + menu */
+        .x-attach-wrap{position:relative;flex-shrink:0;}
+        .x-attach-plus{width:38px;height:38px;border-radius:50%;background:var(--border-color);border:none;color:var(--text-color);font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+        .x-attach-plus:hover{background:var(--text-muted);color:#fff;}
+        .x-plus-menu{display:none;position:fixed;background:var(--card-bg);border:1px solid var(--border-color);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.18);min-width:155px;overflow:hidden;z-index:9999;}
+        .x-plus-menu.open{display:block;}
+        .x-plus-menu-item{display:flex;align-items:center;gap:12px;padding:13px 18px;color:var(--text-color);font-size:.93rem;font-weight:600;cursor:pointer;border:none;background:none;width:100%;transition:background .15s;text-decoration:none;font-family:inherit;}
+        .x-plus-menu-item:hover{background:var(--hover-bg);}
+        .x-plus-menu-item i{font-size:1.1rem;width:20px;text-align:center;flex-shrink:0;}
+        /* X-style preview strip */
+        .x-preview-strip{display:none;padding:10px 14px;background:var(--card-bg);border-top:1px solid var(--border-color);}
+        .x-preview-strip.visible{display:block;}
+        .x-preview-card{position:relative;display:inline-block;max-width:240px;border-radius:16px;overflow:hidden;}
+        .x-preview-card img{display:block;max-height:200px;max-width:100%;object-fit:cover;border-radius:16px;}
+        .x-preview-card video{display:block;max-height:200px;max-width:100%;object-fit:cover;border-radius:16px;}
+        .x-preview-close{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.75rem;z-index:2;}
+        .x-preview-file{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--input-bg);border:1px solid var(--border-color);border-radius:14px;}
+        .x-preview-file i{font-size:2rem;color:var(--ytu-lacivert);}
+        .x-preview-file span{font-size:.9rem;font-weight:600;color:var(--text-color);word-break:break-all;}
+        .ig-send-btn{background:#1d9bf0 !important;}
+        /* X-style profile bottom sheet */
+        .x-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;}
+        .x-sheet-overlay.open{display:block;}
+        .x-profile-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--card-bg);border-radius:16px 16px 0 0;z-index:3001;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:85vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,20px);}
+        .x-profile-sheet.open{transform:translateY(0);}
+        .x-sheet-handle-bar{width:36px;height:4px;border-radius:2px;background:var(--border-color);margin:10px auto 0;}
+        .x-sheet-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;}
+        .x-sheet-back{background:none;border:none;color:var(--text-color);font-size:1.1rem;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .2s;}
+        .x-sheet-back:hover{background:var(--border-color);}
+        .x-sheet-share{background:none;border:none;color:var(--text-color);font-size:1rem;cursor:pointer;}
+        .x-sheet-body{text-align:center;padding:12px 20px 30px;}
+        .x-sheet-avatar{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border-color);margin-bottom:12px;}
+        .x-sheet-name{margin:0 0 4px;font-size:1.1rem;font-weight:900;color:var(--text-color);}
+        .x-sheet-uname{color:var(--text-muted);font-size:.88rem;display:block;margin-bottom:20px;}
+        .x-sheet-actions{display:flex;justify-content:center;gap:16px;margin-bottom:24px;}
+        .x-sheet-action{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:.75rem;font-weight:700;color:var(--text-color);background:none;border:none;cursor:pointer;text-decoration:none;position:relative;}
+        .x-sheet-action-icon{width:52px;height:52px;border-radius:50%;background:var(--input-bg);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.15rem;transition:background .2s;}
+        .x-sheet-action-icon:hover{background:var(--border-color);}
+        .x-more-dropdown{display:none;position:absolute;bottom:calc(100% + 4px);right:-20px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.2);min-width:160px;overflow:hidden;z-index:10;text-align:left;}
+        .x-more-dropdown.open{display:block;}
+        .x-more-dropdown a{display:flex;align-items:center;gap:10px;padding:12px 16px;text-decoration:none;color:var(--text-color);font-size:.9rem;font-weight:600;transition:background .15s;}
+        .x-more-dropdown a.x-danger{color:#dc3545;}
+        .x-more-dropdown a:hover{background:var(--hover-bg);}
+        .x-sheet-danger{display:flex;align-items:center;gap:14px;padding:16px 20px;color:#dc3545;font-size:.93rem;font-weight:700;border:none;background:none;cursor:pointer;width:100%;text-align:left;border-top:1px solid var(--border-color);margin-top:4px;}
+        .x-sheet-danger i{font-size:1rem;width:24px;text-align:center;}
+        /* Sheet settings rows */
+        .x-sheet-settings{background:var(--input-bg);border-radius:14px;margin:0 16px 16px;overflow:hidden;}
+        .x-sheet-setting-row{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--border-color);cursor:pointer;transition:background .15s;text-decoration:none;color:inherit;}
+        .x-sheet-setting-row:last-child{border-bottom:none;}
+        .x-sheet-setting-row:hover{background:var(--hover-bg);}
+        .x-sheet-setting-left{display:flex;align-items:center;gap:14px;}
+        .x-sheet-setting-left i{font-size:1.1rem;color:var(--text-muted);width:22px;text-align:center;}
+        .x-sheet-setting-left span{font-size:.9rem;font-weight:600;color:var(--text-color);}
+        .x-sheet-setting-right{display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:.82rem;}
+        .x-sheet-setting-right i{font-size:.7rem;}
+        /* Nickname sub-sheet */
+        .x-nick-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--card-bg);border-radius:16px 16px 0 0;z-index:3002;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:80vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,20px);}
+        .x-nick-sheet.open{transform:translateY(0);}
+        .x-nick-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border-color);}
+        .x-nick-header-left{display:flex;align-items:center;gap:14px;}
+        .x-nick-title{font-size:1.05rem;font-weight:900;color:var(--text-color);margin:0;}
+        .x-nick-save{background:#1d9bf0;color:#fff;border:none;padding:8px 20px;border-radius:20px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .2s;}
+        .x-nick-save:hover{opacity:.85;}
+        .x-nick-body{padding:20px 16px;}
+        .x-nick-info{display:flex;align-items:flex-start;gap:12px;background:var(--input-bg);border-radius:12px;padding:14px 16px;margin-bottom:24px;}
+        .x-nick-info i{color:var(--text-muted);font-size:1rem;margin-top:2px;flex-shrink:0;}
+        .x-nick-info p{margin:0;font-size:.84rem;color:var(--text-muted);line-height:1.45;}
+        .x-nick-label{font-size:.82rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;display:block;}
+        .x-nick-input{width:100%;padding:12px 16px;border:1.5px solid var(--border-color);border-radius:12px;background:transparent;color:var(--text-color);font-size:.93rem;outline:none;font-family:inherit;transition:border-color .2s;box-sizing:border-box;}
+        .x-nick-input:focus{border-color:#1d9bf0;}
+        .x-nick-input::placeholder{color:var(--text-muted);}
+        /* Emoji picker */
+        .x-emoji-grid{position:fixed;background:var(--card-bg);border:1px solid var(--border-color);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.18);width:280px;max-height:220px;overflow-y:auto;z-index:9999;display:none;padding:8px;}
+        .x-emoji-grid.open{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;}
+        .x-emoji-btn{background:none;border:none;font-size:1.4rem;cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .12s;line-height:1;}
+        .x-emoji-btn:hover{background:var(--border-color);}
+        @media(max-width:1100px){.ig-chat-wrapper{grid-template-columns:1fr;}.ig-sidebar{display:none;}.ig-chat-panel{height:calc(100vh - 120px);}}
+        @media(max-width:768px){
+            .navbar { display: none !important; }
+            .ig-chat-wrapper { padding:0; margin:0; height:100dvh; max-width:100%; }
+            .ig-chat-panel { height:100dvh; border-radius:0; border:none; }
+            .ig-chat-header { padding:10px 12px; }
+            .ig-header-avatar { width:38px; height:38px; }
+            .ig-header-info h4 { font-size:0.93rem; }
+            .ig-messages { padding:12px 10px; }
+            .ig-msg-row { max-width:82%; }
+            .ig-input-bar { padding:8px 10px; gap:6px; }
+            .ig-text-field { font-size:0.9rem; padding:9px 14px; }
+            .ig-attach-btn, .ig-send-btn, .ig-mic-btn, .x-attach-plus { width:38px; height:38px; }
+            .ig-header-actions { display:none !important; }
+        }
+    </style>
 </head>
-
 <body>
-
-    {% include 'navbar_partial.html' ignore missing %}
-
+    {% include "navbar_partial.html" ignore missing %}
     <input type="hidden" id="currentUserId" value="{{ current_user.id }}">
     <input type="hidden" id="currentUserName" value="{{ current_user.username }}">
     <input type="hidden" id="currentUserPic" value="{{ current_user.profile_pic }}">
     <input type="hidden" id="recipientId" value="{{ user.id }}">
     <input type="hidden" id="recipientUserName" value="{{ user.username }}">
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="notification-area">
-        {% for category, message in messages %}
-        <div class="top-alert alert-{{ category }}">
-            <span class="alert-text">{{ message }}</span>
-            <button class="alert-close" onclick="this.parentElement.style.display='none';">&times;</button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
-
-    <div class="main-layout" style="grid-template-columns: 280px 1fr; max-width: 1200px;">
-        
-        <!-- SOL MENÜ (SIDEBAR) -->
-        <aside class="left-sidebar sticky-sidebar">
-            {% if current_user.is_authenticated %}
-            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px 20px; border: 1px solid var(--border-color);">
-                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
-                    <img src="/static/{{ current_user.profile_pic }}" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ytu-lacivert); object-fit: cover; margin-bottom: 12px;">
-                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{ current_user.username }}</h3>
-                    <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
+    <div class="ig-chat-wrapper">
+        <!-- SIDEBAR -->
+        <aside class="ig-sidebar">
+            <div class="ig-sidebar-card">
+                <div class="ig-sidebar-user">
+                    <img src="/static/{{ current_user.profile_pic }}" alt="{{ current_user.username }}">
+                    <h3>{{ current_user.username }}</h3>
+                    <span class="ig-sidebar-score">&#11088; {{ current_user.score }} Puan</span>
                 </div>
-                <nav style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="{{ url_for('main.index') }}" class="sidebar-link"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
-                    <a href="{{ url_for('main.explore') }}" class="sidebar-link"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
-                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link active-link"><i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar</a>
-                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link"><i class="fa-regular fa-heart" style="width: 20px; text-align: center;"></i> Bildirimler</a>
+                <nav>
+                    <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}"><i class="fa-regular fa-compass"></i> Keşfet</a>
+                    <a href="{{ url_for('main.reels') }}"><i class="fa-solid fa-clapperboard"></i> Reels</a>
+                    <a href="{{ url_for('main.saved_posts_list') }}"><i class="fa-regular fa-bookmark"></i> Kaydedilenler</a>
+                    <a href="{{ url_for('main.notes_pool') }}"><i class="fa-solid fa-book-open"></i> Not Havuzu</a>
+                    <a href="{{ url_for('main.clubs_full_list') }}"><i class="fa-solid fa-trophy"></i> Kulüpler Ligi</a>
+                    <a href="{{ url_for('main.adverts') }}"><i class="fa-solid fa-bullhorn"></i> İlanlar</a>
+                    <a href="{{ url_for('main.notifications') }}"><i class="fa-regular fa-bell"></i> Bildirimler</a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="active"><i class="fa-regular fa-envelope"></i> Mesajlar</a>
                 </nav>
             </div>
-            {% endif %}
         </aside>
 
-        <!-- SOHBET KARTI -->
-        <div class="chat-card" style="background: var(--card-bg); border-radius: 16px;">
-        <div class="chat-header-bar">
-            <a href="{{ url_for('main.messages_inbox') }}" class="back-btn"
-                style="margin-right: 15px; color: var(--text-color); font-size: 1.2rem;">
-                <i class="fas fa-chevron-left"></i>
-            </a>
-
-            <a href="{{ url_for('main.user_profile', handle=user.handle) }}"
-                style="display: flex; align-items: center; text-decoration: none; color: inherit; flex: 1;">
-                <div class="avatar-wrapper">
-                    <img src="/static/{{ user.profile_pic }}" class="chat-avatar-sm">
-                    <span id="status-dot-{{ user.id }}"
-                        class="status-dot {% if user.id in online_users %}online{% endif %}"></span>
+        <!-- CHAT PANEL -->
+        <div class="ig-chat-panel">
+            <!-- HEADER -->
+            <div class="ig-chat-header">
+                <a href="{{ url_for('main.messages_inbox') }}" class="ig-back-btn"><i class="fas fa-chevron-left"></i></a>
+                <a href="{{ url_for('main.user_profile', handle=user.handle) }}" class="ig-header-user" id="headerUserLink">
+                    <div class="ig-header-avatar-wrap">
+                        <img src="/static/{{ user.profile_pic }}" class="ig-header-avatar" alt="{{ user.username }}">
+                        <span class="ig-status-dot {% if user.id in online_users %}online{% endif %}" id="status-dot-{{ user.id }}"></span>
+                    </div>
+                    <div class="ig-header-info">
+                        <h4>{{ user.username }}</h4>
+                        <span id="user-status-text">{% if user.id in online_users %}<span style="color:#2ecc71;">&#9679; Cevrimici</span>{% else %}Cevrimdisi{% endif %}</span>
+                    </div>
+                </a>
+                <div class="ig-header-actions">
+                    <button class="ig-action-btn" onclick="startCall(false)" title="Sesli Arama"><i class="fas fa-phone"></i></button>
+                    <button class="ig-action-btn" onclick="startCall(true)" title="Goruntuluacute Arama"><i class="fas fa-video"></i></button>
                 </div>
-                <div style="margin-left: 10px;">
-                    <h3 class="chat-username">{{ user.username }}</h3>
-                    <span class="chat-status" id="user-status-text">
-                        {% if user.id in online_users %}
-                        <span style="color: #2ecc71;">● Çevrimiçi</span>
-                        {% else %}
-                        Çevrimdışı
-                        {% endif %}
-                    </span>
-                </div>
-            </a>
-
-            <div style="display: flex; gap: 10px;">
-                <button class="call-btn" onclick="startCall(false)" title="Sesli Arama"><i
-                        class="fas fa-phone"></i></button>
-                <button class="call-btn" onclick="startCall(true)" title="Görüntülü Arama"><i
-                        class="fas fa-video"></i></button>
             </div>
-        </div>
 
-        <div class="chat-area" id="messageArea">
-            {% for msg in messages %}
-            <div class="message-row {{ 'sent' if msg.sender_id == current_user.id else 'received' }}">
-
-                {% if msg.sender_id != current_user.id %}
-                <img src="/static/{{ user.profile_pic }}" class="chat-avatar-sm">
+            <!-- MESSAGES -->
+            <div class="ig-messages" id="messageArea">
+                {% if not messages %}
+                <div class="ig-empty-chat">
+                    <img src="/static/{{ user.profile_pic }}" class="ig-empty-avatar" alt="{{ user.username }}">
+                    <h3>{{ user.username }}</h3>
+                    <p>Henuz mesaj yok. Ilk adimi at!</p>
+                </div>
                 {% else %}
-                <a href="{{ url_for('main.delete_message', message_id=msg.id) }}" class="msg-delete"
-                    onclick="return confirm('Silmek istediğine emin misin?')">✕</a>
-                {% endif %}
+                {% for msg in messages %}
+                <div class="ig-msg-row {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}" id="msg-{{ msg.id }}">
+                    {% if msg.sender_id != current_user.id %}
+                    <img src="/static/{{ user.profile_pic }}" class="ig-msg-avatar" alt="{{ user.username }}">
+                    {% endif %}
+                    {% if msg.sender_id == current_user.id %}
+                    <button class="ig-delete-btn" onclick="confirmDeleteMsg(event,'/delete_message/{{ msg.id }}')" title="Sil"><i class="fas fa-trash-can"></i></button>
+                    {% endif %}
 
-                <div class="message-bubble {{ 'bubble-sent' if msg.sender_id == current_user.id else 'bubble-received' }}"
-                    style="{{ 'padding:0; background:none; border:none;' if msg.msg_type == 'story' else '' }}">
-
-                    {% if msg.msg_type == 'story' %}
-                    <div class="story-share-card" onclick="viewSharedStory(event, '{{ msg.body }}')"
-                        style="cursor:pointer; width: 180px; position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
-                        <div
-                            style="background: rgba(0,0,0,0.3); position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:white; z-index:2;">
-                            <i class="fas fa-play" style="font-size: 2rem; margin-bottom:8px;"></i>
-                            <span style="font-size:0.85rem; font-weight:600;">Hikayeyi İzle</span>
+                    {% if msg.msg_type == "story" %}
+                    <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %} media">
+                        <div class="ig-story-card" onclick="viewSharedStory(event,'{{ msg.body }}')">
+                            <div class="ig-story-overlay"><i class="fas fa-play" style="font-size:1.8rem;margin-bottom:6px;"></i><span style="font-size:.8rem;font-weight:700;">Hikayeyi Izle</span></div>
+                            <img src="/static/story_images/{{ msg.file_path }}" class="ig-story-img" onerror="this.src='/static/img/story_placeholder.jpg'">
                         </div>
-                        <img src="/static/story_images/{{ msg.file_path }}"
-                            style="width:100%; height: 240px; object-fit: cover; display:block;"
-                            onerror="this.src='/static/img/story_placeholder.jpg'">
                     </div>
 
-                    {% elif msg.msg_type == 'audio' %}
-                    <audio controls controlsList="nodownload" class="audio-msg">
-                        <source src="/static/audio_files/{{ msg.file_path }}" type="audio/webm">
-                        Tarayıcınız sesi desteklemiyor.
-                    </audio>
+                    {% elif msg.msg_type == "audio" %}
+                    <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+                        <audio controls controlsList="nodownload" class="ig-audio-msg">
+                            <source src="/static/audio_files/{{ msg.file_path }}" type="audio/webm">
+                            <source src="/static/audio_files/{{ msg.file_path }}" type="audio/mp4">
+                        </audio>
+                        <span class="ig-msg-time">{{ msg.timestamp.strftime("%H:%M") }}</span>
+                    </div>
+
+                    {% elif msg.msg_type == "image" %}
+                    <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %} media">
+                        <img src="/static/message_files/{{ msg.file_path }}" class="ig-img-msg" onclick="openLightbox(this.src)" alt="Resim">
+                        <span class="ig-msg-time" style="padding:0 4px;">{{ msg.timestamp.strftime("%H:%M") }}</span>
+                    </div>
+
+                    {% elif msg.msg_type == "video" %}
+                    <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %} media">
+                        <video controls controlsList="nodownload" class="ig-video-msg">
+                            <source src="/static/message_files/{{ msg.file_path }}">
+                        </video>
+                        <span class="ig-msg-time" style="padding:0 4px;">{{ msg.timestamp.strftime("%H:%M") }}</span>
+                    </div>
+
+                    {% elif msg.msg_type == "file" %}
+                    <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}" style="padding:0;background:transparent;border:none;">
+                        <a href="/static/message_files/{{ msg.file_path }}" target="_blank" class="ig-file-msg" download>
+                            <i class="fas fa-file-alt ig-file-icon"></i>
+                            <span class="ig-file-name">{{ msg.body }}</span>
+                            <i class="fas fa-download ig-file-dl"></i>
+                        </a>
+                        <span class="ig-msg-time" style="padding:0 4px;">{{ msg.timestamp.strftime("%H:%M") }}</span>
+                    </div>
 
                     {% else %}
-                    {{ msg.body }}
-                    {% endif %}
-
-                    {% if msg.msg_type != 'story' %}
-                    <span class="msg-time">
-                        {{ msg.timestamp.strftime('%H:%M') }}
-                        {% if msg.sender_id == current_user.id %}
-                        <i class="fas fa-check"></i>
-                        {% endif %}
-                    </span>
+                    <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}">
+                        {{ msg.body }}
+                        <span class="ig-msg-time">{{ msg.timestamp.strftime("%H:%M") }}{% if msg.sender_id == current_user.id %} <i class="fas fa-check" style="opacity:.8;font-size:.6rem;"></i>{% endif %}</span>
+                    </div>
                     {% endif %}
                 </div>
-
+                {% endfor %}
+                {% endif %}
+                <div class="ig-typing-row" id="typingIndicator" style="display:none;">
+                    <img src="/static/{{ user.profile_pic }}" class="ig-msg-avatar" alt="">
+                    <div class="ig-typing"><span></span><span></span><span></span></div>
+                </div>
             </div>
-            {% else %}
-            <div class="empty-chat" style="margin-top: 50px;">
-                <p style="font-size: 3rem;">👋</p>
-                <p>Henüz mesaj yok. İlk adımı at!</p>
+
+            <!-- DOSYA ÖNİZLEME (strip card) -->
+            <div class="x-preview-strip" id="filePreviewStrip">
+                <div class="x-preview-card">
+                    <button class="x-preview-close" onclick="clearFilePreview()"><i class="fas fa-times"></i></button>
+                    <div id="filePreviewThumb"></div>
+                </div>
             </div>
-            {% endfor %}
-            <div id="typingIndicator" class="typing-indicator" style="display: none;">
-                <span></span><span></span><span></span></div>
-        </div>
 
-        <div class="chat-form-container">
-            <form id="chatForm" onsubmit="sendMessage(event)"
-                style="flex: 1; display: flex; gap: 10px; margin: 0; align-items: center;">
-                
-                <label for="chatFileInput" class="chat-attach-btn"><i class="fas fa-paperclip"></i></label>
-                <input type="file" id="chatFileInput" style="display: none;" onchange="document.getElementById('messageInput').focus()">
-                
-                <input type="text" id="messageInput" class="chat-input" placeholder="Bir mesaj yaz..."
-                    autocomplete="off">
-                <button type="submit" class="chat-send-btn"
-                    style="background: var(--ytu-lacivert); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
-            <button id="recordBtn" class="mic-btn" title="Ses Kaydet" style="margin-left: 10px;"><i
-                    class="fas fa-microphone"></i></button>
+            <!-- INPUT BAR -->
+            <div class="ig-input-bar">
+                <div class="x-attach-wrap">
+                    <button type="button" class="x-attach-plus" id="plusBtn" onclick="togglePlusMenu()" title="Ekle"><i class="fas fa-plus"></i></button>
+                    <div class="x-plus-menu" id="plusMenu">
+                        <button class="x-plus-menu-item" onclick="closePlusMenu();toggleEmojiPicker()"><i class="fa-regular fa-face-smile"></i> Emoji</button>
+                        <button class="x-plus-menu-item" onclick="closePlusMenu();insertGifPlaceholder()"><i class="fa-solid fa-icons"></i> GIF</button>
+                        <label class="x-plus-menu-item" for="chatFileInput" onclick="closePlusMenu()"><i class="fa-solid fa-paperclip"></i> Yükle</label>
+                    </div>
+                    <div class="x-emoji-grid" id="emojiPicker"></div>
+                </div>
+                <input type="file" id="chatFileInput" accept="image/*,video/*,.pdf,.doc,.docx,.zip,.rar,.txt" style="display:none;" onchange="onFileSelected(this)">
+                <input type="text" id="messageInput" class="ig-text-field" placeholder="Mesaj" autocomplete="off"
+                    oninput="onInputChange()"
+                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage(event);}">
+                <button class="ig-send-btn" id="sendBtn" onclick="sendMessage(event)" title="Gonder" style="display:none;"><i class="fas fa-arrow-up"></i></button>
+                <button class="ig-mic-btn" id="recordBtn" title="Ses kaydet"><i class="fas fa-microphone"></i></button>
+            </div>
         </div>
-        </div>
-
     </div>
 
+    <!-- CALL MODAL -->
     <div id="callModal" class="call-modal">
         <div class="video-grid">
-            <h3 id="callStatus">Aranıyor...</h3>
+            <h3 id="callStatus">Araniyor...</h3>
             <video id="remoteVideo" autoplay playsinline class="remote-video"></video>
             <video id="localVideo" autoplay playsinline muted class="local-video"></video>
             <div class="call-controls">
-                <button onclick="toggleAudio()" class="control-btn" id="audioBtn"><i
-                        class="fas fa-microphone"></i></button>
+                <button onclick="toggleAudio()" class="control-btn" id="audioBtn"><i class="fas fa-microphone"></i></button>
                 <button onclick="endCall()" class="control-btn hangup-btn"><i class="fas fa-phone-slash"></i></button>
                 <button onclick="toggleVideo()" class="control-btn" id="videoBtn"><i class="fas fa-video"></i></button>
             </div>
         </div>
     </div>
-
     <div id="incomingCallBox" class="incoming-call-box">
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div
-                style="width: 50px; height: 50px; background: #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                <i class="fas fa-phone"></i></div>
-            <div>
-                <strong id="callerName" style="font-size: 1.1rem;">Biri</strong>
-                <div id="callType" style="font-size: 0.9rem; color: #666;">Görüntülü Arıyor...</div>
+        <div style="display:flex;align-items:center;gap:15px;">
+            <div style="width:50px;height:50px;background:#ddd;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;"><i class="fas fa-phone"></i></div>
+            <div><strong id="callerName" style="font-size:1.1rem;">Biri</strong><div id="callType" style="font-size:.9rem;color:#666;">Goruntuluacute Ariyor...</div></div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:15px;justify-content:flex-end;">
+            <button onclick="acceptCall()" class="btn-vote" style="background:#2ecc71;padding:10px 25px;">Cevapla</button>
+            <button onclick="rejectCall()" class="btn-vote" style="background:#e74c3c;padding:10px 25px;">Reddet</button>
+        </div>
+    </div>
+
+    <!-- STORY MODAL -->
+    <div id="storyModal" class="story-view-modal">
+        <div id="storyProgressContainer" class="story-progress-container"></div>
+        <span class="close-story" onclick="closeStory()">&times;</span>
+        <div class="story-header-info">
+            <img id="storyUserPic" src="" class="nav-avatar">
+            <span id="storyUserName" style="color:white;font-weight:bold;margin-left:10px;"></span>
+            <span id="storyTime" style="color:#ddd;font-size:.8rem;margin-left:10px;"></span>
+        </div>
+        <button onclick="shareActiveStory()" class="story-share-btn" title="Hikayeyi Paylas" style="right:75px;"><i class="fas fa-paper-plane"></i></button>
+        <a id="deleteStoryBtn" href="#" class="story-delete-btn" onclick="confirmStoryDelete(event)">&#128465;</a>
+        <div id="storyViewers" class="story-viewers-badge">&#128065; <span id="viewerCount">0</span></div>
+        <div class="story-media-wrapper">
+            <img id="storyImage" src="" class="story-full-img" style="display:none;">
+            <video id="storyVideo" class="story-full-img" style="display:none;" playsinline webkit-playsinline>Tarayiciniz video oynatmayi desteklemiyor.</video>
+            <div class="story-nav-left" onclick="navigateStory('prev')" onmousedown="pauseStory()" onmouseup="resumeStory()" ontouchstart="pauseStory()" ontouchend="resumeStory()"></div>
+            <div class="story-nav-right" onclick="navigateStory('next')" onmousedown="pauseStory()" onmouseup="resumeStory()" ontouchstart="pauseStory()" ontouchend="resumeStory()"></div>
+        </div>
+    </div>
+    <div id="advancedShareModal" class="share-modal-overlay"></div>
+
+    <!-- PROFILE BOTTOM SHEET -->
+    <div class="x-sheet-overlay" id="profileSheetOverlay" onclick="closeProfileSheet()"></div>
+    <div class="x-profile-sheet" id="profileSheet">
+        <div class="x-sheet-handle-bar"></div>
+        <div class="x-sheet-top">
+            <button class="x-sheet-back" onclick="closeProfileSheet()"><i class="fas fa-arrow-left"></i></button>
+            <button class="x-sheet-share"><i class="fas fa-share-nodes"></i></button>
+        </div>
+        <div class="x-sheet-body">
+            <img src="/static/{{ user.profile_pic }}" class="x-sheet-avatar">
+            <h3 class="x-sheet-name">{{ user.username }}</h3>
+            <span class="x-sheet-uname">@{{ user.handle }}</span>
+            <div class="x-sheet-actions">
+                <a href="{{ url_for('main.user_profile', handle=user.handle) }}" class="x-sheet-action">
+                    <div class="x-sheet-action-icon"><i class="fa-regular fa-user"></i></div>
+                    <span>Profil</span>
+                </a>
+                <button class="x-sheet-action" onclick="alert('Sessiz alma özelliği yakında!')">
+                    <div class="x-sheet-action-icon"><i class="fa-regular fa-bell"></i></div>
+                    <span>Sessiz al</span>
+                </button>
+                <button class="x-sheet-action" onclick="blockUserToggle({{ user.id }}, this)">
+                    <div class="x-sheet-action-icon"><i class="fa-solid fa-ban"></i></div>
+                    <span>Mesajları<br>Engelle</span>
+                </button>
+                <button class="x-sheet-action" id="moreActionBtn" onclick="toggleSheetMore(event)">
+                    <div class="x-sheet-action-icon"><i class="fa-solid fa-ellipsis"></i></div>
+                    <span>Daha fazla</span>
+                    <div class="x-more-dropdown" id="sheetMoreDropdown">
+                        <a href="#" onclick="event.preventDefault();closeProfileSheet();"><i class="fa-solid fa-magnifying-glass"></i> Ara</a>
+                        <a href="{{ url_for('main.delete_conversation', partner_id=user.id) }}" class="x-danger" onclick="return confirm('Bu kişiyle olan tüm mesajlaşmalar silinecek. Emin misin?');"><i class="fa-solid fa-trash"></i> Sohbeti sil</a>
+                    </div>
+                </button>
             </div>
         </div>
-        <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: flex-end;">
-            <button onclick="acceptCall()" class="btn-vote"
-                style="background: #2ecc71; padding: 10px 25px;">Cevapla</button>
-            <button onclick="rejectCall()" class="btn-vote"
-                style="background: #e74c3c; padding: 10px 25px;">Reddet</button>
+
+        <!-- Sheet Settings -->
+        <div class="x-sheet-settings">
+            <div class="x-sheet-setting-row" onclick="openNicknameSheet()">
+                <div class="x-sheet-setting-left">
+                    <i class="fa-solid fa-at"></i>
+                    <span>Takma ad</span>
+                </div>
+                <div class="x-sheet-setting-right">
+                    <span id="nickPreview">Ayarla</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </div>
+            <div class="x-sheet-setting-row" onclick="alert('Kaybolan mesajlar özelliği yakında!')">
+                <div class="x-sheet-setting-left">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Kaybolan Mesajlar</span>
+                </div>
+                <div class="x-sheet-setting-right">
+                    <span>Kapalı</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </div>
+            <div class="x-sheet-setting-row" onclick="alert('Ekran görüntüsü engelleme özelliği yakında!')">
+                <div class="x-sheet-setting-left">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                    <span>Ekran Görüntülerini Engelle</span>
+                </div>
+                <div class="x-sheet-setting-right">
+                    <span>Kapalı</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </div>
+            <div class="x-sheet-setting-row" onclick="alert('Güvenlik numarası özelliği yakında!')">
+                <div class="x-sheet-setting-left">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Güvenlik Numarası</span>
+                </div>
+                <div class="x-sheet-setting-right">
+                    <span>Doğrulanmadı</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+
+        <button class="x-sheet-danger" id="blockDangerBtn" onclick="blockUserToggle({{ user.id }}, this)">
+            <i class="fa-solid fa-ban"></i> <span id="blockBtnText">Mesajları Engelle</span>
+        </button>
+    </div>
+
+    <!-- TAKMA AD BOTTOM SHEET -->
+    <div class="x-nick-sheet" id="nicknameSheet">
+        <div class="x-sheet-handle-bar"></div>
+        <div class="x-nick-header">
+            <div class="x-nick-header-left">
+                <button class="x-set-back" onclick="closeNicknameSheet()"><i class="fas fa-arrow-left"></i></button>
+                <h3 class="x-nick-title">Takma ad</h3>
+            </div>
+            <button class="x-nick-save" onclick="saveNickname()">Kaydet</button>
+        </div>
+        <div class="x-nick-body">
+            <div class="x-nick-info">
+                <i class="fa-solid fa-circle-info"></i>
+                <p>Takma adlar sadece sana görünür. Diğer kullanıcılar göremez.</p>
+            </div>
+            <label class="x-nick-label">Takma ad</label>
+            <input type="text" class="x-nick-input" id="nicknameInput" placeholder="Takma ad" maxlength="30">
         </div>
     </div>
 
@@ -204,47 +503,123 @@
     <script>
         const MY_USERNAME = "{{ current_user.username }}";
         const OTHER_USERNAME = "{{ user.username }}";
-        if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
-        window.onload = function () {
-            var msgArea = document.getElementById("messageArea");
-            if (msgArea) msgArea.scrollTop = msgArea.scrollHeight;
-        };
+        window.addEventListener("DOMContentLoaded",function(){var a=document.getElementById("messageArea");if(a)a.scrollTop=a.scrollHeight;});
+        function onInputChange(){var v=document.getElementById("messageInput").value.trim();var f=document.getElementById("filePreviewStrip")&&document.getElementById("filePreviewStrip").classList.contains("visible");document.getElementById("sendBtn").style.display=(v||f)?"flex":"none";document.getElementById("recordBtn").style.display=(v||f)?"none":"flex";}
+        function formatFileSize(b){if(b<1024)return b+" B";if(b<1048576)return(b/1024).toFixed(1)+" KB";return(b/1048576).toFixed(1)+" MB";}
+        function onFileSelected(input){
+            if(!input.files||!input.files[0])return;
+            var file=input.files[0];
+            var strip=document.getElementById("filePreviewStrip");
+            var thumbEl=document.getElementById("filePreviewThumb");
+            if(file.type.startsWith("image/")){
+                var url=URL.createObjectURL(file);
+                thumbEl.innerHTML='<img src="'+url+'" alt="preview">';
+            }else if(file.type.startsWith("video/")){
+                var url=URL.createObjectURL(file);
+                thumbEl.innerHTML='<video src="'+url+'" controls></video>';
+            }else{
+                thumbEl.innerHTML='<div class="x-preview-file"><i class="fas fa-file-alt"></i><span>'+file.name+'</span></div>';
+            }
+            strip.classList.add("visible");
+            document.getElementById("sendBtn").style.display="flex";
+            document.getElementById("recordBtn").style.display="none";
+            document.getElementById("messageInput").focus();
+        }
+        function clearFilePreview(){
+            document.getElementById("filePreviewStrip").classList.remove("visible");
+            document.getElementById("chatFileInput").value="";
+            document.getElementById("filePreviewThumb").innerHTML="";
+            document.getElementById("messageInput").value="";
+            onInputChange();
+            var ma=document.getElementById("messageArea");
+            ma.scrollTop=ma.scrollHeight;
+        }
+        function positionAboveBtn(menu,btn){
+            var r=btn.getBoundingClientRect();
+            menu.style.left=r.left+'px';
+            menu.style.bottom=(window.innerHeight-r.top+8)+'px';
+        }
+        function togglePlusMenu(){
+            var m=document.getElementById('plusMenu');
+            var b=document.getElementById('plusBtn');
+            m.classList.toggle('open');
+            if(m.classList.contains('open'))positionAboveBtn(m,b);
+        }
+        function closePlusMenu(){document.getElementById('plusMenu').classList.remove('open');}
+        document.addEventListener('click',function(e){if(!e.target.closest('.x-attach-wrap'))closePlusMenu();});
+        function openProfileSheet(){
+            document.getElementById('profileSheetOverlay').classList.add('open');
+            document.getElementById('profileSheet').classList.add('open');
+            document.body.style.overflow='hidden';
+        }
+        function closeProfileSheet(){
+            document.getElementById('profileSheetOverlay').classList.remove('open');
+            document.getElementById('profileSheet').classList.remove('open');
+            document.body.style.overflow='';
+            var dd=document.getElementById('sheetMoreDropdown');if(dd)dd.classList.remove('open');
+        }
+        function toggleSheetMore(e){
+            e.stopPropagation();
+            document.getElementById('sheetMoreDropdown').classList.toggle('open');
+        }
+        document.addEventListener('click',function(e){if(!e.target.closest('#moreActionBtn')){var dd=document.getElementById('sheetMoreDropdown');if(dd)dd.classList.remove('open');}});
+        /* Emoji Picker */
+        var EMOJIS=['\ud83d\ude00','\ud83d\ude02','\ud83d\ude0d','\ud83e\udd70','\ud83d\ude0e','\ud83e\udd23','\ud83d\ude4f','\u2764\ufe0f','\ud83d\udd25','\ud83d\udc4d','\ud83d\udc4f','\ud83d\ude4c','\ud83e\udd1f','\u270c\ufe0f','\ud83d\udc4c','\ud83e\udd19','\ud83d\udcaf','\u2728','\ud83c\udf89','\ud83c\udf1f','\ud83d\ude80','\ud83d\udca1','\ud83d\udcaa','\ud83e\udde0','\ud83d\udc40','\ud83d\udde3\ufe0f','\ud83d\udcac','\ud83d\udc96','\ud83d\udc99','\ud83d\udc9a','\ud83d\ude22','\ud83d\ude24','\ud83d\ude31','\ud83e\udd14','\ud83d\ude44','\ud83e\udd2f','\ud83e\udd73','\ud83e\udd29','\ud83d\ude08','\ud83d\udc80','\ud83d\udc7b','\ud83d\udc4e','\ud83e\udd1d','\ud83d\ude4b','\ud83d\ude45','\ud83d\ude47','\ud83c\udf39','\ud83c\udf3b','\ud83c\udf3a','\ud83c\udf3c','\ud83c\udf1e','\ud83c\udf08','\u2600\ufe0f','\ud83c\udf27\ufe0f','\u26a1','\ud83c\udf0a','\ud83c\udf4e','\ud83c\udf55','\u2615','\ud83c\udf82','\ud83c\udfc6','\u26bd','\ud83c\udfa5','\ud83c\udfa4','\ud83c\udfb5','\ud83d\udcf8','\ud83d\udcf1'];
+        (function(){
+            var grid=document.getElementById('emojiPicker');
+            if(!grid)return;
+            EMOJIS.forEach(function(em){
+                var b=document.createElement('button');
+                b.className='x-emoji-btn';
+                b.textContent=em;
+                b.type='button';
+                b.addEventListener('click',function(){insertEmoji(em);});
+                grid.appendChild(b);
+            });
+        })();
+        function toggleEmojiPicker(){
+            var m=document.getElementById('emojiPicker');
+            var b=document.getElementById('plusBtn');
+            m.classList.toggle('open');
+            if(m.classList.contains('open'))positionAboveBtn(m,b);
+        }
+        function closeEmojiPicker(){document.getElementById('emojiPicker').classList.remove('open');}
+        document.addEventListener('click',function(e){if(!e.target.closest('.x-attach-wrap'))closeEmojiPicker();});
+        function insertEmoji(em){var inp=document.getElementById('messageInput');var s=inp.selectionStart||inp.value.length;inp.value=inp.value.substring(0,s)+em+inp.value.substring(s);inp.focus();inp.selectionStart=inp.selectionEnd=s+em.length;onInputChange();}
+        function insertGifPlaceholder(){alert('GIF özelliği yakında!');}
+        /* Block user */
+        var _isBlocked = false;
+        function blockUserToggle(userId, btn){
+            var msg = _isBlocked ? 'Bu kişinin engelini kaldırmak istiyor musunuz?' : 'Bu kişiyi engellemek istiyor musunuz? Artık size mesaj gönderemeyecek.';
+            if(!confirm(msg)) return;
+            fetch('/block_user/'+userId, {
+                method:'POST',
+                headers:{'X-CSRFToken': window.CSRF_TOKEN||'', 'Content-Type':'application/json'}
+            }).then(function(r){return r.json();}).then(function(data){
+                if(data.success){
+                    _isBlocked = data.blocked;
+                    var t=document.getElementById('blockBtnText');
+                    if(t) t.textContent=_isBlocked?'Engeli Kaldır':'Mesajları Engelle';
+                    if(data.blocked){closeProfileSheet();window.location.href='{{ url_for("main.messages_inbox") }}';}
+                    else{alert(data.message);}
+                } else { alert(data.error||'Bir hata oluştu.'); }
+            }).catch(function(){alert('Bağlantı hatası.');});
+        }
+        /* Nickname */
+        function openNicknameSheet(){
+            document.getElementById('nicknameSheet').classList.add('open');
+            document.getElementById('nicknameInput').value=localStorage.getItem('nick_{{ user.id }}')||'';
+        }
+        function closeNicknameSheet(){document.getElementById('nicknameSheet').classList.remove('open');}
+        function saveNickname(){
+            var v=document.getElementById('nicknameInput').value.trim();
+            if(v){localStorage.setItem('nick_{{ user.id }}',v);document.getElementById('nickPreview').textContent=v;var h4=document.querySelector('.ig-header-info h4');if(h4)h4.textContent=v;}
+            else{localStorage.removeItem('nick_{{ user.id }}');document.getElementById('nickPreview').textContent='Ayarla';var h4=document.querySelector('.ig-header-info h4');if(h4)h4.textContent='{{ user.username }}';}
+            closeNicknameSheet();
+        }
+        var hl=document.getElementById('headerUserLink');
+        if(hl){hl.addEventListener('click',function(e){e.preventDefault();openProfileSheet();});}
     </script>
-
-    <div id="storyModal" class="story-view-modal">
-        <div id="storyProgressContainer" class="story-progress-container"></div>
-        <span class="close-story" onclick="closeStory()">&times;</span>
-
-        <div class="story-header-info">
-            <img id="storyUserPic" src="" class="nav-avatar">
-            <span id="storyUserName" style="color: white; font-weight: bold; margin-left: 10px;"></span>
-            <span id="storyTime" style="color: #ddd; font-size: 0.8rem; margin-left: 10px;"></span>
-        </div>
-
-        <button onclick="shareActiveStory()" class="story-share-btn" title="Hikayeyi Paylaş" style="right: 75px;">
-            <i class="fas fa-paper-plane"></i>
-        </button>
-
-        <a id="deleteStoryBtn" href="#" class="story-delete-btn"
-            onclick="return confirm('Silmek istediğine emin misin?')">🗑️</a>
-        <div id="storyViewers" class="story-viewers-badge">👁️ <span id="viewerCount">0</span></div>
-
-        <div class="story-media-wrapper">
-            <img id="storyImage" src="" class="story-full-img" style="display: none;">
-            <video id="storyVideo" class="story-full-img" style="display: none;" playsinline webkit-playsinline>
-                Tarayıcınız video oynatmayı desteklemiyor.
-            </video>
-            <div class="story-nav-left" onclick="navigateStory('prev')" onmousedown="pauseStory()"
-                onmouseup="resumeStory()" ontouchstart="pauseStory()" ontouchend="resumeStory()"></div>
-            <div class="story-nav-right" onclick="navigateStory('next')" onmousedown="pauseStory()"
-                onmouseup="resumeStory()" ontouchstart="pauseStory()" ontouchend="resumeStory()"></div>
-        </div>
-    </div>
-
-    <div id="advancedShareModal" class="share-modal-overlay">
-    </div>
-
     <script src="/static/script.js"></script>
 </body>
-
 </html>

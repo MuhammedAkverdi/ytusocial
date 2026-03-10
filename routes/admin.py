@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, abort, current_app
 from flask_login import login_required, current_user
 from extensions import db
-from models import User, Post, Feedback, Club
+from models import User, Post, Feedback, Club, Note, ClubVote, NoteVote, Notification, Advert
 from utils import optimize_and_save_image, allowed_file, ONLINE_USERS
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
@@ -15,17 +15,101 @@ def admin_panel():
     if not current_user.is_admin: return redirect(url_for('main.index'))
     
     reported_posts = Post.query.filter(Post.report_count > 0).order_by(Post.report_count.desc()).all()
+    reported_notes = Note.query.filter(Note.report_count > 0, Note.is_approved == True).order_by(Note.report_count.desc()).all()
     feedbacks = Feedback.query.order_by(Feedback.date_sent.desc()).all()
+    pending_notes = Note.query.filter_by(is_approved=False).order_by(Note.date_posted.desc()).all()
+    moderators = User.query.filter_by(is_moderator=True).all()
     
     return render_template('admin.html',
                            total_users=User.query.count(),
                            total_posts=Post.query.count(),
-                           reported_posts=reported_posts, 
+                           reported_posts=reported_posts,
+                           reported_notes=reported_notes,
                            feedbacks=feedbacks,
                            cpu=psutil.cpu_percent(),
                            ram=psutil.virtual_memory().percent,
                            active_count=len(ONLINE_USERS),
-                           users=User.query.limit(50).all())
+                           users=User.query.limit(50).all(),
+                           clubs=Club.query.order_by(Club.name).all(),
+                           pending_notes=pending_notes,
+                           moderators=moderators)
+
+
+@admin.route('/moderator')
+@login_required
+def moderator_panel():
+    if not (current_user.is_admin or current_user.is_moderator):
+        return redirect(url_for('main.index'))
+    pending_notes = Note.query.filter_by(is_approved=False).order_by(Note.date_posted.desc()).all()
+    reported_notes = Note.query.filter(Note.report_count > 0, Note.is_approved == True).order_by(Note.report_count.desc()).all()
+    reported_posts = Post.query.filter(Post.report_count > 0).order_by(Post.report_count.desc()).all()
+    return render_template('moderator.html',
+                           pending_notes=pending_notes,
+                           reported_notes=reported_notes,
+                           reported_posts=reported_posts)
+
+
+@admin.route('/admin/approve_note/<int:note_id>')
+@login_required
+def approve_note(note_id):
+    if not (current_user.is_admin or current_user.is_moderator): abort(403)
+    note = Note.query.get_or_404(note_id)
+    note.is_approved = True
+    note.author.score += 10
+    db.session.commit()
+    flash(f'"{note.title}" onaylandı. {note.author.username} +10 puan kazandı.', 'success')
+    if current_user.is_admin:
+        return redirect(url_for('admin.admin_panel'))
+    return redirect(url_for('admin.moderator_panel'))
+
+
+@admin.route('/admin/reject_note/<int:note_id>')
+@login_required
+def reject_note(note_id):
+    if not (current_user.is_admin or current_user.is_moderator): abort(403)
+    note = Note.query.get_or_404(note_id)
+    import os as _os
+    file_path = _os.path.join(current_app.root_path, 'static', 'note_files', note.file_path)
+    if _os.path.exists(file_path):
+        _os.remove(file_path)
+    db.session.delete(note)
+    db.session.commit()
+    flash('Not reddedildi ve silindi.', 'warning')
+    if current_user.is_admin:
+        return redirect(url_for('admin.admin_panel'))
+    return redirect(url_for('admin.moderator_panel'))
+
+
+@admin.route('/admin/add_moderator', methods=['POST'])
+@login_required
+def add_moderator():
+    if not current_user.is_admin: abort(403)
+    username = request.form.get('username', '').strip()
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        flash(f'"{username}" adlı kullanıcı bulunamadı.', 'danger')
+    elif user.is_admin:
+        flash('Admin zaten tüm yetkilere sahip.', 'warning')
+    elif user.is_moderator:
+        flash(f'{user.username} zaten moderatör.', 'warning')
+    else:
+        user.is_moderator = True
+        db.session.commit()
+        flash(f'{user.username} moderatör olarak atandı.', 'success')
+    return redirect(url_for('admin.admin_panel'))
+
+
+@admin.route('/admin/remove_moderator/<int:user_id>')
+@login_required
+def remove_moderator(user_id):
+    if not current_user.is_admin: abort(403)
+    user = User.query.get_or_404(user_id)
+    user.is_moderator = False
+    db.session.commit()
+    flash(f'{user.username} moderatörlükten alındı.', 'success')
+    return redirect(url_for('admin.admin_panel'))
+
+
 
 @admin.route('/admin/delete_content/<string:type>/<int:id>')
 @login_required
@@ -36,6 +120,14 @@ def admin_delete_content(type, id):
         item = Post.query.get_or_404(id)
         db.session.delete(item)
         flash("İçerik kalıcı olarak silindi.", "success")
+    elif type == 'note':
+        item = Note.query.get_or_404(id)
+        import os
+        file_path = os.path.join(current_app.root_path, 'static', 'note_files', item.file_path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        db.session.delete(item)
+        flash("Not kalıcı olarak silindi.", "success")
     elif type == 'feedback':
         item = Feedback.query.get_or_404(id)
         db.session.delete(item)
@@ -181,6 +273,95 @@ def admin_create_user():
     db.session.commit()
     
     flash(f"✅ Kullanıcı oluşturuldu: {username}", "success")
+    return redirect(url_for('admin.admin_panel'))
+
+@admin.route('/admin/delete_user/<int:user_id>')
+@login_required
+def admin_delete_user(user_id):
+    if not current_user.is_admin: return "Yetkisiz"
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash("Kendi hesabınızı silemezsiniz.", "danger")
+        return redirect(url_for('admin.admin_panel'))
+    if user.is_admin:
+        flash("Admin hesabı silinemez.", "danger")
+        return redirect(url_for('admin.admin_panel'))
+    username = user.username
+    try:
+        from models import Comment, Story
+        Notification.query.filter(
+            (Notification.user_id == user.id) | (Notification.actor_id == user.id)
+        ).delete(synchronize_session=False)
+        Feedback.query.filter_by(user_id=user.id).delete()
+        ClubVote.query.filter_by(user_id=user.id).delete()
+        NoteVote.query.filter_by(user_id=user.id).delete()
+        Advert.query.filter_by(user_id=user.id).delete()
+        Note.query.filter_by(user_id=user.id).delete()
+        user.messages_sent.delete()
+        user.messages_received.delete()
+        Comment.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+        Story.query.filter_by(user_id=user.id).delete()
+        for post in list(user.posts):
+            db.session.delete(post)
+        db.session.flush()
+        db.session.delete(user)
+        db.session.commit()
+        flash(f"✅ {username} hesabı kalıcı olarak silindi.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"❌ Hata oluştu: {str(e)}", "danger")
+    return redirect(url_for('admin.admin_panel'))
+
+
+@admin.route('/admin/edit_club/<int:club_id>', methods=['POST'])
+@login_required
+def admin_edit_club(club_id):
+    if not current_user.is_admin: return "Yetkisiz"
+    club = Club.query.get_or_404(club_id)
+    club.name = request.form.get('name', club.name).strip()
+    club.description = request.form.get('description', club.description).strip()
+    leader_username = request.form.get('leader_username', '').strip()
+    if leader_username:
+        leader = User.query.filter_by(username=leader_username).first()
+        if leader:
+            club.leader = leader
+    if 'logo' in request.files:
+        file = request.files['logo']
+        if file and file.filename and allowed_file(file.filename):
+            club.logo_file = optimize_and_save_image(file, 'static/img', max_size=(400, 400))
+    db.session.commit()
+    flash(f"Kulüp güncellendi: {club.name}", "success")
+    return redirect(url_for('admin.admin_panel'))
+
+
+@admin.route('/admin/delete_club/<int:club_id>')
+@login_required
+def admin_delete_club(club_id):
+    if not current_user.is_admin: return "Yetkisiz"
+    club = Club.query.get_or_404(club_id)
+    name = club.name
+    # Feed postlarındaki club_id bağlantısını kaldır
+    Post.query.filter_by(club_id=club.id).update({'club_id': None})
+    ClubVote.query.filter_by(club_id=club.id).delete()
+    db.session.flush()
+    db.session.delete(club)
+    db.session.commit()
+    flash(f"Kulüp silindi: {name}", "success")
+    return redirect(url_for('admin.admin_panel'))
+
+
+@admin.route('/admin/edit_note/<int:note_id>', methods=['POST'])
+@login_required
+def admin_edit_note(note_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Yetkisiz'}), 403
+    note = Note.query.get_or_404(note_id)
+    note.title       = request.form.get('title',       note.title).strip()
+    note.course_code = request.form.get('course_code', note.course_code).strip()
+    note.department  = request.form.get('department',  note.department).strip()
+    note.description = request.form.get('description', note.description or '').strip()
+    db.session.commit()
+    flash('Not güncellendi.', 'success')
     return redirect(url_for('admin.admin_panel'))
 
 @admin.route('/fix_db')

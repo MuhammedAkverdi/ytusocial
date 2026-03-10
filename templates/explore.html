@@ -144,11 +144,236 @@
 
         @media (max-width: 1100px) {
             .explore-layout { grid-template-columns: 1fr 300px; }
-            .left-sidebar { display: none; } /* Hide left sidebar on smaller screens */
+            .left-sidebar { display: none; }
         }
         @media (max-width: 800px) {
             .explore-layout { grid-template-columns: 1fr; }
             .right-sidebar { display: none; }
+        }
+
+        /* --- MOBİL (sadece ≤768px) --- */
+        .mob-header, .mob-left-overlay, .mob-left-drawer, .mobile-bottom-nav { display: none; }
+        /* Mobil-only explore page — hidden on desktop */
+        .mob-explore-page { display: none; }
+
+        @media (max-width: 768px) {
+            .navbar { display: none !important; }
+            .mob-header       { display: flex !important; }
+            .mob-left-overlay { display: none !important; }
+            .mob-left-drawer  { display: flex !important; }
+            .mobile-bottom-nav { display: flex !important; }
+
+            .explore-layout {
+                grid-template-columns: 1fr !important;
+                margin: 58px 0 70px !important;
+                padding: 0 !important;
+                gap: 0 !important;
+                max-width: 100% !important;
+            }
+            .left-sidebar  { display: none !important; }
+            .right-sidebar { display: none !important; }
+            .explore-main  { gap: 0; padding: 10px 12px; }
+            .search-hero   { padding: 0 !important; margin-bottom: 12px; }
+            .search-input-lg { font-size: 0.95rem; padding: 12px 16px 12px 44px; }
+            .insta-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }
+            .insta-item { border-radius: 0; border: none; }
+            .user-results-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+            /* --- MOBİL HEADER --- */
+            .mob-header {
+                position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+                height: 54px; background: var(--card-bg);
+                border-bottom: 1px solid var(--border-color);
+                align-items: center; padding: 0 14px;
+                justify-content: space-between;
+                box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            }
+            .mob-header-avatar {
+                width: 34px; height: 34px; border-radius: 50%;
+                object-fit: cover; border: 2px solid var(--ytu-lacivert); cursor: pointer;
+            }
+            .mob-header-logo { font-size: 1.1rem; font-weight: 900; color: var(--ytu-lacivert); letter-spacing: -0.5px; text-decoration: none; }
+            .mob-header-logo span { color: var(--ytu-sari); }
+            .mob-header-icon { background: none; border: none; color: var(--text-color); font-size: 1.15rem; cursor: pointer; padding: 6px; display: flex; align-items: center; }
+
+            /* --- OVERLAY --- */
+            .mob-left-overlay {
+                position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: none;
+            }
+            .mob-left-overlay.open { display: block !important; }
+
+            /* --- SOL DRAWER --- */
+            .mob-left-drawer {
+                position: fixed; top: 0; left: 0; bottom: 0;
+                width: 82%; max-width: 320px;
+                background: var(--card-bg); z-index: 2001;
+                flex-direction: column; overflow-y: auto;
+                transform: translateX(-100%);
+                transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+                padding-bottom: env(safe-area-inset-bottom, 20px);
+            }
+            .mob-left-drawer.open { transform: translateX(0); }
+            .mob-drawer-profile { padding: 28px 22px 16px; }
+            .mob-drawer-avatar { width: 62px; height: 62px; border-radius: 50%; object-fit: cover; border: 3px solid var(--ytu-lacivert); margin-bottom: 12px; display: block; }
+            .mob-drawer-name { font-size: 1.05rem; font-weight: 800; color: var(--text-color); margin: 0 0 2px; }
+            .mob-drawer-score { display: inline-block; background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb),.7)); color: #fff; padding: 3px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin-top: 6px; }
+            .mob-drawer-nav { padding: 8px 0; border-top: 1px solid var(--border-color); }
+            .mob-drawer-link { display: flex; align-items: center; gap: 18px; padding: 14px 22px; text-decoration: none; color: var(--text-color); font-size: 1.05rem; font-weight: 700; transition: background 0.15s; }
+            .mob-drawer-link:active { background: var(--bg-light); }
+            .mob-drawer-link i { width: 26px; text-align: center; font-size: 1.2rem; color: var(--text-color); }
+            .mob-drawer-link.active, .mob-drawer-link.active i { color: var(--ytu-lacivert); }
+            .mob-drawer-sep { height: 1px; background: var(--border-color); margin: 8px 0; }
+            .mob-drawer-section-title { padding: 12px 22px 4px; font-size: 0.78rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; justify-content: space-between; }
+            .mob-drawer-section-title a { font-size: 0.78rem; font-weight: 700; color: var(--ytu-lacivert); text-transform: none; letter-spacing: 0; text-decoration: none; }
+            .mob-drawer-trend { display: flex; align-items: center; justify-content: space-between; padding: 10px 22px; text-decoration: none; color: var(--text-color); transition: background 0.15s; }
+            .mob-drawer-trend:active { background: var(--bg-light); }
+            .mob-drawer-trend-tag { font-weight: 700; font-size: 0.9rem; color: var(--ytu-lacivert); }
+            .mob-drawer-trend-count { font-size: 0.72rem; color: var(--text-muted); }
+            .mob-drawer-club { display: flex; align-items: center; gap: 10px; padding: 10px 22px; border-bottom: 1px solid var(--border-color); }
+            .mob-drawer-club-rank { width: 24px; height: 24px; border-radius: 50%; background: var(--bg-light); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; flex-shrink: 0; }
+            .mob-drawer-club-rank.gold   { background: linear-gradient(135deg,#FFD700,#FDB931); color:#fff; }
+            .mob-drawer-club-rank.silver { background: linear-gradient(135deg,#E0E0E0,#BDBDBD); color:#fff; }
+            .mob-drawer-club-rank.bronze { background: linear-gradient(135deg,#CD7F32,#A0522D); color:#fff; }
+            .mob-drawer-club-logo { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; background: white; border: 1px solid var(--border-color); padding: 2px; flex-shrink: 0; }
+            .mob-drawer-club-name { font-weight: 700; font-size: 0.85rem; color: var(--text-color); }
+            .mob-drawer-club-votes { font-size: 0.7rem; color: var(--text-muted); }
+            .mob-drawer-logout { display: flex; align-items: center; gap: 18px; padding: 14px 22px; text-decoration: none; color: #e74c3c; font-size: 1.05rem; font-weight: 700; }
+            .mob-drawer-logout i { width: 26px; text-align: center; font-size: 1.2rem; }
+
+            /* --- ALT NAV --- */
+            .mobile-bottom-nav {
+                position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+                height: 56px; background: var(--card-bg);
+                border-top: 1px solid var(--border-color);
+                box-shadow: 0 -1px 10px rgba(0,0,0,0.06);
+                padding: 0 4px;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+                justify-content: space-around; align-items: center;
+            }
+            .mobile-bottom-nav .nav-item {
+                flex: 1; display: flex; align-items: center; justify-content: center;
+                font-size: 1.3rem; padding: 8px 0;
+                color: var(--text-color); text-decoration: none; position: relative;
+            }
+            .mobile-bottom-nav .nav-item.active { color: var(--ytu-lacivert); }
+            .mob-nav-badge {
+                position: absolute; top: 4px; right: calc(50% - 18px);
+                background: #ff4757; color: #fff;
+                font-size: 0.55rem; padding: 1px 5px;
+                border-radius: 10px; font-weight: 700;
+                min-width: 16px; text-align: center;
+            }
+
+            /* --- MOBİL EXPLORE PAGE --- */
+            .mob-explore-page {
+                display: block !important;
+                margin-top: 54px;
+                margin-bottom: 70px;
+            }
+            .explore-layout   { display: none !important; }
+
+            .mob-explore-search-wrap {
+                padding: 8px 14px 0;
+                position: relative;
+            }
+            .mob-explore-search-icon {
+                position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+                color: var(--text-muted); font-size: 0.9rem; pointer-events: none;
+            }
+            .mob-explore-search-input {
+                width: 100%; padding: 10px 14px 10px 36px;
+                border-radius: 20px; border: 1px solid var(--border-color);
+                background: var(--input-bg, #f0f0f0); color: var(--text-color);
+                font-size: 0.92rem; outline: none; box-sizing: border-box;
+            }
+            .mob-search-results {
+                position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+                background: var(--card-bg); border: 1px solid var(--border-color);
+                border-radius: 14px; z-index: 600; overflow: hidden;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.13); display: none;
+            }
+            .mob-search-result-item {
+                display: flex; align-items: center; gap: 12px;
+                padding: 12px 16px; border-bottom: 1px solid var(--border-color);
+                text-decoration: none; color: var(--text-color);
+            }
+            .mob-search-result-item:last-child { border-bottom: none; }
+
+            /* Tab Switcher */
+            .mob-explore-tabs {
+                display: flex; border-bottom: 1px solid var(--border-color);
+                margin-top: 8px;
+            }
+            .mob-ex-tab {
+                flex: 1; background: none; border: none; border-bottom: 3px solid transparent;
+                padding: 12px 6px; font-size: 0.92rem; font-weight: 700;
+                color: var(--text-muted); cursor: pointer; transition: color 0.2s, border-color 0.2s;
+            }
+            .mob-ex-tab.active {
+                color: var(--ytu-lacivert, #1a1a6e);
+                border-bottom-color: var(--ytu-lacivert, #1a1a6e);
+            }
+
+            /* Gündem Satırları */
+            .mob-ex-panel { display: block; }
+            .mob-trend-row {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 14px 18px; border-bottom: 1px solid var(--border-color);
+                text-decoration: none; color: inherit; transition: background 0.15s;
+            }
+            .mob-trend-row:active { background: var(--bg-light); }
+            .mob-trend-info { display: flex; flex-direction: column; gap: 2px; }
+            .mob-trend-label { font-size: 0.72rem; color: var(--text-muted); }
+            .mob-trend-name  { font-size: 0.97rem; font-weight: 800; color: var(--text-color); }
+            .mob-trend-count { font-size: 0.72rem; color: var(--text-muted); }
+            .mob-trend-more  { color: var(--text-muted); font-size: 0.95rem; flex-shrink: 0; padding: 4px; }
+
+            /* Insta Grid */
+            .mob-insta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+            .mob-insta-item {
+                position: relative; aspect-ratio: 1; overflow: hidden; cursor: pointer;
+                background: var(--bg-light);
+            }
+            .mob-insta-media { width: 100%; height: 100%; object-fit: cover; display: block; }
+            .mob-insta-text-card {
+                width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+                padding: 8px; background: var(--card-bg); font-size: 0.7rem;
+                color: var(--text-color); text-align: center; overflow: hidden;
+            }
+            .mob-insta-overlay {
+                position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+                display: flex; align-items: center; justify-content: center; gap: 16px;
+                color: #fff; font-size: 0.78rem; font-weight: 700; opacity: 0;
+                transition: opacity 0.2s;
+            }
+            .mob-insta-item:hover .mob-insta-overlay { opacity: 1; }
+            .mob-video-icon {
+                position: absolute; top: 6px; right: 6px;
+                color: #fff; font-size: 0.8rem; text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+            }
+
+            /* Önerilenler */
+            .mob-suggest-row {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 12px 18px; border-bottom: 1px solid var(--border-color);
+            }
+            .mob-suggest-left {
+                display: flex; align-items: center; gap: 12px;
+                text-decoration: none; color: inherit; flex: 1; min-width: 0;
+            }
+            .mob-suggest-avatar {
+                width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
+                border: 2px solid var(--border-color); flex-shrink: 0;
+            }
+            .mob-suggest-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+            .mob-suggest-name { font-weight: 700; font-size: 0.92rem; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .mob-suggest-dept { font-size: 0.75rem; color: var(--text-muted); }
+            .mob-suggest-follow-btn {
+                background: var(--ytu-lacivert, #1a1a6e); color: #fff;
+                border: none; border-radius: 20px; padding: 6px 16px;
+                font-size: 0.82rem; font-weight: 700; cursor: pointer;
+                text-decoration: none; white-space: nowrap; flex-shrink: 0;
+            }
         }
 
         /* Arama Sonuçları Dropdown */
@@ -173,7 +398,76 @@
 </head>
 <body>
 
-    {% include 'navbar_partial.html' ignore missing %} <div class="explore-layout">
+    {% include 'navbar_partial.html' ignore missing %}
+
+    <!-- MOBİL HEADER -->
+    <div class="mob-header" id="mobHeader">
+        <img src="/static/{{ current_user.profile_pic }}" class="mob-header-avatar" onclick="openMobileDrawer()" alt="Profil">
+        <a href="/" class="mob-header-logo">YTU<span>SOCIAL</span></a>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <button class="mob-header-icon" onclick="toggleDarkMode()" title="Tema">🌙</button>
+        </div>
+    </div>
+
+    <!-- MOBİL EXPLORE — sadece ≤768px -->
+    <div class="mob-explore-page">
+        <!-- Arama -->
+        <div class="mob-explore-search-wrap">
+            <div style="position:relative;">
+                <i class="fa-solid fa-magnifying-glass mob-explore-search-icon"></i>
+                <input type="text" id="mobExploreSearch" placeholder="Kullanıcı ara..." class="mob-explore-search-input" autocomplete="off">
+                <div id="mobSearchResults" class="mob-search-results"></div>
+            </div>
+        </div>
+
+        <!-- Tab Switcher -->
+        <div class="mob-explore-tabs">
+            <button class="mob-ex-tab active" onclick="switchExTab('gundem', this)">🔥 Gündem</button>
+            <button class="mob-ex-tab" onclick="switchExTab('trend', this)">📸 Trend Gönderiler</button>
+            <button class="mob-ex-tab" onclick="switchExTab('onerilen', this)">👤 Önerilenler</button>
+        </div>
+
+        <!-- Gündem Paneli -->
+        <div id="tab-gundem" class="mob-ex-panel">
+            {% for tag, count in trending_tags %}
+            <a href="{{ url_for('main.explore', q='#' + tag) }}" class="mob-trend-row">
+                <div class="mob-trend-info">
+                    <div class="mob-trend-label">Kampüste gündemde</div>
+                    <div class="mob-trend-name">#{{ tag }}</div>
+                    <div class="mob-trend-count">{{ count }} gönderi</div>
+                </div>
+                <i class="fa-solid fa-ellipsis mob-trend-more"></i>
+            </a>
+            {% else %}
+            <p style="text-align:center;color:var(--text-muted);padding:40px 20px;">Henüz gündem yok.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Trend Gönderiler Paneli -->
+        <div id="tab-trend" class="mob-ex-panel" style="display:none;">
+            <div id="mob-random-grid" class="mob-insta-grid"></div>
+        </div>
+
+        <!-- Önerilenler Paneli -->
+        <div id="tab-onerilen" class="mob-ex-panel" style="display:none;">
+            {% for user in suggested_users %}
+            <div class="mob-suggest-row">
+                <a href="{{ url_for('main.user_profile', handle=user.handle) }}" class="mob-suggest-left">
+                    <img src="/static/{{ user.profile_pic }}" class="mob-suggest-avatar" alt="{{ user.username }}">
+                    <div class="mob-suggest-info">
+                        <div class="mob-suggest-name">{{ user.username }}</div>
+                        <div class="mob-suggest-dept">{{ user.department or 'Öğrenci' }}</div>
+                    </div>
+                </a>
+                <a href="{{ url_for('main.follow', handle=user.handle) }}" class="mob-suggest-follow-btn">Takip Et</a>
+            </div>
+            {% else %}
+            <p style="text-align:center;color:var(--text-muted);padding:40px 20px;">Şimdilik öneri yok.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="explore-layout">
         
         <aside class="left-sidebar sticky-sidebar">
             <div style="background: var(--card-bg); border-radius: 20px; padding: 25px 20px; border: 1px solid var(--border-color);">
@@ -184,17 +478,22 @@
                 </div>
 
                 <nav style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="{{ url_for('main.index') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
-                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert);"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
+                    <a href="/" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
                     <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
+                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
+                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
+                    <a href="{{ url_for('main.clubs_full_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi</a>
+                    <a href="{{ url_for('main.adverts') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bullhorn" style="width: 20px; text-align: center;"></i> İlanlar</a>
                     <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
                         <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
-                        {% if unread_count > 0 %}
-                        <span class="notification-badge">{{ unread_count }}</span>
-                        {% endif %}
+                        {% if unread_count > 0 %}<span class="notification-badge">{{ unread_count }}</span>{% endif %}
                     </a>
-                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
-                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar</a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
+                        {% if unread_msg_count > 0 %}<span class="msg-badge">{{ unread_msg_count }}</span>{% endif %}
+                    </a>
+                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bus" style="width: 20px; text-align: center;"></i> Ulaşım</a>
                 </nav>
             </div>
         </aside>
@@ -299,6 +598,175 @@
     </div>
 
     <script src="/static/script.js"></script>
+
+    <!-- Mobil Alt Nav -->
+    <div class="mobile-bottom-nav">
+        <a href="{{ url_for('main.index') }}" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+        </a>
+        <a href="{{ url_for('main.explore') }}" class="nav-item active">
+            <i class="fa-regular fa-compass"></i>
+        </a>
+        <a href="{{ url_for('main.reels') }}" class="nav-item">
+            <i class="fa-solid fa-clapperboard"></i>
+        </a>
+        <a href="{{ url_for('main.notifications') }}" class="nav-item">
+            <i class="fa-regular fa-bell"></i>
+            {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('main.messages_inbox') }}" class="nav-item">
+            <i class="fa-regular fa-envelope"></i>
+            {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
+        </a>
+    </div>
+
+    <!-- Mobil Sol Overlay -->
+    <div class="mob-left-overlay" id="mobOverlay" onclick="closeMobileDrawer()"></div>
+
+    <!-- Mobil Sol Drawer -->
+    <div class="mob-left-drawer" id="mobDrawer">
+        <div class="mob-drawer-profile">
+            <img src="/static/{{ current_user.profile_pic }}" class="mob-drawer-avatar" alt="{{ current_user.username }}">
+            <div class="mob-drawer-name">{{ current_user.username }}</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);">@{{ current_user.handle }}</div>
+            <span class="mob-drawer-score">⭐ {{ current_user.score }} Puan</span>
+        </div>
+        <nav class="mob-drawer-nav">
+            <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-regular fa-user"></i> Profil</a>
+            <a href="{{ url_for('main.messages_inbox') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-envelope"></i>
+                <span>Mesajlar{% if unread_msg_count > 0 %} <span style="background:#ff4757;color:#fff;border-radius:10px;font-size:0.7rem;padding:2px 7px;margin-left:6px;">{{ unread_msg_count }}</span>{% endif %}</span>
+            </a>
+            <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-book-open"></i> Not Havuzu</a>
+            <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-regular fa-bookmark"></i> Kaydedilenler</a>
+            <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-trophy"></i> Kulüpler Ligi</a>
+            <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-bullhorn"></i> İlanlar</a>
+            <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-bus"></i> Ulaşım</a>
+            <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-gear"></i> Profili Düzenle</a>
+        </nav>
+        <div class="mob-drawer-sep"></div>
+        <div class="mob-drawer-section-title">
+            🔥 Gündem
+            <a href="{{ url_for('main.explore') }}">Tümünü Keşfet</a>
+        </div>
+        {% for tag, count in trending_tags[:5] %}
+        <a href="{{ url_for('main.explore', q='#' + tag) }}" class="mob-drawer-trend" onclick="closeMobileDrawer()">
+            <div>
+                <div class="mob-drawer-trend-tag">#{{ tag }}</div>
+                <div class="mob-drawer-trend-count">{{ count }} gönderi</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);"></i>
+        </a>
+        {% endfor %}
+        <div class="mob-drawer-sep"></div>
+        <div class="mob-drawer-section-title">
+            🏆 Kulüpler Ligi
+            <a href="{{ url_for('main.clubs_full_list') }}">Tüm Liste</a>
+        </div>
+        {% for club in clubs[:3] %}
+        <div class="mob-drawer-club">
+            <span class="mob-drawer-club-rank {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">{{ loop.index }}</span>
+            <img src="/static/img/{{ club.logo_file }}" class="mob-drawer-club-logo" onerror="this.style.display='none'">
+            <div style="flex:1;min-width:0;">
+                <div class="mob-drawer-club-name">{{ club.name }}</div>
+                <div class="mob-drawer-club-votes">{{ club.total_votes() }} oy</div>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="mob-drawer-sep"></div>
+        <a href="{{ url_for('auth.logout') }}" class="mob-drawer-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+        </a>
+    </div>
+
+    <script>
+        function openMobileDrawer() {
+            document.getElementById('mobDrawer').classList.add('open');
+            document.getElementById('mobOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileDrawer() {
+            document.getElementById('mobDrawer').classList.remove('open');
+            document.getElementById('mobOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        (function(){
+            const drawer = document.getElementById('mobDrawer');
+            let startX = 0;
+            drawer.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+            drawer.addEventListener('touchend', e => { if (startX - e.changedTouches[0].clientX > 70) closeMobileDrawer(); }, { passive: true });
+        })();
+
+        function switchExTab(tab, btn) {
+            document.querySelectorAll('.mob-ex-panel').forEach(function(p) { p.style.display = 'none'; });
+            document.querySelectorAll('.mob-ex-tab').forEach(function(b) { b.classList.remove('active'); });
+            document.getElementById('tab-' + tab).style.display = 'block';
+            btn.classList.add('active');
+            if (tab === 'trend') loadRandomPosts();
+        }
+
+        function loadRandomPosts() {
+            var grid = document.getElementById('mob-random-grid');
+            if (!grid) return;
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--text-muted);">Yükleniyor...</div>';
+            fetch('/api/random_posts')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.success || !data.posts.length) {
+                        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px 20px;">Henüz gönderi yok.</p>';
+                        return;
+                    }
+                    grid.innerHTML = data.posts.map(function(p) {
+                        var media = p.is_video
+                            ? '<video src="/static/post_images/' + p.image_file + '" class="mob-insta-media"></video><i class="fa-solid fa-video mob-video-icon"></i>'
+                            : '<img src="/static/post_images/' + p.image_file + '" class="mob-insta-media" loading="lazy">';
+                        return '<div class="mob-insta-item" onclick="location.href=\'/p/' + p.id + '\'">' +
+                            media +
+                            '<div class="mob-insta-overlay"><span><i class="fa-solid fa-heart"></i> ' + p.like_count + '</span><span><i class="fa-solid fa-comment"></i> ' + p.comment_count + '</span></div>' +
+                            '</div>';
+                    }).join('');
+                })
+                .catch(function() {
+                    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px 20px;">Bir hata oluştu.</p>';
+                });
+        }
+
+        // Mobil anlık kullanıcı arama
+        (function() {
+            var mobSearch = document.getElementById('mobExploreSearch');
+            var mobResults = document.getElementById('mobSearchResults');
+            if (!mobSearch) return;
+            var debounce;
+            mobSearch.addEventListener('input', function() {
+                clearTimeout(debounce);
+                var q = this.value.trim();
+                if (q.length < 1) { mobResults.style.display = 'none'; return; }
+                debounce = setTimeout(function() {
+                    fetch('/api/search_users?q=' + encodeURIComponent(q))
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            if (data.success && data.users.length) {
+                                mobResults.innerHTML = data.users.map(function(u) {
+                                    return '<a href="/u/' + u.handle + '" class="mob-search-result-item">' +
+                                        '<img src="/static/' + u.profile_pic + '" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;">' +
+                                        '<div><div style="font-weight:700;font-size:0.9rem;">' + u.username + '</div>' +
+                                        '<small style="color:var(--text-muted);">@' + u.handle + ' · ' + (u.department || 'Öğrenci') + '</small></div>' +
+                                        '</a>';
+                                }).join('');
+                                mobResults.style.display = 'block';
+                            } else {
+                                mobResults.style.display = 'none';
+                            }
+                        })
+                        .catch(function() {});
+                }, 280);
+            });
+            document.addEventListener('click', function(e) {
+                if (!mobSearch.contains(e.target) && !mobResults.contains(e.target))
+                    mobResults.style.display = 'none';
+            });
+        })();
+    </script>
     <script>
         // Anlık Kullanıcı Arama
         const searchInput = document.getElementById('exploreSearchInput');

@@ -15,8 +15,14 @@
 function linkifyHashtags(text) {
     if (!text) return "";
     // XSS riskine karşı basit temizlik
-    const cleanText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    return cleanText.replace(/#([a-zA-Z0-9çğıöşüÇĞİÖŞÜ]+)/g, '<a href="/explore?q=%23$1" class="hashtag-link">#$1</a>');
+    let out = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    // URL linkify
+    out = out.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:var(--ytu-lacivert);text-decoration:underline;">$1</a>');
+    // Hashtag linkify
+    out = out.replace(/#([a-zA-Z0-9çğıöşüÇĞİÖŞÜ]+)/g, '<a href="/explore?q=%23$1" class="hashtag-link">#$1</a>');
+    // @mention linkify — harf, rakam, Türkçe karakter ve _ destekli
+    out = out.replace(/@([\w\u00C0-\u024F]+)/g, '<a href="/u/$1" class="mention-link">@$1</a>');
+    return out;
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
@@ -33,18 +39,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         document.body.classList.add('transition-active');
     }, 100);
 
-    // 2. Oylama Durumunu Kontrol Et
-    const buttons = document.querySelectorAll('.btn-vote');
-    buttons.forEach(btn => {
-        if (btn.id && btn.id.startsWith('btn-')) {
-            const id = btn.id.replace('btn-', '');
-            if (localStorage.getItem('oy_verildi_' + id)) {
-                oyVerildiGorseli(btn);
-            }
-        }
-    });
-    
-    // 2.5 Sunucudan Güncel Oy Bilgisini Çek (LocalStorage yetersiz kalabilir)
+    // 2. Oylama Durumunu Kontrol Et — sadece sunucudan doğru bilgiyi al
     fetch('/api/my_votes')
         .then(response => {
             if(response.ok) return response.json();
@@ -52,14 +47,20 @@ document.addEventListener('DOMContentLoaded', (event) => {
         })
         .then(data => {
             if (data.success) {
+                // Önce tüm vote butonlarını normal hale getir (stale localStorage'ı temizle)
+                document.querySelectorAll('[data-club-id]').forEach(btn => {
+                    localStorage.removeItem('oy_verildi_' + btn.dataset.clubId);
+                });
+                // Sadece server'dan gelen gerçek oy verilen kulüpleri işaretle
                 data.votes.forEach(clubId => {
-                    const btn = document.getElementById('btn-' + clubId);
-                    if (btn) oyVerildiGorseli(btn);
+                    document.querySelectorAll('[data-club-id="' + clubId + '"]').forEach(btn => {
+                        oyVerildiGorseli(btn);
+                    });
                     localStorage.setItem('oy_verildi_' + clubId, 'true');
                 });
             }
         })
-        .catch(e => console.log("Oy bilgisi güncellenemedi (Giriş yapılmamış olabilir)"));
+        .catch(e => console.log('Oy bilgisi güncellenemedi (Giriş yapılmamış olabilir)'));
 
     // 3. Bildirimleri Otomatik Kapat (4 Saniye Sonra)
     setTimeout(() => {
@@ -218,60 +219,68 @@ function detayKapat() {
 // 3. OYLAMA İŞLEMLERİ
 // ==========================================
 async function oyVer(kulupKey, buton) {
-    if (localStorage.getItem('oy_verildi_' + kulupKey)) {
-        alert("⚠️ Bu kulübe zaten oy verdiniz!");
-        return;
-    }
+    // Zaten oy verilmişse tekrar gönderme
+    if (buton.disabled || buton.classList.contains('voted')) return;
 
     try {
         buton.disabled = true;
-        buton.innerText = "İşleniyor...";
+        buton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-        const response = await fetch('/vote', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ kulup: kulupKey })
-        });
+        const response = await fetch('/vote_club/' + kulupKey);
 
         if (!response.ok) {
-            throw new Error(`Sunucu Hatası: ${response.status}`);
+            throw new Error('Sunucu Hatası: ' + response.status);
         }
 
         const result = await response.json();
 
         if (result.success) {
-            const sayacElementi = buton.parentElement.querySelector('.vote-count');
-            if (sayacElementi) sayacElementi.innerText = result.new_vote + " Oy";
-            else {
-                const parentDiv = buton.closest('.club-action-area') || buton.closest('div');
-                if (parentDiv) {
-                    const scoreDiv = parentDiv.querySelector('div:first-child');
-                    if (scoreDiv && scoreDiv.innerText.includes('Oy')) {
-                        scoreDiv.innerText = result.new_vote + " Oy";
-                    }
-                }
-            }
+            // Oy sayısını güncelle — tüm sayfa üzerindeki bu kulübün sayaçlarını bul
+            const countEl = document.getElementById('vote-count-' + kulupKey);
+            if (countEl) countEl.textContent = result.new_total;
+            // Sidebar span (index.html)
+            const sidebarCount = document.getElementById('vote-count-sm-' + kulupKey);
+            if (sidebarCount) sidebarCount.textContent = result.new_total + ' Oy';
+            // Mobile drawer span
+            const mobCount = document.getElementById('vote-count-mob-' + kulupKey);
+            if (mobCount) mobCount.textContent = result.new_total + ' oy';
 
             localStorage.setItem('oy_verildi_' + kulupKey, 'true');
+            // Aynı kulübe ait tüm butonları işaretle (sidebar + mobile drawer)
+            document.querySelectorAll('[data-club-id="' + kulupKey + '"]').forEach(btn => oyVerildiGorseli(btn));
+            oyVerildiGorseli(buton);
+        } else if (result.message && result.message.includes('Zaten')) {
+            // Zaten oy verilmiş
+            localStorage.setItem('oy_verildi_' + kulupKey, 'true');
+            document.querySelectorAll('[data-club-id="' + kulupKey + '"]').forEach(btn => oyVerildiGorseli(btn));
             oyVerildiGorseli(buton);
         } else {
-            alert("Hata: " + (result.error || "Oylama başarısız!"));
             buton.disabled = false;
-            buton.innerText = "OY VER";
+            buton.innerHTML = 'OY VER';
         }
     } catch (error) {
-        console.error("Hata Detayı:", error);
-        alert("İşlem başarısız! " + error.message);
+        console.error('Oylama hatası:', error);
         buton.disabled = false;
-        buton.innerText = "OY VER";
+        buton.innerHTML = 'OY VER';
     }
 }
 
 function oyVerildiGorseli(btn) {
-    btn.innerText = "OY VERİLDİ";
+    if (!btn) return;
+    btn.disabled = true;
     btn.style.cursor = "default";
     btn.style.pointerEvents = "none";
-    btn.disabled = true;
+    btn.classList.add('voted');
+    if (btn.classList.contains('btn-vote-sm')) {
+        // Sidebar / mobile küçük buton
+        btn.innerHTML = '<i class="fas fa-check"></i> OY VERİLDİ';
+    } else {
+        // Tam boyut "OY VER" butonu (clubs_full.html)
+        btn.innerHTML = '<i class="fas fa-check"></i> OY VERİLDİ';
+        btn.style.background = '#27ae60';
+        btn.style.borderColor = '#27ae60';
+        btn.style.boxShadow = '0 4px 15px rgba(39,174,96,0.25)';
+    }
 }
 
 // ==========================================
@@ -424,18 +433,23 @@ async function deletePostJS(postId, element) {
 }
 
 // MENÜ FONKSİYONLARI
-function toggleMenu(menuId) {
+function toggleMenu(menuId, event) {
+    if (event) event.stopPropagation();
     document.querySelectorAll('.comment-dropdown').forEach(menu => {
         if (menu.id !== menuId) menu.style.display = 'none';
     });
 
     const menu = document.getElementById(menuId);
-    if (menu.style.display === 'block') {
-        menu.style.display = 'none';
-    } else {
-        menu.style.display = 'block';
-    }
+    if (!menu) return;
+    menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
 }
+
+// Dropdown dışına tıklanınca kapat
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.tw-comment-menu-wrap') && !e.target.closest('.action-menu-wrapper')) {
+        document.querySelectorAll('.comment-dropdown').forEach(m => m.style.display = 'none');
+    }
+});
 
 function openEditMode(commentId) {
     document.getElementById('menu-' + commentId).style.display = 'none';
@@ -1257,7 +1271,7 @@ function createPostHTML(data) {
             </span>
             
             <div class="action-menu-wrapper">
-                <button type="button" class="comment-menu-btn" onclick="toggleMenu('post-menu-${data.id}')">⋮</button>
+                <button type="button" class="comment-menu-btn" onclick="toggleMenu('post-menu-${data.id}', event)">⋮</button>
                 <div id="post-menu-${data.id}" class="comment-dropdown" style="bottom: 30px; top: auto; right: 0;">
                     <button type="button" class="comment-action delete" onclick="deletePostJS('${data.id}', this)">🗑️ Sil</button>
                 </div>
@@ -1303,7 +1317,22 @@ async function submitComment(e, postId) {
             // 1. Anasayfa (Feed) İçin - TÜM KOPYALARI GÜNCELLE (Senkronizasyon)
             const allForms = document.querySelectorAll(`.js-comment-form-${postId}`);
             allForms.forEach(f => {
-                const commentHTML = `<div class="comment-item"><strong class="comment-author">${result.comment.author_name}:</strong> <span class="comment-content">${result.comment.text}</span></div>`;
+                const handle = result.comment.author_handle || '';
+                const commentHTML = `
+                <div class="tw-comment">
+                    <a href="/u/${handle}" class="tw-comment-avatar-link">
+                        <img src="/static/${result.comment.author_pic}" class="tw-comment-avatar">
+                    </a>
+                    <div class="tw-comment-body">
+                        <div class="tw-comment-meta">
+                            <a href="/u/${handle}" class="tw-comment-name">${result.comment.author_name}</a>
+                            <span class="tw-comment-handle">@${handle}</span>
+                            <span class="tw-comment-dot">·</span>
+                            <span class="tw-comment-time">${result.comment.date}</span>
+                        </div>
+                        <div class="tw-comment-text">${linkifyHashtags(result.comment.text)}</div>
+                    </div>
+                </div>`;
                 f.insertAdjacentHTML('beforebegin', commentHTML);
                 
                 // Inputları temizle
@@ -1322,32 +1351,35 @@ async function submitComment(e, postId) {
             // 2. Detay Sayfası İçin (YENİ)
             const detailComments = document.querySelector('.post-detail-comments');
             if (detailComments) {
-                // Yorum metnindeki etiketleri linke çevir (Basit regex)
-                let formattedText = result.comment.text.replace(/@(\w+)/g, '<a href="/u/$1" class="mention-link" style="color: var(--ytu-lacivert); font-weight: bold; text-decoration:none;">@$1</a>');
-                
+                let formattedText = linkifyHashtags(result.comment.text);
+                const handle = result.comment.author_handle || '';
                 const commentHTML = `
-                <div class="comment-item" data-timestamp="${Date.now() / 1000}" data-likes="0">
-                    <img src="/static/${result.comment.author_pic}" class="comment-avatar-sm">
-                    <div class="comment-bubble" style="flex: 1;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <strong>${result.comment.author_name}</strong>
-                            <div style="position: relative;">
-                                <button type="button" class="comment-menu-btn" onclick="toggleMenu('menu-${result.comment.id}')" style="position: static; padding: 0 5px; color: var(--text-muted);">⋮</button>
-                                <div id="menu-${result.comment.id}" class="comment-dropdown" style="right: 0; top: 20px; width: 120px;">
+                <div class="tw-comment" id="comment-container-${result.comment.id}">
+                    <a href="/u/${handle}" class="tw-comment-avatar-link">
+                        <img src="/static/${result.comment.author_pic}" class="tw-comment-avatar">
+                    </a>
+                    <div class="tw-comment-body">
+                        <div class="tw-comment-meta">
+                            <a href="/u/${handle}" class="tw-comment-name">${result.comment.author_name}</a>
+                            <span class="tw-comment-handle">@${handle}</span>
+                            <span class="tw-comment-dot">·</span>
+                            <span class="tw-comment-time">${result.comment.date}</span>
+                            <div class="tw-comment-menu-wrap">
+                                <button type="button" class="tw-comment-menu-btn" onclick="toggleMenu('menu-${result.comment.id}', event)">⋮</button>
+                                <div id="menu-${result.comment.id}" class="comment-dropdown">
                                     <button type="button" class="comment-action" onclick="openEditMode('${result.comment.id}')">✏️ Düzenle</button>
-                                    <a href="/delete_comment/${result.comment.id}" class="comment-action delete" onclick="return confirm('Bu yorumu silmek istediğine emin misin?')">🗑️ Sil</a>
+                                    <button type="button" class="comment-action delete" onclick="deleteCommentJS('${result.comment.id}', '${postId}', this)">🗑️ Sil</button>
                                 </div>
                             </div>
                         </div>
-                        <p id="comment-text-${result.comment.id}" style="margin: 4px 0;">${formattedText}</p>
-                        <form action="/edit_comment/${result.comment.id}" method="POST" class="edit-comment-form" id="edit-form-${result.comment.id}" style="margin-bottom: 10px;">
-                            <input type="text" name="new_text" value="${result.comment.text}" class="comment-input" style="width: 100%; margin-bottom: 8px;">
-                            <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                                <button type="button" onclick="closeEditMode('${result.comment.id}')" class="btn-cancel" style="font-size: 0.8rem;">İptal</button>
+                        <div class="tw-comment-text" id="comment-text-${result.comment.id}">${formattedText}</div>
+                        <form action="/edit_comment/${result.comment.id}" method="POST" class="edit-comment-form" id="edit-form-${result.comment.id}">
+                            <input type="text" name="new_text" value="${result.comment.text}" class="comment-input">
+                            <div class="edit-actions">
+                                <button type="button" onclick="closeEditMode('${result.comment.id}')" class="btn-cancel">İptal</button>
                                 <button type="submit" class="btn-vote btn-sm">Kaydet</button>
                             </div>
                         </form>
-                        <small class="text-muted">Şimdi</small>
                     </div>
                 </div>`;
                 detailComments.insertAdjacentHTML('beforeend', commentHTML);
@@ -1368,7 +1400,7 @@ async function deleteCommentJS(commentId, postId, element) {
 
         if (result.success) {
             // 1. Yorum elementini sayfadan kaldır
-            const commentItem = document.getElementById(`comment-container-${commentId}`) || element.closest('.comment-item');
+            const commentItem = document.getElementById(`comment-container-${commentId}`) || element.closest('.tw-comment') || element.closest('.comment-item');
             if (commentItem) {
                 commentItem.style.opacity = '0';
                 setTimeout(() => commentItem.remove(), 300);
@@ -1403,22 +1435,28 @@ async function sendMessage(event) {
 
     if ((!text && !hasFile) || !recipientId) return;
 
+    // Dosyayı input temizlenmeden ÖNCE yakala
+    const capturedFile = hasFile ? fileInput.files[0] : null;
+
     let msgType = 'text';
     let localFilePath = null;
 
-    if (hasFile) {
-        const file = fileInput.files[0];
-        if (file.type.startsWith('image/')) {
+    if (capturedFile) {
+        if (capturedFile.type.startsWith('image/')) {
             msgType = 'image';
-            localFilePath = URL.createObjectURL(file);
+            localFilePath = URL.createObjectURL(capturedFile);
+        } else if (capturedFile.type.startsWith('video/')) {
+            msgType = 'video';
+            localFilePath = URL.createObjectURL(capturedFile);
         } else {
             msgType = 'file';
+            localFilePath = URL.createObjectURL(capturedFile); // indirme icin
         }
     }
 
-    // 1. UI'da göster
+    // 1. UI'da göster (anında)
     const myData = {
-        body: text || (hasFile ? fileInput.files[0].name : ""),
+        body: text || (capturedFile ? capturedFile.name : ""),
         sender_id: document.getElementById('currentUserId').value,
         sender_pic: document.getElementById('currentUserPic').value,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -1426,21 +1464,41 @@ async function sendMessage(event) {
         file_path: localFilePath,
         is_local: true
     };
-    appendMessageToChat(myData);
-    
+    const addedEl = appendMessageToChat(myData); // eklenen DOM elementi
+
     input.value = "";
     if (fileInput) fileInput.value = "";
+    // Dosya preview alanını temizle
+    const previewStrip = document.getElementById('filePreviewStrip');
+    if (previewStrip) previewStrip.classList.remove('visible');
+    const previewThumb = document.getElementById('filePreviewThumb');
+    if (previewThumb) previewThumb.innerHTML = '';
+    if (typeof onInputChange === 'function') onInputChange();
+
     const messageArea = document.getElementById("messageArea");
     messageArea.scrollTop = messageArea.scrollHeight;
 
-    // 2. Sunucuya gönder
+    // 2. Sunucuya gönder ve donen ID ile delete butonunu guncelle
     try {
         const formData = new FormData();
         formData.append('body', text);
-        if (hasFile) {
-            formData.append('file', fileInput.files[0]);
+        formData.append('csrf_token', window.CSRF_TOKEN || '');
+        if (capturedFile) {
+            formData.append('file', capturedFile);
         }
-        await fetch(`/send_message/${recipientId}`, { method: 'POST', body: formData });
+        const resp = await fetch(`/send_message/${recipientId}`, { method: 'POST', body: formData });
+        const result = await resp.json();
+        // Sunucudan gelen gercek msg.id ile delete butonunu guncelle
+        if (result.success && result.message && result.message.id && addedEl) {
+            const realId = result.message.id;
+            // Hem yeni chat (.ig-delete-btn) hem eski (.msg-delete) destekle
+            const delBtn = addedEl.querySelector('.ig-delete-btn, .msg-delete');
+            if (delBtn) {
+                delBtn.setAttribute('onclick', `confirmDeleteMsg(event, '/delete_message/${realId}')`);
+            }
+            // Satira gercek sunucu ID'sini de ekle (opsiyonel)
+            addedEl.id = `msg-${realId}`;
+        }
     } catch (err) {
         console.error("Mesaj gönderilemedi:", err);
     }
@@ -1569,108 +1627,98 @@ function appendMessageToChat(msg) {
     const messageArea = document.getElementById('messageArea');
     if (!messageArea) return;
 
+    // Boş chat placeholder'larını kaldır (her iki tasarım için)
+    const emptyDiv = messageArea.querySelector('.empty-chat, .ig-empty-chat');
+    if (emptyDiv) emptyDiv.remove();
+
     const myId = document.getElementById('currentUserId').value;
     const isMe = (msg.sender_id == myId);
-    
-    // Mesajın sağda mı solda mı duracağını belirle
-    const rowClass = isMe ? 'message-row sent' : 'message-row received';
-    const bubbleClass = isMe ? 'message-bubble bubble-sent' : 'message-bubble bubble-received';
+
+    // Yeni IG-style mi eski style mi?
+    const isIgStyle = messageArea.classList.contains('ig-messages');
 
     let contentHtml = '';
+    const deleteSafeUrl = msg.id ? `/delete_message/${msg.id}` : '/delete_message/#';
 
-    // --- 1. EĞER HİKAYE PAYLAŞIMI İSE ---
-    if (msg.msg_type === 'story') {
-        const storyId = msg.body;
-        // Resim yolu varsa onu kullan, yoksa varsayılanı koy
-        const imgPath = msg.story_img ? `/static/story_images/${msg.story_img}` : '/static/img/story_placeholder.jpg';
-        
-        // Tıklayınca 'viewSharedStory' fonksiyonunu çalıştıran kart yapısı
-        contentHtml = `
-            <div class="story-share-card" onclick="viewSharedStory(event, '${storyId}')" style="cursor:pointer; max-width: 200px; position:relative; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.2);">
-                <div style="background: rgba(0,0,0,0.4); position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; color:white; z-index:2;">
-                    <i class="fas fa-play-circle" style="font-size: 3rem; margin-bottom:10px; opacity:0.9; text-shadow: 0 2px 10px rgba(0,0,0,0.5);"></i>
-                    <span style="font-size:0.9rem; font-weight:bold; text-shadow: 0 1px 5px rgba(0,0,0,0.8);">Hikayeyi İzle</span>
-                </div>
-                <img src="${imgPath}" style="width:100%; height: 280px; object-fit: cover; display:block;" onerror="this.onerror=null; this.src='/static/img/default_avatar.png'">
-            </div>
-        `;
-    } 
-    // --- 2. EĞER SESLİ MESAJ İSE ---
-    else if (msg.msg_type === 'audio') {
-        contentHtml = `
-            <audio controls controlsList="nodownload" class="audio-msg">
-                <source src="/static/audio_files/${msg.file_path}" type="audio/webm">
-                <source src="/static/audio_files/${msg.file_path ? msg.file_path.replace('.webm', '.mp4') : ''}" type="audio/mp4">
-            </audio>`;
-    } 
-    // --- YENI: RESIM MESAJI ---
-    else if (msg.msg_type === 'image') {
-        const imgPath = (msg.is_local && msg.file_path) ? msg.file_path : `/static/message_files/${msg.file_path}`;
-        contentHtml = `
-            <div class="chat-image-container">
-                <img src="${imgPath}" class="chat-image" onclick="openLightbox(this.src)">
-            </div>`;
-    }
-    // --- 4. EĞER DOSYA İSE ---
-    else if (msg.msg_type === 'file') {
-        const fileName = msg.body;
-        const downloadLink = msg.file_path ? `/static/message_files/${msg.file_path}` : '#';
-        contentHtml = `
-            <a href="${downloadLink}" target="_blank" class="file-msg-link">
-                <i class="fas fa-file-alt file-msg-icon"></i>
-                <span class="file-msg-name">${fileName}</span>
-                <i class="fas fa-download file-msg-download"></i>
-            </a>`;
-    }
-    // --- 3. EĞER NORMAL METİN İSE ---
-    else {
-        contentHtml = msg.body;
-    }
+    if (isIgStyle) {
+        // ===== YENİ IG-STYLE =====
+        const sideClass = isMe ? 'sent' : 'received';
+        const recipientPic = document.getElementById('recipientUserName') ?
+            (document.querySelector('.ig-header-avatar')?.src || '') : '';
+        const avatarHtml = !isMe ? `<img src="${recipientPic}" class="ig-msg-avatar" alt="">` : '';
+        const deleteBtnHtml = isMe
+            ? `<button class="ig-delete-btn" onclick="confirmDeleteMsg(event,'${deleteSafeUrl}')" title="Sil"><i class="fas fa-trash-can"></i></button>`
+            : '';
+        const timeHtml = msg.msg_type !== 'story'
+            ? `<span class="ig-msg-time">${msg.timestamp}${isMe ? ' <i class="fas fa-check" style="opacity:.8;font-size:.6rem;"></i>' : ''}</span>`
+            : '';
 
-    // Avatar Ayarı (Sadece karşı taraf için)
-    let avatarHtml = '';
-    if (!isMe) {
-        const pic = msg.sender_pic ? msg.sender_pic : 'img/default_avatar.png';
-        avatarHtml = `<img src="/static/${pic}" class="chat-avatar-sm" style="width:35px; border-radius:50%; margin-right:10px;">`;
-    }
+        if (msg.msg_type === 'story') {
+            const imgPath = msg.story_img ? `/static/story_images/${msg.story_img}` : '/static/img/story_placeholder.jpg';
+            contentHtml = `<div class="ig-bubble ${sideClass} media"><div class="ig-story-card" onclick="viewSharedStory(event,'${msg.body}')"><div class="ig-story-overlay"><i class="fas fa-play" style="font-size:1.8rem;margin-bottom:6px;"></i><span style="font-size:.8rem;font-weight:700;">Hikayeyi İzle</span></div><img src="${imgPath}" class="ig-story-img" onerror="this.src='/static/img/story_placeholder.jpg'"></div></div>`;
+        } else if (msg.msg_type === 'audio') {
+            contentHtml = `<div class="ig-bubble ${sideClass}"><audio controls controlsList="nodownload" class="ig-audio-msg"><source src="/static/audio_files/${msg.file_path}" type="audio/webm"><source src="/static/audio_files/${msg.file_path}" type="audio/mp4"></audio>${timeHtml}</div>`;
+        } else if (msg.msg_type === 'image') {
+            const imgPath = (msg.is_local && msg.file_path) ? msg.file_path : `/static/message_files/${msg.file_path}`;
+            contentHtml = `<div class="ig-bubble ${sideClass} media"><img src="${imgPath}" class="ig-img-msg" onclick="openLightbox(this.src)" alt="Resim">${timeHtml}</div>`;
+        } else if (msg.msg_type === 'video') {
+            const vidPath = (msg.is_local && msg.file_path) ? msg.file_path : `/static/message_files/${msg.file_path}`;
+            contentHtml = `<div class="ig-bubble ${sideClass} media"><video controls controlsList="nodownload" class="ig-video-msg"><source src="${vidPath}"></video>${timeHtml}</div>`;
+        } else if (msg.msg_type === 'file') {
+            const dlLink = msg.is_local ? (msg.file_path || '#') : (msg.file_path ? `/static/message_files/${msg.file_path}` : '#');
+            contentHtml = `<div class="ig-bubble ${sideClass}" style="padding:0;background:transparent;border:none;"><a href="${dlLink}" target="_blank" class="ig-file-msg" download><i class="fas fa-file-alt ig-file-icon"></i><span class="ig-file-name">${msg.body}</span><i class="fas fa-download ig-file-dl"></i></a>${timeHtml}</div>`;
+        } else {
+            contentHtml = `<div class="ig-bubble ${sideClass}">${msg.body}${timeHtml}</div>`;
+        }
 
-    // Silme Butonu
-    const deleteLink = msg.id ? `/delete_message/${msg.id}` : '#';
-    const deleteHtml = `<a href="${deleteLink}" class="msg-delete" onclick="return confirm('Silmek istediğine emin misin?');" style="margin: 0 10px; opacity: 0.5; text-decoration: none;">✕</a>`;
+        const html = `<div class="ig-msg-row ${sideClass}">${!isMe ? avatarHtml : ''}${isMe ? deleteBtnHtml : ''}${contentHtml}</div>`;
+        const typingDiv = document.getElementById('typingIndicator');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const el = tempDiv.firstElementChild;
+        if (typingDiv && typingDiv.parentNode === messageArea) messageArea.insertBefore(el, typingDiv);
+        else messageArea.appendChild(el);
+        messageArea.scrollTop = messageArea.scrollHeight;
+        return el;
 
-    // Baloncuğun stilini ayarla (Hikaye ise arka planı şeffaf yap)
-    const bubbleStyle = msg.msg_type === 'story' ? 'padding:0; background:none; border:none; box-shadow:none;' : '';
-
-    const html = `
-    <div class="${rowClass}">
-        ${!isMe ? avatarHtml : ''} 
-        ${isMe ? deleteHtml : ''}
-        
-        <div class="${bubbleClass}" style="${bubbleStyle}">
-            ${contentHtml}
-            
-            ${msg.msg_type !== 'story' ? 
-                `<span class="msg-time" style="display:flex; align-items:center; gap:3px; justify-content:flex-end;">
-                    ${msg.timestamp} 
-                    ${isMe ? '<i class="fas fa-check"></i>' : ''}
-                </span>` 
-            : ''}
-        </div>
-    </div>`;
-
-    // Ekrana Basma İşlemi
-    const typingDiv = document.getElementById('typingIndicator');
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-
-    if (typingDiv && typingDiv.parentNode === messageArea) {
-        messageArea.insertBefore(tempDiv.firstElementChild, typingDiv);
     } else {
-        messageArea.appendChild(tempDiv.firstElementChild);
-    }
+        // ===== ESKİ STYLE (diğer sayfalar için) =====
+        const rowClass = isMe ? 'message-row sent' : 'message-row received';
+        const bubbleClass = isMe ? 'message-bubble bubble-sent' : 'message-bubble bubble-received';
 
-    // En alta kaydır
-    messageArea.scrollTop = messageArea.scrollHeight;
+        if (msg.msg_type === 'story') {
+            const imgPath = msg.story_img ? `/static/story_images/${msg.story_img}` : '/static/img/story_placeholder.jpg';
+            contentHtml = `<div class="story-share-card" onclick="viewSharedStory(event,'${msg.body}')" style="cursor:pointer;max-width:200px;position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.2);"><div style="background:rgba(0,0,0,0.4);position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;color:white;z-index:2;"><i class="fas fa-play-circle" style="font-size:3rem;margin-bottom:10px;"></i><span>Hikayeyi İzle</span></div><img src="${imgPath}" style="width:100%;height:280px;object-fit:cover;display:block;" onerror="this.onerror=null;this.src='/static/img/default_avatar.png'"></div>`;
+        } else if (msg.msg_type === 'audio') {
+            contentHtml = `<audio controls controlsList="nodownload" class="audio-msg"><source src="/static/audio_files/${msg.file_path}" type="audio/webm"><source src="/static/audio_files/${msg.file_path ? msg.file_path.replace('.webm','.mp4') : ''}" type="audio/mp4"></audio>`;
+        } else if (msg.msg_type === 'image') {
+            const imgPath = (msg.is_local && msg.file_path) ? msg.file_path : `/static/message_files/${msg.file_path}`;
+            contentHtml = `<div class="chat-image-container"><img src="${imgPath}" class="chat-image" onclick="openLightbox(this.src)"></div>`;
+        } else if (msg.msg_type === 'video') {
+            const vidPath = (msg.is_local && msg.file_path) ? msg.file_path : `/static/message_files/${msg.file_path}`;
+            contentHtml = `<video controls controlsList="nodownload" class="chat-video-msg" style="max-width:280px;max-height:200px;border-radius:10px;display:block;"><source src="${vidPath}">Tarayıcınız videoyu desteklemiyor.</video>`;
+        } else if (msg.msg_type === 'file') {
+            const dlLink = msg.is_local ? (msg.file_path || '#') : (msg.file_path ? `/static/message_files/${msg.file_path}` : '#');
+            contentHtml = `<a href="${dlLink}" target="_blank" class="file-msg-link" download><i class="fas fa-file-alt file-msg-icon"></i><span class="file-msg-name">${msg.body}</span><i class="fas fa-download file-msg-download"></i></a>`;
+        } else {
+            contentHtml = msg.body;
+        }
+
+        const avatarHtml = !isMe ? `<img src="/static/${msg.sender_pic || 'img/default_avatar.png'}" class="chat-avatar-sm" style="width:35px;border-radius:50%;margin-right:10px;">` : '';
+        const deleteHtml = `<a href="#" class="msg-delete" onclick="confirmDeleteMsg(event,'${deleteSafeUrl}')" style="margin:0 10px;opacity:0.5;text-decoration:none;">✕</a>`;
+        const bubbleStyle = msg.msg_type === 'story' ? 'padding:0;background:none;border:none;box-shadow:none;' : '';
+        const timeHtml = msg.msg_type !== 'story' ? `<span class="msg-time" style="display:flex;align-items:center;gap:3px;justify-content:flex-end;">${msg.timestamp}${isMe ? ' <i class="fas fa-check"></i>' : ''}</span>` : '';
+
+        const html = `<div class="${rowClass}">${!isMe ? avatarHtml : ''}${isMe ? deleteHtml : ''}<div class="${bubbleClass}" style="${bubbleStyle}">${contentHtml}${timeHtml}</div></div>`;
+        const typingDiv = document.getElementById('typingIndicator');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const el = tempDiv.firstElementChild;
+        if (typingDiv && typingDiv.parentNode === messageArea) messageArea.insertBefore(el, typingDiv);
+        else messageArea.appendChild(el);
+        messageArea.scrollTop = messageArea.scrollHeight;
+        return el;
+    }
 }
 
 function showToast(text, img) {
@@ -1688,6 +1736,67 @@ function showToast(text, img) {
     toast.onclick = () => window.location.href = '/messages';
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 4000);
+}
+
+// ==========================================
+// ÖZEL ONAY MODALİ (browser confirm() yerine)
+// ==========================================
+function showCustomConfirm(message, onConfirm) {
+    // Varsa eskiyi kaldır
+    const existing = document.getElementById('customConfirmOverlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'customConfirmOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;';
+
+    overlay.innerHTML = `
+        <div style="background:var(--card-bg,#fff);border-radius:16px;padding:28px 32px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;">
+            <div style="width:52px;height:52px;background:rgba(231,76,60,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                <i class="fas fa-trash-can" style="color:#e74c3c;font-size:1.4rem;"></i>
+            </div>
+            <h3 style="margin:0 0 8px;font-size:1.1rem;color:var(--text-color,#222);">Emin misin?</h3>
+            <p style="margin:0 0 24px;font-size:0.9rem;color:var(--text-muted,#666);">${message}</p>
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button id="customConfirmCancel" style="flex:1;padding:10px 0;border-radius:10px;border:1.5px solid var(--border-color,#ddd);background:transparent;color:var(--text-color,#333);font-weight:600;cursor:pointer;font-size:0.95rem;">Vazgeç</button>
+                <button id="customConfirmOk" style="flex:1;padding:10px 0;border-radius:10px;border:none;background:#e74c3c;color:#fff;font-weight:700;cursor:pointer;font-size:0.95rem;">Sil</button>
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+
+    document.getElementById('customConfirmOk').onclick = () => { overlay.remove(); onConfirm(); };
+    document.getElementById('customConfirmCancel').onclick = () => overlay.remove();
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+}
+
+async function confirmDeleteMsg(event, url) {
+    event.preventDefault();
+    // Hem yeni .ig-msg-row hem eski .message-row destekle
+    const msgRow = event.target.closest('.ig-msg-row, .message-row');
+    if (!url || url === '/delete_message/#') return; // ID henuz gelmedi, iptal
+    showCustomConfirm('Bu mesaj kalıcı olarak silinecek.', async () => {
+        try {
+            const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const data = await resp.json();
+            if (data.success && msgRow) {
+                msgRow.style.transition = 'opacity 0.25s, transform 0.25s';
+                msgRow.style.opacity = '0';
+                msgRow.style.transform = 'scale(0.95)';
+                setTimeout(() => msgRow.remove(), 250);
+            }
+        } catch (err) { console.error('Silme hatası:', err); }
+    });
+}
+
+function confirmStoryDelete(event) {
+    event.preventDefault();
+    const btn = document.getElementById('deleteStoryBtn');
+    const url = btn ? btn.getAttribute('href') : null;
+    if (!url || url === '#') return;
+    showCustomConfirm('Bu hikaye kalıcı olarak silinecek.', () => {
+        window.location.href = url;
+    });
 }
 
 // ==========================================
@@ -2243,190 +2352,157 @@ document.addEventListener('DOMContentLoaded', () => {
     setupMentionSystem();
 });
 
-// Etiketleme Sistemi (@username)
+// ==========================================
+// 27. ETİKETLEME SİSTEMİ (@username) — Twitter-style
+// ==========================================
 function setupMentionSystem() {
-    // Create a single floating suggestion box if not present
-    let suggestionBox = document.getElementById('mention-suggestions-global');
-    if (!suggestionBox) {
-        suggestionBox = document.createElement('div');
-        suggestionBox.id = 'mention-suggestions-global';
-        suggestionBox.className = 'mention-dropdown';
-        suggestionBox.style.position = 'absolute';
-        suggestionBox.style.display = 'none';
-        suggestionBox.style.zIndex = 99999;
-        document.body.appendChild(suggestionBox);
+    // Single fixed popup anchored to viewport (avoids scroll/offset bugs)
+    let box = document.getElementById('mention-suggestions-global');
+    if (!box) {
+        box = document.createElement('div');
+        box.id = 'mention-suggestions-global';
+        document.body.appendChild(box);
     }
 
-    const DEBOUNCE_MS = 260;
-    function debounce(fn, wait) {
+    let activeInput = null;
+
+    function hide() {
+        box.style.display = 'none';
+        box.innerHTML = '';
+    }
+
+    function positionUnder(el) {
+        const r = el.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - r.bottom;
+        box.style.left   = r.left + 'px';
+        box.style.width  = Math.max(280, r.width) + 'px';
+        if (spaceBelow < 240 && r.top > 240) {
+            box.style.top    = '';
+            box.style.bottom = (window.innerHeight - r.top + 6) + 'px';
+        } else {
+            box.style.bottom = '';
+            box.style.top    = (r.bottom + 6) + 'px';
+        }
+    }
+
+    function applySelection(inputEl, user) {
+        const val    = inputEl.value;
+        const cursor = inputEl.selectionStart ?? val.length;
+        const before = val.substring(0, cursor);
+        const match  = before.match(/(^|\s)@([\w\u00C0-\u024F-]*)$/i);
+        if (!match) return;
+        const prefix  = before.substring(0, match.index + match[1].length);
+        inputEl.value = prefix + '@' + user.handle + ' ' + val.substring(cursor);
+        const pos = (prefix + '@' + user.handle + ' ').length;
+        inputEl.setSelectionRange(pos, pos);
+        hide();
+        inputEl.focus();
+    }
+
+    function buildItem(user, input) {
+        const d = document.createElement('div');
+        d.className = 'mention-popup-item';
+        const pic = user.profile_pic
+            ? `/static/${user.profile_pic}`
+            : '/static/uploads/profiles/default.jpg';
+        d.innerHTML = `
+            <img src="${pic}" class="mention-popup-avatar"
+                 onerror="this.src='/static/uploads/profiles/default.jpg'">
+            <div class="mention-popup-info">
+                <span class="mention-popup-name">${user.username}</span>
+                <span class="mention-popup-handle">@${user.handle}</span>
+            </div>`;
+        d.addEventListener('mousedown', ev => { ev.preventDefault(); applySelection(input, user); });
+        return d;
+    }
+
+    function debounce(fn, ms) {
         let t;
-        return (...args) => {
-            clearTimeout(t);
-            t = setTimeout(() => fn(...args), wait);
-        };
+        return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
     }
 
-    // Attach mention handlers to an input/textarea
+    const SELECTOR = '.detail-comment-input, .comment-input, [data-mention]';
+
     function bindInput(input) {
         if (input._mentionBound) return;
         input._mentionBound = true;
 
-        let currentItems = [];
-        let selectedIndex = -1;
+        let items = [], sel = -1;
 
-        async function fetchAndShow(query, caretRect) {
+        const doFetch = debounce(async (query) => {
             try {
-                const res = await fetch(`/api/search_users?q=${encodeURIComponent(query)}`);
-                if (!res.ok) throw new Error('Network');
-                const data = await res.json();
-                if (!data.success || !data.users || data.users.length === 0) {
-                    suggestionBox.style.display = 'none';
-                    return;
-                }
-
-                suggestionBox.innerHTML = '';
-                currentItems = data.users;
-                selectedIndex = -1;
-
-                data.users.forEach((user, idx) => {
-                    const div = document.createElement('div');
-                    div.className = 'mention-item';
-                    div.dataset.index = idx;
-                    div.innerHTML = `
-                        <img src="/static/${user.profile_pic}" class="mention-avatar">
-                        <div class="mention-info">
-                            <span class="mention-name">${user.username}</span>
-                            <span class="mention-handle">@${user.handle}</span>
-                        </div>`;
-                    div.addEventListener('mousedown', (ev) => {
-                        // use mousedown to avoid blur before click
-                        ev.preventDefault();
-                        applySelection(input, user);
-                    });
-                    suggestionBox.appendChild(div);
-                });
-
-                // Position suggestion box under input caret (approx)
-                if (caretRect) {
-                    suggestionBox.style.left = (window.scrollX + caretRect.left) + 'px';
-                    suggestionBox.style.top = (window.scrollY + caretRect.bottom + 6) + 'px';
-                    suggestionBox.style.minWidth = Math.max(220, caretRect.width) + 'px';
-                } else {
-                    const rect = input.getBoundingClientRect();
-                    suggestionBox.style.left = (window.scrollX + rect.left) + 'px';
-                    suggestionBox.style.top = (window.scrollY + rect.bottom + 6) + 'px';
-                    suggestionBox.style.minWidth = Math.max(220, rect.width) + 'px';
-                }
-
-                suggestionBox.style.display = 'block';
-            } catch (e) {
-                console.error('Mention fetch error', e);
-                suggestionBox.style.display = 'none';
-            }
-        }
-
-        const debouncedFetch = debounce(fetchAndShow, DEBOUNCE_MS);
-
-        function getCaretCoordinates(el, position) {
-            // Best-effort: use range on textarea/input via mirror div fallback
-            try {
-                if (el.selectionEnd !== undefined) {
-                    // For inputs/textareas, approximate using getBoundingClientRect of input
-                    const rect = el.getBoundingClientRect();
-                    return { left: rect.left + 8, bottom: rect.top + rect.height, width: rect.width };
-                }
-            } catch (e) {}
-            return null;
-        }
-
-        function applySelection(inputEl, user) {
-            const val = inputEl.value;
-            const cursor = inputEl.selectionStart || val.length;
-            const textBeforeCursor = val.substring(0, cursor);
-            const match = textBeforeCursor.match(/(^|\s)@([\wğüşöçıİĞÜŞÖÇ-]+)$/i);
-            if (!match) return;
-            const prefix = textBeforeCursor.substring(0, match.index + match[1].length);
-            const newText = prefix + '@' + user.handle + ' ' + val.substring(cursor);
-            inputEl.value = newText;
-            // move caret after inserted handle + space
-            const newPos = (prefix + '@' + user.handle + ' ').length;
-            inputEl.setSelectionRange(newPos, newPos);
-            suggestionBox.style.display = 'none';
-            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-            inputEl.focus();
-        }
-
-        input.addEventListener('keydown', (e) => {
-            if (suggestionBox.style.display === 'block') {
-                const items = suggestionBox.querySelectorAll('.mention-item');
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
-                    items.forEach((it, i) => it.classList.toggle('selected', i === selectedIndex));
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    selectedIndex = Math.max(selectedIndex - 1, 0);
-                    items.forEach((it, i) => it.classList.toggle('selected', i === selectedIndex));
-                } else if (e.key === 'Enter') {
-                    if (selectedIndex >= 0 && items[selectedIndex]) {
-                        e.preventDefault();
-                        const u = currentItems[selectedIndex];
-                        applySelection(input, u);
-                    }
-                } else if (e.key === 'Escape') {
-                    suggestionBox.style.display = 'none';
-                }
-            }
-        });
+                const r = await fetch(`/api/search_users?q=${encodeURIComponent(query)}`);
+                if (!r.ok) { hide(); return; }
+                const data = await r.json();
+                if (!data.success || !data.users?.length) { hide(); return; }
+                box.innerHTML = '';
+                items = data.users;
+                sel   = -1;
+                items.forEach(u => box.appendChild(buildItem(u, input)));
+                positionUnder(input);
+                box.style.display = 'block';
+            } catch { hide(); }
+        }, 220);
 
         input.addEventListener('input', function () {
-            const val = this.value;
-            const cursor = this.selectionStart;
-            const textBeforeCursor = val.substring(0, cursor);
-            const m = textBeforeCursor.match(/(^|\s)@([\wğüşöçıİĞÜŞÖÇ-]{1,})$/i);
-            if (m) {
-                const query = m[2];
-                const caretRect = getCaretCoordinates(this, cursor);
-                debouncedFetch(query, caretRect);
-            } else {
-                suggestionBox.style.display = 'none';
+            activeInput = this;
+            const cur    = this.selectionStart ?? this.value.length;
+            const before = this.value.substring(0, cur);
+            const m      = before.match(/(^|\s)@([\w\u00C0-\u024F-]{1,30})$/i);
+            m ? doFetch(m[2]) : hide();
+        });
+
+        input.addEventListener('keydown', e => {
+            if (box.style.display !== 'block') return;
+            const rows = [...box.querySelectorAll('.mention-popup-item')];
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                sel = Math.min(sel + 1, rows.length - 1);
+                rows.forEach((r, i) => r.classList.toggle('selected', i === sel));
+                rows[sel]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                sel = Math.max(sel - 1, 0);
+                rows.forEach((r, i) => r.classList.toggle('selected', i === sel));
+                rows[sel]?.scrollIntoView({ block: 'nearest' });
+            } else if ((e.key === 'Enter' || e.key === 'Tab') && sel >= 0) {
+                e.preventDefault();
+                applySelection(input, items[sel]);
+            } else if (e.key === 'Escape') {
+                hide();
             }
         });
 
-        // Hide suggestions on blur (small delay to allow click)
-        input.addEventListener('blur', () => setTimeout(() => suggestionBox.style.display = 'none', 120));
+        // Delay hide on blur so mousedown on item fires first
+        input.addEventListener('blur', () => setTimeout(hide, 180));
     }
 
-    // Bind existing and future inputs
     function bindAll() {
-        document.querySelectorAll('.detail-comment-input, .comment-input, input[data-mention], textarea[data-mention]').forEach(bindInput);
+        document.querySelectorAll(SELECTOR).forEach(bindInput);
     }
-
     bindAll();
 
-    // Watch for dynamically added comment inputs
-    const mo = new MutationObserver((mutations) => {
-        for (const m of mutations) {
-            if (m.addedNodes && m.addedNodes.length) {
-                m.addedNodes.forEach(node => {
-                    if (node.querySelectorAll) {
-                        node.querySelectorAll('.detail-comment-input, .comment-input, input[data-mention], textarea[data-mention]').forEach(bindInput);
-                    }
-                    if (node.classList && (node.classList.contains('detail-comment-input') || node.classList.contains('comment-input'))) {
-                        bindInput(node);
-                    }
-                });
-            }
-        }
-    });
-    mo.observe(document.body, { childList: true, subtree: true });
+    // Watch for dynamically added inputs (AJAX comment boxes, etc.)
+    new MutationObserver(mutations => {
+        mutations.forEach(m => m.addedNodes.forEach(node => {
+            if (!node.querySelectorAll) return;
+            node.querySelectorAll(SELECTOR).forEach(bindInput);
+            if (node.matches?.(SELECTOR)) bindInput(node);
+        }));
+    }).observe(document.body, { childList: true, subtree: true });
 
-    // Global click to hide when clicking outside
-    document.addEventListener('click', function (e) {
-        if (!e.target.closest('.mention-item') && !e.target.closest('.detail-comment-input') && !e.target.closest('.comment-input')) {
-            suggestionBox.style.display = 'none';
+    // Hide on outside click — whitelist the popup itself and any bound input
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#mention-suggestions-global') &&
+            !e.target.closest(SELECTOR)) {
+            hide();
         }
     });
+
+    // Reposition on scroll so popup tracks the input
+    window.addEventListener('scroll', () => {
+        if (box.style.display === 'block' && activeInput) positionUnder(activeInput);
+    }, true);
 }
 
 // ==========================================

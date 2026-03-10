@@ -7,6 +7,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Bu sayfaya özel stiller */
         .league-container {
@@ -141,6 +142,22 @@
             background: #004080;
         }
         .vote-btn:active { transform: translateY(0); }
+        .vote-btn.voted {
+            background: #27ae60;
+            cursor: default;
+            pointer-events: none;
+            box-shadow: 0 4px 15px rgba(39,174,96,0.25);
+        }
+        .vote-btn.voted:hover { transform: none; }
+        .club-page-link {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.78rem; font-weight: 600; color: var(--ytu-lacivert);
+            text-decoration: none; padding: 4px 10px;
+            border: 1px solid var(--ytu-lacivert); border-radius: 20px;
+            opacity: 0.75; transition: opacity .15s, background .15s;
+            margin-top: 4px;
+        }
+        .club-page-link:hover { opacity: 1; background: rgba(var(--ytu-lacivert-rgb),.07); }
 
         /* Mobil Uyum */
         @media (max-width: 600px) {
@@ -158,6 +175,140 @@
             }
             .club-meta { font-size: 0.8rem; gap: 10px; }
         }
+
+        /* ===== TAM MOBİL ===== */
+        @media (max-width: 768px) {
+            /* Üst navbar */
+            .navbar { display: none !important; }
+            .cf-top-bar {
+                display: flex !important;
+                position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+                height: 54px;
+                background: var(--card-bg);
+                border-bottom: 1px solid var(--border-color);
+                align-items: center;
+                padding: 0 14px;
+                gap: 10px;
+                box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            }
+            .cf-top-back {
+                width: 36px; height: 36px; border-radius: 50%;
+                border: none; background: var(--hover-bg);
+                color: var(--text-color); font-size: 1rem;
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; flex-shrink: 0; text-decoration: none;
+            }
+            .cf-top-title {
+                flex: 1; font-size: 1rem; font-weight: 900; color: var(--text-color);
+            }
+
+            /* Layout */
+            body { padding-top: 54px; padding-bottom: 68px; }
+            .left-sidebar, aside.right-sidebar { display: none !important; }
+            .main-layout {
+                display: block !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            main { padding: 0 12px !important; }
+            .section-header { margin-bottom: 14px !important; }
+            .section-header h2 { font-size: 1.3rem !important; }
+            .league-container { max-width: 100% !important; }
+
+            /* Kart kompakt */
+            .club-card {
+                flex-wrap: nowrap !important;
+                padding: 12px 14px !important;
+                border-radius: 16px !important;
+                margin-bottom: 10px !important;
+                align-items: center !important;
+                gap: 0;
+            }
+            .club-card:hover { transform: none !important; }
+
+            /* Sıra rozeti */
+            .rank-badge {
+                width: 32px !important;
+                font-size: 1rem !important;
+                flex-shrink: 0;
+            }
+            .club-card.rank-1 .rank-badge { font-size: 1.3rem !important; }
+            .club-card.rank-2 .rank-badge,
+            .club-card.rank-3 .rank-badge { font-size: 1.2rem !important; }
+
+            /* Logo */
+            .club-logo-wrapper {
+                width: 46px !important; height: 46px !important;
+                border-radius: 12px !important;
+                margin: 0 10px !important;
+                padding: 3px !important;
+                flex-shrink: 0;
+            }
+
+            /* Detaylar */
+            .club-details { flex: 1; min-width: 0; }
+            .club-name {
+                font-size: 0.9rem !important;
+                margin-bottom: 3px !important;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            }
+            .club-meta {
+                font-size: 0.75rem !important;
+                gap: 8px !important;
+                flex-wrap: wrap;
+            }
+            .club-page-link { display: none !important; }
+
+            /* Oy bölümü */
+            .vote-section {
+                min-width: 0 !important;
+                width: auto !important;
+                padding-left: 10px !important;
+                border-left: 1px solid var(--border-color) !important;
+                border-top: none !important;
+                margin-top: 0 !important;
+                padding-top: 0 !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 4px !important;
+                flex-shrink: 0;
+            }
+            .vote-count { font-size: 1.1rem !important; }
+            .vote-label { font-size: 0.62rem !important; }
+            .vote-btn {
+                padding: 6px 10px !important;
+                font-size: 0.72rem !important;
+                border-radius: 20px !important;
+                box-shadow: none !important;
+                gap: 4px !important;
+            }
+
+            /* Alt navbar */
+            .cf-bottom-nav {
+                display: flex !important;
+                position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+                height: 60px;
+                background: var(--card-bg);
+                border-top: 1px solid var(--border-color);
+                align-items: center;
+                justify-content: space-around;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+            }
+            .cf-nav-item {
+                display: flex; flex-direction: column; align-items: center;
+                gap: 3px; flex: 1;
+                text-decoration: none;
+                color: var(--text-muted);
+                font-size: 0.6rem; font-weight: 600;
+                padding: 6px 0;
+            }
+            .cf-nav-item i { font-size: 1.15rem; }
+            .cf-nav-item.active { color: var(--ytu-lacivert); }
+        }
+
+        /* Masaüstünde mobil elemanları gizle */
+        .cf-top-bar, .cf-bottom-nav { display: none; }
     </style>
 </head>
 <body>
@@ -170,6 +321,12 @@
 
     {% include 'navbar_partial.html' ignore missing %}
 
+    <!-- MOBİL ÜST BAR -->
+    <div class="cf-top-bar">
+        <a href="{{ url_for('main.index') }}" class="cf-top-back"><i class="fas fa-arrow-left"></i></a>
+        <span class="cf-top-title">🏆 Kulüpler Ligi</span>
+    </div>
+
     <div class="main-layout">
         
         <aside class="left-sidebar sticky-sidebar">
@@ -180,7 +337,22 @@
                     <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
                 </div>
                 <nav style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="{{ url_for('main.index') }}" class="sidebar-link" style="padding:12px; border-radius:12px; font-weight:600; color:var(--text-muted); display:flex; gap:10px;"><i class="fas fa-arrow-left"></i> Geri Dön</a>
+                    <a href="/" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
+                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
+                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
+                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
+                    <a href="{{ url_for('main.clubs_full_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi</a>
+                    <a href="{{ url_for('main.adverts') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bullhorn" style="width: 20px; text-align: center;"></i> İlanlar</a>
+                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
+                        {% if unread_count > 0 %}<span class="notification-badge">{{ unread_count }}</span>{% endif %}
+                    </a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
+                        {% if unread_msg_count > 0 %}<span class="msg-badge">{{ unread_msg_count }}</span>{% endif %}
+                    </a>
+                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bus" style="width: 20px; text-align: center;"></i> Ulaşım</a>
                 </nav>
             </div>
         </aside>
@@ -205,15 +377,25 @@
                     <div class="club-details">
                         <a href="{{ url_for('main.club_detail', slug=club.slug) }}" class="club-name">{{ club.name }}</a>
                         <div class="club-meta">
-                            <span><i class="fas fa-users"></i> {{ club.members }}</span>
-                            <span><i class="fas fa-rocket"></i> {{ club.projects }} Proje</span>
+                            <span><i class="fas fa-users"></i> {{ club.followers|length }} Takipçi</span>
                         </div>
+                        <a href="{{ url_for('main.club_detail', slug=club.slug) }}" class="club-page-link">
+                            <i class="fas fa-external-link-alt" style="font-size:.68rem;"></i> Kulübü Gör
+                        </a>
                     </div>
 
                     <div class="vote-section">
                         <span class="vote-count" id="vote-count-{{ club.id }}">{{ club.votes }}</span>
                         <span class="vote-label">OY</span>
-                        <button class="vote-btn" onclick="oyVer('{{ club.id }}', this)">OY VER</button>
+                        {% if club.id in voted_ids %}
+                        <button class="vote-btn voted" data-club-id="{{ club.id }}" disabled>
+                            <i class="fas fa-check"></i> OY VERİLDİ
+                        </button>
+                        {% else %}
+                        <button class="vote-btn" data-club-id="{{ club.id }}" onclick="oyVer('{{ club.id }}', this)">
+                            OY VER
+                        </button>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -228,5 +410,24 @@
 
     <script src="/static/script.js"></script>
     <button onclick="topFunction()" id="scrollTopBtn" title="Yukarı Çık">⬆️</button>
+
+    <!-- MOBİL ALT NAVBAR -->
+    <nav class="cf-bottom-nav">
+        <a href="{{ url_for('main.index') }}" class="cf-nav-item">
+            <i class="fas fa-house"></i><span>Ana Sayfa</span>
+        </a>
+        <a href="{{ url_for('main.explore') }}" class="cf-nav-item">
+            <i class="fas fa-compass"></i><span>Keşfet</span>
+        </a>
+        <a href="{{ url_for('main.clubs_full_list') }}" class="cf-nav-item active">
+            <i class="fas fa-trophy"></i><span>Kulüpler</span>
+        </a>
+        <a href="{{ url_for('main.notifications') }}" class="cf-nav-item">
+            <i class="fas fa-bell"></i><span>Bildirim</span>
+        </a>
+        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="cf-nav-item">
+            <i class="fas fa-user"></i><span>Profil</span>
+        </a>
+    </nav>
 </body>
 </html>

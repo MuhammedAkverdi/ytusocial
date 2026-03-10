@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, current_app, send_from_directory
 from flask_login import login_required, current_user
 from extensions import db, socketio
 from models import User, Post, Story, Club, ClubVote, ClubPost, Poll, PollOption, PollVote, Comment, SavedPost, Message, Notification, Feedback, Note, NoteVote, Advert, likes
-from utils import optimize_and_save_image, allowed_file, create_notification, get_trending_hashtags, not_icerigi_dogru_mu, get_file_size_str, icerik_temiz_mi, ONLINE_USERS
+from utils import optimize_and_save_image, allowed_file, create_notification, get_trending_hashtags, not_icerigi_dogru_mu, get_file_size_str, icerik_temiz_mi, ONLINE_USERS, scan_file_safety, ALLOWED_NOTE_EXTENSIONS
 from sqlalchemy import or_, func
 from datetime import datetime, timedelta
 import os
@@ -223,6 +223,12 @@ def club_detail(slug):
         
         new_event = ClubPost(title=title, content=content, image_file=filename, club=club)
         db.session.add(new_event)
+
+        # Kulüp liderinin duyurusunu global feed'e de ekle
+        feed_content = f"{title}\n\n{content}"
+        feed_post = Post(content=feed_content, image_file=filename, user_id=current_user.id, club_id=club.id)
+        db.session.add(feed_post)
+
         db.session.commit()
         flash("Etkinlik başarıyla duyuruldu!", "success")
         return redirect(url_for('main.club_detail', slug=slug))
@@ -240,10 +246,18 @@ def delete_club_post(post_id):
     if current_user != post.club.leader and not current_user.is_admin:
         flash("Yetkisiz işlem!", "danger")
         return redirect(url_for('main.club_detail', slug=post.club.slug))
+    slug = post.club.slug
+
+    # İlişkili feed postunu da sil
+    linked = Post.query.filter_by(club_id=post.club_id, user_id=post.club.leader_id)\
+        .order_by(Post.date_posted.desc()).first()
+    if linked:
+        db.session.delete(linked)
+
     db.session.delete(post)
     db.session.commit()
     flash("Etkinlik silindi.", "info")
-    return redirect(url_for('main.club_detail', slug=post.club.slug))
+    return redirect(url_for('main.club_detail', slug=slug))
 
 @main.route('/vote_club/<int:club_id>')
 @login_required
@@ -384,7 +398,24 @@ def explore():
         if query.startswith('#'):
             posts = Post.query.filter(Post.content.contains(query)).order_by(Post.date_posted.desc()).all()
             hashtag_stats = {'name': query, 'post_count': len(posts)}
-            return render_template('index.html', posts=posts, active_tab='explore', clubs=ranked_clubs, votes=votes, stories={}, top_clubs=ranked_clubs[:3], hashtag_stats=hashtag_stats)
+            # Hikaye verisini yükle (ana sayfayla aynı mantık)
+            one_day_ago = datetime.utcnow() - timedelta(days=1)
+            active_stories = Story.query.filter(Story.timestamp > one_day_ago).order_by(Story.timestamp.asc()).all()
+            stories_data = {}
+            for story in active_stories:
+                if story.author not in stories_data:
+                    stories_data[story.author] = {'stories': [], 'all_seen': True}
+                seen_by_me = current_user in story.viewers
+                if not seen_by_me and story.author != current_user:
+                    stories_data[story.author]['all_seen'] = False
+                stories_data[story.author]['stories'].append({
+                    'id': story.id,
+                    'file': story.image_file,
+                    'timestamp': story.timestamp.strftime('%H:%M'),
+                    'seen': seen_by_me,
+                    'viewers': [u.username for u in story.viewers] if story.author == current_user else []
+                })
+            return render_template('index.html', posts=posts, active_tab='explore', clubs=ranked_clubs, votes=votes, stories=stories_data, top_clubs=ranked_clubs[:3], hashtag_stats=hashtag_stats)
         else:
             search_term = f"%{query}%"
             users = User.query.filter(or_(User.username.ilike(search_term), User.handle.ilike(search_term), User.department.ilike(search_term))).all()
@@ -421,7 +452,8 @@ def trending_full_list():
 def clubs_full_list():
     all_clubs = Club.query.all()
     ranked_clubs = sorted(all_clubs, key=lambda c: c.total_votes(), reverse=True)
-    return render_template('clubs_full.html', clubs=ranked_clubs)
+    voted_ids = {v.club_id for v in ClubVote.query.filter_by(user_id=current_user.id).all()}
+    return render_template('clubs_full.html', clubs=ranked_clubs, voted_ids=voted_ids)
 
 @main.route('/follow/<handle>')
 @login_required
@@ -491,7 +523,8 @@ def messages_inbox():
         unread_count = Message.query.filter_by(sender_id=contact.id, recipient_id=current_user.id, is_read=False).count()
         conversations.append({'user': contact, 'last_message': last_msg, 'timestamp': last_msg.timestamp if last_msg else datetime.min, 'unread': unread_count})
     conversations.sort(key=lambda x: (x['unread'] > 0, x['timestamp']), reverse=True)
-    return render_template('inbox.html', conversations=conversations)
+    following_users = current_user.followed.all()
+    return render_template('inbox.html', conversations=conversations, following_users=following_users)
 
 @main.route('/chat/<handle>', methods=['GET', 'POST'])
 @login_required
@@ -530,6 +563,8 @@ def send_message(rid):
         file_path = unique_filename
         if ext in ['.png', '.jpg', '.jpeg', '.gif', '.webp']:
             msg_type = 'image'
+        elif ext in ['.mp4', '.mov', '.avi', '.webm', '.mkv', '.flv']:
+            msg_type = 'video'
         if not b: b = filename
     elif story_id:
         msg_type = 'story'
@@ -553,7 +588,7 @@ def send_message(rid):
 def notes_pool():
     dept_filter = request.args.get('dept')
     sort_by = request.args.get('sort', 'newest')
-    query = Note.query
+    query = Note.query.filter_by(is_approved=True)
     if dept_filter:
         query = query.filter_by(department=dept_filter)
     if sort_by == 'popular':
@@ -588,6 +623,8 @@ def report_content(type, id):
         item = Post.query.get_or_404(id)
     elif type == 'comment':
         item = Comment.query.get_or_404(id)
+    elif type == 'note':
+        item = Note.query.get_or_404(id)
     else:
         return jsonify({'success': False, 'message': 'Hata'})
     item.report_count += 1
@@ -597,32 +634,59 @@ def report_content(type, id):
 @main.route('/upload_note', methods=['POST'])
 @login_required
 def upload_note():
-    if 'note_file' not in request.files: return redirect(request.url)
-    file = request.files['note_file']
-    title = request.form.get('title')
-    course_code = request.form.get('course_code')
-    department = request.form.get('department')
-    description = request.form.get('description')
-    if file:
-        file.seek(0, os.SEEK_END)
-        file_length = file.tell()
-        file_size_str = get_file_size_str(file_length)
-        file.seek(0)
-        file_ext = file.filename.rsplit('.', 1)[1].lower()
-        filename = secrets.token_hex(8) + "." + file_ext
-        save_path = os.path.join(current_app.config['UPLOAD_FOLDER_NOTES'], filename)
-        file.save(save_path)
-        is_valid, message = not_icerigi_dogru_mu(save_path, department)
-        if not is_valid:
-             os.remove(save_path)
-             flash('AI Onaylamadı: ' + message, 'danger')
-             return redirect(url_for('main.notes_pool'))
-        new_note = Note(title=title, course_code=course_code, department=department, description=description, file_path=filename, file_type=file_ext, file_size=file_size_str, author=current_user)
-        current_user.score += 10
-        db.session.add(new_note)
-        db.session.commit()
-        flash('Not yüklendi! +10 Puan', 'success')
+    if 'note_file' not in request.files:
+        flash('Dosya seçilmedi.', 'danger')
         return redirect(url_for('main.notes_pool'))
+    file = request.files['note_file']
+    if not file or not file.filename:
+        flash('Geçersiz dosya.', 'danger')
+        return redirect(url_for('main.notes_pool'))
+
+    title = request.form.get('title', '').strip()
+    course_code = request.form.get('course_code', '').strip()
+    department = request.form.get('department', '').strip()
+    description = request.form.get('description', '').strip()
+
+    if not title or not course_code or not department:
+        flash('Başlık, ders kodu ve bölüm alanları zorunludur.', 'danger')
+        return redirect(url_for('main.notes_pool'))
+
+    # Uzantı kontrolü
+    if '.' not in file.filename:
+        flash('Uzantısız dosya yüklenemez.', 'danger')
+        return redirect(url_for('main.notes_pool'))
+    file_ext = file.filename.rsplit('.', 1)[1].lower()
+    if file_ext not in ALLOWED_NOTE_EXTENSIONS:
+        flash(f'İzin verilmeyen dosya türü: .{file_ext}. Sadece PDF, TXT, DOC, DOCX, PPT, PPTX yüklenebilir.', 'danger')
+        return redirect(url_for('main.notes_pool'))
+
+    # Boyut ölçümü
+    file.seek(0, os.SEEK_END)
+    file_length = file.tell()
+    file.seek(0)
+    file_size_str = get_file_size_str(file_length)
+
+    filename = secrets.token_hex(8) + '.' + file_ext
+    save_path = os.path.join(current_app.config['UPLOAD_FOLDER_NOTES'], filename)
+    file.save(save_path)
+
+    # Güvenlik taraması (magic bytes + boyut + içerik)
+    is_safe, scan_msg = scan_file_safety(save_path, file_ext)
+    if not is_safe:
+        os.remove(save_path)
+        flash('Güvenlik taraması başarısız: ' + scan_msg, 'danger')
+        return redirect(url_for('main.notes_pool'))
+
+    new_note = Note(
+        title=title, course_code=course_code.upper(), department=department,
+        description=description, file_path=filename, file_type=file_ext,
+        file_size=file_size_str, author=current_user,
+        is_approved=False
+    )
+    db.session.add(new_note)
+    db.session.commit()
+    flash('Notun incelemeye alındı! Onaylandıktan sonra havuzda görünecek ve +10 puan kazanacaksın 🎓', 'success')
+    return redirect(url_for('main.notes_pool'))
 
 @main.route('/download_note/<int:note_id>')
 @login_required
@@ -630,7 +694,34 @@ def download_note(note_id):
     note = Note.query.get_or_404(note_id)
     note.downloads += 1
     db.session.commit()
-    return redirect(url_for('static', filename='note_files/' + note.file_path))
+    notes_folder = os.path.join(current_app.root_path, 'static', 'note_files')
+    return send_from_directory(notes_folder, note.file_path, as_attachment=True)
+
+@main.route('/delete_note/<int:note_id>', methods=['POST'])
+@login_required
+def delete_note(note_id):
+    note = Note.query.get_or_404(note_id)
+    if note.user_id != current_user.id and not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Yetkisiz'}), 403
+    file_path = os.path.join(current_app.root_path, 'static', 'note_files', note.file_path)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    db.session.delete(note)
+    db.session.commit()
+    return jsonify({'success': True})
+
+@main.route('/edit_note/<int:note_id>', methods=['POST'])
+@login_required
+def edit_note(note_id):
+    note = Note.query.get_or_404(note_id)
+    if note.user_id != current_user.id and not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Yetkisiz'}), 403
+    note.title       = request.form.get('title',       note.title).strip()
+    note.course_code = request.form.get('course_code', note.course_code).strip()
+    note.department  = request.form.get('department',  note.department).strip()
+    note.description = request.form.get('description', note.description or '').strip()
+    db.session.commit()
+    return jsonify({'success': True})
 
 @main.route('/upload_story', methods=['POST'])
 @login_required
@@ -653,11 +744,16 @@ def upload_story():
 @login_required
 def delete_message(message_id):
     msg = Message.query.get_or_404(message_id)
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if msg.sender_id == current_user.id or msg.recipient_id == current_user.id:
         db.session.delete(msg)
         db.session.commit()
+        if is_ajax:
+            return jsonify({'success': True})
         return redirect(request.referrer)
     else:
+        if is_ajax:
+            return jsonify({'success': False, 'error': 'Yetki yok'})
         flash("Bu mesajı silme yetkiniz yok!", "danger")
         return redirect(url_for('main.messages_inbox'))
     
@@ -670,6 +766,21 @@ def delete_conversation(partner_id):
     db.session.commit()
     flash("Sohbet ve tüm mesajlar silindi.", "info")
     return redirect(url_for('main.messages_inbox'))
+
+@main.route('/block_user/<int:user_id>', methods=['POST'])
+@login_required
+def block_user(user_id):
+    target = User.query.get_or_404(user_id)
+    if target == current_user:
+        return jsonify({'success': False, 'error': 'Kendinizi engelleyemezsiniz.'})
+    if current_user.is_blocking(target):
+        current_user.unblock_user(target)
+        db.session.commit()
+        return jsonify({'success': True, 'blocked': False, 'message': f'@{target.handle} engellemesi kaldırıldı.'})
+    else:
+        current_user.block_user(target)
+        db.session.commit()
+        return jsonify({'success': True, 'blocked': True, 'message': f'@{target.handle} engellendi.'})
 
 @main.route('/submit_feedback', methods=['POST'])
 @login_required
@@ -817,3 +928,10 @@ def edit_advert(adv_id):
     db.session.commit()
     flash("İlan başarıyla güncellendi.", "success")
     return redirect(url_for('main.adverts'))
+
+@main.route('/ulasim')
+@login_required
+def ulasim():
+    if not current_user.is_verified:
+        return redirect(url_for('auth.verify', email=current_user.email))
+    return render_template('ulasim.html')

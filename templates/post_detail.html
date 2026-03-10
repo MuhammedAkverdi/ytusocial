@@ -23,13 +23,23 @@
                     <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{ current_user.username }}</h3>
                     <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
                 </div>
-
                 <nav style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="{{ url_for('main.index') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
+                    <a href="/" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
                     <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
                     <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
+                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
                     <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
-                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar</a>
+                    <a href="{{ url_for('main.clubs_full_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi</a>
+                    <a href="{{ url_for('main.adverts') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bullhorn" style="width: 20px; text-align: center;"></i> İlanlar</a>
+                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
+                        {% if unread_count > 0 %}<span class="notification-badge">{{ unread_count }}</span>{% endif %}
+                    </a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
+                        {% if unread_msg_count > 0 %}<span class="msg-badge">{{ unread_msg_count }}</span>{% endif %}
+                    </a>
+                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bus" style="width: 20px; text-align: center;"></i> Ulaşım</a>
                 </nav>
             </div>
             {% endif %}
@@ -99,36 +109,37 @@
                     {% endif %}
 
                     {% for comment in post.comments %}
-                    <div class="comment-item" data-timestamp="{{ comment.date_posted.timestamp() }}" data-likes="0">
-                        <img src="/static/{{ comment.author.profile_pic }}" class="comment-avatar-sm">
-                        <div class="comment-bubble" style="flex: 1;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                <strong>{{ comment.author.username }}</strong>
+                    <div class="tw-comment" id="comment-container-{{ comment.id }}">
+                        <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="tw-comment-avatar-link">
+                            <img src="/static/{{ comment.author.profile_pic }}" class="tw-comment-avatar">
+                        </a>
+                        <div class="tw-comment-body">
+                            <div class="tw-comment-meta">
+                                <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="tw-comment-name">{{ comment.author.username }}</a>
+                                <span class="tw-comment-handle">@{{ comment.author.handle }}</span>
+                                <span class="tw-comment-dot">·</span>
+                                <span class="tw-comment-time">{{ comment.date_posted.strftime('%H:%M') }}</span>
                                 {% if comment.author == current_user %}
-                                <div style="position: relative;">
-                                    <button type="button" class="comment-menu-btn" onclick="toggleMenu('menu-{{ comment.id }}')" style="position: static; padding: 0 5px; color: var(--text-muted);">⋮</button>
-                                    <div id="menu-{{ comment.id }}" class="comment-dropdown" style="right: 0; top: 20px; width: 120px;">
+                                <div class="tw-comment-menu-wrap">
+                                    <button type="button" class="tw-comment-menu-btn" onclick="toggleMenu('menu-{{ comment.id }}', event)">⋮</button>
+                                    <div id="menu-{{ comment.id }}" class="comment-dropdown">
                                         <button type="button" class="comment-action" onclick="openEditMode('{{ comment.id }}')">✏️ Düzenle</button>
-                                        <a href="{{ url_for('main.delete_comment', comment_id=comment.id) }}" class="comment-action delete" onclick="return confirm('Bu yorumu silmek istediğine emin misin?')">🗑️ Sil</a>
+                                        <button type="button" class="comment-action delete" onclick="deleteCommentJS('{{ comment.id }}', '{{ post.id }}', this)">🗑️ Sil</button>
                                     </div>
                                 </div>
                                 {% endif %}
                             </div>
-                            
-                            <p id="comment-text-{{ comment.id }}" style="margin: 4px 0;">{{ comment.text | format_tags }}</p>
-                            
+                            <div class="tw-comment-text" id="comment-text-{{ comment.id }}">{{ comment.text | format_tags }}</div>
                             {% if comment.author == current_user %}
-                            <form action="{{ url_for('main.edit_comment', comment_id=comment.id) }}" method="POST" class="edit-comment-form" id="edit-form-{{ comment.id }}" style="margin-bottom: 10px;">
+                            <form action="{{ url_for('main.edit_comment', comment_id=comment.id) }}" method="POST" class="edit-comment-form" id="edit-form-{{ comment.id }}">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <input type="text" name="new_text" value="{{ comment.text }}" class="comment-input" style="width: 100%; margin-bottom: 8px;">
-                                <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                                    <button type="button" onclick="closeEditMode('{{ comment.id }}')" class="btn-cancel" style="font-size: 0.8rem;">İptal</button>
+                                <input type="text" name="new_text" value="{{ comment.text }}" class="comment-input" data-mention="true">
+                                <div class="edit-actions">
+                                    <button type="button" onclick="closeEditMode('{{ comment.id }}')" class="btn-cancel">İptal</button>
                                     <button type="submit" class="btn-vote btn-sm">Kaydet</button>
                                 </div>
                             </form>
                             {% endif %}
-                            
-                            <small class="text-muted">{{ comment.date_posted.strftime('%H:%M') }}</small>
                         </div>
                     </div>
                     {% endfor %}
@@ -157,10 +168,8 @@
                     <small class="post-date-text">{{ post.date_posted.strftime('%d %B %Y') }}</small>
 
                     <form onsubmit="submitComment(event, '{{ post.id }}')" class="detail-comment-form" style="position: relative;">
-                        <!-- Etiketleme Öneri Kutusu -->
-                        <div id="mention-suggestions" class="mention-dropdown"></div>
                         
-                        <input type="text" id="comment-input-{{ post.id }}" class="detail-comment-input" placeholder="Yorum ekle... (@kullanici)" required autocomplete="off">
+                        <input type="text" id="comment-input-{{ post.id }}" class="detail-comment-input" data-mention="true" placeholder="Yorum ekle... (@kullanici)" required autocomplete="off">
                         <button type="submit" class="detail-comment-btn">Paylaş</button>
                     </form>
                 </div>

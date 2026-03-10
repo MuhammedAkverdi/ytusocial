@@ -8,6 +8,11 @@ followers = db.Table('followers',
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
 )
 
+blocked_users = db.Table('blocked_users',
+    db.Column('blocker_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('blocked_id', db.Integer, db.ForeignKey('user.id'))
+)
+
 story_views = db.Table('story_views',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('story_id', db.Integer, db.ForeignKey('story.id'))
@@ -107,6 +112,7 @@ class User(UserMixin, db.Model):
     handle = db.Column(db.String(30), unique=True, nullable=True)
     stories = db.relationship('Story', backref='author', lazy=True)
     is_admin = db.Column(db.Boolean, default=False)
+    is_moderator = db.Column(db.Boolean, default=False)
     department = db.Column(db.String(100), nullable=True)
     score = db.Column(db.Integer, default=0)
     bio = db.Column(db.String(200), nullable=True)
@@ -131,6 +137,13 @@ class User(UserMixin, db.Model):
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
     )
 
+    blocking = db.relationship(
+        'User', secondary=blocked_users,
+        primaryjoin=(blocked_users.c.blocker_id == id),
+        secondaryjoin=(blocked_users.c.blocked_id == id),
+        backref=db.backref('blocked_by', lazy='dynamic'), lazy='dynamic'
+    )
+
     def follow(self, user):
         if not self.is_following(user):
             self.followed.append(user)
@@ -149,6 +162,15 @@ class User(UserMixin, db.Model):
         s = SavedPost.query.filter_by(user_id=self.id, post_id=post.id).first()
         if s: db.session.delete(s)
 
+    def block_user(self, user):
+        if not self.is_blocking(user):
+            self.blocking.append(user)
+    def unblock_user(self, user):
+        if self.is_blocking(user):
+            self.blocking.remove(user)
+    def is_blocking(self, user):
+        return self.blocking.filter(blocked_users.c.blocked_id == user.id).count() > 0
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=True)
@@ -156,6 +178,8 @@ class Post(db.Model):
     date_posted = db.Column(db.DateTime, nullable=False, default=get_turkey_time)
     image_file = db.Column(db.String(255), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    club_id = db.Column(db.Integer, db.ForeignKey('club.id'), nullable=True)  # Kulüp duyurusu ise set edilir
+    club = db.relationship('Club', foreign_keys=[club_id], backref=db.backref('feed_posts', lazy=True))
     
     liked_by = db.relationship('User', secondary=likes, backref=db.backref('liked_posts', lazy='dynamic'))
     comments = db.relationship('Comment', backref='post', lazy=True, cascade="all, delete-orphan")
@@ -203,6 +227,7 @@ class Note(db.Model):
     rating_sum = db.Column(db.Integer, default=0)
     rating_count = db.Column(db.Integer, default=0)
     report_count = db.Column(db.Integer, default=0)
+    is_approved = db.Column(db.Boolean, default=False)
     
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

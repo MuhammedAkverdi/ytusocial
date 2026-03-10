@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, request, current_app
+import urllib.request
+import urllib.error
 from flask_login import login_required, current_user
 from extensions import db, socketio
 from models import User, Story, Post, Poll, PollOption, Comment, ClubVote
@@ -123,6 +125,7 @@ def add_comment_api(post_id):
             'id': comment.id,
             'text': comment.text,
             'author_name': current_user.username,
+            'author_handle': current_user.handle,
             'author_pic': current_user.profile_pic,
             'date': comment.date_posted.strftime('%H:%M')
         }
@@ -193,3 +196,53 @@ def api_follow_user(user_id):
 def my_votes():
     user_votes = [v.club_id for v in ClubVote.query.filter_by(user_id=current_user.id).all()]
     return jsonify({'success': True, 'votes': user_votes})
+
+@api.route('/api/random_posts')
+@login_required
+def api_random_posts():
+    import random
+    posts = Post.query.filter(Post.image_file != None).all()
+    random.shuffle(posts)
+    posts = posts[:20]
+    results = []
+    for p in posts:
+        results.append({
+            'id': p.id,
+            'image_file': p.image_file,
+            'is_video': p.is_video(),
+            'like_count': len(p.liked_by),
+            'comment_count': len(p.comments)
+        })
+    return jsonify({'success': True, 'posts': results})
+
+
+# ── IETT Gerçek Zamanlı Durak Proxy ──────────────────────────────────────────
+_ulasim_cache = {}   # {stop_code: (timestamp, html)}
+_CACHE_TTL = 30      # saniye
+
+@api.route('/api/ulasim_live')
+@login_required
+def ulasim_live():
+    import time
+    stop_code = request.args.get('stop', '125851')
+    # Sadece sayısal stop-code kabul et
+    if not stop_code.isdigit():
+        return jsonify({'success': False, 'error': 'Geçersiz durak kodu'}), 400
+
+    now = time.time()
+    cached = _ulasim_cache.get(stop_code)
+    if cached and (now - cached[0]) < _CACHE_TTL:
+        return jsonify({'success': True, 'html': cached[1], 'cached': True})
+
+    try:
+        url = f'https://iett.istanbul/tr/RouteStation/GetStationInfo?dcode={stop_code}&langid=1'
+        req = urllib.request.Request(url, headers={
+            'User-Agent': 'Mozilla/5.0',
+            'Referer': 'https://iett.istanbul/',
+        })
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            html = resp.read().decode('utf-8')
+        _ulasim_cache[stop_code] = (now, html)
+        return jsonify({'success': True, 'html': html, 'cached': False})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 502

@@ -1,4 +1,5 @@
 from flask import Flask, g, render_template, redirect, url_for, flash, request
+import os
 from flask_login import current_user, logout_user
 from extensions import db, login_manager, mail, socketio, csrf, migrate
 from config import Config
@@ -62,7 +63,7 @@ def create_app():
         if not text: return ""
         text = re.sub(r'(https?://\S+)', r'<a href="\1" target="_blank" style="color: var(--ytu-lacivert); text-decoration: underline;">\1</a>', text)
         tags = re.sub(r"#(\w+)", r'<a href="/explore?q=%23\1" class="hashtag-link">#\1</a>', text)
-        tags = re.sub(r"@(\w+)", r'<a href="/u/\1" class="mention-link" style="color: var(--ytu-lacivert); font-weight: bold; text-decoration:none;">@\1</a>', tags)
+        tags = re.sub(r"@(\w+)", r'<a href="/u/\1" class="mention-link">@\1</a>', tags)
         return Markup(tags)
 
     @app.before_request
@@ -84,6 +85,9 @@ def create_app():
             now = time.time()
             duration = round(now - g.start, 4)
             print(f"--- Sayfa Yükleme: {duration}s ---")
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
         return response
 
     return app
@@ -93,4 +97,5 @@ app = create_app()
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    socketio.run(app, host='0.0.0.0', port=5002, debug=True)
+    debug_flag = os.environ.get('FLASK_DEBUG', '1') == '1'
+    socketio.run(app, host='0.0.0.0', port=5002, debug=debug_flag)

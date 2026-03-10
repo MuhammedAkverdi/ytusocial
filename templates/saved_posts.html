@@ -7,7 +7,64 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        .sv-top-bar, .sv-bottom-nav { display: none; }
+
+        @media (max-width: 768px) {
+            .navbar, .left-sidebar { display: none !important; }
+            body { padding-top: 54px !important; padding-bottom: 68px !important; }
+            .main-layout {
+                grid-template-columns: 1fr !important;
+                margin-top: 0 !important;
+                padding: 12px !important;
+            }
+
+            /* ---- mobil üst bar ---- */
+            .sv-top-bar {
+                display: flex !important;
+                position: fixed; top: 0; left: 0; right: 0; height: 54px;
+                background: var(--card-bg);
+                border-bottom: 1px solid var(--border-color);
+                align-items: center; justify-content: space-between;
+                padding: 0 14px; z-index: 5000;
+                box-shadow: 0 1px 6px rgba(0,0,0,.07);
+            }
+            .sv-top-bar-back {
+                width: 36px; height: 36px;
+                display: flex; align-items: center; justify-content: center;
+                border-radius: 50%; background: none;
+                border: none; cursor: pointer;
+                color: var(--text-color); font-size: 1.1rem;
+            }
+            .sv-top-bar-title {
+                font-size: 1rem; font-weight: 800; color: var(--text-color);
+            }
+            .sv-top-bar-spacer { width: 36px; }
+
+            /* ---- mobil alt nav ---- */
+            .sv-bottom-nav {
+                display: flex !important;
+                position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+                background: var(--card-bg);
+                border-top: 1px solid var(--border-color);
+                align-items: center; justify-content: space-around;
+                z-index: 5000;
+                box-shadow: 0 -1px 6px rgba(0,0,0,.07);
+            }
+            .sv-bottom-nav a {
+                flex: 1; display: flex; flex-direction: column;
+                align-items: center; justify-content: center;
+                gap: 3px; text-decoration: none;
+                color: var(--text-muted);
+                font-size: 0.62rem; font-weight: 600; padding: 6px 0;
+                transition: color 0.15s;
+            }
+            .sv-bottom-nav a i { font-size: 1.15rem; }
+            .sv-bottom-nav a.active { color: #3949ab; }
+        }
+    </style>
 </head>
 <body>
 
@@ -18,6 +75,13 @@
     </script>
 
     {% include 'navbar_partial.html' ignore missing %}
+
+    <!-- MOBİL ÜST BAR -->
+    <div class="sv-top-bar">
+        <button class="sv-top-bar-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+        <span class="sv-top-bar-title">📌 Kaydedilenler</span>
+        <div class="sv-top-bar-spacer"></div>
+    </div>
 
     <div class="main-layout" style="grid-template-columns: 280px 1fr;">
         
@@ -30,18 +94,22 @@
                 </div>
 
                 <nav style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="{{ url_for('main.index') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-home" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
-                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
-                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-film" style="width: 20px; text-align: center;"></i> Reels</a>
-                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert);"><i class="fas fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
+                    <a href="/" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
+                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
+                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
+                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
+                    <a href="{{ url_for('main.clubs_full_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi</a>
+                    <a href="{{ url_for('main.adverts') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bullhorn" style="width: 20px; text-align: center;"></i> İlanlar</a>
                     <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
-                        <i class="fas fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
-                        {% if unread_count > 0 %}
-                        <span class="notification-badge">{{ unread_count }}</span>
-                        {% endif %}
+                        <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
+                        {% if unread_count > 0 %}<span class="notification-badge">{{ unread_count }}</span>{% endif %}
                     </a>
-                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fas fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar</a>
-                    <a href="javascript:history.back()" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; margin-top: 12px; opacity: 0.7;"><i class="fas fa-arrow-left" style="width: 20px; text-align: center;"></i> Geri</a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
+                        <i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
+                        {% if unread_msg_count > 0 %}<span class="msg-badge">{{ unread_msg_count }}</span>{% endif %}
+                    </a>
+                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bus" style="width: 20px; text-align: center;"></i> Ulaşım</a>
                 </nav>
             </div>
         </aside>
@@ -124,6 +192,15 @@
         <span class="close-lightbox">&times;</span>
         <img class="lightbox-content" id="lightboxImage" onclick="event.stopPropagation()"> 
     </div>
+
+    <!-- MOBİL ALT NAV -->
+    <nav class="sv-bottom-nav">
+        <a href="/"><i class="fas fa-home"></i><span>Ana Sayfa</span></a>
+        <a href="{{ url_for('main.explore') }}"><i class="fas fa-compass"></i><span>Keşfet</span></a>
+        <a href="{{ url_for('main.saved_posts_list') }}" class="active"><i class="fas fa-bookmark"></i><span>Kaydedilen</span></a>
+        <a href="{{ url_for('main.notifications') }}"><i class="fas fa-bell"></i><span>Bildirim</span></a>
+        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}"><i class="fas fa-user"></i><span>Profil</span></a>
+    </nav>
 
     <script src="/static/script.js"></script>
 </body>

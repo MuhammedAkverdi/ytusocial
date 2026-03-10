@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Mesajlar | YTU Social</title>
     
     <script>
@@ -15,34 +18,267 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+    .mob-header, .mob-left-overlay, .mob-left-drawer { display: none; }
+    .inbox-tabs { display:flex;gap:8px;padding:10px 14px 6px; }
+    .inbox-tab { padding:7px 18px;border-radius:20px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);font-size:0.85rem;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit; }
+    .inbox-tab.active { background:var(--text-color);color:var(--card-bg);border-color:transparent; }
+    /* DM Settings Page */
+    .x-settings-page{display:none;position:fixed;inset:0;background:var(--card-bg);z-index:4000;overflow-y:auto;}
+    .x-settings-page.open{display:block;}
+    .x-set-header{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--card-bg);z-index:1;}
+    .x-set-back{background:none;border:none;color:var(--text-color);font-size:1.15rem;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .2s;}
+    .x-set-back:hover{background:var(--border-color);}
+    .x-set-header h2{margin:0;font-size:1.15rem;font-weight:900;color:var(--text-color);}
+    .x-set-section{padding:20px 16px 10px;}
+    .x-set-section-title{font-size:1rem;font-weight:800;color:var(--text-color);margin:0 0 6px;}
+    .x-set-desc{font-size:.82rem;color:var(--text-muted);line-height:1.45;margin:0 0 16px;}
+    .x-set-option{display:flex;align-items:center;justify-content:space-between;padding:14px 0;cursor:pointer;}
+    .x-set-option-label{font-size:.93rem;font-weight:600;color:var(--text-color);}
+    .x-set-radio{width:22px;height:22px;border-radius:50%;border:2px solid var(--text-muted);position:relative;flex-shrink:0;transition:border-color .15s;}
+    .x-set-radio.active{border-color:#1d9bf0;}
+    .x-set-radio.active::after{content:'';position:absolute;inset:3px;border-radius:50%;background:#1d9bf0;}
+    .x-set-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--text-muted);position:relative;flex-shrink:0;transition:border-color .15s,background .15s;display:flex;align-items:center;justify-content:center;}
+    .x-set-check.active{border-color:#1d9bf0;background:#1d9bf0;}
+    .x-set-check.active::after{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;font-size:.7rem;color:#fff;}
+    .x-set-sep{height:1px;background:var(--border-color);margin:6px 16px;}
+    .x-set-section-sub{padding:16px 16px 6px;}
+    .x-set-section-sub-title{font-size:.88rem;font-weight:800;color:var(--text-color);margin:0 0 4px;}
+    .x-set-section-sub-desc{font-size:.8rem;color:var(--text-muted);line-height:1.45;margin:0 0 12px;}
+    .x-set-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;}
+    .x-set-toggle-info{flex:1;padding-right:16px;}
+    .x-set-toggle-label{font-size:.93rem;font-weight:700;color:var(--text-color);margin:0 0 4px;}
+    .x-set-toggle-desc{font-size:.78rem;color:var(--text-muted);line-height:1.4;margin:0;}
+    .x-toggle{width:44px;height:24px;border-radius:12px;background:var(--text-muted);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+    .x-toggle.active{background:#1d9bf0;}
+    .x-toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;}
+    .x-toggle.active::after{transform:translateX(20px);}
+    @media (max-width: 768px) {
+        .mob-header       { display: flex; }
+        .mob-left-overlay { display: block; }
+        .mob-left-drawer  { display: flex; }
+    }
+    @media (max-width: 768px) {
+        .navbar { display: none !important; }
+        .mob-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            height: 54px; background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            align-items: center; padding: 0 14px;
+            justify-content: space-between;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+        }
+        .mob-header-avatar { width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--ytu-lacivert);cursor:pointer; }
+        .mob-header-logo { font-size:1.1rem;font-weight:900;color:var(--ytu-lacivert);letter-spacing:-0.5px;text-decoration:none; }
+        .mob-header-logo span { color:var(--ytu-sari); }
+        .mob-header-right { display:flex;align-items:center;gap:10px; }
+        .mob-header-icon { background:none;border:none;color:var(--text-color);font-size:1.15rem;cursor:pointer;padding:6px;display:flex;align-items:center; }
+        .mob-left-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:none; }
+        .mob-left-overlay.open { display:block; }
+        .mob-left-drawer {
+            position:fixed;top:0;left:0;bottom:0;width:82%;max-width:320px;
+            background:var(--card-bg);z-index:2001;flex-direction:column;overflow-y:auto;
+            transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+            padding-bottom:env(safe-area-inset-bottom,20px);
+        }
+        .mob-left-drawer.open { transform:translateX(0); }
+        .mob-drawer-profile { padding:28px 22px 16px; }
+        .mob-drawer-avatar { width:62px;height:62px;border-radius:50%;object-fit:cover;border:3px solid var(--ytu-lacivert);margin-bottom:12px;display:block; }
+        .mob-drawer-name { font-size:1.05rem;font-weight:800;color:var(--text-color);margin:0 0 2px; }
+        .mob-drawer-score { display:inline-block;background:linear-gradient(135deg,var(--ytu-lacivert),rgba(var(--ytu-lacivert-rgb),.7));color:#fff;padding:3px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;margin-top:6px; }
+        .mob-drawer-nav { padding:8px 0;border-top:1px solid var(--border-color); }
+        .mob-drawer-link { display:flex;align-items:center;gap:18px;padding:14px 22px;text-decoration:none;color:var(--text-color);font-size:1.05rem;font-weight:700;transition:background 0.15s; }
+        .mob-drawer-link:active { background:var(--bg-light); }
+        .mob-drawer-link i { width:26px;text-align:center;font-size:1.2rem;color:var(--text-color); }
+        .mob-drawer-link.active, .mob-drawer-link.active i { color:var(--ytu-lacivert); }
+        .mob-drawer-sep { height:1px;background:var(--border-color);margin:8px 0; }
+        .mob-drawer-section-title { padding:12px 22px 4px;font-size:0.78rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.8px;display:flex;align-items:center;justify-content:space-between; }
+        .mob-drawer-section-title a { font-size:0.78rem;font-weight:700;color:var(--ytu-lacivert);text-transform:none;letter-spacing:0;text-decoration:none; }
+        .mob-drawer-trend { display:flex;align-items:center;justify-content:space-between;padding:10px 22px;text-decoration:none;color:var(--text-color);transition:background 0.15s; }
+        .mob-drawer-trend:active { background:var(--bg-light); }
+        .mob-drawer-trend-tag { font-weight:700;font-size:0.9rem;color:var(--ytu-lacivert); }
+        .mob-drawer-trend-count { font-size:0.72rem;color:var(--text-muted); }
+        .mob-drawer-logout { display:flex;align-items:center;gap:18px;padding:14px 22px;text-decoration:none;color:#e74c3c;font-size:1.05rem;font-weight:700; }
+        .mob-drawer-logout i { width:26px;text-align:center;font-size:1.2rem; }
+
+        .x-chat-title { font-size:1.25rem;font-weight:900;color:var(--text-color);flex:1;margin-left:12px; }
+        .inbox-title-row { display:none !important; }
+
+        /* inbox layout */
+        .inbox-layout {
+            display: block !important;
+            margin: 54px 0 70px !important;
+            padding: 0 !important;
+        }
+        .left-sidebar { display: none !important; }
+
+        /* inbox container */
+        .inbox-container { border-radius: 0 !important; border-left: none !important; border-right: none !important; }
+        .inbox-header { padding: 12px 14px 10px !important; border-radius: 0 !important; }
+        .inbox-title-row h2 { font-size: 1.05rem !important; }
+        .inbox-search-wrapper { margin-top: 8px; }
+        .inbox-search-input { font-size: 0.88rem !important; }
+
+        /* inbox satırları */
+        .inbox-row {
+            border-radius: 0 !important;
+            border-left: none !important;
+            border-right: none !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+        .inbox-item {
+            padding: 12px 10px 12px 14px !important;
+            border-radius: 0 !important;
+            gap: 12px;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            z-index: 2;
+            background: var(--card-bg);
+            transition: transform 0.25s ease;
+        }
+        .inbox-swipe-delete {
+            position: absolute !important;
+            right: 0; top: 0; bottom: 0;
+            width: 80px;
+            background: #dc3545;
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-decoration: none;
+            z-index: 1;
+        }
+        .inbox-swipe-delete i { font-size: 1.1rem; }
+        .inbox-row.swiped .inbox-item { transform: translateX(-80px); }
+        .inbox-avatar { width: 50px !important; height: 50px !important; }
+
+        .inbox-name { font-size: 0.92rem !important; font-weight: 800 !important; }
+        .inbox-preview { font-size: 0.82rem !important; }
+        .inbox-time { font-size: 0.72rem !important; }
+
+        /* alt nav */
+        .mobile-bottom-nav {
+            display: flex !important;
+            height: 56px;
+            padding: 0 4px;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -1px 10px rgba(0,0,0,0.06);
+        }
+        .mobile-bottom-nav .nav-item {
+            flex:1;display:flex;align-items:center;justify-content:center;
+            font-size:1.3rem;padding:8px 0;
+            color:var(--text-color);text-decoration:none;position:relative;
+        }
+        .mobile-bottom-nav .nav-item.active { color:var(--ytu-lacivert); }
+        .mob-nav-badge { position:absolute;top:4px;right:calc(50% - 18px);background:#ff4757;color:#fff;font-size:0.55rem;padding:1px 5px;border-radius:10px;font-weight:700;min-width:16px;text-align:center; }
+    }
+    </style>
 </head>
 <body>
 
     {% include 'navbar_partial.html' ignore missing %}
 
-    <div class="inbox-layout">
-        
-        <aside class="left-sidebar sticky-sidebar">
-            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px 20px; border: 1px solid var(--border-color);">
-                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
-                    <img src="/static/{{ current_user.profile_pic }}" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ytu-lacivert); object-fit: cover; margin-bottom: 12px;">
-                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{ current_user.username }}</h3>
-                    <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
-                </div>
+    <!-- MOBİL HEADER -->
+    <div class="mob-header" id="mobHeader">
+        <img src="/static/{{ current_user.profile_pic }}" class="mob-header-avatar" onclick="openMobileDrawer()" alt="Profil">
+        <span class="x-chat-title">Sohbet</span>
+        <div class="mob-header-right">
+            <button class="mob-header-icon" onclick="openDmSettings()" title="Ayarlar"><i class="fa-solid fa-gear"></i></button>
+            <button class="mob-header-icon" onclick="openNewMsgModal()" title="Yeni Mesaj"><i class="fa-regular fa-pen-to-square"></i></button>
+        </div>
+    </div>
 
-                <nav style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="{{ url_for('main.index') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
-                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
-                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
-                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
-                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
-                        <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
-                        {% if unread_count > 0 %}
-                        <span class="notification-badge">{{ unread_count }}</span>
-                        {% endif %}
+    <!-- MOBİL OVERLAY -->
+    <div class="mob-left-overlay" id="mobOverlay" onclick="closeMobileDrawer()"></div>
+
+    <!-- MOBİL DRAWER -->
+    <div class="mob-left-drawer" id="mobDrawer">
+        <div class="mob-drawer-profile">
+            <img src="/static/{{ current_user.profile_pic }}" class="mob-drawer-avatar" alt="{{ current_user.username }}">
+            <div class="mob-drawer-name">{{ current_user.username }}</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);">@{{ current_user.handle }}</div>
+            <span class="mob-drawer-score">⭐ {{ current_user.score }} Puan</span>
+        </div>
+        <nav class="mob-drawer-nav">
+            <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-user"></i> Profil
+            </a>
+            <a href="{{ url_for('main.messages_inbox') }}" class="mob-drawer-link active" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-envelope"></i> Mesajlar
+            </a>
+            <a href="{{ url_for('main.notifications') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-bell"></i>
+                <span>Bildirimler{% if unread_count > 0 %} <span style="background:#ff4757;color:#fff;border-radius:10px;font-size:0.7rem;padding:2px 7px;margin-left:6px;">{{ unread_count }}</span>{% endif %}</span>
+            </a>
+            <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-book-open"></i> Not Havuzu
+            </a>
+            <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-bookmark"></i> Kaydedilenler
+            </a>
+            <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-trophy"></i> Kulüpler Ligi
+            </a>
+            <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-bullhorn"></i> İlanlar
+            </a>
+            <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-gear"></i> Profili Düzenle
+            </a>
+        </nav>
+        <div class="mob-drawer-sep"></div>
+        <div class="mob-drawer-section-title">
+            🔥 Gündem
+            <a href="{{ url_for('main.explore') }}">Tümünü Keşfet</a>
+        </div>
+        {% for tag, count in trending_tags[:5] %}
+        <a href="{{ url_for('main.explore', q='#' + tag) }}" class="mob-drawer-trend" onclick="closeMobileDrawer()">
+            <div>
+                <div class="mob-drawer-trend-tag">#{{ tag }}</div>
+                <div class="mob-drawer-trend-count">{{ count }} gönderi</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);"></i>
+        </a>
+        {% endfor %}
+        <div class="mob-drawer-sep"></div>
+        <a href="{{ url_for('auth.logout') }}" class="mob-drawer-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+        </a>
+    </div>
+
+    <div class="inbox-layout">
+
+        <!-- SOL SİDEBAR -->
+        <aside class="left-sidebar sticky-sidebar">
+            <div style="background:var(--card-bg);border-radius:20px;padding:25px 20px;border:1px solid var(--border-color);">
+                <div style="text-align:center;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border-color);">
+                    <img src="/static/{{ current_user.profile_pic }}" style="width:70px;height:70px;border-radius:50%;border:3px solid var(--ytu-lacivert);object-fit:cover;margin-bottom:12px;">
+                    <h3 style="font-size:1.1rem;font-weight:800;color:var(--text-color);margin:0 0 8px;">{{ current_user.username }}</h3>
+                    <span style="background:linear-gradient(135deg,var(--ytu-lacivert),rgba(var(--ytu-lacivert-rgb),.7));color:#fff;display:inline-block;padding:6px 14px;border-radius:20px;font-weight:700;font-size:.85rem;box-shadow:0 2px 8px rgba(var(--ytu-lacivert-rgb),.3);">⭐ {{ current_user.score }} Puan</span>
+                </div>
+                <nav style="display:flex;flex-direction:column;gap:8px;">
+                    <a href="{{ url_for('main.index') }}" class="sidebar-link" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;font-size:.95rem;transition:all .2s;"><i class="fa-solid fa-house" style="width:20px;text-align:center;"></i> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;font-size:.95rem;transition:all .2s;"><i class="fa-regular fa-compass" style="width:20px;text-align:center;"></i> Keşfet</a>
+                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;font-size:.95rem;transition:all .2s;"><i class="fa-solid fa-clapperboard" style="width:20px;text-align:center;"></i> Reels</a>
+                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;font-size:.95rem;transition:all .2s;"><i class="fa-regular fa-bookmark" style="width:20px;text-align:center;"></i> Kaydedilenler</a>
+                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;font-size:.95rem;transition:all .2s;"><i class="fa-solid fa-book-open" style="width:20px;text-align:center;"></i> Not Havuzu</a>
+                    <a href="{{ url_for('main.clubs_full_list') }}" class="sidebar-link" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;font-size:.95rem;transition:all .2s;"><i class="fa-solid fa-trophy" style="width:20px;text-align:center;"></i> Kulüpler Ligi</a>
+                    <a href="{{ url_for('main.adverts') }}" class="sidebar-link" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;font-size:.95rem;transition:all .2s;"><i class="fa-solid fa-bullhorn" style="width:20px;text-align:center;"></i> İlanlar</a>
+                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;font-size:.95rem;transition:all .2s;">
+                        <i class="fa-regular fa-bell" style="width:20px;text-align:center;"></i> Bildirimler
+                        {% if unread_count > 0 %}<span class="notification-badge">{{ unread_count }}</span>{% endif %}
                     </a>
-                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert);"><i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
+                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(var(--ytu-lacivert-rgb),.12);color:var(--ytu-lacivert);text-decoration:none;font-weight:600;font-size:.95rem;transition:all .2s;">
+                        <i class="fa-regular fa-envelope" style="width:20px;text-align:center;"></i> Mesajlar
+                        {% if unread_msg_count > 0 %}<span class="msg-badge">{{ unread_msg_count }}</span>{% endif %}
                     </a>
+                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;color:var(--text-muted);text-decoration:none;font-weight:600;font-size:.95rem;transition:all .2s;"><i class="fa-solid fa-bus" style="width:20px;text-align:center;"></i> Ulaşım</a>
                 </nav>
             </div>
         </aside>
@@ -53,14 +289,18 @@
                 <div class="inbox-header">
                     <div class="inbox-title-row">
                         <h2>Mesajlar</h2>
-                        <a href="{{ url_for('main.explore') }}" class="btn-new-msg">
+                        <button class="btn-new-msg" onclick="openNewMsgModal()">
                             <i class="fa-solid fa-plus"></i> Yeni Mesaj
-                        </a>
+                        </button>
                     </div>
                     
                     <div class="inbox-search-wrapper">
                         <i class="fa-solid fa-magnifying-glass search-icon-pos"></i>
-                        <input type="text" id="chatSearch" class="inbox-search-input" placeholder="Sohbetlerde veya kişilerde ara..." onkeyup="searchChats()">
+                        <input type="text" id="chatSearch" class="inbox-search-input" placeholder="Ara" onkeyup="searchChats()">
+                    </div>
+                    <div class="inbox-tabs">
+                        <button class="inbox-tab active" data-filter="all">Tümü</button>
+                        <button class="inbox-tab" data-filter="requests">İstekler</button>
                     </div>
                 </div>
 
@@ -106,8 +346,9 @@
                                 </div>
                             </div>
                         </a>
-                        <a href="{{ url_for('main.delete_conversation', partner_id=conv.user.id) }}" class="delete-conv-btn" onclick="return confirm('Bu kişiyle olan tüm mesajlaşmalar silinecek. Emin misin?');" title="Sohbeti Sil">
-                            <i class="fa-solid fa-trash-can"></i>
+                        <a href="{{ url_for('main.delete_conversation', partner_id=conv.user.id) }}" class="inbox-swipe-delete" onclick="return confirm('Bu kişiyle olan tüm mesajlaşmalar silinecek. Emin misin?');">
+                            <i class="fa-solid fa-trash"></i>
+                            <span>Sil</span>
                         </a>
                         </div>
                         {% endfor %}
@@ -128,8 +369,227 @@
 
     </div>
 
+    <!-- YENİ MESAJ MODAL -->
+    <div id="newMsgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:var(--card-bg);border:1px solid var(--border-color);border-radius:20px;width:90%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;animation:nmSlide .2s ease;">
+            <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-color);">
+                <h3 style="margin:0;color:var(--text-color);font-size:1.15rem;font-weight:900;">Yeni mesaj</h3>
+                <button onclick="closeNewMsgModal()" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;line-height:1;padding:0 4px;transition:.15s;">&times;</button>
+            </div>
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border-color);">
+                <div style="display:flex;align-items:center;gap:10px;background:var(--input-bg);border:1.5px solid var(--border-color);border-radius:24px;padding:10px 16px;">
+                    <i class="fas fa-search" style="color:var(--text-muted);font-size:.9rem;"></i>
+                    <input id="nmSearch" type="text" placeholder="Ada veya kullanıcı adına göre ara" oninput="filterNmList()"
+                        style="border:none;background:transparent;outline:none;color:var(--text-color);font-size:.9rem;width:100%;font-family:inherit;">
+                </div>
+            </div>
+            <div id="nmList" style="max-height:340px;overflow-y:auto;">
+                {% if following_users %}
+                    {% for user in following_users %}
+                    <a href="{{ url_for('main.chat', handle=user.handle) }}" class="nm-user-row"
+                        style="display:flex;align-items:center;gap:14px;padding:13px 20px;text-decoration:none;transition:background .15s;border-bottom:1px solid var(--border-color);">
+                        <img src="/static/{{ user.profile_pic }}" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--border-color);flex-shrink:0;">
+                        <div>
+                            <div style="font-weight:700;color:var(--text-color);font-size:.95rem;">{{ user.username }}</div>
+                            <div style="font-size:.8rem;color:var(--text-muted);">@{{ user.handle }}</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center;padding:50px 20px;color:var(--text-muted);">
+                        <i class="fas fa-user-friends" style="font-size:2.5rem;opacity:.25;display:block;margin-bottom:12px;"></i>
+                        <p style="margin:0;font-size:.9rem;">Henüz kimseyi takip etmiyorsun.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes nmSlide { from { transform:translateY(30px);opacity:0; } to { transform:translateY(0);opacity:1; } }
+        #nmList .nm-user-row:hover { background:var(--hover-bg); }
+    </style>
+
+    <!-- MOBİL ALT NAV -->
+    <div class="mobile-bottom-nav">
+        <a href="{{ url_for('main.index') }}" class="nav-item"><i class="fa-solid fa-house"></i></a>
+        <a href="{{ url_for('main.explore') }}" class="nav-item"><i class="fa-regular fa-compass"></i></a>
+        <a href="{{ url_for('main.reels') }}" class="nav-item"><i class="fa-solid fa-clapperboard"></i></a>
+        <a href="{{ url_for('main.notifications') }}" class="nav-item">
+            <i class="fa-regular fa-bell"></i>
+            {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('main.messages_inbox') }}" class="nav-item active">
+            <i class="fa-solid fa-envelope"></i>
+            {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
+        </a>
+    </div>
+
+    <!-- DM AYARLAR SAYFASI -->
+    <div class="x-settings-page" id="dmSettingsPage">
+        <div class="x-set-header">
+            <button class="x-set-back" onclick="closeDmSettings()"><i class="fas fa-arrow-left"></i></button>
+            <h2>Ayarlar</h2>
+        </div>
+
+        <div class="x-set-section">
+            <h3 class="x-set-section-title">Şu kişilerden mesaj isteklerine izin ver:</h3>
+            <p class="x-set-desc">Takip ettiğin kişiler daima sana mesaj gönderebilecek.</p>
+            <div class="x-set-option" onclick="setRadio(this,'msg-perm')">
+                <span class="x-set-option-label">Hiç kimse</span>
+                <div class="x-set-radio active" data-group="msg-perm"></div>
+            </div>
+            <div class="x-set-option" onclick="setRadio(this,'msg-perm')">
+                <span class="x-set-option-label">Herkes</span>
+                <div class="x-set-radio" data-group="msg-perm"></div>
+            </div>
+        </div>
+
+        <div class="x-set-sep"></div>
+
+        <div class="x-set-section-sub">
+            <div class="x-set-toggle-row">
+                <div class="x-set-toggle-info">
+                    <p class="x-set-toggle-label">Düşük kaliteli mesajları filtrele</p>
+                    <p class="x-set-toggle-desc">Potansiyel spam veya düşük kaliteli olarak tespit edilen mesaj isteklerini gizle.</p>
+                </div>
+                <div class="x-toggle active" onclick="this.classList.toggle('active')"></div>
+            </div>
+        </div>
+
+        <div class="x-set-sep"></div>
+
+        <div class="x-set-section-sub">
+            <h3 class="x-set-section-sub-title">Tema</h3>
+            <div class="x-set-toggle-row">
+                <div class="x-set-toggle-info">
+                    <p class="x-set-toggle-label">Karanlık mod</p>
+                    <p class="x-set-toggle-desc">Karanlık temayı aç veya kapat.</p>
+                </div>
+                <div class="x-toggle" id="dmDarkToggle" onclick="toggleDarkFromSettings()"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="/static/script.js"></script>
     <script>
+        function openDmSettings(){
+            document.getElementById('dmSettingsPage').classList.add('open');
+            document.body.style.overflow='hidden';
+            var dt=document.getElementById('dmDarkToggle');
+            if(dt){if(document.documentElement.classList.contains('dark-mode'))dt.classList.add('active');else dt.classList.remove('active');}
+        }
+        function closeDmSettings(){
+            document.getElementById('dmSettingsPage').classList.remove('open');
+            document.body.style.overflow='';
+        }
+        function setRadio(el,group){
+            document.querySelectorAll('.x-set-radio[data-group="'+group+'"]').forEach(function(r){r.classList.remove('active');});
+            el.querySelector('.x-set-radio').classList.add('active');
+        }
+        function toggleDarkFromSettings(){
+            if(typeof toggleDarkMode==='function')toggleDarkMode();
+            var dt=document.getElementById('dmDarkToggle');
+            if(dt){if(document.documentElement.classList.contains('dark-mode'))dt.classList.add('active');else dt.classList.remove('active');}
+        }
+        function openMobileDrawer() {
+            document.getElementById('mobDrawer').classList.add('open');
+            document.getElementById('mobOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileDrawer() {
+            document.getElementById('mobDrawer').classList.remove('open');
+            document.getElementById('mobOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        (function () {
+            var d = document.getElementById('mobDrawer'), sx = 0;
+            d.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+            d.addEventListener('touchend', function (e) { if (sx - e.changedTouches[0].clientX > 70) closeMobileDrawer(); }, { passive: true });
+        })();
+    </script>
+    <script>
+        /* Swipe-to-delete */
+        (function(){
+            document.querySelectorAll('.inbox-row').forEach(function(row){
+                var item=row.querySelector('.inbox-item');
+                if(!item)return;
+                var sx=0,cx=0,swiping=false;
+                item.addEventListener('touchstart',function(e){
+                    sx=e.touches[0].clientX;cx=sx;swiping=true;
+                    document.querySelectorAll('.inbox-row.swiped').forEach(function(r){
+                        if(r!==row)r.classList.remove('swiped');
+                    });
+                },{passive:true});
+                item.addEventListener('touchmove',function(e){
+                    if(!swiping)return;
+                    cx=e.touches[0].clientX;
+                    var diff=sx-cx;
+                    if(diff>0&&diff<=80){
+                        item.style.transition='none';
+                        item.style.transform='translateX(-'+diff+'px)';
+                    }
+                },{passive:true});
+                item.addEventListener('touchend',function(){
+                    swiping=false;
+                    item.style.transition='';
+                    item.style.transform='';
+                    var diff=sx-cx;
+                    if(diff>40){row.classList.add('swiped');}
+                    else{row.classList.remove('swiped');}
+                },{passive:true});
+            });
+            document.addEventListener('touchstart',function(e){
+                if(!e.target.closest('.inbox-row')){
+                    document.querySelectorAll('.inbox-row.swiped').forEach(function(r){r.classList.remove('swiped');});
+                }
+            },{passive:true});
+        })();
+    </script>
+    <script>
+        document.querySelectorAll('.inbox-tab').forEach(function(tab){
+            tab.addEventListener('click',function(){
+                document.querySelectorAll('.inbox-tab').forEach(function(t){t.classList.remove('active');});
+                tab.classList.add('active');
+                var filter=tab.dataset.filter;
+                var rows=document.querySelectorAll('.inbox-row');
+                var re=document.getElementById('reqEmpty');
+                if(filter==='requests'){
+                    rows.forEach(function(r){r.style.display='none';});
+                    if(!re){
+                        var d=document.createElement('div');d.id='reqEmpty';d.className='inbox-empty';d.style.padding='50px 20px';d.style.textAlign='center';d.style.color='var(--text-muted)';
+                        d.innerHTML='<i class="fa-regular fa-envelope-open" style="font-size:2.5rem;opacity:.3;display:block;margin-bottom:12px;"></i><p style="margin:0;font-size:.9rem;">Henüz mesaj isteği yok.</p>';
+                        document.getElementById('inboxList').appendChild(d);
+                    }else{re.style.display='';}
+                }else{
+                    rows.forEach(function(r){r.style.display='';});
+                    if(re)re.style.display='none';
+                }
+            });
+        });
+    </script>
+    <script>
+        function openNewMsgModal() {
+            const m = document.getElementById('newMsgModal');
+            m.style.display = 'flex';
+            document.getElementById('nmSearch').focus();
+        }
+        function closeNewMsgModal() {
+            document.getElementById('newMsgModal').style.display = 'none';
+            document.getElementById('nmSearch').value = '';
+            filterNmList();
+        }
+        function filterNmList() {
+            const q = document.getElementById('nmSearch').value.toLowerCase();
+            document.querySelectorAll('#nmList .nm-user-row').forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(q) ? 'flex' : 'none';
+            });
+        }
+        document.getElementById('newMsgModal').addEventListener('click', function(e) {
+            if (e.target === this) closeNewMsgModal();
+        });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNewMsgModal(); });
+
         // Basit Arama Fonksiyonu
         function searchChats() {
             var input, filter, list, items, name, i, txtValue;

@@ -11,6 +11,446 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+    /* Drawer + overlay masaüstünde tamamen gizli */
+    .mob-header, .mob-left-overlay, .mob-left-drawer { display: none; }
+    @media (max-width: 768px) {
+        .mob-header       { display: flex; }
+        .mob-left-overlay { display: block; }
+        .mob-left-drawer  { display: flex; }
+    }
+
+    /* =====================================================
+       KULÜP DUYURUSU KARTI (tüm ekranlar)
+    ===================================================== */
+    .club-announcement-card {
+        border-radius: 16px !important;
+        border: 1.5px solid #3949ab44 !important;
+        border-left: 1.5px solid #3949ab44 !important;
+        border-right: 1.5px solid #3949ab44 !important;
+        overflow: hidden !important;
+        margin: 0 0 16px 0 !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 16px rgba(57,73,171,0.10) !important;
+    }
+    .club-ann-banner {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        padding: 9px 14px !important;
+        background: #f0f2ff !important;
+        border-bottom: 1px solid #3949ab22 !important;
+    }
+    html.dark-mode .club-ann-banner {
+        background: rgba(57,73,171,0.13) !important;
+        border-bottom-color: rgba(57,73,171,0.2) !important;
+    }
+    .club-ann-logo {
+        width: 26px !important;
+        height: 26px !important;
+        border-radius: 6px !important;
+        object-fit: contain !important;
+        background: #fff !important;
+        padding: 2px !important;
+        border: 1px solid #3949ab33 !important;
+        flex-shrink: 0 !important;
+    }
+    .club-ann-name {
+        font-size: 0.82rem !important;
+        font-weight: 800 !important;
+        color: #3949ab !important;
+        flex: 1 !important;
+        line-height: 1.3 !important;
+    }
+    html.dark-mode .club-ann-name { color: #7986cb !important; }
+    .club-ann-pill {
+        display: inline-block !important;
+        background: #3949ab1a !important;
+        color: #3949ab !important;
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
+        padding: 2px 8px !important;
+        border-radius: 20px !important;
+        margin-left: 6px !important;
+        vertical-align: middle !important;
+    }
+    html.dark-mode .club-ann-pill { background: rgba(57,73,171,0.25) !important; color: #7986cb !important; }
+    .club-ann-goto {
+        font-size: 0.73rem !important;
+        font-weight: 700 !important;
+        color: #3949ab !important;
+        text-decoration: none !important;
+        white-space: nowrap !important;
+        opacity: 0.8 !important;
+    }
+    .club-ann-goto:hover { opacity: 1 !important; }
+    html.dark-mode .club-ann-goto { color: #7986cb !important; }
+    .club-announcement-card .post-header {
+        padding: 12px 16px 0 !important;
+        margin-bottom: 6px !important;
+    }
+    .club-announcement-card .post-text {
+        padding: 4px 16px 8px !important;
+    }
+    .club-announcement-card .post-image-container {
+        margin: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-height: 400px;
+        overflow: hidden;
+    }
+    .club-announcement-card .post-image {
+        border-radius: 0 !important;
+        border: none !important;
+        width: 100% !important;
+        max-height: 400px !important;
+        object-fit: contain !important;
+        background: #000;
+    }
+    .club-announcement-card video.post-image {
+        object-fit: contain !important;
+        max-height: 400px !important;
+        background: #000;
+    }
+    .club-announcement-card .post-actions {
+        padding: 4px 16px 10px !important;
+        margin-top: 6px !important;
+    }
+    @media (max-width: 768px) {
+
+        /* Ana navbar gizle, mob-header göster */
+        .navbar { display: none !important; }
+
+        /* --- MOBİL HEADER --- */
+        .mob-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            height: 54px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            padding: 0 14px;
+            justify-content: space-between;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+        }
+        .mob-header-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            object-fit: cover; border: 2px solid var(--ytu-lacivert);
+            cursor: pointer;
+        }
+        .mob-header-logo {
+            font-size: 1.1rem; font-weight: 900;
+            color: var(--ytu-lacivert); letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+        .mob-header-logo span { color: var(--ytu-sari); }
+        .mob-header-right {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .mob-header-icon {
+            background: none; border: none;
+            color: var(--text-color); font-size: 1.15rem;
+            cursor: pointer; padding: 6px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* --- OVERLAY (sol drawer arkası) --- */
+        .mob-left-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            display: none;
+        }
+        .mob-left-overlay.open { display: block; }
+
+        /* --- SOL DRAWER (Twitter/X tarzı) --- */
+        .mob-left-drawer {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 82%; max-width: 320px;
+            background: var(--card-bg);
+            z-index: 10001;
+            flex-direction: column;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        .mob-left-drawer.open { transform: translateX(0); }
+
+        /* Drawer: Profil Üst Bölüm */
+        .mob-drawer-profile {
+            padding: 28px 22px 16px;
+        }
+        .mob-drawer-avatar {
+            width: 62px; height: 62px; border-radius: 50%;
+            object-fit: cover; border: 3px solid var(--ytu-lacivert);
+            margin-bottom: 12px; display: block;
+        }
+        .mob-drawer-name {
+            font-size: 1.05rem; font-weight: 800;
+            color: var(--text-color); margin: 0 0 2px;
+        }
+        .mob-drawer-score {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb),.7));
+            color: #fff; padding: 3px 12px; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 700; margin-top: 6px;
+        }
+
+        /* Drawer: Nav Linkleri (Twitter tarzı geniş) */
+        .mob-drawer-nav {
+            padding: 8px 0;
+            border-top: 1px solid var(--border-color);
+        }
+        .mob-drawer-link {
+            display: flex; align-items: center; gap: 18px;
+            padding: 14px 22px;
+            text-decoration: none; color: var(--text-color);
+            font-size: 1.05rem; font-weight: 700;
+            transition: background 0.15s;
+        }
+        .mob-drawer-link:active { background: var(--bg-light); }
+        .mob-drawer-link i {
+            width: 26px; text-align: center;
+            font-size: 1.2rem; color: var(--text-color);
+        }
+        .mob-drawer-link.active i,
+        .mob-drawer-link.active { color: var(--ytu-lacivert); }
+        .mob-drawer-sep {
+            height: 1px; background: var(--border-color);
+            margin: 8px 0;
+        }
+        .mob-drawer-section-title {
+            padding: 12px 22px 4px;
+            font-size: 0.78rem; font-weight: 800;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px;
+        }
+        .mob-drawer-trend {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 22px;
+            text-decoration: none; color: var(--text-color);
+            transition: background 0.15s;
+        }
+        .mob-drawer-trend:active { background: var(--bg-light); }
+        .mob-drawer-trend-tag { font-weight: 700; font-size: 0.9rem; color: var(--ytu-lacivert); }
+        .mob-drawer-trend-count { font-size: 0.72rem; color: var(--text-muted); }
+        .mob-drawer-club {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 22px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .mob-drawer-club-rank {
+            width: 24px; height: 24px; border-radius: 50%;
+            background: var(--bg-light); color: var(--text-muted);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 800; flex-shrink: 0;
+        }
+        .mob-drawer-club-rank.gold   { background: linear-gradient(135deg,#FFD700,#FDB931); color:#fff; }
+        .mob-drawer-club-rank.silver { background: linear-gradient(135deg,#E0E0E0,#BDBDBD); color:#fff; }
+        .mob-drawer-club-rank.bronze { background: linear-gradient(135deg,#CD7F32,#A0522D); color:#fff; }
+        .mob-drawer-club-logo {
+            width: 36px; height: 36px; border-radius: 8px;
+            object-fit: contain; background: white;
+            border: 1px solid var(--border-color); padding: 2px; flex-shrink: 0;
+        }
+        .mob-drawer-club-name { font-weight: 700; font-size: 0.85rem; color: var(--text-color); }
+        .mob-drawer-club-votes { font-size: 0.7rem; color: var(--text-muted); }
+        .mob-drawer-club-see-btn { display:inline-block;margin-top:4px;font-size:.72rem;font-weight:700;color:var(--ytu-lacivert);text-decoration:none;background:rgba(var(--ytu-lacivert-rgb),.1);padding:2px 9px;border-radius:8px;transition:background .15s; }
+        .mob-drawer-club-see-btn:active { background:rgba(var(--ytu-lacivert-rgb),.2); }
+        .mob-drawer-see-all {
+            display: block; text-align: center;
+            padding: 12px; font-weight: 700; font-size: 0.85rem;
+            color: var(--ytu-lacivert); text-decoration: none;
+        }
+        .mob-drawer-logout {
+            display: flex; align-items: center; gap: 18px;
+            padding: 14px 22px;
+            text-decoration: none; color: #e74c3c;
+            font-size: 1.05rem; font-weight: 700;
+        }
+        .mob-drawer-logout i { width: 26px; text-align: center; font-size: 1.2rem; }
+
+        /* --- LAYOUT: tek kolon, kenar boşluksuz --- */
+        .main-layout {
+            grid-template-columns: 1fr !important;
+            margin: 58px 0 70px !important;
+            padding: 0 !important;
+            gap: 0 !important;
+            max-width: 100% !important;
+        }
+        .left-sidebar  { display: none !important; }
+        .right-sidebar { display: none !important; }
+
+        /* --- STORIES: yatay scroll, tam genişlik --- */
+        .stories-container {
+            display: flex;
+            flex-direction: row;
+            padding: 10px 12px;
+            gap: 12px;
+            overflow-x: auto;
+            overflow-y: visible;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            margin: 0;
+            border-radius: 0;
+            flex-wrap: nowrap;
+        }
+        .stories-container::-webkit-scrollbar { display: none; }
+        .story-item { flex-shrink: 0; }
+        .story-ring  { width: 58px; height: 58px; }
+        .story-avatar { width: 52px; height: 52px; }
+        .story-username { font-size: 0.68rem; max-width: 64px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+
+        /* --- FEED SEKME BUTONLARI --- */
+        .feed-tabs {
+            background: var(--card-bg);
+            border-radius: 0;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            border-bottom: 1px solid var(--border-color);
+            margin: 0 0 6px;
+            padding: 0;
+            gap: 0;
+        }
+        .feed-tab {
+            flex: 1;
+            text-align: center;
+            padding: 11px 0;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border-radius: 0;
+            border-bottom: 2.5px solid transparent;
+        }
+        .feed-tab.active {
+            border-bottom-color: var(--ytu-lacivert);
+            color: var(--ytu-lacivert);
+            background: transparent;
+        }
+
+        /* --- GÖNDERİ OLUŞTURMA ALANI --- */
+        .club-card.create-post-card {
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            margin: 0 0 6px;
+            padding: 12px 14px;
+            box-shadow: none;
+        }
+        .create-post-input {
+            font-size: 0.95rem;
+            padding: 8px 0;
+        }
+        .create-post-footer {
+            margin-top: 10px;
+            padding-top: 10px;
+        }
+        .file-upload-label { font-size: 1.15rem; }
+
+        /* --- POST KART --- */
+        .post-card {
+            border-radius: 0;
+            border-left:  none;
+            border-right: none;
+            margin-bottom: 6px;
+            padding: 12px 14px;
+            box-shadow: none;
+        }
+
+        /* Post header */
+        .post-header        { gap: 10px; margin-bottom: 8px; }
+        .post-avatar        { width: 38px; height: 38px; }
+        .post-author-name   { font-size: 0.9rem; }
+        .post-author-dept   { font-size: 0.73rem; }
+        .post-time          { font-size: 0.73rem; }
+
+        /* Post body */
+        .post-text { font-size: 0.93rem; line-height: 1.5; margin-bottom: 10px; }
+
+        /* Post medya */
+        .post-image-container { border-radius: 10px; overflow: hidden; margin: 0 -14px; border-left: none; border-right: none; }
+        .post-image { width: 100%; border-radius: 0; max-height: 340px; object-fit: contain; background: #000; }
+
+        /* Post aksiyonlar */
+        .post-actions {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-color);
+            justify-content: space-between;
+        }
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            padding: 6px 4px;
+            flex: 1;
+            justify-content: center;
+        }
+        /* Repost ve Kaydet butonlarında yalnızca ikon göster */
+        .action-item i { font-size: 1rem; }
+
+        /* Yorum alanı */
+        .comment-section { padding: 8px 0; }
+        .tw-comment       { padding: 8px 0; gap: 8px; }
+        .tw-comment-avatar { width: 30px; height: 30px; }
+        .tw-comment-input-row { gap: 8px; margin-top: 6px; }
+        .comment-input.tw-comment-input { font-size: 0.88rem; padding: 8px 12px; }
+        .comment-submit { padding: 8px 14px; font-size: 0.82rem; }
+
+        /* Repost header */
+        .repost-header { font-size: 0.78rem; padding: 6px 14px; margin: -12px -14px 8px; }
+
+        /* Anket */
+        .poll-container { margin: 8px 0; }
+        .poll-option    { padding: 10px 14px; font-size: 0.88rem; }
+
+        /* Feed container arka plan */
+        #feedContainer { background: var(--bg-light); padding-bottom: 8px; }
+
+        /* Boş durum */
+        .empty-state { padding: 40px 20px; font-size: 0.95rem; }
+
+        /* Yukarı çık butonu */
+        #scrollTopBtn { bottom: 76px; right: 16px; width: 40px; height: 40px; font-size: 0.9rem; }
+
+        /* Mobil alt nav */
+        .mobile-bottom-nav {
+            height: 56px;
+            padding: 0 4px;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -1px 10px rgba(0,0,0,0.06);
+        }
+        .mobile-bottom-nav .nav-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            padding: 8px 0;
+            color: var(--text-color);
+            text-decoration: none;
+            position: relative;
+        }
+        .mobile-bottom-nav .nav-item.active { color: var(--ytu-lacivert); }
+        .mob-nav-badge {
+            position: absolute; top: 4px; right: calc(50% - 18px);
+            background: #ff4757; color: #fff;
+            font-size: 0.55rem; padding: 1px 5px;
+            border-radius: 10px; font-weight: 700;
+            min-width: 16px; text-align: center;
+        }
+    }
+    </style>
 </head>
 
 <body>
@@ -39,6 +479,15 @@
     {% endwith %}
 
     {% include 'navbar_partial.html' ignore missing %}
+
+    <!-- MOBİL HEADER (sadece mobilde görünür) -->
+    <div class="mob-header" id="mobHeader">
+        <img src="/static/{{ current_user.profile_pic }}" class="mob-header-avatar" onclick="openMobileDrawer()" alt="Profil">
+        <a href="/" class="mob-header-logo">YTU<span>SOCIAL</span></a>
+        <div class="mob-header-right">
+            <button class="mob-header-icon" onclick="toggleDarkMode()" title="Tema">🌙</button>
+        </div>
+    </div>
 
     <div class="main-layout">
 
@@ -93,6 +542,7 @@
                         <span class="msg-badge">{{ unread_msg_count }}</span>
                         {% endif %}
                     </a>
+                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bus" style="width: 20px; text-align: center;"></i> Ulaşım</a>
                 </nav>
             </div>
         </aside>
@@ -115,13 +565,13 @@
                 {% for author, data in stories.items() %}
                 <div class="story-item" data-stories='{{ data.stories | tojson | safe }}'
                     data-username="{{ author.username }}" data-userpic="/static/{{ author.profile_pic }}"
-                    data-isowner="{{ 'true' if author == current_user else 'false' }}"
-                    onclick="openStoryGalleryWrapper(this)">
+                    data-isowner="{{ 'true' if author == current_user else 'false' }}">
                     <div
-                        class="story-ring {{ 'seen-story-ring' if data.all_seen and author != current_user else 'has-story-ring' }}">
+                        class="story-ring {{ 'seen-story-ring' if data.all_seen and author != current_user else 'has-story-ring' }}"
+                        onclick="openStoryGalleryWrapper(this.closest('.story-item'))">
                         <img src="/static/{{ author.profile_pic }}" class="story-avatar">
                     </div>
-                    <span class="story-username">{{ author.username }}</span>
+                    <a href="{{ url_for('main.user_profile', handle=author.handle) }}" class="story-username" onclick="event.stopPropagation()">{{ author.username }}</a>
                 </div>
                 {% endfor %}
             </div>
@@ -137,7 +587,7 @@
 
             <div class="club-card create-post-card">
                 <form id="ajaxPostForm" enctype="multipart/form-data">
-                    <textarea name="content" id="postTextarea" class="create-post-input" rows="2"
+                    <textarea name="content" id="postTextarea" class="create-post-input" rows="2" data-mention="true"
                         placeholder="Neler oluyor Yıldız?"></textarea>
 
                     <div id="image-preview" class="image-preview-container" style="display: none;">
@@ -178,7 +628,15 @@
 
             <div id="feedContainer">
                 {% for post in posts %}
-                <div class="post-card" id="post-card-{{ post.id }}">
+                <div class="post-card{% if post.club_id %} club-announcement-card{% endif %}" id="post-card-{{ post.id }}">
+
+                    {% if post.club_id %}
+                    <div class="club-ann-banner">
+                        <img src="/static/img/{{ post.club.logo_file }}" class="club-ann-logo" onerror="this.style.display='none'">
+                        <span class="club-ann-name">{{ post.club.name }}<span class="club-ann-pill">🏆 Kulüp Duyurusu</span></span>
+                        <a href="{{ url_for('main.club_detail', slug=post.club.slug) }}" class="club-ann-goto">Kulübü Gör →</a>
+                    </div>
+                    {% endif %}
 
                     {% if post.repost_of %}
                     <div class="repost-header">
@@ -189,6 +647,7 @@
 
                     {% set display_post = post.repost_of if post.repost_of else post %}
 
+                    {% if not post.club_id %}
                     <div class="post-header">
                         <div class="post-author-info">
                             <img src="/static/{{ display_post.author.profile_pic }}" class="post-avatar">
@@ -209,6 +668,7 @@
                             </small>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div id="post-content-{{ display_post.id }}" class="post-text">{{ display_post.content | format_tags
                         }}</div>
@@ -262,7 +722,7 @@
                     {% if display_post.author == current_user %}
                     <form action="{{ url_for('main.edit_post', post_id=display_post.id) }}" method="POST"
                         id="post-edit-form-{{ display_post.id }}" class="edit-post-form" style="display: none;">
-                        <textarea name="new_content" class="create-post-input" rows="3"
+                        <textarea name="new_content" class="create-post-input" rows="3" data-mention="true"
                             style="border:1px solid #ddd; border-radius:10px;">{{ display_post.content }}</textarea>
                         <div class="edit-actions">
                             <button type="button" onclick="closePostEditMode('{{ display_post.id }}')"
@@ -306,7 +766,7 @@
                         {% if display_post.author == current_user %}
                         <div class="action-menu-wrapper">
                             <button type="button" class="comment-menu-btn"
-                                onclick="toggleMenu('post-menu-{{ display_post.id }}')">⋮</button>
+                                onclick="toggleMenu('post-menu-{{ display_post.id }}', event)">⋮</button>
                             <div id="post-menu-{{ display_post.id }}" class="comment-dropdown" style="bottom: 30px; top: auto; right: 0;">
                                 <button type="button" class="comment-action"
                                     onclick="openPostEditMode('{{ display_post.id }}')">✏️ Düzenle</button>
@@ -319,40 +779,44 @@
 
                     <div id="comment-box-{{ post.id }}" class="comment-section" style="display: none;">
                         {% for comment in display_post.comments %}
-                        <div class="comment-item" id="comment-container-{{ comment.id }}">
-                            <div class="comment-header">
-                                <div>
-                                    <strong class="comment-author">{{ comment.author.username or 'Anonim' }}:</strong>
-                                    <span class="comment-content" id="comment-text-{{ comment.id }}">{{ comment.text
-                                        }}</span>
+                        <div class="tw-comment" id="comment-container-{{ comment.id }}">
+                            <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="tw-comment-avatar-link">
+                                <img src="/static/{{ comment.author.profile_pic }}" class="tw-comment-avatar">
+                            </a>
+                            <div class="tw-comment-body">
+                                <div class="tw-comment-meta">
+                                    <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="tw-comment-name">{{ comment.author.username }}</a>
+                                    <span class="tw-comment-handle">@{{ comment.author.handle }}</span>
+                                    <span class="tw-comment-dot">·</span>
+                                    <span class="tw-comment-time">{{ comment.date_posted.strftime('%H:%M') }}</span>
+                                    {% if comment.author == current_user %}
+                                    <div class="tw-comment-menu-wrap">
+                                        <button type="button" class="tw-comment-menu-btn" onclick="toggleMenu('menu-{{ comment.id }}', event)">⋮</button>
+                                        <div id="menu-{{ comment.id }}" class="comment-dropdown">
+                                            <button type="button" class="comment-action" onclick="openEditMode('{{ comment.id }}')">✏️ Düzenle</button>
+                                            <button type="button" class="comment-action delete" onclick="deleteCommentJS('{{ comment.id }}', '{{ display_post.id }}', this)">🗑️ Sil</button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                 </div>
-                                <small class="comment-time">{{ comment.date_posted.strftime('%H:%M') }}</small>
+                                <div class="tw-comment-text" id="comment-text-{{ comment.id }}">{{ comment.text | format_tags }}</div>
+                                {% if comment.author == current_user %}
+                                <form action="{{ url_for('main.edit_comment', comment_id=comment.id) }}" method="POST" class="edit-comment-form" id="edit-form-{{ comment.id }}">
+                                    <input type="text" name="new_text" value="{{ comment.text }}" class="comment-input" data-mention="true">
+                                    <div class="edit-actions">
+                                        <button type="button" onclick="closeEditMode('{{ comment.id }}')" class="btn-cancel">İptal</button>
+                                        <button type="submit" class="btn-vote btn-sm">Kaydet</button>
+                                    </div>
+                                </form>
+                                {% endif %}
                             </div>
-
-                            {% if comment.author == current_user %}
-                            <button type="button" class="comment-menu-btn"
-                                onclick="toggleMenu('menu-{{ comment.id }}')">⋮</button>
-                            <div id="menu-{{ comment.id }}" class="comment-dropdown">
-                                <button type="button" class="comment-action"
-                                    onclick="openEditMode('{{ comment.id }}')">✏️ Düzenle</button>
-
-                                <button type="button" class="comment-action delete"
-                                    onclick="deleteCommentJS('{{ comment.id }}', '{{ display_post.id }}', this)">🗑️ Sil</button>
-                            </div>
-                            <form action="{{ url_for('main.edit_comment', comment_id=comment.id) }}" method="POST"
-                                class="edit-comment-form" id="edit-form-{{ comment.id }}">
-                                <input type="text" name="new_text" value="{{ comment.text }}" class="comment-input">
-                                <button type="submit" class="btn-vote btn-sm">Kaydet</button>
-                                <button type="button" onclick="closeEditMode('{{ comment.id }}')"
-                                    class="btn-cancel">İptal</button>
-                            </form>
-                            {% endif %}
                         </div>
                         {% endfor %}
 
-                        <form onsubmit="submitComment(event, '{{ display_post.id }}')" class="comment-form">
+                        <form onsubmit="submitComment(event, '{{ display_post.id }}')" class="js-comment-form-{{ display_post.id }} tw-comment-input-row">
+                            <img src="/static/{{ current_user.profile_pic }}" class="tw-comment-avatar">
                             <input type="text" name="comment_text" id="comment-input-{{ display_post.id }}"
-                                placeholder="Yorumun..." required class="comment-input">
+                                placeholder="Yorum yaz..." required class="comment-input tw-comment-input" data-mention="true">
                             <button type="submit" class="comment-submit">Gönder</button>
                         </form>
                     </div>
@@ -403,21 +867,18 @@
                 <div class="club-list">
                     {% for club in top_clubs %}
                     <div class="club-list-item">
-                        <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
                             <span class="club-rank rank-{{ loop.index }}">{{ loop.index }}</span>
                             <img src="/static/img/{{ club.logo_file }}" class="club-logo-sm">
-
-                            
-                            <div style="display: flex; flex-direction: column;">
-                                <a href="{{ url_for('main.clubs_full_list') }}" style="text-decoration: none; color: var(--text-color); font-weight: 700; font-size: 0.9rem; line-height: 1.2;">
+                            <div style="display: flex; flex-direction: column; min-width: 0; flex: 1;">
+                                <a href="{{ url_for('main.clubs_full_list') }}" style="text-decoration: none; color: var(--text-color); font-weight: 700; font-size: 0.9rem; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
                                     {{ club.name }}
                                 </a>
-                                <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ club.votes }} Oy</span>
+                                <span id="vote-count-sm-{{ club.id }}" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">{{ club.votes }} Oy</span>
                             </div>
                         </div>
-
                         {% if current_user.is_authenticated %}
-                        <a href="javascript:void(0)" onclick="oyVer('{{ club.id }}', this)" class="btn-vote-sm">
+                        <a href="javascript:void(0)" onclick="oyVer('{{ club.id }}', this)" class="btn-vote-sm" data-club-id="{{ club.id }}">
                             OY
                         </a>
                         {% endif %}
@@ -436,7 +897,7 @@
         </aside>
 
 
-    <button type="button" onclick="topFunction()" id="scrollTopBtn" title="Yukarı Çık">⬆️</button>
+    <button type="button" onclick="topFunction()" id="scrollTopBtn" title="Yukarı Çık"><i class="fas fa-arrow-up"></i></button>
 
 
     <div id="storyModal" class="story-view-modal">
@@ -472,6 +933,24 @@
     <script src="/static/script.js" defer></script>
 
     <script>
+        function openMobileDrawer() {
+            document.getElementById('mobDrawer').classList.add('open');
+            document.getElementById('mobOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileDrawer() {
+            document.getElementById('mobDrawer').classList.remove('open');
+            document.getElementById('mobOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        // Swipe left ile kapat
+        (function(){
+            const drawer = document.getElementById('mobDrawer');
+            let startX = 0;
+            drawer.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+            drawer.addEventListener('touchend', e => { if (startX - e.changedTouches[0].clientX > 70) closeMobileDrawer(); }, { passive: true });
+        })();
+
         document.getElementById('postTextarea').addEventListener('keydown', function (e) {
             // Shift+Enter ise yeni satır yap, sadece Enter ise gönder
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -485,7 +964,7 @@
 
     <!-- Share Modal artık navbar_partial.html içinde -->
 
-    <!-- Mobil Alt Menü (Sadece Mobilde Görünür) -->
+    <!-- Mobil Alt Nav -->
     <div class="mobile-bottom-nav">
         <a href="/" class="nav-item {{ 'active' if request.path == '/' else '' }}">
             <i class="fa-solid fa-house"></i>
@@ -497,15 +976,98 @@
             <i class="fa-solid fa-clapperboard"></i>
         </a>
         <a href="{{ url_for('main.notifications') }}" class="nav-item {{ 'active' if 'notifications' in request.path else '' }}">
-            <div style="position: relative;">
-                <i class="fa-regular fa-bell"></i>
-                {% if unread_count > 0 %}
-                <span class="mobile-badge" style="position: absolute; top: -5px; right: -5px; background: #ff4757; color: white; font-size: 0.6rem; padding: 2px 5px; border-radius: 50%;">{{ unread_count }}</span>
-                {% endif %}
-            </div>
+            <i class="fa-regular fa-bell"></i>
+            {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
         </a>
-        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="nav-item {{ 'active' if current_user.handle in request.path else '' }}">
-            <img src="/static/{{ current_user.profile_pic }}" class="nav-avatar-small">
+        <a href="{{ url_for('main.messages_inbox') }}" class="nav-item {{ 'active' if 'inbox' in request.path or 'chat' in request.path else '' }}">
+            <i class="fa-regular fa-envelope"></i>
+            {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
+        </a>
+    </div>
+
+    <!-- Mobil Sol Overlay -->
+    <div class="mob-left-overlay" id="mobOverlay" onclick="closeMobileDrawer()"></div>
+
+    <!-- Mobil Sol Drawer (Twitter/X stili) -->
+    <div class="mob-left-drawer" id="mobDrawer">
+
+        <!-- Profil Üstü -->
+        <div class="mob-drawer-profile">
+            <img src="/static/{{ current_user.profile_pic }}" class="mob-drawer-avatar" alt="{{ current_user.username }}">
+            <div class="mob-drawer-name">{{ current_user.username }}</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);">@{{ current_user.handle }}</div>
+            <span class="mob-drawer-score">⭐ {{ current_user.score }} Puan</span>
+        </div>
+
+        <!-- Ana Navigasyon -->
+        <nav class="mob-drawer-nav">
+            <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-user"></i> Profil
+            </a>
+            <a href="{{ url_for('main.messages_inbox') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-envelope"></i>
+                <span>Mesajlar{% if unread_msg_count > 0 %} <span style="background:#ff4757;color:#fff;border-radius:10px;font-size:0.7rem;padding:2px 7px;margin-left:6px;">{{ unread_msg_count }}</span>{% endif %}</span>
+            </a>
+            <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-book-open"></i> Not Havuzu
+            </a>
+            <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-regular fa-bookmark"></i> Kaydedilenler
+            </a>
+            <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-trophy"></i> Kulüpler Ligi
+            </a>
+            <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-bullhorn"></i> İlanlar
+            </a>
+            <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-bus"></i> Ulaşım
+            </a>
+            <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-gear"></i> Profili Düzenle
+            </a>
+        </nav>
+
+        <div class="mob-drawer-sep"></div>
+
+        <!-- Gündem -->
+        <div class="mob-drawer-section-title">🔥 Gündem</div>
+        {% for tag, count in trending_tags[:5] %}
+        <a href="{{ url_for('main.explore', q='#' + tag) }}" class="mob-drawer-trend" onclick="closeMobileDrawer()">
+            <div>
+                <div class="mob-drawer-trend-tag">#{{ tag }}</div>
+                <div class="mob-drawer-trend-count">{{ count }} gönderi</div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);"></i>
+        </a>
+        {% endfor %}
+
+        <div class="mob-drawer-sep"></div>
+
+        <!-- Kulüpler Ligi -->
+        <div class="mob-drawer-section-title" style="display:flex;justify-content:space-between;align-items:center;">🏆 Kulüpler Ligi <a href="{{ url_for('main.clubs_full_list') }}" style="font-size:0.78rem;color:var(--ytu-lacivert);text-transform:none;letter-spacing:0;font-weight:700;text-decoration:none;">Tümü →</a></div>
+        {% for club in top_clubs[:3] %}
+        <div class="mob-drawer-club">
+            <span class="mob-drawer-club-rank {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">{{ loop.index }}</span>
+            <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+                <img src="/static/img/{{ club.logo_file }}" class="mob-drawer-club-logo" onerror="this.style.display='none'">
+                <div style="min-width:0;">
+                    <div class="mob-drawer-club-name">{{ club.name }}</div>
+                    <div class="mob-drawer-club-votes" id="vote-count-mob-{{ club.id }}">{{ club.votes }} oy</div>
+                    <a href="{{ url_for('main.club_detail', slug=club.slug) }}" onclick="closeMobileDrawer()" class="mob-drawer-club-see-btn">Kulübü Gör →</a>
+                </div>
+            </div>
+            {% if current_user.is_authenticated %}
+            <a href="javascript:void(0)" onclick="oyVer('{{ club.id }}', this);" class="btn-vote-sm" data-club-id="{{ club.id }}">OY</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="mob-drawer-sep"></div>
+
+        <!-- Çıkış -->
+        <a href="{{ url_for('auth.logout') }}" class="mob-drawer-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
         </a>
     </div>
 
