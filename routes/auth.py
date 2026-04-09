@@ -4,10 +4,9 @@ from urllib.parse import urlparse
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
-from flask_mail import Message as MailMessage
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from extensions import db, mail, socketio
+from extensions import db, socketio
 from models import User
 
 auth = Blueprint('auth', __name__)
@@ -51,10 +50,14 @@ def _queue_otp_email(subject, email, intro_text, otp):
     def _worker():
         with app.app_context():
             try:
-                msg = MailMessage(subject, sender=app.config['MAIL_USERNAME'], recipients=[email])
-                msg.body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
-                with mail.connect() as connection:
-                    connection.send(msg)
+                send_mail = getattr(app, 'send_mail', None)
+                if not callable(send_mail):
+                    print(f"Mail gönderim hatası ({email}): app.send_mail bulunamadı")
+                    return
+
+                body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
+                if not send_mail(email, subject, body):
+                    print(f"Mail gönderim hatası ({email}): Brevo API başarısız döndü")
             except Exception as exc:
                 print(f"Mail gönderim hatası ({email}): {exc}")
 

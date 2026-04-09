@@ -53,12 +53,13 @@ class Config:
     MAX_CONTENT_LENGTH = 100 * 1024 * 1024 
     WTF_CSRF_CHECK_DEFAULT = False
 
-    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    # Legacy Flask-Mail settings are kept empty; OTP mail now uses Brevo API.
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', '')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
     MAIL_USE_TLS = _env_bool('MAIL_USE_TLS', True)
     MAIL_TIMEOUT = int(os.environ.get('MAIL_TIMEOUT', '8'))
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'portalytu@gmail.com')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'xpfj soms rwht ttam')
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
 
     UPLOAD_FOLDER_NOTES = 'static/note_files'
     AUDIO_UPLOAD_FOLDER = os.path.join('static', 'audio_files')

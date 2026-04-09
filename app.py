@@ -1,5 +1,6 @@
 from flask import Flask, g, redirect, url_for, flash, request
 import os
+import requests # Brevo API için eklendi
 from flask_login import current_user, logout_user
 from extensions import db, login_manager, mail, socketio, csrf, migrate
 from config import Config
@@ -18,9 +19,47 @@ from sqlalchemy import func
 
 importlib.import_module('events')
 
+# --- BREVO MAIL FONKSİYONU ---
+def send_brevo_email(recipient_email, subject, body):
+    """SMTP portu kapalı olduğu için maili API üzerinden gönderir."""
+    api_key = os.environ.get('BREVO_API_KEY') # .env dosyasına BREVO_API_KEY eklemeyi unutma
+    if not api_key:
+        print("HATA: BREVO_API_KEY bulunamadı!")
+        return False
+
+    sender_name = os.environ.get('BREVO_SENDER_NAME', 'YTUSocial')
+    sender_email = os.environ.get('BREVO_SENDER_EMAIL', 'info@ytusocial.com')
+
+    url = "https://api.brevo.com/v3/smtp/email"
+    html_body = body.replace('\n', '<br>')
+    payload = {
+        "sender": {"name": sender_name, "email": sender_email},
+        "to": [{"email": recipient_email}],
+        "subject": subject,
+        "htmlContent": f"<div>{html_body}</div>"
+    }
+    headers = {
+        "accept": "application/json",
+        "api-key": api_key,
+        "content-type": "application/json"
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=10)
+        if response.status_code in [201, 200]:
+            return True
+        print(f"Brevo API Hatası ({response.status_code}): {response.text}")
+        return False
+    except Exception as e:
+        print(f"Mail gönderme hatası: {e}")
+        return False
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # Brevo fonksiyonunu her yerden erişilebilir yapalım
+    app.send_mail = send_brevo_email
 
     # Initialize extensions
     db.init_app(app)
@@ -100,6 +139,6 @@ app = create_app()
 if __name__ == '__main__':
     with app.app_context():
         os.makedirs(app.instance_path, exist_ok=True)
-        db.create_all()
-    debug_flag = os.environ.get('FLASK_DEBUG', '1') == '1'
+        # db.create_all() # Dikkat: Canlıdayken her seferinde db sıfırlanmasın diye yorum satırı yaptım, istersen açabilirsin.
+    debug_flag = os.environ.get('FLASK_DEBUG', '0') == '1' # Canlıda debug kapalı olması daha iyi
     socketio.run(app, host='0.0.0.0', port=5002, debug=debug_flag)
