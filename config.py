@@ -49,6 +49,7 @@ class Config:
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
+    MAIL_TIMEOUT = int(os.environ.get('MAIL_TIMEOUT', '8'))
     MAIL_USERNAME = 'portalytu@gmail.com' 
     MAIL_PASSWORD = 'xpfj soms rwht ttam' 
 

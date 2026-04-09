@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import random
 from urllib.parse import urlparse
+from threading import Thread
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
@@ -45,10 +46,19 @@ def _otp_is_active(user):
     return bool(user and user.otp_code and user.otp_expires_at and user.otp_expires_at > _now())
 
 
-def _send_otp_email(email, subject, intro_text, otp):
-    msg = MailMessage(subject, sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-    msg.body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
-    mail.send(msg)
+def _queue_otp_email(subject, email, intro_text, otp):
+    app = current_app._get_current_object()
+
+    def _worker():
+        with app.app_context():
+            try:
+                msg = MailMessage(subject, sender=app.config['MAIL_USERNAME'], recipients=[email])
+                msg.body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
+                mail.send(msg)
+            except Exception as exc:
+                print(f"Mail gönderim hatası ({email}): {exc}")
+
+    Thread(target=_worker, daemon=True).start()
 
 
 def _verify_redirect(email, next_url=None):
@@ -104,7 +114,6 @@ def register():
 
             if _otp_is_active(user):
                 try:
-                    db.session.flush()
                     db.session.commit()
                 except Exception as e:
                     db.session.rollback()
@@ -117,14 +126,13 @@ def register():
 
             otp = _issue_otp(user)
             try:
-                db.session.flush()
-                _send_otp_email(
-                    email,
+                db.session.commit()
+                _queue_otp_email(
                     'YTÜ Portal Doğrulama',
+                    email,
                     'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
                     otp,
                 )
-                db.session.commit()
             except Exception as e:
                 db.session.rollback()
                 print(f"Kayıt Hatası: {e}")
@@ -150,14 +158,13 @@ def register():
 
         try:
             db.session.add(new_user)
-            db.session.flush()
-            _send_otp_email(
-                email,
+            db.session.commit()
+            _queue_otp_email(
                 'YTÜ Portal Doğrulama',
+                email,
                 'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
                 otp,
             )
-            db.session.commit()
         except Exception as e:
             db.session.rollback()
             print(f"Kayıt Hatası: {e}")
@@ -226,14 +233,13 @@ def forgot_password():
         if user:
             otp = _issue_otp(user)
             try:
-                db.session.flush()
-                _send_otp_email(
-                    email,
+                db.session.commit()
+                _queue_otp_email(
                     'YTÜ Portal Şifre Sıfırlama',
+                    email,
                     'Şifre sıfırlama kodun aşağıda.',
                     otp,
                 )
-                db.session.commit()
                 flash("Sıfırlama kodu e-posta adresine gönderildi.", "info")
                 return redirect(url_for('auth.reset_password', email=email))
             except Exception as e:
@@ -291,14 +297,13 @@ def login():
 
                 otp = _issue_otp(user)
                 try:
-                    db.session.flush()
-                    _send_otp_email(
-                        email,
+                    db.session.commit()
+                    _queue_otp_email(
                         'YTÜ Portal Doğrulama',
+                        email,
                         'Hesabını doğrulamak için yeni kodun aşağıda.',
                         otp,
                     )
-                    db.session.commit()
                 except Exception as e:
                     db.session.rollback()
                     print(f"Giriş Hatası: {e}")
