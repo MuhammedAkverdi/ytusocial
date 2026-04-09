@@ -27,6 +27,13 @@ def _get_brevo_api_key():
     return ''
 
 
+def _get_brevo_sender_email():
+    sender_email = (os.environ.get('BREVO_SENDER_EMAIL') or '').strip()
+    if sender_email:
+        return sender_email
+    return 'portalytu@gmail.com'
+
+
 # --- BREVO MAIL FONKSİYONU ---
 def send_brevo_email(recipient_email, subject, body):
     """Maili Brevo API üzerinden gönderir."""
@@ -36,7 +43,7 @@ def send_brevo_email(recipient_email, subject, body):
         return False
 
     sender_name = os.environ.get('BREVO_SENDER_NAME', 'ytusocial')
-    sender_email = os.environ.get('BREVO_SENDER_EMAIL') or os.environ.get('MAIL_USERNAME') or 'portalytu@gmail.com'
+    sender_email = _get_brevo_sender_email()
 
     url = "https://api.brevo.com/v3/smtp/email"
     html_body = body.replace('\n', '<br>')
