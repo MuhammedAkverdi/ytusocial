@@ -632,7 +632,7 @@
 
                     {% if post.club_id %}
                     <div class="club-ann-banner">
-                        <img src="/static/img/{{ post.club.logo_file }}" class="club-ann-logo" onerror="this.style.display='none'">
+                        <img src="{{ club_logo_src(post.club.logo_file) }}" class="club-ann-logo" onerror="this.src='/static/img/default_club.png'">
                         <span class="club-ann-name">{{ post.club.name }}<span class="club-ann-pill">🏆 Kulüp Duyurusu</span></span>
                         <a href="{{ url_for('main.club_detail', slug=post.club.slug) }}" class="club-ann-goto">Kulübü Gör →</a>
                     </div>
@@ -869,7 +869,7 @@
                     <div class="club-list-item">
                         <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
                             <span class="club-rank rank-{{ loop.index }}">{{ loop.index }}</span>
-                            <img src="/static/img/{{ club.logo_file }}" class="club-logo-sm">
+                            <img src="{{ club_logo_src(club.logo_file) }}" class="club-logo-sm" onerror="this.src='/static/img/default_club.png'">
                             <div style="display: flex; flex-direction: column; min-width: 0; flex: 1;">
                                 <a href="{{ url_for('main.clubs_full_list') }}" style="text-decoration: none; color: var(--text-color); font-weight: 700; font-size: 0.9rem; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
                                     {{ club.name }}
@@ -1052,7 +1052,7 @@
         <div class="mob-drawer-club">
             <span class="mob-drawer-club-rank {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">{{ loop.index }}</span>
             <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-                <img src="/static/img/{{ club.logo_file }}" class="mob-drawer-club-logo" onerror="this.style.display='none'">
+                <img src="{{ club_logo_src(club.logo_file) }}" class="mob-drawer-club-logo" onerror="this.src='/static/img/default_club.png'">
                 <div style="min-width:0;">
                     <div class="mob-drawer-club-name">{{ club.name }}</div>
                     <div class="mob-drawer-club-votes" id="vote-count-mob-{{ club.id }}">{{ club.votes }} oy</div>

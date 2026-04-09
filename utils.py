@@ -1,4 +1,9 @@
 from datetime import datetime, timedelta
+from io import BytesIO
+from urllib.parse import quote
+
+import boto3
+import mimetypes
 from PIL import Image
 import pytesseract
 import os
@@ -23,6 +28,7 @@ ONLINE_USER_CONNECTIONS = {}
 ONLINE_USER_SID_MAP = {}
 ONLINE_USERS_LOCK = Lock()
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi', 'webm', 'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'}
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 DATA_FILE = 'votes.json'
 
 # Not havuzu için izin verilen uzantılar (sadece belge formatları)
@@ -84,6 +90,103 @@ def unregister_online_user(user_id=None, sid=None):
 def get_online_user_count():
     with ONLINE_USERS_LOCK:
         return len(ONLINE_USERS)
+
+def allowed_image_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+def _get_spaces_config():
+    access_key = (os.environ.get('SPACES_ACCESS_KEY') or '').strip()
+    secret_key = (os.environ.get('SPACES_SECRET_KEY') or '').strip()
+    bucket_name = (os.environ.get('SPACES_BUCKET_NAME') or '').strip()
+    endpoint = (os.environ.get('SPACES_ENDPOINT') or '').strip()
+    region = (os.environ.get('SPACES_REGION') or '').strip()
+
+    if not access_key or not secret_key or not bucket_name or not endpoint or not region:
+        return None
+
+    return {
+        'access_key': access_key,
+        'secret_key': secret_key,
+        'bucket_name': bucket_name,
+        'endpoint': endpoint,
+        'region': region,
+    }
+
+def club_logo_src(logo_file):
+    if not logo_file:
+        return '/static/img/default_club.png'
+
+    if logo_file.startswith('http://') or logo_file.startswith('https://'):
+        return logo_file
+
+    if logo_file in {'default_club.jpg', 'default_club.png'}:
+        return '/static/img/default_club.png'
+
+    spaces_config = _get_spaces_config()
+    if spaces_config:
+        return f"https://{spaces_config['bucket_name']}.{spaces_config['region']}.digitaloceanspaces.com/{quote(logo_file, safe='/')}"
+
+    return '/static/img/' + logo_file
+
+def upload_club_logo_to_spaces(file_storage, object_key=None, max_size=(400, 400), quality=85):
+    spaces_config = _get_spaces_config()
+    if not spaces_config:
+        raise RuntimeError('DigitalOcean Spaces ayarları eksik.')
+
+    filename = secure_filename(file_storage.filename or '')
+    if not filename:
+        raise ValueError('Geçersiz logo dosyası.')
+
+    ext = os.path.splitext(filename)[1].lower().lstrip('.')
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        raise ValueError('Kulüp logosu yalnızca PNG, JPG, JPEG veya WEBP olabilir.')
+
+    object_key = object_key or filename
+    content_type = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
+    payload = BytesIO()
+
+    try:
+        file_storage.stream.seek(0)
+        image = Image.open(file_storage.stream)
+        image.thumbnail(max_size)
+
+        save_format = 'JPEG' if ext in {'jpg', 'jpeg'} else ext.upper()
+        if save_format == 'JPEG' and image.mode in {'RGBA', 'P'}:
+            image = image.convert('RGB')
+
+        save_kwargs = {'optimize': True}
+        if save_format in {'JPEG', 'WEBP'}:
+            save_kwargs['quality'] = quality
+
+        image.save(payload, format=save_format, **save_kwargs)
+        payload.seek(0)
+
+        if save_format == 'JPEG':
+            content_type = 'image/jpeg'
+        elif save_format == 'PNG':
+            content_type = 'image/png'
+        elif save_format == 'WEBP':
+            content_type = 'image/webp'
+    except Exception:
+        file_storage.stream.seek(0)
+        payload = BytesIO(file_storage.read())
+        payload.seek(0)
+
+    client = boto3.client(
+        's3',
+        region_name=spaces_config['region'],
+        endpoint_url=spaces_config['endpoint'],
+        aws_access_key_id=spaces_config['access_key'],
+        aws_secret_access_key=spaces_config['secret_key'],
+    )
+    client.put_object(
+        Bucket=spaces_config['bucket_name'],
+        Key=object_key,
+        Body=payload.getvalue(),
+        ACL='public-read',
+        ContentType=content_type,
+    )
+    return object_key
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

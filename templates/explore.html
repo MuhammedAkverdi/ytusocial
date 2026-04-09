@@ -638,7 +638,7 @@
         {% for club in clubs[:3] %}
         <div class="mob-drawer-club">
             <span class="mob-drawer-club-rank {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">{{ loop.index }}</span>
-            <img src="/static/img/{{ club.logo_file }}" class="mob-drawer-club-logo" onerror="this.style.display='none'">
+            <img src="{{ club_logo_src(club.logo_file) }}" class="mob-drawer-club-logo" onerror="this.src='/static/img/default_club.png'">
             <div style="flex:1;min-width:0;">
                 <div class="mob-drawer-club-name">{{ club.name }}</div>
                 <div class="mob-drawer-club-votes">{{ club.total_votes() }} oy</div>

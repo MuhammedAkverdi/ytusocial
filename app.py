@@ -11,7 +11,7 @@ from routes.admin import admin as admin_blueprint
 import importlib
 import time
 from datetime import datetime
-from utils import get_trending_hashtags, ONLINE_USERS
+from utils import get_trending_hashtags, ONLINE_USERS, club_logo_src
 from markupsafe import Markup
 import re
 from sqlalchemy import func
@@ -50,7 +50,7 @@ def create_app():
             followed_ids = [u.id for u in current_user.followed]
             followed_ids.append(current_user.id)
             suggested = User.query.filter(~User.id.in_(followed_ids)).order_by(func.random()).limit(5).all()
-        return dict(trending_tags=trending, suggested_users=suggested)
+        return dict(trending_tags=trending, suggested_users=suggested, club_logo_src=club_logo_src)
 
     @app.context_processor
     def inject_notifications():

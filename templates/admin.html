@@ -462,7 +462,7 @@
                 <tbody>
                     {% for club in clubs %}
                     <tr>
-                        <td><img src="/static/img/{{ club.logo_file }}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--border-color);" onerror="this.style.display='none'"></td>
+                        <td><img src="{{ club_logo_src(club.logo_file) }}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--border-color);" onerror="this.src='/static/img/default_club.png'"></td>
                         <td>
                             <b>{{ club.name }}</b><br>
                             <small style="color:var(--text-muted);">{{ club.slug }}</small>

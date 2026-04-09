@@ -344,7 +344,7 @@
                     </div>
                     
                     <div class="club-logo-wrapper">
-                        <img src="/static/img/{{ club.logo_file }}" alt="{{ club.name }}">
+                        <img src="{{ club_logo_src(club.logo_file) }}" alt="{{ club.name }}" onerror="this.src='/static/img/default_club.png'">
                     </div>
                     
                     <div class="club-details">

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from extensions import db
 from models import User, Post, Feedback, Club, Note, ClubVote, NoteVote, Notification, Advert
-from utils import optimize_and_save_image, allowed_file, get_online_user_count
+from utils import allowed_image_file, upload_club_logo_to_spaces, get_online_user_count
 from routes.main import _purge_post_tree
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
@@ -238,11 +238,11 @@ def admin_create_club():
     
     leader = User.query.filter_by(username=leader_username).first()
     
-    logo_filename = 'default_club.jpg'
+    logo_filename = 'default_club.png'
     if 'logo' in request.files:
         file = request.files['logo']
-        if file and allowed_file(file.filename):
-            logo_filename = optimize_and_save_image(file, 'static/img', max_size=(400, 400))
+        if file and file.filename and allowed_image_file(file.filename):
+            logo_filename = upload_club_logo_to_spaces(file)
 
     new_club = Club(name=name, slug=slug, description=description, logo_file=logo_filename)
     if leader:

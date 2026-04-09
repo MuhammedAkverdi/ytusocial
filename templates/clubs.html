@@ -373,13 +373,13 @@
                 <div class="rank-badge">#{{ loop.index }}</div>
 
                 <div class="club-banner">
-                    <img src="/static/img/{{ club.logo_file }}" class="club-logo">
+                    <img src="{{ club_logo_src(club.logo_file) }}" class="club-logo" onerror="this.src='/static/img/default_club.png'">
                 </div>
 
                 <div class="club-body">
                     <!-- MOBİL GÖRÜNÜM -->
                     <div class="cl-mob-info">
-                        <img src="/static/img/{{ club.logo_file }}" class="cl-mob-logo" onerror="this.style.display='none'">
+                        <img src="{{ club_logo_src(club.logo_file) }}" class="cl-mob-logo" onerror="this.src='/static/img/default_club.png'">
                         <div class="cl-mob-text">
                             <div class="club-name">{{ club.name }}</div>
                             <div class="club-desc">{{ club.description[:80] }}</div>

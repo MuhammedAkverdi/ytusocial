@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, jsonify, redirect, url_fo
 from flask_login import login_required, current_user
 from extensions import db, socketio
 from models import User, Post, Story, Club, ClubVote, ClubPost, Poll, PollOption, PollVote, SavedPost, Comment, Message, Notification, Feedback, Note, NoteVote, Advert, StoryView, likes
-from utils import optimize_and_save_image, allowed_file, create_notification, get_trending_hashtags, get_file_size_str, icerik_temiz_mi, scan_file_safety, ALLOWED_NOTE_EXTENSIONS
+from utils import optimize_and_save_image, allowed_file, create_notification, get_trending_hashtags, get_file_size_str, icerik_temiz_mi, scan_file_safety, ALLOWED_NOTE_EXTENSIONS, allowed_image_file, upload_club_logo_to_spaces
 from sqlalchemy import or_, func
 from datetime import datetime, timedelta
 import os
@@ -249,9 +249,8 @@ def club_detail(slug):
                 club.description = new_desc
             if 'logo' in request.files:
                 file = request.files['logo']
-                if file and allowed_file(file.filename):
-                    filename = optimize_and_save_image(file, 'static/img', max_size=(400, 400))
-                    club.logo_file = filename
+                if file and file.filename and allowed_image_file(file.filename):
+                    club.logo_file = upload_club_logo_to_spaces(file)
             db.session.commit()
             flash("Kulüp bilgileri güncellendi!", "success")
             return redirect(url_for('main.club_detail', slug=slug))
