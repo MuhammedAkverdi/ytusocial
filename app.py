@@ -29,8 +29,10 @@ def _get_brevo_api_key():
 
 def _get_brevo_sender_email():
     sender_email = (os.environ.get('BREVO_SENDER_EMAIL') or '').strip()
-    if sender_email:
+    if sender_email == 'portalytu@gmail.com':
         return sender_email
+    if sender_email:
+        print(f"BREVO_SENDER_EMAIL '{sender_email}' doğrulanmamış görünüyor; portalytu@gmail.com kullanılacak.")
     return 'portalytu@gmail.com'
 
 
