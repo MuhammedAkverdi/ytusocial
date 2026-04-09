@@ -6,7 +6,7 @@ from flask import Blueprint, current_app, flash, redirect, render_template, requ
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from extensions import db, socketio
+from extensions import db
 from models import User
 
 auth = Blueprint('auth', __name__)
@@ -46,22 +46,21 @@ def _otp_is_active(user):
 
 def _queue_otp_email(subject, email, intro_text, otp):
     app = current_app._get_current_object()
+    with app.app_context():
+        try:
+            send_mail = getattr(app, 'send_mail', None)
+            if not callable(send_mail):
+                print(f"Mail gönderim hatası ({email}): app.send_mail bulunamadı")
+                return False
 
-    def _worker():
-        with app.app_context():
-            try:
-                send_mail = getattr(app, 'send_mail', None)
-                if not callable(send_mail):
-                    print(f"Mail gönderim hatası ({email}): app.send_mail bulunamadı")
-                    return
-
-                body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
-                if not send_mail(email, subject, body):
-                    print(f"Mail gönderim hatası ({email}): Brevo API başarısız döndü")
-            except Exception as exc:
-                print(f"Mail gönderim hatası ({email}): {exc}")
-
-    socketio.start_background_task(_worker)
+            body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
+            if not send_mail(email, subject, body):
+                print(f"Mail gönderim hatası ({email}): Brevo API başarısız döndü")
+                return False
+            return True
+        except Exception as exc:
+            print(f"Mail gönderim hatası ({email}): {exc}")
+            return False
 
 
 def _verify_redirect(email, next_url=None):
@@ -124,24 +123,28 @@ def register():
                     flash("Kayıt güncellenirken bir teknik sorun oluştu!", "danger")
                     return _render_register(next_url)
 
-                _queue_otp_email(
+                if not _queue_otp_email(
                     'YTÜ Portal Doğrulama',
                     email,
                     'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
                     user.otp_code,
-                )
+                ):
+                    flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", "danger")
+                    return _render_register(next_url)
                 flash("Doğrulama kodu yeniden gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "success")
                 return _verify_redirect(email, next_url)
 
             otp = _issue_otp(user)
             try:
                 db.session.commit()
-                _queue_otp_email(
+                if not _queue_otp_email(
                     'YTÜ Portal Doğrulama',
                     email,
                     'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
                     otp,
-                )
+                ):
+                    flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", "danger")
+                    return _render_register(next_url)
             except Exception as e:
                 db.session.rollback()
                 print(f"Kayıt Hatası: {e}")
@@ -168,12 +171,14 @@ def register():
         try:
             db.session.add(new_user)
             db.session.commit()
-            _queue_otp_email(
+            if not _queue_otp_email(
                 'YTÜ Portal Doğrulama',
                 email,
                 'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
                 otp,
-            )
+            ):
+                flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", "danger")
+                return _render_register(next_url)
         except Exception as e:
             db.session.rollback()
             print(f"Kayıt Hatası: {e}")
@@ -246,12 +251,14 @@ def forgot_password():
                 otp = _issue_otp(user)
             try:
                 db.session.commit()
-                _queue_otp_email(
+                if not _queue_otp_email(
                     'YTÜ Portal Şifre Sıfırlama',
                     email,
                     'Şifre sıfırlama kodun aşağıda.',
                     otp,
-                )
+                ):
+                    flash("Sıfırlama kodu gönderilemedi. Lütfen tekrar dene.", "danger")
+                    return render_template('forgot_password.html')
                 flash("Sıfırlama kodu gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "info")
                 return redirect(url_for('auth.reset_password', email=email))
             except Exception as e:
@@ -306,12 +313,14 @@ def login():
                 if _otp_is_active(user):
                     try:
                         db.session.commit()
-                        _queue_otp_email(
+                        if not _queue_otp_email(
                             'YTÜ Portal Doğrulama',
                             email,
                             'Hesabını doğrulamak için kodun aşağıda.',
                             user.otp_code,
-                        )
+                        ):
+                            flash("Doğrulama kodu yeniden gönderilemedi.", "danger")
+                            return _render_login(next_url)
                     except Exception as e:
                         db.session.rollback()
                         print(f"Giriş Hatası: {e}")
@@ -324,12 +333,14 @@ def login():
                 otp = _issue_otp(user)
                 try:
                     db.session.commit()
-                    _queue_otp_email(
+                    if not _queue_otp_email(
                         'YTÜ Portal Doğrulama',
                         email,
                         'Hesabını doğrulamak için yeni kodun aşağıda.',
                         otp,
-                    )
+                    ):
+                        flash("Yeni doğrulama kodu gönderilemedi.", "danger")
+                        return _render_login(next_url)
                 except Exception as e:
                     db.session.rollback()
                     print(f"Giriş Hatası: {e}")

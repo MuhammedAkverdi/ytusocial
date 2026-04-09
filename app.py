@@ -19,16 +19,24 @@ from sqlalchemy import func
 
 importlib.import_module('events')
 
+def _get_brevo_api_key():
+    for key_name in ('BREVO_API_KEY', 'BREAVO_API_KEY', 'BREVO_KEY', 'BREAVO_KEY'):
+        value = (os.environ.get(key_name) or '').strip()
+        if value:
+            return value
+    return ''
+
+
 # --- BREVO MAIL FONKSİYONU ---
 def send_brevo_email(recipient_email, subject, body):
-    """SMTP portu kapalı olduğu için maili API üzerinden gönderir."""
-    api_key = os.environ.get('BREVO_API_KEY') # .env dosyasına BREVO_API_KEY eklemeyi unutma
+    """Maili Brevo API üzerinden gönderir."""
+    api_key = _get_brevo_api_key()
     if not api_key:
-        print("HATA: BREVO_API_KEY bulunamadı!")
+        print("HATA: BREVO API key bulunamadı!")
         return False
 
-    sender_name = os.environ.get('BREVO_SENDER_NAME', 'YTUSocial')
-    sender_email = os.environ.get('BREVO_SENDER_EMAIL', 'info@ytusocial.com')
+    sender_name = os.environ.get('BREVO_SENDER_NAME', 'ytusocial')
+    sender_email = os.environ.get('BREVO_SENDER_EMAIL') or os.environ.get('MAIL_USERNAME') or 'portalytu@gmail.com'
 
     url = "https://api.brevo.com/v3/smtp/email"
     html_body = body.replace('\n', '<br>')
@@ -36,23 +44,25 @@ def send_brevo_email(recipient_email, subject, body):
         "sender": {"name": sender_name, "email": sender_email},
         "to": [{"email": recipient_email}],
         "subject": subject,
-        "htmlContent": f"<div>{html_body}</div>"
+        "htmlContent": f"<div>{html_body}</div>",
+        "textContent": body,
     }
     headers = {
         "accept": "application/json",
         "api-key": api_key,
-        "content-type": "application/json"
+        "content-type": "application/json",
     }
-    
+
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=10)
-        if response.status_code in [201, 200]:
+        if response.status_code in [200, 201, 202]:
             return True
         print(f"Brevo API Hatası ({response.status_code}): {response.text}")
         return False
     except Exception as e:
         print(f"Mail gönderme hatası: {e}")
         return False
+
 
 def create_app():
     app = Flask(__name__)
