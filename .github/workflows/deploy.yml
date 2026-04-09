@@ -1,0 +1,22 @@
+name: YTUSocial Otomatik Deploy
+
+on:
+  push:
+    branches:
+      - main  # Eğer GitHub'daki ana dalının adı master ise burayı master yap
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sunucuya Bağlan ve Güncelle
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            # Sunucudaki proje klasörüne git (Yol farklıysa burayı düzelt)
+            cd /root/ytusocial 
+            # GitHub'dan en güncel kodları çek
+            git pull origin main

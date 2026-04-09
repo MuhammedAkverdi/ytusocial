@@ -23,26 +23,6 @@ def handle_disconnect():
             ONLINE_USERS.remove(current_user.id)
         emit('user_status_change', {'user_id': current_user.id, 'status': 'offline'}, broadcast=True)
 
-@socketio.on('call_user')
-def on_call_user(data):
-    emit('incoming_call', {
-        'caller': data['caller'],
-        'signal': data['signal'],
-        'isVideo': data['isVideo']
-    }, room=data['userToCall'])
-
-@socketio.on('answer_call')
-def on_answer_call(data):
-    emit('call_accepted', data['signal'], room=data['to'])
-
-@socketio.on('ice_candidate')
-def on_ice_candidate(data):
-    emit('ice_candidate_msg', data['candidate'], room=data['to'])
-
-@socketio.on('end_call')
-def on_end_call(data):
-    emit('call_ended', room=data['to'])
-
 @socketio.on('typing')
 def on_typing(data):
     emit('display_typing', {'username': current_user.username}, room=data['to'])

@@ -3,8 +3,10 @@ from flask_login import login_required, current_user
 from extensions import db
 from models import User, Post, Feedback, Club, Note, ClubVote, NoteVote, Notification, Advert
 from utils import optimize_and_save_image, allowed_file, ONLINE_USERS
+from routes.main import _purge_post_tree
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
+import os
 import psutil
 
 admin = Blueprint('admin', __name__)
@@ -116,24 +118,29 @@ def remove_moderator(user_id):
 def admin_delete_content(type, id):
     if not current_user.is_admin: return "Yetkisiz"
     
-    if type == 'post':
-        item = Post.query.get_or_404(id)
-        db.session.delete(item)
-        flash("İçerik kalıcı olarak silindi.", "success")
-    elif type == 'note':
-        item = Note.query.get_or_404(id)
-        import os
-        file_path = os.path.join(current_app.root_path, 'static', 'note_files', item.file_path)
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        db.session.delete(item)
-        flash("Not kalıcı olarak silindi.", "success")
-    elif type == 'feedback':
-        item = Feedback.query.get_or_404(id)
-        db.session.delete(item)
-        flash("Geri bildirim silindi.", "success")
-    
-    db.session.commit()
+    try:
+        if type == 'post':
+            item = Post.query.get_or_404(id)
+            _purge_post_tree(item)
+            flash("İçerik kalıcı olarak silindi.", "success")
+        elif type == 'note':
+            item = Note.query.get_or_404(id)
+            import os
+            file_path = os.path.join(current_app.root_path, 'static', 'note_files', item.file_path)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            db.session.delete(item)
+            flash("Not kalıcı olarak silindi.", "success")
+        elif type == 'feedback':
+            item = Feedback.query.get_or_404(id)
+            db.session.delete(item)
+            flash("Geri bildirim silindi.", "success")
+
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Admin delete content failed: type=%s id=%s", type, id)
+        flash("İçerik silinirken hata oluştu.", "danger")
     return redirect(url_for('admin.admin_panel'))
 
 @admin.route('/admin/ban_user/<int:user_id>/<string:action>')
@@ -180,10 +187,17 @@ def admin_delete_user_posts(user_id):
     if not current_user.is_admin: return "Yetkisiz"
     user = User.query.get_or_404(user_id)
     posts = Post.query.filter_by(user_id=user.id).all()
-    for p in posts:
-        db.session.delete(p)
-    db.session.commit()
-    flash(f"{user.username} kullanıcısının tüm gönderileri silindi.", "success")
+    deleted_count = 0
+    try:
+        for post in posts:
+            deleted_count += _purge_post_tree(post)
+
+        db.session.commit()
+        flash(f"{user.username} kullanıcısının {deleted_count} gönderisi silindi.", "success")
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Admin delete user posts failed for user %s", user_id)
+        flash("Gönderiler silinirken hata oluştu.", "danger")
     return redirect(url_for('admin.admin_panel'))
 
 @admin.route('/admin/create_tester', methods=['POST'])

@@ -6,14 +6,33 @@ from extensions import db, mail
 from models import User
 import random
 from flask import current_app
+from urllib.parse import urlparse
 
 auth = Blueprint('auth', __name__)
 
+
+def _safe_next_url(target):
+    if not target:
+        return None
+    parsed = urlparse(target)
+    if parsed.scheme or parsed.netloc:
+        return None
+    if not target.startswith('/'):
+        return None
+    return target
+
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
+    next_url = request.args.get('next') or request.form.get('next')
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        accept_terms = request.form.get('accept_terms')
+        accept_privacy = request.form.get('accept_privacy')
+        
+        if not accept_terms or not accept_privacy:
+            flash("Hizmet Şartları ve Gizlilik Politikası'nı kabul etmelisin!", "danger")
+            return render_template('register.html')
         
         if not email.endswith('@std.yildiz.edu.tr'):
             flash("Sadece @std.yildiz.edu.tr uzantılı YTÜ maili kabul edilir!", "danger")
@@ -39,16 +58,21 @@ def register():
             msg = MailMessage('YTÜ Portal Doğrulama', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
             msg.body = f'Portalımıza hoş geldin! Doğrulama kodun: {otp}'
             mail.send(msg)
-            return redirect(url_for('auth.verify', email=email))
+            verify_target = url_for('auth.verify', email=email)
+            safe_next = _safe_next_url(next_url)
+            if safe_next:
+                verify_target = url_for('auth.verify', email=email, next=safe_next)
+            return redirect(verify_target)
         except Exception as e:
             db.session.rollback()
             print(f"Kayıt Hatası: {e}")
             flash("Mail gönderilirken bir teknik sorun oluştu!", "danger")
-            return render_template('register.html')
-    return render_template('register.html')
+            return render_template('register.html', next_url=next_url)
+    return render_template('register.html', next_url=next_url)
 
 @auth.route('/verify/<email>', methods=['GET', 'POST'])
 def verify(email):
+    next_url = request.args.get('next') or request.form.get('next')
     if request.method == 'POST':
         girilen_kod = request.form.get('kod')
         user = User.query.filter_by(email=email).first()
@@ -58,11 +82,14 @@ def verify(email):
             db.session.commit()
             login_user(user)
             flash("Kod onaylandı! YTU Social'a hoş geldin.", "success")
+            safe_next = _safe_next_url(next_url)
+            if safe_next:
+                return redirect(safe_next)
             return redirect(url_for('main.index'))
         else:
             flash("Hata: Girdiğin kod hatalı, lütfen tekrar dene!", "danger")
-            return render_template('verify.html', email=email)
-    return render_template('verify.html', email=email)
+            return render_template('verify.html', email=email, next_url=next_url)
+    return render_template('verify.html', email=email, next_url=next_url)
 
 @auth.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -105,17 +132,21 @@ def reset_password(email):
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    next_url = request.args.get('next') or request.form.get('next')
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
+            safe_next = _safe_next_url(next_url)
+            if safe_next:
+                return redirect(safe_next)
             return redirect(url_for('main.index'))
         else:
             flash("Giriş başarısız! Lütfen bilgilerinizi kontrol edin.", "danger")
-            return render_template('login.html')
-    return render_template('login.html')
+            return render_template('login.html', next_url=next_url)
+    return render_template('login.html', next_url=next_url)
 
 @auth.route('/logout')
 @login_required

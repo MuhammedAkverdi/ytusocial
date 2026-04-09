@@ -20,8 +20,8 @@ function linkifyHashtags(text) {
     out = out.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color:var(--ytu-lacivert);text-decoration:underline;">$1</a>');
     // Hashtag linkify
     out = out.replace(/#([a-zA-Z0-9çğıöşüÇĞİÖŞÜ]+)/g, '<a href="/explore?q=%23$1" class="hashtag-link">#$1</a>');
-    // @mention linkify — harf, rakam, Türkçe karakter ve _ destekli
-    out = out.replace(/@([\w\u00C0-\u024F]+)/g, '<a href="/u/$1" class="mention-link">@$1</a>');
+    // @mention linkify — harf, rakam, Türkçe karakter, _ ve nokta destekli
+    out = out.replace(/@([\w\u00C0-\u024F-]+(?:\.[\w\u00C0-\u024F-]+)*)/g, '<a href="/u/$1" class="mention-link">@$1</a>');
     return out;
 }
 
@@ -359,17 +359,26 @@ async function likePost(postId, element) {
 
         if (response.ok) {
             const data = await response.json();
+            const isReelsLike = Boolean(element && (element.dataset?.iconFormat === 'svg' || element.closest?.('.reels-container')));
             
             // Sayfadaki AYNI ID'ye sahip tüm beğeni butonlarını güncelle (Senkronizasyon)
             const allLikeBtns = document.querySelectorAll(`.js-like-${postId}`);
-            const iconHtml = data.action === 'liked' ? '<i class="fa-solid fa-heart" style="color: #ff4757;"></i>' : '<i class="fa-regular fa-heart"></i>';
-            
-            allLikeBtns.forEach(btn => {
-                btn.innerHTML = `${iconHtml} <span class="like-count">${data.likes_count}</span>`;
-            });
+            if (isReelsLike) {
+                allLikeBtns.forEach(btn => {
+                    btn.classList.toggle('is-liked', data.action === 'liked');
+                    const countEl = btn.querySelector('.like-count');
+                    if (countEl) countEl.textContent = data.likes_count;
+                });
+            } else {
+                const iconHtml = data.action === 'liked' ? '<i class="fa-solid fa-heart" style="color: #ff4757;"></i>' : '<i class="fa-regular fa-heart"></i>';
+                
+                allLikeBtns.forEach(btn => {
+                    btn.innerHTML = `${iconHtml} <span class="like-count">${data.likes_count}</span>`;
+                });
+            }
 
             // Eğer beğenildiyse uçuşan kalp animasyonu ekle
-            if (data.action === 'liked') {
+            if (data.action === 'liked' && !isReelsLike) {
                 createFloatingHeart(element);
             }
         }
@@ -553,23 +562,41 @@ let isStoryPaused = false;
 let storyStartTime;
 let storyDuration = 5000;
 let remainingTime = 5000;
+let currentStoryAuthorId = null;
+let storySoundMuted = true;
+let storySwipeStart = null;
 
 function openStoryGalleryWrapper(element) {
     const stories = JSON.parse(element.getAttribute('data-stories'));
     const username = element.getAttribute('data-username');
     const userPic = element.getAttribute('data-userpic');
     const isOwner = element.getAttribute('data-isowner') === 'true';
-    openStoryGallery(stories, username, userPic, isOwner);
+    const authorId = element.getAttribute('data-author-id');
+    openStoryGallery(stories, username, userPic, isOwner, authorId);
 }
 
-function openStoryGallery(stories, username, userPic, isOwner) {
+function openStoryGallery(stories, username, userPic, isOwner, authorId) {
     currentStories = stories;
     currentStoryIndex = 0;
+    currentStoryAuthorId = authorId || null;
+    storySoundMuted = true;
 
     const modal = document.getElementById('storyModal');
     document.getElementById('storyUserName').innerText = username;
     document.getElementById('storyUserPic').src = userPic;
     modal.style.display = "flex";
+    document.body.classList.add('story-open');
+
+    const menu = document.getElementById('storyMoreMenu');
+    if (menu) menu.classList.remove('open');
+
+    const replyInput = document.getElementById('storyReplyInput');
+    if (replyInput) {
+        replyInput.value = '';
+        replyInput.placeholder = isOwner ? 'Kendi hikayen...' : username + ' kullanicisina mesaj gonder...';
+    }
+
+    setupStorySwipeClose();
 
     const progressContainer = document.getElementById('storyProgressContainer');
     progressContainer.innerHTML = '';
@@ -613,7 +640,7 @@ function loadStoryItem(isOwner) {
     timeElement.innerText = story.timestamp;
 
     if (isOwner) {
-        deleteBtn.style.display = 'block';
+        deleteBtn.style.display = 'flex';
         deleteBtn.href = `/delete_story/${story.id}`;
         viewerBadge.style.display = 'block';
         viewerCount.innerText = story.viewers.length;
@@ -647,20 +674,42 @@ function loadStoryItem(isOwner) {
     if (isVideo) {
         imgElement.style.display = "none";
         videoElement.style.display = "block";
+        videoElement.setAttribute('playsinline', '');
+        videoElement.setAttribute('webkit-playsinline', '');
+        videoElement.controls = true;
         videoElement.src = fileUrl;
         videoElement.volume = 1.0;
         videoElement.currentTime = 0;
-        videoElement.play().catch(e => console.log("Otomatik oynatma engellendi:", e));
+
+        // Start muted for autoplay compatibility; user can tap sound button or video to unmute.
+        videoElement.muted = true;
+        updateStorySoundUI();
+        videoElement.play().catch(e => {
+            console.log("Otomatik oynatma engellendi:", e);
+            videoElement.muted = true;
+            updateStorySoundUI();
+        });
+
+        videoElement.onclick = function () {
+            toggleStorySound();
+        };
+
         videoElement.onended = () => navigateStory('next');
+        videoElement.onerror = () => navigateStory('next');
         videoElement.onloadedmetadata = function () {
-            storyDuration = videoElement.duration * 1000;
+            const durationSec = Number(videoElement.duration);
+            storyDuration = Number.isFinite(durationSec) && durationSec > 0 ? durationSec * 1000 : 5000;
             startProgressBar(storyDuration);
         };
     } else {
         videoElement.pause();
+        videoElement.removeAttribute('src');
+        videoElement.load();
+        videoElement.onclick = null;
         videoElement.style.display = "none";
         imgElement.style.display = "block";
         imgElement.src = fileUrl;
+        updateStorySoundUI();
         storyDuration = 5000;
         startProgressBar(5000);
         storyStartTime = Date.now();
@@ -691,7 +740,8 @@ function navigateStory(direction) {
     if (direction === 'next') currentStoryIndex++;
     else currentStoryIndex--;
 
-    const isOwner = document.getElementById('deleteStoryBtn').style.display === 'block';
+    const deleteBtn = document.getElementById('deleteStoryBtn');
+    const isOwner = deleteBtn && deleteBtn.style.display !== 'none';
     loadStoryItem(isOwner);
 }
 
@@ -752,14 +802,189 @@ function handleStoryKeyboard(e) {
 function closeStory() {
     const modal = document.getElementById('storyModal');
     const videoElement = document.getElementById('storyVideo');
+    const menu = document.getElementById('storyMoreMenu');
     if (modal) modal.style.display = "none";
+    document.body.classList.remove('story-open');
+    if (menu) menu.classList.remove('open');
     if (videoElement) {
         videoElement.pause();
         videoElement.currentTime = 0;
+        videoElement.onclick = null;
     }
+    currentStoryAuthorId = null;
     clearTimeout(storyTimer);
     document.removeEventListener('keydown', handleStoryKeyboard);
 }
+
+function updateStorySoundUI() {
+    const soundBtn = document.getElementById('storySoundBtn');
+    const soundIcon = soundBtn ? soundBtn.querySelector('i') : null;
+    if (!soundBtn || !soundIcon) return;
+    soundIcon.className = storySoundMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+}
+
+function toggleStorySound(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const videoElement = document.getElementById('storyVideo');
+    if (!videoElement || videoElement.style.display === 'none') return;
+    storySoundMuted = !storySoundMuted;
+    videoElement.muted = storySoundMuted;
+    updateStorySoundUI();
+}
+
+function toggleStoryMenu(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const menu = document.getElementById('storyMoreMenu');
+    if (!menu) return;
+    menu.classList.toggle('open');
+}
+
+function copyActiveStoryLink() {
+    if (!currentStories || !currentStories.length) return;
+    const active = currentStories[currentStoryIndex];
+    if (!active || !active.id) return;
+    const url = window.location.origin + '/s/' + active.id;
+
+    navigator.clipboard.writeText(url).then(function () {
+        const input = document.getElementById('storyReplyInput');
+        if (input) {
+            const old = input.placeholder;
+            input.placeholder = 'Story linki kopyalandi';
+            setTimeout(function () { input.placeholder = old; }, 1200);
+        }
+    }).catch(function () {
+        prompt('Linki kopyala:', url);
+    });
+}
+
+async function reportActiveStory() {
+    if (!currentStories || !currentStories.length) return;
+    const active = currentStories[currentStoryIndex];
+    if (!active || !active.id) return;
+
+    const reason = prompt('Bildirim nedeni (kisa):', 'Uygunsuz icerik');
+    if (reason === null) return;
+
+    try {
+        const response = await fetch('/api/story/report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                story_id: active.id,
+                reason: (reason || '').trim() || 'Uygunsuz icerik'
+            })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || 'Bildirilemedi.');
+        }
+
+        const input = document.getElementById('storyReplyInput');
+        if (input) {
+            const old = input.placeholder;
+            input.placeholder = 'Hikaye bildirimi gonderildi';
+            setTimeout(function () { input.placeholder = old; }, 1400);
+        }
+    } catch (err) {
+        alert(err.message || 'Bildirirken hata olustu.');
+    }
+}
+
+async function sendStoryReply() {
+    const input = document.getElementById('storyReplyInput');
+    if (!input) return;
+    const text = (input.value || '').trim();
+    if (!text) return;
+
+    const story = currentStories[currentStoryIndex];
+    if (!story || !currentStoryAuthorId) {
+        alert('Mesaj gonderilemedi.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('body', text);
+    formData.append('story_id', story.id);
+
+    try {
+        const response = await fetch('/send_message/' + currentStoryAuthorId, {
+            method: 'POST',
+            body: formData
+        });
+        if (!response.ok) throw new Error('Mesaj gonderilemedi');
+        input.value = '';
+        input.placeholder = 'Mesaj gonderildi';
+        setTimeout(() => {
+            input.placeholder = document.getElementById('storyUserName').innerText + ' kullanicisina mesaj gonder...';
+        }, 1300);
+    } catch (err) {
+        console.error(err);
+        alert('Mesaj gonderilirken hata olustu.');
+    }
+}
+
+function setupStorySwipeClose() {
+    const wrapper = document.querySelector('#storyModal .story-media-wrapper');
+    if (!wrapper || wrapper.dataset.swipeBound === '1') return;
+    wrapper.dataset.swipeBound = '1';
+
+    wrapper.addEventListener('touchstart', function (e) {
+        const t = e.touches[0];
+        storySwipeStart = {
+            x: t.clientX,
+            y: t.clientY,
+            ts: Date.now()
+        };
+    }, { passive: true });
+
+    wrapper.addEventListener('touchend', function (e) {
+        if (!storySwipeStart) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - storySwipeStart.x;
+        const dy = t.clientY - storySwipeStart.y;
+        const dt = Date.now() - storySwipeStart.ts;
+        storySwipeStart = null;
+
+        const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
+        const isHorizontalSwipe = absX > absY * 1.15 && absX > 50 && dt < 700;
+        const isVerticalClose = absY > absX * 1.15 && dy > 95 && dt < 700;
+
+        if (isHorizontalSwipe) {
+            navigateStory(dx < 0 ? 'next' : 'prev');
+            return;
+        }
+
+        if (isVerticalClose) {
+            closeStory();
+        }
+    }, { passive: true });
+
+    wrapper.addEventListener('touchcancel', function () {
+        storySwipeStart = null;
+    }, { passive: true });
+
+    wrapper.addEventListener('click', function () {
+        const menu = document.getElementById('storyMoreMenu');
+        if (menu) menu.classList.remove('open');
+    });
+}
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter' && document.getElementById('storyModal') && document.getElementById('storyModal').style.display === 'flex') {
+        const active = document.activeElement;
+        if (active && active.id === 'storyReplyInput') {
+            event.preventDefault();
+            sendStoryReply();
+        }
+    }
+});
 
 // ==========================================
 // 10. ANKET SİSTEMİ
@@ -790,24 +1015,7 @@ async function votePoll(pollId, optionId, element) {
     }
 }
 
-// ==========================================
-// 11. GÖRÜNTÜLÜ VE SESLİ ARAMA (WEBRTC)
-// ==========================================
-let localStream;
-let remoteStream;
-let peerConnection;
 let socket;
-let isCaller = false;
-let incomingSignal;
-let currentCallUser;
-let iceCandidatesQueue = [];
-
-const rtcSettings = {
-    iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" }
-    ]
-};
 
 if (typeof io !== 'undefined') {
     socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
@@ -817,180 +1025,6 @@ if (typeof io !== 'undefined') {
             socket.emit('join', { username: MY_USERNAME });
         }
     });
-
-    socket.on('incoming_call', (data) => {
-        if (document.getElementById('callModal').style.display === 'flex') return;
-        document.getElementById('incomingCallBox').style.display = 'block';
-        document.getElementById('callerName').innerText = data.caller;
-        document.getElementById('callType').innerText = data.isVideo ? "Görüntülü Arıyor..." : "Sesli Arıyor...";
-        incomingSignal = data.signal;
-        currentCallUser = data.caller;
-        isCaller = false;
-    });
-
-    socket.on('call_accepted', async (signal) => {
-        document.getElementById('callStatus').innerText = "Bağlanıyor...";
-        try {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(signal));
-            processIceQueue();
-        } catch (error) {
-            console.error("❌ Sinyal işleme hatası:", error);
-        }
-    });
-
-    socket.on('ice_candidate_msg', async (candidate) => {
-        if (peerConnection && peerConnection.remoteDescription) {
-            try {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-            } catch (e) { console.error("❌ ICE Ekleme Hatası", e); }
-        } else {
-            iceCandidatesQueue.push(candidate);
-        }
-    });
-
-    socket.on('call_ended', () => { closeCallModal(); });
-}
-
-async function startCall(isVideo) {
-    isCaller = true;
-    currentCallUser = typeof OTHER_USERNAME !== 'undefined' ? OTHER_USERNAME : null;
-    
-    // HATA DÜZELTME: Eğer global değişken yoksa DOM'dan al
-    if (!currentCallUser) {
-        const nameEl = document.querySelector('.chat-username');
-        if (nameEl) currentCallUser = nameEl.innerText.trim();
-    }
-    
-    iceCandidatesQueue = [];
-
-    if (!currentCallUser) {
-        alert("Kimi arayacağını bulamadım!");
-        return;
-    }
-
-    document.getElementById('callModal').style.display = 'flex';
-    const statusBox = document.getElementById('callStatus');
-    statusBox.style.display = 'block';
-    statusBox.innerText = "Aranıyor...";
-
-    await setupLocalStream(isVideo);
-    createPeerConnection();
-
-    const offer = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offer);
-
-    socket.emit('call_user', {
-        userToCall: currentCallUser,
-        caller: MY_USERNAME,
-        signal: offer,
-        isVideo: isVideo
-    });
-}
-
-async function acceptCall() {
-    document.getElementById('incomingCallBox').style.display = 'none';
-    document.getElementById('callModal').style.display = 'flex';
-    document.getElementById('callStatus').innerText = "Bağlanıyor...";
-
-    await setupLocalStream(true);
-    createPeerConnection();
-
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingSignal));
-    processIceQueue();
-
-    const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
-
-    socket.emit('answer_call', {
-        signal: answer,
-        to: currentCallUser
-    });
-}
-
-function rejectCall() {
-    document.getElementById('incomingCallBox').style.display = 'none';
-    socket.emit('end_call', { to: currentCallUser });
-}
-
-async function setupLocalStream(isVideo) {
-    try {
-        const constraints = {
-            audio: true,
-            video: isVideo ? { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" } : false
-        };
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        document.getElementById('localVideo').srcObject = localStream;
-    } catch (err) {
-        console.error("❌ Kamera hatası:", err);
-        alert("Kamera/Mikrofon izni gerekli.");
-        closeCallModal();
-    }
-}
-
-function createPeerConnection() {
-    peerConnection = new RTCPeerConnection(rtcSettings);
-    localStream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, localStream);
-    });
-
-    peerConnection.ontrack = (event) => {
-        const remoteVid = document.getElementById('remoteVideo');
-        if (remoteVid.srcObject !== event.streams[0]) {
-            remoteVid.srcObject = event.streams[0];
-            document.getElementById('callStatus').style.display = 'none';
-        }
-    };
-
-    peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-            socket.emit('ice_candidate', {
-                candidate: event.candidate,
-                to: currentCallUser
-            });
-        }
-    };
-}
-
-async function processIceQueue() {
-    while (iceCandidatesQueue.length > 0) {
-        const candidate = iceCandidatesQueue.shift();
-        try {
-            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch (e) {}
-    }
-}
-
-function endCall() {
-    socket.emit('end_call', { to: currentCallUser });
-    closeCallModal();
-}
-
-function closeCallModal() {
-    document.getElementById('callModal').style.display = 'none';
-    document.getElementById('incomingCallBox').style.display = 'none';
-    if (localStream) localStream.getTracks().forEach(track => track.stop());
-    if (peerConnection) peerConnection.close();
-    location.reload();
-}
-
-function toggleAudio() {
-    if (localStream) {
-        const audioTrack = localStream.getAudioTracks()[0];
-        if (audioTrack) {
-            audioTrack.enabled = !audioTrack.enabled;
-            document.getElementById('audioBtn').innerText = audioTrack.enabled ? "🎤" : "🔇";
-        }
-    }
-}
-
-function toggleVideo() {
-    if (localStream) {
-        const videoTrack = localStream.getVideoTracks()[0];
-        if (videoTrack) {
-            videoTrack.enabled = !videoTrack.enabled;
-            document.getElementById('videoBtn').innerText = videoTrack.enabled ? "📷" : "🚫";
-        }
-    }
 }
 
 // ==========================================
@@ -1846,7 +1880,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (d.success) {
                     if (d.action === 'followed') { 
                         // Animasyonlu Tik İşareti
-                        this.innerHTML = '<i class="fas fa-check"></i>';
+                        this.innerHTML = '<svg class="reels-svg-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5 9.5 17 19 7.5"></path></svg>';
                         this.classList.add('followed-success');
                         setTimeout(() => {
                             this.style.opacity = '0';
@@ -1858,11 +1892,44 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Klavye ile Reels Kaydırma (Yumuşak Geçiş)
+    document.addEventListener('keydown', function(e) {
+        const container = document.querySelector('.reels-container');
+        if (!container) return;
+
+        const itemHeight = window.innerHeight;
+        const currentScroll = container.scrollTop;
+        const index = Math.round(currentScroll / itemHeight);
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            container.scrollTo({
+                top: (index + 1) * itemHeight,
+                behavior: 'smooth'
+            });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            container.scrollTo({
+                top: (index - 1) * itemHeight,
+                behavior: 'smooth'
+            });
+        }
+    });
+
+    if (window.__reelsInlineControllerActive) return;
+
     // 2. Beğeni Butonları (Görsel Toggle)
     const likeBtns = document.querySelectorAll('.reel-action.like-btn');
     likeBtns.forEach(btn => {
         btn.addEventListener('click', function () {
+            if (this.querySelector('svg')) {
+                this.classList.add('reel-pulse');
+                setTimeout(() => this.classList.remove('reel-pulse'), 180);
+                return;
+            }
+
             const icon = this.querySelector('i');
+            if (!icon) return;
             if (icon.classList.contains('fa-regular')) { 
                 icon.classList.replace('fa-regular', 'fa-solid'); 
                 icon.style.color = '#ff4757'; // Kırmızı
@@ -1918,30 +1985,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
-    });
-
-    // Klavye ile Reels Kaydırma (Yumuşak Geçiş)
-    document.addEventListener('keydown', function(e) {
-        const container = document.querySelector('.reels-container');
-        if (!container) return;
-
-        const itemHeight = window.innerHeight;
-        const currentScroll = container.scrollTop;
-        const index = Math.round(currentScroll / itemHeight);
-
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            container.scrollTo({
-                top: (index + 1) * itemHeight,
-                behavior: 'smooth'
-            });
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            container.scrollTo({
-                top: (index - 1) * itemHeight,
-                behavior: 'smooth'
-            });
-        }
     });
 });
 
@@ -2181,8 +2224,8 @@ async function viewSharedStory(event, storyId) {
 // ==========================================
 function createFloatingHeart(element) {
     const heart = document.createElement('div');
-    heart.innerText = '❤️';
     heart.classList.add('floating-heart');
+    heart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-6.8-4.5-9.2-8.6C.8 8.7 2.7 5.5 6 5.5c1.9 0 3.2 1 4 2.1.8-1.1 2.1-2.1 4-2.1 3.3 0 5.2 3.2 3.2 6.9C18.7 16.5 12 21 12 21z"></path></svg>';
     
     const rect = element.getBoundingClientRect();
     heart.style.left = (rect.left + window.scrollX + rect.width / 2) + 'px';
@@ -2197,17 +2240,15 @@ function createFloatingHeart(element) {
 
 // Reels İçin Özel Büyük Kalp Animasyonu
 function showReelsHeart(x, y) {
-    const heart = document.createElement('i');
-    heart.className = 'fas fa-heart';
+    const heart = document.createElement('div');
+    heart.className = 'reels-heart-burst';
+    heart.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-6.8-4.5-9.2-8.6C.8 8.7 2.7 5.5 6 5.5c1.9 0 3.2 1 4 2.1.8-1.1 2.1-2.1 4-2.1 3.3 0 5.2 3.2 3.2 6.9C18.7 16.5 12 21 12 21z"></path></svg>';
     heart.style.position = 'fixed';
     heart.style.left = x + 'px';
     heart.style.top = y + 'px';
     heart.style.transform = 'translate(-50%, -50%) scale(0)';
-    heart.style.color = 'white';
-    heart.style.fontSize = '6rem';
     heart.style.zIndex = '9999';
     heart.style.pointerEvents = 'none';
-    heart.style.textShadow = '0 10px 20px rgba(0,0,0,0.3)';
     heart.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease-in';
     
     document.body.appendChild(heart);
@@ -2389,7 +2430,7 @@ function setupMentionSystem() {
         const val    = inputEl.value;
         const cursor = inputEl.selectionStart ?? val.length;
         const before = val.substring(0, cursor);
-        const match  = before.match(/(^|\s)@([\w\u00C0-\u024F-]*)$/i);
+        const match  = before.match(/(^|\s)@([\w\u00C0-\u024F-]+(?:\.[\w\u00C0-\u024F-]+)*)$/i);
         if (!match) return;
         const prefix  = before.substring(0, match.index + match[1].length);
         inputEl.value = prefix + '@' + user.handle + ' ' + val.substring(cursor);
@@ -2448,7 +2489,7 @@ function setupMentionSystem() {
             activeInput = this;
             const cur    = this.selectionStart ?? this.value.length;
             const before = this.value.substring(0, cur);
-            const m      = before.match(/(^|\s)@([\w\u00C0-\u024F-]{1,30})$/i);
+            const m      = before.match(/(^|\s)@([\w\u00C0-\u024F-]+(?:\.[\w\u00C0-\u024F-]+)*)$/i);
             m ? doFetch(m[2]) : hide();
         });
 

@@ -7,126 +7,392 @@
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #1a1a1a; /* Instagram koyu gri/siyah tonu */
+            background: #000;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
         }
 
-        .story-viewer-container {
+        .story-container {
             position: relative;
             width: 100%;
-            max-width: 400px; /* Mobil hikaye boyutu */
             height: 100vh;
-            max-height: 850px;
-            background: black;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-
-        /* Medya (Resim/Video) */
-        .story-media {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* Resmi kesmeden sığdır */
-            display: block;
-        }
-
-        /* Üst Bilgi (Kullanıcı) */
-        .story-header {
-            position: absolute;
-            top: 20px;
-            left: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 10;
-            width: 90%;
-        }
-
-        .user-avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            border: 2px solid white;
-            object-fit: cover;
-        }
-
-        .user-info {
+            max-width: 450px;
+            background: #000;
             display: flex;
             flex-direction: column;
         }
 
-        .username {
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-decoration: none;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-        }
-
-        .timestamp {
-            color: rgba(255,255,255,0.7);
-            font-size: 0.75rem;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-        }
-
-        /* Kapatma Butonu */
-        .close-btn {
+        /* Progress Bar */
+        .story-progress {
+            height: 3px;
+            background: rgba(255,255,255,0.2);
             position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            font-size: 1.5rem;
-            text-decoration: none;
-            z-index: 20;
-            cursor: pointer;
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
         }
 
-        /* Mobil Uyum */
+        .story-progress-bar {
+            height: 100%;
+            background: #fff;
+            width: 100%;
+            animation: progress 8s linear forwards;
+        }
+
+        @keyframes progress {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        /* Header */
+        .story-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+            background: linear-gradient(180deg, rgba(0,0,0,.3) 0%, transparent 100%);
+        }
+
+        .story-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .story-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .story-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .story-username {
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-shadow: 0 1px 3px rgba(0,0,0,.5);
+        }
+
+        .story-time {
+            color: rgba(255,255,255,.8);
+            font-size: 0.8rem;
+            text-shadow: 0 1px 3px rgba(0,0,0,.5);
+        }
+
+        .story-close {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 50%;
+            background: none;
+            border: none;
+        }
+
+        .story-close:hover {
+            background: rgba(255,255,255,.1);
+        }
+
+        /* Media Container */
+        .story-media-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .story-media {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        /* Bottom - Viewers */
+        .story-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 16px;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.4) 100%);
+            z-index: 50;
+        }
+
+        .story-viewers {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 14px;
+            background: rgba(255,255,255,.15);
+            border-radius: 20px;
+            cursor: pointer;
+            width: fit-content;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .story-viewers:hover {
+            background: rgba(255,255,255,.25);
+        }
+
+        .viewers-icon {
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .viewers-text {
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Viewers Modal */
+        .viewers-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.7);
+            z-index: 1000;
+            align-items: flex-end;
+            justify-content: center;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .viewers-modal.active {
+            display: flex;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .viewers-sheet {
+            background: var(--card-bg);
+            border-radius: 24px 24px 0 0;
+            max-height: 80vh;
+            width: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .viewers-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+        }
+
+        .viewers-header h3 {
+            color: var(--text-color);
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .viewers-close {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+
+        .viewers-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewer-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+        }
+
+        .viewer-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .viewer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .viewer-info {
+            flex: 1;
+        }
+
+        .viewer-name {
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .viewer-handle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .viewer-time {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-align: right;
+        }
+
         @media (max-width: 500px) {
-            .story-viewer-container {
+            .story-container {
                 max-width: 100%;
                 border-radius: 0;
-                height: 100vh;
-                max-height: none;
+            }
+
+            .viewers-sheet {
+                max-height: 70vh;
             }
         }
     </style>
 </head>
 <body>
 
-    <a href="/" style="position: absolute; top: 20px; left: 20px; color: white; text-decoration: none; font-weight: 800; font-size: 1.5rem; z-index: 5;">
-        YTU<span style="color: #ffc107;">SOCIAL</span>
-    </a>
-
-    <a href="/" class="close-btn"><i class="fas fa-times"></i></a>
-
-    <div class="story-viewer-container">
-        
-        <div class="story-header">
-            <img src="/static/{{ story.author.profile_pic }}" class="user-avatar" onerror="this.src='/static/img/default_avatar.png'">
-            <div class="user-info">
-                <a href="{{ url_for('main.user_profile', handle=story.author.handle) }}" class="username">{{ story.author.username }}</a>
-                <span class="timestamp">{{ story.timestamp.strftime('%H:%M') }}</span>
-            </div>
+    <div class="story-container">
+        <!-- Progress Bar -->
+        <div class="story-progress">
+            <div class="story-progress-bar"></div>
         </div>
 
-        {% if story.image_file.lower().endswith(('.mp4', '.mov', '.avi', '.webm')) %}
-            <video src="/static/story_images/{{ story.image_file }}" class="story-media" autoplay playsinline controls></video>
-        {% else %}
-            <img src="/static/story_images/{{ story.image_file }}" class="story-media">
-        {% endif %}
+        <!-- Header -->
+        <div class="story-top">
+            <div class="story-user">
+                <a href="{{ url_for('main.user_profile', handle=story.author.handle) }}">
+                    <img src="/static/{{ story.author.profile_pic }}" class="story-avatar" onerror="this.src='/static/img/default_avatar.png'">
+                </a>
+                <div class="story-user-info">
+                    <a href="{{ url_for('main.user_profile', handle=story.author.handle) }}" class="story-username">
+                        {{ story.author.username }}
+                    </a>
+                    <span class="story-time">{{ story.timestamp.strftime('%H:%M') }}</span>
+                </div>
+            </div>
+            <button class="story-close" onclick="window.location.href='/'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
+        <!-- Media -->
+        <div class="story-media-box">
+            {% if story.image_file.lower().endswith(('.mp4', '.mov', '.avi', '.webm', '.mkv')) %}
+                <video src="/static/story_images/{{ story.image_file }}" class="story-media" autoplay playsinline controls></video>
+            {% else %}
+                <img src="/static/story_images/{{ story.image_file }}" class="story-media" alt="Story">
+            {% endif %}
+        </div>
+
+        <!-- Bottom - Viewers -->
+        <div class="story-bottom">
+            {% if viewers %}
+            <button class="story-viewers" onclick="openViewersModal()">
+                <i class="fas fa-eye viewers-icon"></i>
+                <span class="viewers-text">{{ viewers|length }} kişi gördü</span>
+            </button>
+            {% endif %}
+        </div>
     </div>
+
+    <!-- Viewers Modal -->
+    <div class="viewers-modal" id="viewersModal">
+        <div class="viewers-sheet">
+            <div class="viewers-header">
+                <h3>Hikayeni Görenler</h3>
+                <button class="viewers-close" onclick="closeViewersModal()">✕</button>
+            </div>
+            <div class="viewers-list">
+                {% for viewer in viewers %}
+                <a href="{{ url_for('main.user_profile', handle=viewer.user.handle) }}" class="viewer-item">
+                    <img src="/static/{{ viewer.user.profile_pic }}" class="viewer-avatar" onerror="this.src='/static/img/default_avatar.png'">
+                    <div class="viewer-info">
+                        <div class="viewer-name">{{ viewer.user.username }}</div>
+                        <div class="viewer-handle">@{{ viewer.user.handle }}</div>
+                    </div>
+                    <div class="viewer-time">{{ viewer.viewed_at.strftime('%H:%M') }}</div>
+                </a>
+                {% endfor %}
+                {% if not viewers %}
+                <div style="padding: 40px 20px; text-align: center; color: var(--text-muted);">
+                    Henüz kimse görmedi
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-close story after 8 seconds
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 8000);
+
+        function openViewersModal() {
+            document.getElementById('viewersModal').classList.add('active');
+        }
+
+        function closeViewersModal() {
+            document.getElementById('viewersModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('viewersModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'viewersModal') {
+                closeViewersModal();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeViewersModal();
+            }
+        });
+    </script>
 
 </body>
 </html>

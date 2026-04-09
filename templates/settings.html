@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayarlar - YTU Social</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .settings-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .settings-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .settings-header h1 {
+            color: var(--text-color);
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .settings-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .settings-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .settings-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--hover-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--ytu-lacivert);
+            flex-shrink: 0;
+        }
+
+        .settings-item-label {
+            flex: 1;
+        }
+
+        .settings-item-title {
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .settings-item-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .settings-item-arrow {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+        }
+
+        .settings-item:hover .settings-item-arrow {
+            transform: translateX(4px);
+        }
+
+        .settings-danger {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+        }
+
+        .settings-danger h3 {
+            color: #ef4444;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .settings-danger p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        @media (max-width: 768px) {
+            .settings-container {
+                padding: 10px;
+            }
+
+            .settings-header {
+                padding-top: 10px;
+                margin-bottom: 30px;
+            }
+
+            .settings-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .settings-item {
+                padding: 14px 16px;
+                gap: 12px;
+            }
+
+            .settings-item-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar_partial.html' %}
+
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1>Ayarlar</h1>
+            <p>Hesap ve gizlilik ayarlarını düzenle</p>
+        </div>
+
+        <div class="settings-menu">
+            <!-- Profili Düzenle -->
+            <a href="{{ url_for('main.edit_profile') }}" class="settings-item">
+                <div class="settings-item-icon">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="settings-item-label">
+                    <div class="settings-item-title">Profili Düzenle</div>
+                    <div class="settings-item-desc">Fotoğraf, bio, sosyal linkler</div>
+                </div>
+                <div class="settings-item-arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </a>
+
+            <!-- Şifre Değiştir -->
+            <a href="{{ url_for('main.change_password') }}" class="settings-item">
+                <div class="settings-item-icon">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <div class="settings-item-label">
+                    <div class="settings-item-title">Şifre Değiştir</div>
+                    <div class="settings-item-desc">Hesap şifreni güncelletle</div>
+                </div>
+                <div class="settings-item-arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </a>
+
+            <!-- Engellenen Kişiler -->
+            <a href="{{ url_for('main.blocked_users') }}" class="settings-item">
+                <div class="settings-item-icon">
+                    <i class="fa-solid fa-ban"></i>
+                </div>
+                <div class="settings-item-label">
+                    <div class="settings-item-title">Engellenen Kişiler</div>
+                    <div class="settings-item-desc">Engellediğin hesapları yönet</div>
+                </div>
+                <div class="settings-item-arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </a>
+        </div>
+
+        <!-- Hesabı Sil (Danger Zone) -->
+        <div class="settings-danger">
+            <h3><i class="fa-solid fa-triangle-exclamation"></i> Tehlikeli Bölge</h3>
+            <p>
+                Hesabını silmek tüm verilerini kalıcı olarak siler. Bu işlem geri alınamaz.
+            </p>
+            <button type="button" class="btn-delete" onclick="confirmDeleteAccount()">
+                <i class="fa-solid fa-trash"></i> Hesabı Sil
+            </button>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script>
+        function confirmDeleteAccount() {
+            const msg = "Bu işlem geri alınamaz! Tüm verileriniz kalıcı olarak silinecek.\n\nDevam etmek istiyor musunuz?";
+            if (confirm(msg)) {
+                const password = prompt("İşlemi onaylamak için şifrenizi giriniz:");
+                if (password) {
+                    fetch('{{ url_for("main.delete_account") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ password: password })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Hesabınız silindi. Yönlendiriliyorsunuz...');
+                            window.location.href = '/';
+                        } else {
+                            alert(data.message || 'Hata: Hesap silinemedi');
+                        }
+                    })
+                    .catch(e => alert('Hata: ' + e));
+                }
+            }
+        }
+    </script>
+</body>
+</html>

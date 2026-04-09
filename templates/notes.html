@@ -16,51 +16,12 @@
     <style>
         .np-layout {
             display: grid;
-            grid-template-columns: 240px 1fr 270px;
+            grid-template-columns: 280px 1fr 270px;
             gap: 20px;
             max-width: 1260px;
             margin: 90px auto 30px;
             padding: 0 20px;
             align-items: start;
-        }
-        .np-sidebar {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 18px;
-            padding: 20px 16px;
-            position: sticky;
-            top: 80px;
-        }
-        .np-profile {
-            text-align: center;
-            padding-bottom: 18px;
-            margin-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .np-profile-pic {
-            width: 64px; height: 64px; border-radius: 50%;
-            object-fit: cover; border: 3px solid var(--ytu-lacivert); margin-bottom: 10px;
-        }
-        .np-profile-name { font-size: 1rem; font-weight: 800; color: var(--text-color); margin: 0 0 4px; }
-        .np-score-badge {
-            display: inline-flex; align-items: center; gap: 5px;
-            background: linear-gradient(135deg, var(--ytu-lacivert), #2a5298);
-            color: #fff; padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.82rem;
-        }
-        .np-nav { display: flex; flex-direction: column; gap: 4px; }
-        .np-nav-link {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 12px; border-radius: 10px;
-            color: var(--text-muted); text-decoration: none;
-            font-weight: 600; font-size: 0.9rem; transition: all 0.15s;
-        }
-        .np-nav-link:hover  { background: rgba(var(--ytu-lacivert-rgb),.08); color: var(--ytu-lacivert); }
-        .np-nav-link.active { background: rgba(var(--ytu-lacivert-rgb),.12); color: var(--ytu-lacivert); }
-        .np-nav-link i { width: 18px; text-align: center; }
-
-        .np-flash {
-            padding: 12px 16px; border-radius: 10px; margin-bottom: 16px;
-            font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 10px;
         }
         .np-flash.success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
         .np-flash.danger  { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
@@ -150,7 +111,7 @@
         .np-item-desc {
             font-size: 0.83rem; color: var(--text-muted); margin: 0 0 10px;
             overflow: hidden; text-overflow: ellipsis;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45;
+            display: -webkit-box; line-clamp: 2; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45;
         }
         .np-item-footer { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
         .np-uploader { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-muted); }
@@ -399,7 +360,6 @@
             .navbar, .left-sidebar { display: none !important; }
             body { padding-top: 54px !important; padding-bottom: 68px !important; }
             .np-layout { grid-template-columns: 1fr; margin: 0 auto 20px; padding: 0 12px; }
-            .np-sidebar { display: none; }
             .np-right   { display: none; }
             .np-hero { flex-direction: column; align-items: flex-start; }
             .np-form-grid { grid-template-columns: 1fr; }
@@ -540,35 +500,7 @@
 
 <div class="np-layout">
 
-<!-- LEFT SIDEBAR -->
-<aside class="np-sidebar">
-    <div class="np-profile">
-        <img src="/static/{{ current_user.profile_pic }}" class="np-profile-pic">
-        <p class="np-profile-name">{{ current_user.username }}</p>
-        <span class="np-score-badge">
-            <i class="fas fa-star" style="color:#f0b429;"></i>
-            {{ current_user.score }} Puan
-        </span>
-    </div>
-    <nav class="np-nav">
-        <a href="/"                                     class="np-nav-link"><i class="fas fa-home"></i> Ana Sayfa</a>
-        <a href="{{ url_for('main.notes_pool') }}"      class="np-nav-link active"><i class="fas fa-book-open"></i> Not Havuzu</a>
-        <a href="{{ url_for('main.explore') }}"         class="np-nav-link"><i class="fas fa-compass"></i> Keşfet</a>
-        <a href="{{ url_for('main.reels') }}"           class="np-nav-link"><i class="fas fa-clapperboard"></i> Reels</a>
-        <a href="{{ url_for('main.saved_posts_list') }}" class="np-nav-link"><i class="far fa-bookmark"></i> Kaydedilenler</a>
-        <a href="{{ url_for('main.clubs_full_list') }}" class="np-nav-link"><i class="fas fa-trophy"></i> Kulüpler Ligi</a>
-        <a href="{{ url_for('main.adverts') }}"         class="np-nav-link"><i class="fas fa-bullhorn"></i> İlanlar</a>
-        <a href="{{ url_for('main.notifications') }}"   class="np-nav-link" style="display:flex;align-items:center;gap:8px;">
-            <i class="far fa-bell"></i> Bildirimler
-            {% if unread_count > 0 %}<span class="notification-badge">{{ unread_count }}</span>{% endif %}
-        </a>
-        <a href="{{ url_for('main.messages_inbox') }}"  class="np-nav-link" style="display:flex;align-items:center;gap:8px;">
-            <i class="far fa-envelope"></i> Mesajlar
-            {% if unread_msg_count > 0 %}<span class="msg-badge">{{ unread_msg_count }}</span>{% endif %}
-        </a>
-        <a href="{{ url_for('main.ulasim') }}" class="np-nav-link" style="display:flex;align-items:center;gap:8px;"><i class="fas fa-bus"></i> Ulaşım</a>
-    </nav>
-</aside>
+{% include 'sidebar_partial.html' %}
 
 <!-- MAIN -->
 <main>
@@ -672,14 +604,14 @@
                         </svg>
                     </button>
                     <div class="np-dot-menu" id="nm_{{ note.id }}">
-                        <button class="np-dot-item" onclick="openEditNote({{ note.id }},'{{ note.title|e }}','{{ note.course_code|e }}','{{ note.department|e }}','{{ (note.description or '')|e }}')">
+                        <button class="np-dot-item" data-note-id="{{ note.id }}" data-note-title="{{ note.title|e }}" data-note-course="{{ note.course_code|e }}" data-note-dept="{{ note.department|e }}" data-note-desc="{{ (note.description or '')|e }}" onclick="openEditNoteFromButton(this)">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                             </svg>
                             Düzenle
                         </button>
-                        <button class="np-dot-item del" onclick="openDeleteNote({{ note.id }})">
+                        <button class="np-dot-item del" data-note-id="{{ note.id }}" onclick="openDeleteNoteFromButton(this)">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"/>
                                 <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -1063,6 +995,15 @@
 
     /* ---------- Notu Düzenle ---------- */
     var _editId = null;
+    function openEditNoteFromButton(btn) {
+        openEditNote(
+            btn.dataset.noteId,
+            btn.dataset.noteTitle || '',
+            btn.dataset.noteCourse || '',
+            btn.dataset.noteDept || '',
+            btn.dataset.noteDesc || ''
+        );
+    }
     function openEditNote(id, title, course, dept, desc) {
         _editId = id;
         document.getElementById('enNoteTitle').value  = title;
@@ -1088,6 +1029,9 @@
 
     /* ---------- Notu Sil ---------- */
     var _deleteId = null;
+    function openDeleteNoteFromButton(btn) {
+        openDeleteNote(btn.dataset.noteId);
+    }
     function openDeleteNote(id) {
         _deleteId = id;
         document.getElementById('deleteNoteModal').classList.add('open');

@@ -3,180 +3,498 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gönderi Detayı | YTU Social</title>
+    <title>Gönderi • YTU Social</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: var(--bg-light);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .post-detail-main {
+            min-width: 0;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+            }
+
+            .navbar {
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+        }
+
+        /* White background for main content */
+        .post-detail-container {
+            background: var(--card-bg);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-left: none;
+            border-right: none;
+        }
+
+        @media (min-width: 769px) {
+            .post-detail-container {
+                border-radius: 8px;
+                margin-top: 20px;
+                border: 1px solid var(--border-color);
+            }
+        }
+
+        /* Header */
+        .pd-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .pd-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+            flex: 1;
+        }
+
+        .pd-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .pd-user-info {
+            flex: 1;
+        }
+
+        .pd-username {
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: block;
+            text-decoration: none;
+        }
+
+        .pd-dept {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .pd-menu {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: none;
+            border-radius: 50%;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .pd-menu:hover {
+            background: var(--hover-bg);
+            color: var(--text-color);
+        }
+
+        /* Media */
+        .pd-media {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            background: var(--hover-bg);
+        }
+
+        .pd-media-placeholder {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: var(--hover-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 3rem;
+        }
+
+        /* Caption */
+        .pd-caption {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        /* Stats */
+        .pd-stats {
+            padding: 16px;
+            display: flex;
+            gap: 32px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .pd-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pd-stat-value {
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Actions */
+        .pd-actions {
+            padding: 12px 16px;
+            display: flex;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-color);
+            justify-content: space-around;
+        }
+
+        .action-btn {
+            flex: 1;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            color: var(--text-color);
+            background: var(--hover-bg);
+        }
+
+        .action-btn.liked {
+            color: #ff4757;
+        }
+
+        /* Comments Section */
+        .pd-comments-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pd-comments-header h3 {
+            color: var(--text-color);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .sort-select {
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        /* Comments List */
+        .pd-comments-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .comment {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+        }
+
+        .comment-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .comment-body {
+            flex: 1;
+        }
+
+        .comment-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .comment-handle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .comment-dot {
+            color: var(--text-muted);
+        }
+
+        .comment-time {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .comment-text {
+            color: var(--text-color);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Comment Input */
+        .pd-comment-input-section {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .comment-input {
+            flex: 1;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            border-radius: 20px;
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: var(--ytu-lacivert);
+            background: var(--card-bg);
+        }
+
+        .comment-submit {
+            background: none;
+            border: none;
+            color: var(--ytu-lacivert);
+            font-weight: 600;
+            cursor: pointer;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        .comment-submit:hover {
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .pd-header {
+                padding: 12px;
+            }
+
+            .pd-caption,
+            .pd-stats,
+            .pd-actions,
+            .pd-comments-header,
+            .pd-comment-input-section {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+        }
+    </style>
 </head>
 <body>
+    {% include 'navbar_partial.html' %}
 
-    {% include 'navbar_partial.html' ignore missing %}
+    <div class="main-layout">
+        {% include 'sidebar_partial.html' %}
 
-    <div class="main-layout" style="grid-template-columns: 280px 1fr; max-width: 1400px;">
-        
-        <!-- SOL MENÜ (SIDEBAR) -->
-        <aside class="left-sidebar sticky-sidebar">
-            {% if current_user.is_authenticated %}
-            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px 20px; border: 1px solid var(--border-color);">
-                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
-                    <img src="/static/{{ current_user.profile_pic }}" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ytu-lacivert); object-fit: cover; margin-bottom: 12px;">
-                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{ current_user.username }}</h3>
-                    <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
-                </div>
-                <nav style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="/" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
-                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
-                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
-                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
-                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
-                    <a href="{{ url_for('main.clubs_full_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi</a>
-                    <a href="{{ url_for('main.adverts') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bullhorn" style="width: 20px; text-align: center;"></i> İlanlar</a>
-                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
-                        <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
-                        {% if unread_count > 0 %}<span class="notification-badge">{{ unread_count }}</span>{% endif %}
-                    </a>
-                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
-                        <i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
-                        {% if unread_msg_count > 0 %}<span class="msg-badge">{{ unread_msg_count }}</span>{% endif %}
-                    </a>
-                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bus" style="width: 20px; text-align: center;"></i> Ulaşım</a>
-                </nav>
-            </div>
-            {% endif %}
-        </aside>
-
-        <main style="display: flex; justify-content: center; align-items: flex-start;">
-        <div class="post-detail-card" style="height: calc(100vh - 120px); width: 100%; max-width: 1100px;">
-            
-            <!-- Sol Taraf: Medya (Resim/Video) -->
-            <div class="post-detail-media-box">
-                {% if post.image_file %}
-                    {% if post.is_video() %}
-                        <video controls autoplay class="post-detail-content">
-                            <source src="/static/post_images/{{ post.image_file }}" type="video/mp4">
-                            Tarayıcınız videoyu desteklemiyor.
-                        </video>
-                    {% else %}
-                        <img src="/static/post_images/{{ post.image_file }}" class="post-detail-content">
-                    {% endif %}
-                {% else %}
-                    <div class="post-detail-text-only">
-                        <p>{{ post.content }}</p>
+        <main class="post-detail-main">
+        <div class="post-detail-container">
+            <!-- Header -->
+            <div class="pd-header">
+                <a href="{{ url_for('main.user_profile', handle=post.author.handle) }}" class="pd-user">
+                    <img src="/static/{{ post.author.profile_pic }}" class="pd-avatar">
+                    <div class="pd-user-info">
+                        <span class="pd-username">{{ post.author.username }}</span>
+                        <span class="pd-dept">{{ post.author.department or 'Yıldız Teknik Üniversitesi' }}</span>
                     </div>
+                </a>
+                {% if post.author == current_user %}
+                    <a href="{{ url_for('main.delete_post', post_id=post.id) }}" class="pd-menu" onclick="return confirm('Silmek istediğine emin misin?')" title="Sil">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </a>
                 {% endif %}
             </div>
 
-            <!-- Sağ Taraf: Bilgiler ve Yorumlar -->
-            <div class="post-detail-info">
-                
-                <!-- Üst: Yazar Bilgisi -->
-                <div class="post-detail-header">
-                    <a href="{{ url_for('main.user_profile', handle=post.author.handle) }}" class="post-detail-author">
-                        <img src="/static/{{ post.author.profile_pic }}" class="post-detail-avatar">
-                        <div>
-                            <span class="post-detail-username">{{ post.author.username }}</span>
-                            <span class="post-detail-dept">{{ post.author.department or 'Öğrenci' }}</span>
-                        </div>
+            <!-- Media -->
+            {% if post.image_file %}
+                {% if post.is_video() %}
+                    <video controls class="pd-media" style="aspect-ratio: auto;">
+                        <source src="/static/post_images/{{ post.image_file }}">
+                    </video>
+                {% else %}
+                    <img src="/static/post_images/{{ post.image_file }}" class="pd-media" alt="Post">
+                {% endif %}
+            {% else %}
+                <div class="pd-media-placeholder">
+                    <i class="fa-solid fa-image"></i>
+                </div>
+            {% endif %}
+
+            <!-- Caption -->
+            {% if post.content %}
+            <div class="pd-caption">{{ post.content | format_tags }}</div>
+            {% endif %}
+
+            <!-- Stats -->
+            <div class="pd-stats">
+                <div class="pd-stat">
+                    <span class="pd-stat-value">{{ post.liked_by|length }}</span>
+                    <span>Beğenme</span>
+                </div>
+                <div class="pd-stat">
+                    <span class="pd-stat-value">{{ post.comments|length }}</span>
+                    <span>Yorum</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="pd-actions">
+                <button class="action-btn {% if current_user in post.liked_by %}liked{% endif %}" onclick="likePost('{{ post.id }}', this)">
+                    <i class="fa-{% if current_user in post.liked_by %}solid{% else %}regular{% endif %} fa-heart"></i>
+                </button>
+                <button class="action-btn" onclick="document.querySelector('.comment-input').focus()">
+                    <i class="fa-regular fa-comment"></i>
+                </button>
+                <button class="action-btn" onclick="openShareModal('post', '{{ post.id }}')">
+                    <i class="fa-regular fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <!-- Comments Header -->
+            <div class="pd-comments-header">
+                <h3>Yorumlar</h3>
+            </div>
+
+            <!-- Comments List -->
+            <div class="pd-comments-list" id="commentsContainer">
+                {% for comment in post.comments %}
+                <div class="comment">
+                    <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}">
+                        <img src="/static/{{ comment.author.profile_pic }}" class="comment-avatar">
                     </a>
-                    {% if post.author == current_user %}
-                    <a href="{{ url_for('main.delete_post', post_id=post.id) }}" class="post-detail-delete" onclick="return confirm('Silmek istediğine emin misin?')">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </a>
-                    {% endif %}
-                </div>
-
-                <!-- Yorum Başlığı ve Sıralama -->
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color);">
-                    <h4 style="margin: 0; font-size: 1rem; color: var(--text-color);">Yorumlar ({{ post.comments|length }})</h4>
-                    <select onchange="sortComments(this.value)" class="sort-dropdown">
-                        <option value="newest" selected>En Yeniler</option>
-                        <option value="oldest">En Eskiler</option>
-                        <option value="popular">Beğeniye Göre</option>
-                    </select>
-                </div>
-
-                <!-- Orta: Açıklama ve Yorumlar -->
-                <div class="post-detail-comments" id="commentsContainer">
-                    {% if post.content and post.image_file %}
-                    <div class="comment-item">
-                        <img src="/static/{{ post.author.profile_pic }}" class="comment-avatar-sm">
-                        <div class="comment-bubble">
-                            <strong>{{ post.author.username }}</strong>
-                            <p>{{ post.content }}</p>
-                            <small class="text-muted">{{ post.date_posted.strftime('%d %b %H:%M') }}</small>
+                    <div class="comment-body">
+                        <div class="comment-meta">
+                            <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="comment-author">
+                                {{ comment.author.username }}
+                            </a>
+                            <span class="comment-handle">@{{ comment.author.handle }}</span>
+                            <span class="comment-dot">·</span>
+                            <span class="comment-time">{{ comment.date_posted.strftime('%H:%M') }}</span>
                         </div>
+                        <div class="comment-text" id="comment-text-{{ comment.id }}">{{ comment.text | format_tags }}</div>
                     </div>
-                    {% endif %}
-
-                    {% for comment in post.comments %}
-                    <div class="tw-comment" id="comment-container-{{ comment.id }}">
-                        <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="tw-comment-avatar-link">
-                            <img src="/static/{{ comment.author.profile_pic }}" class="tw-comment-avatar">
-                        </a>
-                        <div class="tw-comment-body">
-                            <div class="tw-comment-meta">
-                                <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="tw-comment-name">{{ comment.author.username }}</a>
-                                <span class="tw-comment-handle">@{{ comment.author.handle }}</span>
-                                <span class="tw-comment-dot">·</span>
-                                <span class="tw-comment-time">{{ comment.date_posted.strftime('%H:%M') }}</span>
-                                {% if comment.author == current_user %}
-                                <div class="tw-comment-menu-wrap">
-                                    <button type="button" class="tw-comment-menu-btn" onclick="toggleMenu('menu-{{ comment.id }}', event)">⋮</button>
-                                    <div id="menu-{{ comment.id }}" class="comment-dropdown">
-                                        <button type="button" class="comment-action" onclick="openEditMode('{{ comment.id }}')">✏️ Düzenle</button>
-                                        <button type="button" class="comment-action delete" onclick="deleteCommentJS('{{ comment.id }}', '{{ post.id }}', this)">🗑️ Sil</button>
-                                    </div>
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="tw-comment-text" id="comment-text-{{ comment.id }}">{{ comment.text | format_tags }}</div>
-                            {% if comment.author == current_user %}
-                            <form action="{{ url_for('main.edit_comment', comment_id=comment.id) }}" method="POST" class="edit-comment-form" id="edit-form-{{ comment.id }}">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <input type="text" name="new_text" value="{{ comment.text }}" class="comment-input" data-mention="true">
-                                <div class="edit-actions">
-                                    <button type="button" onclick="closeEditMode('{{ comment.id }}')" class="btn-cancel">İptal</button>
-                                    <button type="submit" class="btn-vote btn-sm">Kaydet</button>
-                                </div>
-                            </form>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
                 </div>
-
-                <!-- Alt: Aksiyonlar ve Yorum Yazma -->
-                <div class="post-detail-actions">
-                    <div class="action-buttons">
-                        <button class="action-btn" onclick="likePost('{{ post.id }}', this)">
-                            {% if current_user in post.liked_by %}
-                            <i class="fa-solid fa-heart" style="color: #ff4757;"></i>
-                            {% else %}
-                            <i class="fa-regular fa-heart"></i>
-                            {% endif %}
-                        </button>
-                        <button class="action-btn" onclick="document.getElementById('comment-input-{{ post.id }}').focus()">
-                            <i class="fa-regular fa-comment"></i>
-                        </button>
-                        <button class="action-btn" onclick="openShareModal('post', '{{ post.id }}')">
-                            <i class="fa-regular fa-paper-plane"></i>
-                        </button>
-                    </div>
-                    <div class="like-count-text">
-                        {{ post.liked_by|length }} beğenme
-                    </div>
-                    <small class="post-date-text">{{ post.date_posted.strftime('%d %B %Y') }}</small>
-
-                    <form onsubmit="submitComment(event, '{{ post.id }}')" class="detail-comment-form" style="position: relative;">
-                        
-                        <input type="text" id="comment-input-{{ post.id }}" class="detail-comment-input" data-mention="true" placeholder="Yorum ekle... (@kullanici)" required autocomplete="off">
-                        <button type="submit" class="detail-comment-btn">Paylaş</button>
-                    </form>
+                {% endfor %}
+                {% if not post.comments %}
+                <div style="padding: 40px 20px; text-align: center; color: var(--text-muted); border-bottom: 1px solid var(--border-color);">
+                    <i class="fa-regular fa-comments" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                    Henüz yorum yok
                 </div>
+                {% endif %}
+            </div>
 
+            <!-- Comment Input -->
+            <div class="pd-comment-input-section">
+                <form onsubmit="submitComment(event, '{{ post.id }}')" style="display: flex; gap: 12px; width: 100%;">
+                    <input type="text" class="comment-input" placeholder="Yorum ekle..." required autocomplete="off" data-mention="true">
+                    <button type="submit" class="comment-submit">Paylaş</button>
+                </form>
             </div>
         </div>
+
         </main>
+
+        <aside class="right-sidebar sticky-sidebar">
+            <div class="right-widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">🔥 Gündem</h3>
+                </div>
+                <div class="club-list">
+                    {% for tag, count in trending_tags[:5] %}
+                    <div class="club-list-item">
+                        <div style="display: flex; flex-direction: column; min-width: 0;">
+                            <a href="{{ url_for('main.explore', q='#' + tag) }}" style="text-decoration: none; color: var(--text-color); font-weight: 700; font-size: 0.95rem;">
+                                #{{ tag }}
+                            </a>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">{{ count }} gönderi</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div style="padding: 18px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Henüz gündem yok.</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="right-widget" style="margin-top: 20px;">
+                <div class="widget-header">
+                    <h3 class="widget-title">✨ Sana Önerilenler</h3>
+                </div>
+                <div class="club-list">
+                    {% for user in suggested_users[:5] %}
+                    <div class="club-list-item">
+                        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
+                            <img src="/static/{{ user.profile_pic }}" class="club-list-img" onerror="this.src='/static/img/default_avatar.png'">
+                            <div style="display: flex; flex-direction: column; min-width: 0; flex: 1;">
+                                <a href="{{ url_for('main.user_profile', handle=user.handle) }}" style="text-decoration: none; color: var(--text-color); font-weight: 700; font-size: 0.9rem; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
+                                    {{ user.username or user.handle }}
+                                </a>
+                                <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">@{{ user.handle }}</span>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('main.user_profile', handle=user.handle) }}" class="btn-vote-sm">Gör</a>
+                    </div>
+                    {% else %}
+                    <div style="padding: 18px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Öneri yok.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </aside>
     </div>
 
     <script src="/static/script.js"></script>

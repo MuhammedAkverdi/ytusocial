@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hizmet Şartları - YTU Social</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    {% include 'navbar_partial.html' %}
+
+    <div class="container" style="max-width: 900px; margin: 40px auto; padding: 20px;">
+        <h1 style="color: var(--text-color); margin-bottom: 30px;">Hizmet Şartları</h1>
+        
+        <div style="color: var(--text-muted); line-height: 1.8; font-size: 0.95rem;">
+            
+            <section style="margin-bottom: 30px;">
+                <h2 style="color: var(--text-color); font-size: 1.3rem; margin-bottom: 15px;">1. Hizmetin Tanımı</h2>
+                <p>
+                    YTU Social, Yıldız Teknik Üniversitesi öğrencileri tarafından kullanılmak üzere tasarlanan bir sosyal ağ platformudur. 
+                    Bu platform, kullanıcıların birbirleriyle iletişim kurmasına, içerik paylaşmasına ve topluluk oluşturmasına olanak tanır.
+                </p>
+            </section>
+
+            <section style="margin-bottom: 30px;">
+                <h2 style="color: var(--text-color); font-size: 1.3rem; margin-bottom: 15px;">2. Kullanıcı Sorumlulukları</h2>
+                <ul style="margin-left: 20px;">
+                    <li>Yalnızca geçerli YTÜ öğrenci e-posta adresiyle kayıt yapılabilir (@std.yildiz.edu.tr)</li>
+                    <li>Hesap bilgileriniz gizli tutulmalı, üçüncü kişilerle paylaşılmamalıdır</li>
+                    <li>Yasadışı, hakaret, iftira veya zararlı içerik paylaşamazsınız</li>
+                    <li>Başkasının haklarını, gizliliğini veya kişisel verilerini ihlal edemezsiniz</li>
+                    <li>Spam, aşırı reklam veya automatik içerik üretemezsiniz</li>
+                </ul>
+            </section>
+
+            <section style="margin-bottom: 30px;">
+                <h2 style="color: var(--text-color); font-size: 1.3rem; margin-bottom: 15px;">3. İçerik Sahipliği</h2>
+                <p>
+                    Platformda paylaştığınız tüm içeriğin sahibi siz olursunuz. Ancak, YTU Social'a bu içeriği görüntüleme, 
+                    saklama ve dağıtma hakkını vermiş olursunuz. YTU Social, telif hakkı ihlali veya uygunsuz içeriği 
+                    kaldırma hakkını saklı tutar.
+                </p>
+            </section>
+
+            <section style="margin-bottom: 30px;">
+                <h2 style="color: var(--text-color); font-size: 1.3rem; margin-bottom: 15px;">4. Yasak Davranışlar</h2>
+                <p>Aşağıdaki davranışlar kesinlikle yasaktır ve hesabınızın kapatılmasına neden olabilir:</p>
+                <ul style="margin-left: 20px;">
+                    <li>Nefret söylemi, ayrımcılık veya şiddet içeriklerinin paylaşılması</li>
+                    <li>Cinsel istismar veya zarar verme tehdidi içeren içerik</li>
+                    <li>Fikri mülkiyet haklarının ihlali</li>
+                    <li>Kişisel bilgilerin yetkisiz kullanılması</li>
+                    <li>Platform manipülasyonu veya deception</li>
+                    <li>Başka kullanıcıları rahatsız etme, taciz etme veya izleyerek takip etme</li>
+                    <li>Zararlı yazılım veya phishing linki paylaşılması</li>
+                </ul>
+            </section>
+
+            <section style="margin-bottom: 30px;">
+                <h2 style="color: var(--text-color); font-size: 1.3rem; margin-bottom: 15px;">5. Hizmetin Değiştirilmesi</h2>
+                <p>
+                    YTU Social, platformun özelliklerini, işlevlerini ve kullanım şartlarını önceden bildirimde bulunmak suretiyle 
+                    değiştirme, askıya alma veya sonlandırma hakkını saklı tutar.
+                </p>
+            </section>
+
+            <section style="margin-bottom: 30px;">
+                <h2 style="color: var(--text-color); font-size: 1.3rem; margin-bottom: 15px;">6. Sorumluluk Reddi</h2>
+                <p>
+                    YTU Social, platform üzerindeki içeriğin doğruluğu, güvenliği veya telif hakkı uyumluluğu garantisi vermez. 
+                    Platform, kullanıcılar tarafından neden olunan doğrudan veya dolaylı zararlardan sorumlu değildir.
+                </p>
+            </section>
+
+            <section style="margin-bottom: 30px;">
+                <h2 style="color: var(--text-color); font-size: 1.3rem; margin-bottom: 15px;">7. Hesap Kapatma</h2>
+                <p>
+                    Hesabınızı istediğiniz zaman ayarlar bölümünden silebilirsiniz. Hesap silme işlemi geri alınamaz ve 
+                    tüm verileriniz kalıcı olarak silinecektir.
+                </p>
+            </section>
+
+            <section style="margin-bottom: 30px;">
+                <h2 style="color: var(--text-color); font-size: 1.3rem; margin-bottom: 15px;">8. Son Değişiklik Tarihi</h2>
+                <p>Bu hizmet şartları en son {{ today }} tarihinde güncellenmiştir.</p>
+            </section>
+
+        </div>
+
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+            <a href="{{ url_for('main.index') }}" style="color: var(--ytu-lacivert); text-decoration: none; font-weight: 600;">
+                ← Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

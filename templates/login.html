@@ -143,6 +143,9 @@
 
         <form method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if next_url %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
             <div class="form-group">
                 <label class="form-label">YTÜ E-posta</label>
                 <input type="email" name="email" placeholder="isim@std.yildiz.edu.tr" required 
@@ -163,7 +166,11 @@
         <div class="auth-footer-link">
             <p style="margin: 0;">
                 Hesabın yok mu? 
+                {% if next_url %}
+                <a href="{{ url_for('auth.register', next=next_url) }}" class="link-highlight">Kayıt Ol</a>
+                {% else %}
                 <a href="{{ url_for('auth.register') }}" class="link-highlight">Kayıt Ol</a>
+                {% endif %}
             </p>
             <p style="margin: 8px 0 0 0; font-size: 0.9rem;">
                 Şifreni mi unuttun?

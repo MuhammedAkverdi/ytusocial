@@ -50,6 +50,9 @@
 
         <form method="POST" class="verify-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if next_url %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
             <div class="form-group">
                 <input type="text" name="kod" placeholder="______" required 
                        maxlength="6" inputmode="numeric" autocomplete="one-time-code" autofocus 
@@ -65,7 +68,11 @@
             <p>Kod gelmedi mi? <b>Spam (Gereksiz)</b> kutusuna bakmayı unutma!</p>
             <p style="margin-top: 15px;">
                 Mail adresi yanlış mı? <br>
+                {% if next_url %}
+                <a href="{{ url_for('auth.register', next=next_url) }}" style="color: var(--ytu-lacivert); font-weight: bold;">Tekrar Kayıt Ol</a>
+                {% else %}
                 <a href="{{ url_for('auth.register') }}" style="color: var(--ytu-lacivert); font-weight: bold;">Tekrar Kayıt Ol</a>
+                {% endif %}
             </p>
         </div>
     </div>

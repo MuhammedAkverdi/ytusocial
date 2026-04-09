@@ -910,8 +910,10 @@
             <span id="storyTime" style="color: #ddd; font-size: 0.8rem; margin-left: 10px;"></span>
         </div>
 
-        <a id="deleteStoryBtn" href="#" class="story-delete-btn"
-            onclick="return confirm('Silmek istediğine emin misin?')">🗑️</a>
+        <a id="deleteStoryBtn" href="#" class="story-delete-btn" title="Hikayeyi sil"
+            onclick="confirmStoryDelete(event)">
+            <i class="fa-solid fa-trash-can"></i>
+        </a>
         <div id="storyViewers" class="story-viewers-badge">👁️ <span id="viewerCount">0</span></div>
 
         <button onclick="shareActiveStory()" class="story-share-btn" title="Hikayeyi Paylaş">

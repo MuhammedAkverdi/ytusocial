@@ -1,46 +1,46 @@
 <nav class="navbar">
-    <a href="/" class="nav-logo">YTU<span>SOCIAL</span></a>
-    
-    <button type="button" class="hamburger-btn" onclick="toggleMobileMenu()">
-        ☰
-    </button>
-    
-    <div class="nav-items" id="mobile-menu">
-        
+    <div class="nav-left">
+        <a href="/" class="nav-logo">YTU<span>SOCIAL</span></a>
+    </div>
+
+    <div class="nav-right">
         <button type="button" onclick="toggleDarkMode()" id="theme-btn" title="Temayı Değiştir" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">
             🌙
         </button>
 
-        <div class="profile-menu" onclick="toggleProfileDropdown()">
-            {% if current_user.is_authenticated %}
-                <span style="font-weight: 600; font-size: 0.9rem;">{{ current_user.username }}</span>
-                <img src="/static/{{ current_user.profile_pic }}" class="nav-avatar" alt="Profil">
-            {% else %}
-                <span style="font-weight: 600;">Misafir</span>
-                <img src="/static/img/default_avatar.png" class="nav-avatar" alt="Misafir">
-            {% endif %}
-            
-            <div class="dropdown-content">
-                {% if current_user.is_authenticated %}
-                    {% if current_user.is_admin %}
-                    <a href="{{ url_for('admin.admin_panel') }}" class="dropdown-item" style="color: var(--ytu-lacivert); font-weight: bold;">👑 Admin Paneli</a>
-                    <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
-                    {% elif current_user.is_moderator %}
-                    <a href="{{ url_for('admin.moderator_panel') }}" class="dropdown-item" style="color: #27ae60; font-weight: bold;">🛡️ Moderatör Paneli</a>
-                    <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
-                    {% endif %}
-                    
-                    <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="dropdown-item">👤 Profilim</a>
-                    <a href="{{ url_for('main.edit_profile') }}" class="dropdown-item">⚙️ Profili Düzenle</a>
-                    <a href="javascript:void(0)" onclick="openFeedbackModal()" class="dropdown-item">📢 Geri Bildirim</a>
-                    <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
-                    <a href="{{ url_for('auth.logout') }}" class="dropdown-item" style="color: #e74c3c;">🚪 Çıkış Yap</a>
-                {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="dropdown-item">Giriş Yap</a>
-                    <a href="{{ url_for('auth.register') }}" class="dropdown-item">Kayıt Ol</a>
-                {% endif %}
+        {% if current_user.is_authenticated %}
+            <button type="button" class="hamburger-btn" onclick="toggleMobileMenu()">
+                ☰
+            </button>
+
+            <div class="nav-items" id="mobile-menu">
+                <div class="profile-menu" onclick="toggleProfileDropdown()">
+                    <span style="font-weight: 600; font-size: 0.9rem;">{{ current_user.username }}</span>
+                    <img src="/static/{{ current_user.profile_pic }}" class="nav-avatar" alt="Profil">
+
+                    <div class="dropdown-content">
+                        {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin.admin_panel') }}" class="dropdown-item" style="color: var(--ytu-lacivert); font-weight: bold;">👑 Admin Paneli</a>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
+                        {% elif current_user.is_moderator %}
+                        <a href="{{ url_for('admin.moderator_panel') }}" class="dropdown-item" style="color: #27ae60; font-weight: bold;">🛡️ Moderatör Paneli</a>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
+                        {% endif %}
+
+                        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="dropdown-item">👤 Profilim</a>
+                        <a href="{{ url_for('main.settings') }}" class="dropdown-item">⚙️ Ayarlar</a>
+                        <a href="javascript:void(0)" onclick="openFeedbackModal()" class="dropdown-item">📢 Geri Bildirim</a>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
+                        <a href="{{ url_for('auth.logout') }}" class="dropdown-item" style="color: #e74c3c;">🚪 Çıkış Yap</a>
+                    </div>
+                </div>
             </div>
-        </div>
+        {% else %}
+            <div class="nav-auth-actions">
+                <a href="{{ url_for('auth.login', next=request.path) }}" class="nav-auth-btn nav-auth-btn-secondary">Giriş Yap</a>
+                <a href="{{ url_for('auth.register', next=request.path) }}" class="nav-auth-btn nav-auth-btn-primary">Kayıt Ol</a>
+            </div>
+        {% endif %}
     </div>
 </nav>
 
@@ -114,3 +114,41 @@
         </div>
     </div>
 </div>
+
+<script>
+if (document.documentElement.classList.contains('dark-mode')) {
+    const themeBtn = document.getElementById('theme-btn');
+    if (themeBtn) themeBtn.innerText = '☀️';
+}
+
+if (typeof window.toggleMobileMenu !== 'function') {
+    window.toggleMobileMenu = function () {
+        const menu = document.getElementById('mobile-menu');
+        if (menu) menu.classList.toggle('active');
+    };
+}
+
+if (typeof window.toggleProfileDropdown !== 'function') {
+    window.toggleProfileDropdown = function () {
+        if (window.innerWidth <= 768) {
+            const profileMenu = document.querySelector('.profile-menu');
+            if (profileMenu) profileMenu.classList.toggle('active');
+        }
+    };
+}
+
+if (typeof window.toggleDarkMode !== 'function') {
+    window.toggleDarkMode = function () {
+        const html = document.documentElement;
+        const btn = document.getElementById('theme-btn');
+        html.classList.toggle('dark-mode');
+        if (html.classList.contains('dark-mode')) {
+            localStorage.setItem('theme', 'dark');
+            if (btn) btn.innerText = '☀️';
+        } else {
+            localStorage.setItem('theme', 'light');
+            if (btn) btn.innerText = '🌙';
+        }
+    };
+}
+</script>

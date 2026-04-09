@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, current_app, send_from_directory
 from flask_login import login_required, current_user
 from extensions import db, socketio
-from models import User, Post, Story, Club, ClubVote, ClubPost, Poll, PollOption, PollVote, Comment, SavedPost, Message, Notification, Feedback, Note, NoteVote, Advert, likes
-from utils import optimize_and_save_image, allowed_file, create_notification, get_trending_hashtags, not_icerigi_dogru_mu, get_file_size_str, icerik_temiz_mi, ONLINE_USERS, scan_file_safety, ALLOWED_NOTE_EXTENSIONS
+from models import User, Post, Story, Club, ClubVote, ClubPost, Poll, PollOption, PollVote, SavedPost, Comment, Message, Notification, Feedback, Note, NoteVote, Advert, StoryView, likes
+from utils import optimize_and_save_image, allowed_file, create_notification, get_trending_hashtags, get_file_size_str, icerik_temiz_mi, scan_file_safety, ALLOWED_NOTE_EXTENSIONS
 from sqlalchemy import or_, func
 from datetime import datetime, timedelta
 import os
@@ -11,6 +11,33 @@ import secrets
 from werkzeug.utils import secure_filename
 
 main = Blueprint('main', __name__)
+
+
+def _purge_post_tree(post):
+    deleted_count = 1
+
+    for repost in list(post.reposts):
+        deleted_count += _purge_post_tree(repost)
+
+    with db.session.no_autoflush:
+        if post.image_file:
+            file_path = os.path.join(current_app.root_path, 'static', 'post_images', post.image_file)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+        SavedPost.query.filter_by(post_id=post.id).delete(synchronize_session=False)
+        Notification.query.filter_by(post_id=post.id).update({Notification.post_id: None}, synchronize_session=False)
+
+        db.session.execute(likes.delete().where(likes.c.post_id == post.id))
+
+        Comment.query.filter_by(post_id=post.id).delete(synchronize_session=False)
+
+        if post.poll:
+            db.session.delete(post.poll)
+
+        db.session.delete(post)
+
+    return deleted_count
 
 @main.route('/', methods=['GET', 'POST'])
 @login_required
@@ -128,7 +155,7 @@ def add_comment(post_id):
         db.session.commit()
         create_notification(target_post.author, current_user, 'commented', target_post)
         
-        mentions = re.findall(r"@(\w+)", text)
+        mentions = re.findall(r"@([\w\u00C0-\u024F-]+(?:\.[\w\u00C0-\u024F-]+)*)", text)
         for handle in set(mentions):
             mentioned_user = User.query.filter_by(handle=handle).first()
             if mentioned_user:
@@ -180,7 +207,10 @@ def repost(post_id):
     return jsonify({"success": True, "action": action, "post": new_post_data, "repost_id": deleted_repost_id})
 
 @main.route('/p/<int:post_id>')
+@login_required
 def post_detail(post_id):
+    if not current_user.is_verified:
+        return redirect(url_for('auth.verify', email=current_user.email, next=request.path))
     post = Post.query.get_or_404(post_id)
     return render_template('post_detail.html', post=post)
 
@@ -191,7 +221,18 @@ def story_detail(story_id):
     if story.is_expired():
         flash("Bu hikayenin süresi dolmuş.", "warning")
         return redirect(url_for('main.index'))
-    return render_template('story_detail.html', story=story)
+    
+    # Record this view if not already viewed by current user
+    existing_view = StoryView.query.filter_by(story_id=story_id, user_id=current_user.id).first()
+    if not existing_view:
+        view = StoryView(story_id=story_id, user_id=current_user.id)
+        db.session.add(view)
+        db.session.commit()
+    
+    # Get all viewers
+    viewers = StoryView.query.filter_by(story_id=story_id).order_by(StoryView.viewed_at.desc()).all()
+    
+    return render_template('story_detail.html', story=story, viewers=viewers)
 
 @main.route('/club/<string:slug>', methods=['GET', 'POST'])
 @login_required
@@ -204,7 +245,8 @@ def club_detail(slug):
         
         if 'update_settings' in request.form:
             new_desc = request.form.get('description')
-            if new_desc: club.description = new_desc
+            if new_desc:
+                club.description = new_desc
             if 'logo' in request.files:
                 file = request.files['logo']
                 if file and allowed_file(file.filename):
@@ -322,7 +364,8 @@ def vote():
         data = request.json
         kulup_id = data.get('kulup')
         club = Club.query.get(kulup_id)
-        if not club: return jsonify({"success": False, "error": "Kulüp bulunamadı!"})
+        if not club:
+            return jsonify({"success": False, "error": "Kulüp bulunamadı!"})
         if not ClubVote.query.filter_by(user_id=current_user.id, club_id=club.id).first():
             db.session.add(ClubVote(user_id=current_user.id, club_id=club.id))
             db.session.commit()
@@ -367,9 +410,14 @@ def delete_post(post_id):
     if post.author != current_user:
         flash("Bu gönderiyi silme yetkiniz yok!", "danger")
         return redirect(url_for('main.index'))
-    db.session.delete(post)
-    db.session.commit()
-    flash("Gönderi silindi.", "info")
+    try:
+        _purge_post_tree(post)
+        db.session.commit()
+        flash("Gönderi silindi.", "info")
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception("Post deletion failed for post %s", post_id)
+        flash("Gönderi silinirken hata oluştu.", "danger")
     return redirect(url_for('main.index'))
 
 @main.route('/edit_post/<int:post_id>', methods=['POST'])
@@ -423,14 +471,17 @@ def explore():
                 q_lower = query.lower()
                 name_lower = (user.username or "").lower()
                 handle_lower = (user.handle or "").lower()
-                if name_lower == q_lower or handle_lower == q_lower: return 0
-                elif name_lower.startswith(q_lower) or handle_lower.startswith(q_lower): return 1
-                else: return 2
+                if name_lower == q_lower or handle_lower == q_lower:
+                    return 0
+                elif name_lower.startswith(q_lower) or handle_lower.startswith(q_lower):
+                    return 1
+                else:
+                    return 2
             users.sort(key=siralama_puani)
             return render_template('explore.html', users=users, search_query=query, clubs=ranked_clubs, posts=[])
     else:
         users = []
-        posts = db.session.query(Post).filter(Post.image_file != None).outerjoin(likes).group_by(Post.id).order_by(func.count(likes.c.user_id).desc()).limit(10).all()
+        posts = db.session.query(Post).filter(Post.image_file.isnot(None)).outerjoin(likes).group_by(Post.id).order_by(func.count(likes.c.user_id).desc()).limit(10).all()
         return render_template('explore.html', users=users, search_query=query, clubs=ranked_clubs, posts=posts)
 
 @main.route('/u/<handle>')
@@ -565,7 +616,8 @@ def send_message(rid):
             msg_type = 'image'
         elif ext in ['.mp4', '.mov', '.avi', '.webm', '.mkv', '.flv']:
             msg_type = 'video'
-        if not b: b = filename
+        if not b:
+            b = filename
     elif story_id:
         msg_type = 'story'
         b = story_id
@@ -574,7 +626,8 @@ def send_message(rid):
             file_path = story.image_file
     elif not icerik_temiz_mi(b):
         return jsonify({'success':False, 'error': 'Küfür yasak'})
-    if not b: return jsonify({'success':False})
+    if not b:
+        return jsonify({'success':False})
     m = Message(sender_id=current_user.id, recipient_id=rid, body=b, msg_type=msg_type, file_path=file_path)
     db.session.add(m)
     db.session.commit()
@@ -814,7 +867,7 @@ def delete_story(story_id):
         file_path = os.path.join(current_app.config['STORY_UPLOAD_FOLDER'], story.image_file)
         if os.path.exists(file_path):
             os.remove(file_path)
-    except:
+    except Exception:
         pass
     db.session.delete(story)
     db.session.commit()
@@ -935,3 +988,101 @@ def ulasim():
     if not current_user.is_verified:
         return redirect(url_for('auth.verify', email=current_user.email))
     return render_template('ulasim.html')
+
+@main.route('/settings')
+@login_required
+def settings():
+    return render_template('settings.html')
+
+@main.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        from werkzeug.security import check_password_hash, generate_password_hash
+        
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not check_password_hash(current_user.password, current_password):
+            flash("Mevcut şifre hatalı!", "danger")
+            return render_template('change_password.html')
+        
+        if len(new_password) < 6:
+            flash("Yeni şifre en az 6 karakter olmalı!", "danger")
+            return render_template('change_password.html')
+        
+        if new_password != confirm_password:
+            flash("Şifreler eşleşmiyor!", "danger")
+            return render_template('change_password.html')
+        
+        current_user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+        db.session.commit()
+        flash("Şifren başarıyla değiştirildi!", "success")
+        return redirect(url_for('main.settings'))
+    
+    return render_template('change_password.html')
+
+@main.route('/blocked_users')
+@login_required
+def blocked_users():
+    blocked = current_user.blocking.all()
+    return render_template('blocked_users.html', blocked_users=blocked)
+
+@main.route('/terms')
+def terms():
+    from datetime import date
+    return render_template('terms.html', today=date.today().strftime('%d.%m.%Y'))
+
+@main.route('/privacy')
+def privacy():
+    from datetime import date
+    return render_template('privacy.html', today=date.today().strftime('%d.%m.%Y'), contact_email='support@ytusocial.com')
+
+@main.route('/delete_account', methods=['POST'])
+@login_required
+def delete_account():
+    from werkzeug.security import check_password_hash
+    from flask_login import logout_user
+    
+    try:
+        data = request.get_json() or {}
+        password = data.get('password', '')
+        
+        if not check_password_hash(current_user.password, password):
+            return jsonify({'success': False, 'message': 'Şifre hatalı!'})
+        
+        user_id = current_user.id
+        
+        # Tüm post'ları sil
+        posts = Post.query.filter_by(author_id=user_id).all()
+        for post in posts:
+            _purge_post_tree(post)
+        
+        # Tüm story'leri sil
+        Story.query.filter_by(author_id=user_id).delete()
+        
+        # Tüm takip ilişkilerini sil
+        current_user.followers.clear()
+        current_user.following.clear()
+        
+        # Tüm mesajları sil
+        Message.query.filter(
+            (Message.sender_id == user_id) | (Message.recipient_id == user_id)
+        ).delete()
+        
+        # Tüm yorum/beğenleri sil
+        Comment.query.filter_by(author_id=user_id).delete()
+        likes.delete().where(likes.c.user_id == user_id)
+        
+        # Hesabı kapat (silme yerine is_active = False yapabilirsin)
+        db.session.delete(current_user)
+        db.session.commit()
+        
+        logout_user()
+        return jsonify({'success': True, 'message': 'Hesab silindi!'})
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Bir hata oluştu: ' + str(e)})
+

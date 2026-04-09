@@ -1,20 +1,22 @@
-from flask import Flask, g, render_template, redirect, url_for, flash, request
+from flask import Flask, g, redirect, url_for, flash, request
 import os
 from flask_login import current_user, logout_user
 from extensions import db, login_manager, mail, socketio, csrf, migrate
 from config import Config
-from models import User, Post, Message, Notification, Club
+from models import User, Message, Notification
 from routes.auth import auth as auth_blueprint
 from routes.main import main as main_blueprint
 from routes.api import api as api_blueprint
 from routes.admin import admin as admin_blueprint
-import events # Import events to register socketio handlers
+import importlib
 import time
 from datetime import datetime
 from utils import get_trending_hashtags, ONLINE_USERS
 from markupsafe import Markup
 import re
-from sqlalchemy import or_, func
+from sqlalchemy import func
+
+importlib.import_module('events')
 
 def create_app():
     app = Flask(__name__)
@@ -60,10 +62,11 @@ def create_app():
 
     @app.template_filter('format_tags')
     def format_tags(text):
-        if not text: return ""
+        if not text:
+            return ""
         text = re.sub(r'(https?://\S+)', r'<a href="\1" target="_blank" style="color: var(--ytu-lacivert); text-decoration: underline;">\1</a>', text)
         tags = re.sub(r"#(\w+)", r'<a href="/explore?q=%23\1" class="hashtag-link">#\1</a>', text)
-        tags = re.sub(r"@(\w+)", r'<a href="/u/\1" class="mention-link">@\1</a>', tags)
+        tags = re.sub(r"@([\w\u00C0-\u024F-]+(?:\.[\w\u00C0-\u024F-]+)*)", r'<a href="/u/\1" class="mention-link">@\1</a>', tags)
         return Markup(tags)
 
     @app.before_request
@@ -96,6 +99,7 @@ app = create_app()
 
 if __name__ == '__main__':
     with app.app_context():
+        os.makedirs(app.instance_path, exist_ok=True)
         db.create_all()
     debug_flag = os.environ.get('FLASK_DEBUG', '1') == '1'
     socketio.run(app, host='0.0.0.0', port=5002, debug=debug_flag)

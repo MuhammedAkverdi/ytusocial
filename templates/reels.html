@@ -11,23 +11,62 @@
 
     <!-- Modallar için navbar partial'ı dahil et ama navbar'ı gizle -->
     {% include 'navbar_partial.html' %}
+    {% macro reels_icon(name) -%}
+    <svg class="reels-svg-icon reels-svg-icon--{{ name }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        {% if name == 'back' %}
+            <path d="M15 18l-6-6 6-6"></path>
+        {% elif name == 'home' %}
+            <path d="M4 11.5 12 5l8 6.5"></path>
+            <path d="M6.5 10.5V20h11v-9.5"></path>
+            <path d="M10 20v-5.5h4V20"></path>
+        {% elif name == 'explore' %}
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M14.8 9.2 9.2 14.8 10.8 10.8 14.8 9.2z"></path>
+        {% elif name == 'reels' %}
+            <rect x="4" y="6" width="16" height="12" rx="2"></rect>
+            <path d="M4 10h16"></path>
+            <path d="M7 4l2.5 4"></path>
+            <path d="M12 4l2.5 4"></path>
+            <path d="M17 4l2.5 4"></path>
+            <path d="M10.5 12.5 15 15l-4.5 2.5z"></path>
+        {% elif name == 'bell' %}
+            <path d="M6 9.5a6 6 0 0 1 12 0c0 4.5 2 5.5 2 6.5H4c0-1 2-2 2-6.5z"></path>
+            <path d="M10 18a2 2 0 0 0 4 0"></path>
+        {% elif name == 'message' %}
+            <path d="M4 5.5h16v10H8l-4 4z"></path>
+        {% elif name == 'bus' %}
+            <rect x="5" y="4" width="14" height="12" rx="3"></rect>
+            <path d="M8 16v2"></path>
+            <path d="M16 16v2"></path>
+            <path d="M7 8h10"></path>
+            <path d="M7 12h10"></path>
+        {% elif name == 'heart' %}
+            <path d="M12 21s-6.8-4.5-9.2-8.6C.8 8.7 2.7 5.5 6 5.5c1.9 0 3.2 1 4 2.1.8-1.1 2.1-2.1 4-2.1 3.3 0 5.2 3.2 3.2 6.9C18.7 16.5 12 21 12 21z"></path>
+        {% elif name == 'comment' %}
+            <path d="M4 5.5h16v10H9l-5 4z"></path>
+        {% elif name == 'share' %}
+            <path d="M14 6l5 6-5 6"></path>
+            <path d="M19 12H9"></path>
+            <path d="M9 12l4-6v12z"></path>
+        {% endif %}
+    </svg>
+    {%- endmacro %}
     <style>
         .navbar { display: none !important; }
 
         .reels-top-nav    { display: none; }
         .reels-bottom-nav { display: none; }
 
-        /* --- SES BUTONU (her zaman aktif) --- */
-        .reel-sound-btn {
-            position: absolute; top: 14px; right: 14px; z-index: 310;
-            background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
-            border: none; color: #fff; width: 38px; height: 38px;
-            border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; font-size: 1rem;
-            cursor: pointer; transition: background .2s;
-            -webkit-tap-highlight-color: transparent;
+        .reels-svg-icon {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-width: 1.9;
+            flex-shrink: 0;
         }
-        .reel-sound-btn:hover { background: rgba(0,0,0,0.65); }
 
         @media (max-width: 768px) {
             /* --- ÜST NAVBAR --- */
@@ -40,32 +79,60 @@
                 background: linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, transparent 100%);
             }
             .reels-top-nav-back {
-                color: #fff; font-size: 1.25rem;
+                color: #fff;
                 text-decoration: none; display: flex; align-items: center; padding: 6px;
             }
+            .reels-top-nav-back .reels-svg-icon { width: 20px; height: 20px; }
             .reels-top-nav-title { font-size: 1.05rem; font-weight: 800; color: #fff; }
             .reels-top-nav-placeholder { width: 36px; }
 
             /* --- ALT NAVBAR --- */
-            .reels-bottom-nav {
+            .mobile-bottom-nav {
                 display: flex;
-                position: fixed; bottom: 0; left: 0; right: 0;
-                z-index: 1100; height: 56px;
-                align-items: center; justify-content: space-around;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 56px;
+                background: var(--card-bg);
+                border-top: 1px solid var(--border-color);
+                justify-content: space-around;
+                align-items: center;
+                z-index: 9999;
+                padding: 0 4px;
                 padding-bottom: env(safe-area-inset-bottom, 0px);
-                background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%);
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             }
-            .reels-bottom-nav .rbn-item {
-                flex: 1; display: flex; align-items: center; justify-content: center;
-                font-size: 1.3rem; padding: 8px 0;
-                color: rgba(255,255,255,0.75); text-decoration: none; position: relative;
+
+            .mobile-bottom-nav .nav-item {
+                color: var(--text-muted);
+                font-size: 1.4rem;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+                text-decoration: none;
+                transition: color 0.2s;
             }
-            .reels-bottom-nav .rbn-item.active { color: #fff; }
-            .rbn-badge {
-                position: absolute; top: 4px; right: calc(50% - 18px);
-                background: #ff4757; color: #fff;
-                font-size: 0.55rem; padding: 1px 5px; border-radius: 10px;
-                font-weight: 700; min-width: 16px; text-align: center;
+
+            .mobile-bottom-nav .nav-item.active {
+                color: var(--ytu-lacivert);
+            }
+
+            .mob-nav-badge {
+                position: absolute;
+                top: 4px;
+                right: calc(50% - 18px);
+                background: #ff4757;
+                color: #fff;
+                font-size: 0.55rem;
+                padding: 1px 5px;
+                border-radius: 10px;
+                font-weight: 700;
+                min-width: 16px;
+                text-align: center;
             }
 
             .reels-back-btn { display: none !important; }
@@ -75,12 +142,46 @@
 
             /* --- SAĞ SİDEBAR — alt nav'ın üstünde --- */
             .reel-sidebar {
-                bottom: calc(56px + 80px) !important;
-                right: 12px !important;
-                gap: 22px !important;
+                bottom: calc(56px + 82px) !important;
+                right: 10px !important;
+                gap: 16px !important;
+                z-index: 300 !important;
             }
-            .reel-action i { font-size: 1.8rem !important; }
-            .reel-action span { font-size: 0.78rem !important; font-weight: 700 !important; }
+            .reel-sidebar .reel-action {
+                background: transparent !important;
+                border: 0 !important;
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+                border-radius: 0 !important;
+                width: auto !important;
+                min-width: 0 !important;
+                padding: 0 !important;
+                gap: 2px !important;
+                color: #fff !important;
+            }
+            .reel-sidebar .reel-action:hover {
+                background: transparent !important;
+            }
+            .reel-sidebar .reel-action:active {
+                transform: scale(0.94) !important;
+            }
+            .reel-sidebar .reel-action svg,
+            .reel-sidebar .reel-action-img {
+                width: 1.95rem !important;
+                height: 1.95rem !important;
+            }
+            .reel-sidebar .reel-action span {
+                font-size: 0.72rem !important;
+                font-weight: 700 !important;
+            }
+            .reel-sidebar .reel-action.like-btn.is-liked {
+                background: transparent !important;
+                border: 0 !important;
+                color: #ff4757 !important;
+            }
+            .reel-sidebar .reel-action:not(.like-btn) {
+                height: auto !important;
+            }
 
             /* --- ALT BİLGİ — alt nav + sidebar çakışmasın --- */
             .reel-info {
@@ -89,20 +190,6 @@
                 padding-right: 75px !important; /* sidebar genişliğini bırak */
             }
             .reel-desc { max-width: 100% !important; }
-
-            /* --- ORTADA OYNAT/DURDUR İKONU --- */
-            .reel-center-icon {
-                position: absolute; top: 50%; left: 50%;
-                transform: translate(-50%, -50%) scale(0);
-                z-index: 200; color: rgba(255,255,255,0.9);
-                font-size: 3.8rem; pointer-events: none;
-                opacity: 0; transition: transform 0.12s, opacity 0.25s;
-                filter: drop-shadow(0 2px 10px rgba(0,0,0,0.6));
-            }
-            .reel-center-icon.show {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
 
             /* --- ÇİFT TAP KALBİ --- */
             .reel-tap-overlay {
@@ -119,9 +206,10 @@
             .reel-info    { z-index: 250 !important; }
             .reel-like-burst {
                 position: fixed; pointer-events: none; z-index: 9999;
-                font-size: 5rem; color: #ff4757;
+                width: 5rem; height: 5rem; color: #ff4757;
                 animation: burstAnim 0.65s ease-out forwards;
             }
+            .reel-like-burst svg { width: 100%; height: 100%; fill: currentColor; stroke: none; }
             @keyframes burstAnim {
                 0%   { transform: translate(-50%,-50%) scale(0.3); opacity: 1; }
                 55%  { transform: translate(-50%,-50%) scale(1.5); opacity: 1; }
@@ -132,68 +220,61 @@
 
     <!-- Mobil Üst Navbar -->
     <div class="reels-top-nav">
-        <a href="{{ url_for('main.index') }}" class="reels-top-nav-back"><i class="fa-solid fa-arrow-left"></i></a>
+        <a href="{{ url_for('main.index') }}" class="reels-top-nav-back">{{ reels_icon('back') }}</a>
         <span class="reels-top-nav-title">Reels</span>
         <div class="reels-top-nav-placeholder"></div>
     </div>
 
     <!-- Mobil Alt Navbar -->
-    <div class="reels-bottom-nav">
-        <a href="{{ url_for('main.index') }}" class="rbn-item"><i class="fa-solid fa-house"></i></a>
-        <a href="{{ url_for('main.explore') }}" class="rbn-item"><i class="fa-regular fa-compass"></i></a>
-        <a href="{{ url_for('main.reels') }}" class="rbn-item active"><i class="fa-solid fa-clapperboard"></i></a>
-        <a href="{{ url_for('main.notifications') }}" class="rbn-item">
+    <div class="mobile-bottom-nav">
+        <a href="/" class="nav-item {{ 'active' if request.path == '/' else '' }}">
+            <i class="fa-solid fa-house"></i>
+        </a>
+        <a href="{{ url_for('main.explore') }}" class="nav-item {{ 'active' if 'explore' in request.path else '' }}">
+            <i class="fa-regular fa-compass"></i>
+        </a>
+        <a href="{{ url_for('main.reels') }}" class="nav-item {{ 'active' if 'reels' in request.path else '' }}">
+            <i class="fa-solid fa-clapperboard"></i>
+        </a>
+        <a href="{{ url_for('main.notifications') }}" class="nav-item {{ 'active' if 'notifications' in request.path else '' }}">
             <i class="fa-regular fa-bell"></i>
-            {% if unread_count > 0 %}<span class="rbn-badge">{{ unread_count }}</span>{% endif %}
+            {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
         </a>
-        <a href="{{ url_for('main.messages_inbox') }}" class="rbn-item">
+        <a href="{{ url_for('main.messages_inbox') }}" class="nav-item {{ 'active' if 'inbox' in request.path or 'chat' in request.path else '' }}">
             <i class="fa-regular fa-envelope"></i>
-            {% if unread_msg_count > 0 %}<span class="rbn-badge">{{ unread_msg_count }}</span>{% endif %}
+            {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
         </a>
-        <a href="{{ url_for('main.ulasim') }}" class="rbn-item"><i class="fa-solid fa-bus"></i></a>
     </div>
 
-    <a href="/" class="reels-back-btn"><i class="fas fa-arrow-left"></i> Geri</a>
+    <a href="/" class="reels-back-btn">{{ reels_icon('back') }}<span>Geri</span></a>
 
     <div class="reels-container">
         {% for post in posts %}
         <div class="reel-item">
-            <video src="/static/post_images/{{ post.image_file }}" class="reel-video" loop playsinline muted {% if loop.index <= 2 %}preload="auto"{% else %}preload="none"{% endif %}></video>
+            <video src="/static/post_images/{{ post.image_file }}" class="reel-video" loop playsinline {% if loop.index <= 2 %}preload="auto"{% else %}preload="none"{% endif %}></video>
 
             <!-- Dokunma katmanı: tek tık oynat/durdur, çift tık beğeni -->
             <div class="reel-tap-overlay" data-post-id="{{ post.id }}"></div>
 
-            <!-- Ses toggle butonu -->
-            <button class="reel-sound-btn" onclick="toggleReelSound(this)" title="Sesi aç/kapat">
-                <i class="fa-solid fa-volume-xmark"></i>
-            </button>
-
-            <!-- Ortada oynat/durdur ikonu -->
-            <div class="reel-center-icon" id="reel-center-{{ post.id }}">
-                <i class="fa-solid fa-play"></i>
-            </div>
+            <div class="reel-center-icon" id="reel-center-{{ post.id }}"></div>
 
             <div class="reel-sidebar">
                 <!-- Beğeni -->
-                <div class="reel-action like-btn" id="like-btn-{{ post.id }}" onclick="likePost('{{ post.id }}', this)">
-                    {% if current_user in post.liked_by %}
-                    <i class="fa-solid fa-heart" style="color:#ff4757;"></i>
-                    {% else %}
-                    <i class="fa-regular fa-heart"></i>
-                    {% endif %}
+                <button type="button" class="reel-action like-btn js-like-{{ post.id }} {% if current_user in post.liked_by %}is-liked{% endif %}" id="like-btn-{{ post.id }}" data-icon-format="svg" onclick="likePost('{{ post.id }}', this)" aria-label="Beğen">
+                    {{ reels_icon('heart') }}
                     <span class="like-count">{{ post.liked_by|length }}</span>
-                </div>
+                </button>
 
                 <!-- Yorum -->
-                <div class="reel-action" onclick="openReelComments('{{ post.id }}')">
-                    <i class="fa-regular fa-message"></i>
+                <button type="button" class="reel-action" onclick="openReelComments('{{ post.id }}')" aria-label="Yorumlar">
+                    {{ reels_icon('comment') }}
                     <span id="reel-comment-count-{{ post.id }}">{{ post.comments|length }}</span>
-                </div>
+                </button>
 
                 <!-- Paylaş -->
-                <div class="reel-action" onclick="openShareModal('post', '{{ post.id }}')">
-                    <i class="fa-solid fa-share-from-square"></i>
-                </div>
+                <button type="button" class="reel-action" onclick="openShareModal('post', '{{ post.id }}')" aria-label="Paylaş">
+                    <img src="/static/img/reels/share.svg" class="reel-action-img" alt="">
+                </button>
             </div>
 
             <div class="reel-info">
@@ -242,12 +323,21 @@
 
     <script src="/static/script.js" defer></script>
     <script>
+        window.__reelsInlineControllerActive = true;
+
         /* ======================================================
-           REELS — SES + OYNAT/DURDUR + FİZİKSEL SES TUŞU
+              REELS — OYNAT/DURDUR + ÇİFT TAP BEĞENİ
            ====================================================== */
 
         // Global ses durumu: true = sessiz, false = sesli
-        var _reelSoundMuted = true;
+        var _reelSoundMuted = false;
+        var _reelSoundUnlocked = false;
+
+        function _unlockReelSound() {
+            if (_reelSoundUnlocked) return;
+            _reelSoundUnlocked = true;
+            _applySound(false);
+        }
 
         // Tüm video + buton ikonlarını güncelle
         function _applySound(muted) {
@@ -339,8 +429,9 @@
             function showCenterIcon(postId, type) {
                 var el = document.getElementById('reel-center-' + postId);
                 if (!el) return;
-                var icon = el.querySelector('i');
-                icon.className = type === 'play' ? 'fa-solid fa-play' : 'fa-solid fa-pause';
+                el.innerHTML = type === 'play'
+                    ? '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10-6.5z"></path></svg>'
+                    : '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13"></path><path d="M16 5.5v13"></path></svg>';
                 el.classList.add('show');
                 setTimeout(function () { el.classList.remove('show'); }, 600);
             }
@@ -349,7 +440,7 @@
             function showLikeBurst(x, y) {
                 var el = document.createElement('div');
                 el.className = 'reel-like-burst';
-                el.innerHTML = '<i class="fa-solid fa-heart"></i>';
+                el.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-6.8-4.5-9.2-8.6C.8 8.7 2.7 5.5 6 5.5c1.9 0 3.2 1 4 2.1.8-1.1 2.1-2.1 4-2.1 3.3 0 5.2 3.2 3.2 6.9C18.7 16.5 12 21 12 21z"></path></svg>';
                 el.style.left = x + 'px';
                 el.style.top  = y + 'px';
                 el.style.position = 'fixed';
@@ -395,6 +486,7 @@
                     if (dx > 12 || dy > 12) return;
 
                     e.preventDefault();
+                    _unlockReelSound();
 
                     var now  = Date.now();
                     var prev = lastTap[postId] || 0;
@@ -406,11 +498,8 @@
                         lastTap[postId]  = 0;
                         showLikeBurst(touch.clientX, touch.clientY);
                         var likeBtn = document.getElementById('like-btn-' + postId);
-                        if (likeBtn) {
-                            var icon = likeBtn.querySelector('i');
-                            if (!icon || !icon.classList.contains('fa-solid')) {
-                                likePost(postId, likeBtn);
-                            }
+                        if (likeBtn && !likeBtn.classList.contains('is-liked')) {
+                            likePost(postId, likeBtn);
                         }
                     } else {
                         tapTimer[postId] = setTimeout(function () {
@@ -435,6 +524,7 @@
                     var prev   = lastTap[postId] || 0;
                     if (now - prev < 500 && touchStartPos[postId]) return;
                     lastTap[postId] = now;
+                    _unlockReelSound();
                     tapTimer[postId] = setTimeout(function () {
                         tapTimer[postId] = null;
                         var video = self.closest('.reel-item').querySelector('.reel-video');

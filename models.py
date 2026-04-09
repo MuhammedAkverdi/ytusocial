@@ -291,8 +291,20 @@ class Story(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     viewers = db.relationship('User', secondary=story_views, backref=db.backref('viewed_stories', lazy='dynamic'), lazy='dynamic')
+    
     def is_expired(self):
         return datetime.utcnow() > self.timestamp + timedelta(days=1)
+
+class StoryView(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    story_id = db.Column(db.Integer, db.ForeignKey('story.id'), nullable=False, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    viewed_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    story = db.relationship('Story', backref=db.backref('view_records', lazy='dynamic', cascade='all, delete-orphan'))
+    user = db.relationship('User', backref=db.backref('story_views', lazy='dynamic'))
+    
+    __table_args__ = (db.UniqueConstraint('story_id', 'user_id', name='unique_story_view'),)
 
 @login_manager.user_loader
 def load_user(user_id):

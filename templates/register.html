@@ -6,8 +6,106 @@
     <title>Kayıt Ol - YTU Social</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        /* Masaüstünde hero'yu gizle */
+        .register-mob-hero { display: none; }
+
+        @media (max-width: 768px) {
+            .auth-body {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                justify-content: flex-start !important;
+                padding: 0 !important;
+                min-height: 100vh;
+            }
+
+            /* Tema butonu hero üzerinde */
+            .theme-toggle-fixed {
+                position: fixed !important;
+                top: 10px !important; right: 10px !important;
+                z-index: 200;
+            }
+
+            /* Üst hero bölümü */
+            .register-mob-hero {
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                min-height: 220px;
+                background: linear-gradient(145deg, #1B3A6B 0%, #3949ab 100%);
+                padding: 48px 28px 44px;
+                text-align: center;
+                box-sizing: border-box;
+            }
+            .register-mob-logo {
+                font-size: 2.2rem; font-weight: 900; color: #fff;
+                letter-spacing: -1px; text-decoration: none; display: block;
+                margin-bottom: 8px;
+            }
+            .register-mob-logo span { color: #f5c518; }
+            .register-mob-tagline {
+                color: rgba(255,255,255,.75); font-size: 0.9rem; margin: 0;
+            }
+
+            /* Form kartı */
+            .auth-card {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                border-radius: 24px 24px 0 0 !important;
+                border: none !important;
+                box-shadow: 0 -6px 30px rgba(0,0,0,.1) !important;
+                padding: 30px 22px 36px !important;
+                margin-top: -20px !important;
+                flex: 1;
+                text-align: left !important;
+            }
+
+            /* Masaüstü logosunu mobilde gizle */
+            .auth-logo { display: none !important; }
+
+            .auth-header { text-align: left; margin-bottom: 22px; }
+            .auth-title  { font-size: 1.45rem !important; margin-bottom: 4px !important; }
+            .auth-subtitle { font-size: 0.88rem; }
+
+            .form-group  { margin-bottom: 16px; }
+            .form-label  { font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; display: block; }
+            .auth-input  {
+                font-size: 1rem !important;
+                padding: 14px !important;
+                border-radius: 12px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .btn-vote {
+                border-radius: 12px !important;
+                padding: 15px !important;
+                font-size: 1rem !important;
+                font-weight: 800 !important;
+                width: 100% !important;
+                margin-top: 8px !important;
+            }
+
+            .auth-footer-link { text-align: center; margin-top: 22px; }
+
+            /* Checkbox bölümü mobilde daha kompakt */
+            .terms-box {
+                margin: 16px 0 !important;
+                padding: 12px !important;
+                border-radius: 8px;
+            }
+            .terms-label {
+                font-size: 0.8rem !important;
+                margin-bottom: 10px !important;
+            }
+        }
+    </style>
 </head>
 <body class="auth-body">
 
@@ -40,12 +138,25 @@
       {% endif %}
     {% endwith %}
 
+    <!-- MOBİL HERO -->
+    <div class="register-mob-hero">
+        <a href="/" class="register-mob-logo">YTU<span>SOCIAL</span></a>
+        <p class="register-mob-tagline">Yıldız Teknik Üniversitesi Sosyal Platformu</p>
+    </div>
+
     <div class="auth-card">
         <a href="/" class="auth-logo">YTU<span>SOCIAL</span></a>
-        <h2 class="auth-subtitle">Yıldızlıların Buluşma Noktası</h2>
+        
+        <div class="auth-header">
+            <h2 class="auth-title">Hoş Geldin</h2>
+            <p class="auth-subtitle">Yıldızlıların Buluşma Noktası</p>
+        </div>
 
         <form method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if next_url %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
             <div class="form-group">
                 <label class="form-label">Öğrenci Maili</label>
                 <input type="email" name="email" class="auth-input" placeholder="ogrenci@std.yildiz.edu.tr" 
@@ -58,13 +169,34 @@
                        required autocomplete="new-password">
             </div>
 
+            <div style="margin: 20px 0; padding: 15px; background: var(--hover-bg); border-radius: 8px;">
+                <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; margin-bottom: 12px;">
+                    <input type="checkbox" name="accept_terms" required style="margin-top: 4px; width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                    <span style="font-size: 0.9rem; color: var(--text-color); line-height: 1.5;">
+                        <a href="{{ url_for('main.terms') }}" target="_blank" style="color: var(--ytu-lacivert); text-decoration: none; font-weight: 600;">Hizmet Şartları</a>'nı okudum ve kabul ediyorum.
+                    </span>
+                </label>
+
+                <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" name="accept_privacy" required style="margin-top: 4px; width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                    <span style="font-size: 0.9rem; color: var(--text-color); line-height: 1.5;">
+                        <a href="{{ url_for('main.privacy') }}" target="_blank" style="color: var(--ytu-lacivert); text-decoration: none; font-weight: 600;">Gizlilik Politikası</a>'nı okudum ve rıza veriyorum.
+                    </span>
+                </label>
+            </div>
+
             <button type="submit" class="btn-vote" style="width: 100%; margin-top: 20px;">
                 Kayıt Ol ve Doğrula
             </button>
         </form>
 
         <div class="auth-footer-link">
-            Zaten hesabın var mı? <a href="{{ url_for('auth.login') }}" class="link-highlight">Giriş Yap</a>
+            Zaten hesabın var mı? 
+            {% if next_url %}
+            <a href="{{ url_for('auth.login', next=next_url) }}" class="link-highlight">Giriş Yap</a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="link-highlight">Giriş Yap</a>
+            {% endif %}
         </div>
     </div>
 

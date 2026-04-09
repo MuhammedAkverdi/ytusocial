@@ -10,609 +10,1936 @@
         }
     </script>
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-    .mob-header, .mob-left-overlay, .mob-left-drawer { display: none; }
-    @media (max-width: 768px) {
-        .navbar { display: none !important; }
-        .mob-header {
-            display: flex;
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            height: 54px; background: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            align-items: center; padding: 0 14px;
-            justify-content: space-between;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-        }
-        .mob-header-avatar { width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--ytu-lacivert);cursor:pointer; }
-        .mob-header-logo { font-size:1.1rem;font-weight:900;color:var(--ytu-lacivert);letter-spacing:-0.5px;text-decoration:none; }
-        .mob-header-logo span { color:var(--ytu-sari); }
-        .mob-header-right { display:flex;align-items:center;gap:10px; }
-        .mob-header-icon { background:none;border:none;color:var(--text-color);font-size:1.15rem;cursor:pointer;padding:6px;display:flex;align-items:center; }
-        .mob-left-overlay { display: block; position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000; }
-        .mob-left-overlay.open { display:block; }
+        .mob-header,
+        .mob-left-overlay,
         .mob-left-drawer {
+            display: none;
+        }
+
+        .mob-left-overlay.open {
+            display: block;
+        }
+
+        .mob-left-drawer.open {
             display: flex;
-            position:fixed;top:0;left:0;bottom:0;width:82%;max-width:320px;
-            background:var(--card-bg);z-index:2001;flex-direction:column;overflow-y:auto;
-            transform:translateX(-100%);transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
-            padding-bottom:env(safe-area-inset-bottom,20px);
         }
-        .mob-left-drawer.open { transform:translateX(0); }
-        .mob-drawer-profile { padding:28px 22px 16px; }
-        .mob-drawer-avatar { width:62px;height:62px;border-radius:50%;object-fit:cover;border:3px solid var(--ytu-lacivert);margin-bottom:12px;display:block; }
-        .mob-drawer-name { font-size:1.05rem;font-weight:800;color:var(--text-color);margin:0 0 2px; }
-        .mob-drawer-score { display:inline-block;background:linear-gradient(135deg,var(--ytu-lacivert),rgba(var(--ytu-lacivert-rgb),.7));color:#fff;padding:3px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;margin-top:6px; }
-        .mob-drawer-nav { padding:8px 0;border-top:1px solid var(--border-color); }
-        .mob-drawer-link { display:flex;align-items:center;gap:18px;padding:14px 22px;text-decoration:none;color:var(--text-color);font-size:1.05rem;font-weight:700;transition:background 0.15s; }
-        .mob-drawer-link:active { background:var(--bg-light); }
-        .mob-drawer-link i { width:26px;text-align:center;font-size:1.2rem;color:var(--text-color); }
-        .mob-drawer-link.active, .mob-drawer-link.active i { color:var(--ytu-lacivert); }
-        .mob-drawer-sep { height:1px;background:var(--border-color);margin:8px 0; }
-        .mob-drawer-logout { display:flex;align-items:center;gap:18px;padding:14px 22px;text-decoration:none;color:#e74c3c;font-size:1.05rem;font-weight:700; }
-        .mob-drawer-logout i { width:26px;text-align:center;font-size:1.2rem; }
-        .main-layout {
-            grid-template-columns: 1fr !important;
-            margin: 58px 0 70px !important;
-            padding: 0 12px !important;
-            gap: 0 !important;
-            max-width: 100% !important;
+
+        .ulasim-layout {
+            grid-template-columns: 280px minmax(0, 1fr);
         }
-        .left-sidebar { display: none !important; }
-        .right-sidebar { display: none !important; }
-    }
 
-    /* ── IETT Live Box ── */
-    .ulasim-refresh-bar {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 10px 0 14px; border-bottom: 1px solid var(--border-color); margin-bottom: 14px;
-        flex-wrap: wrap; gap: 8px;
-    }
-    .ulasim-countdown {
-        font-size: 0.8rem; color: var(--text-muted);
-        background: var(--bg-light); border: 1px solid var(--border-color);
-        padding: 3px 10px; border-radius: 20px; font-weight: 600;
-    }
-    .ulasim-refresh-btn {
-        display: flex; align-items: center; gap: 6px;
-        padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--ytu-lacivert);
-        background: transparent; color: var(--ytu-lacivert); font-weight: 700;
-        font-size: 0.84rem; cursor: pointer; transition: all 0.2s;
-    }
-    .ulasim-refresh-btn:hover { background: rgba(var(--ytu-lacivert-rgb), 0.1); }
-    .ulasim-refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .ulasim-spinner {
-        width: 32px; height: 32px; border: 3px solid var(--border-color);
-        border-top-color: var(--ytu-lacivert); border-radius: 50%;
-        animation: ulasim-spin 0.7s linear infinite; margin: 0 auto;
-    }
-    @keyframes ulasim-spin { to { transform: rotate(360deg); } }
-    .iett-live-box { min-height: 60px; }
-    /* Injected IETT HTML styles */
-    .iett-live-box .departure-times-header { display: none; } /* we show our own note */
-    .iett-live-box .line-list { display: flex; flex-direction: column; gap: 8px; }
-    .iett-live-box .line-item { border: 1.5px solid var(--border-color); border-radius: 12px; overflow: hidden; }
-    .iett-live-box .line-item .content-header {
-        background: var(--bg-light); padding: 10px 14px;
-        font-size: 0.82rem; font-weight: 700; color: var(--text-muted);
-    }
-    .iett-live-box .line-item .content-header p { margin: 0; }
-    .iett-live-box .line-item .content-header small { font-weight: 600; margin-left: 6px; }
-    .iett-live-box .line-item:has(.line-icon) {
-        display: flex; align-items: center; gap: 14px; padding: 12px 14px;
-    }
-    .iett-live-box .line-icon {
-        min-width: 52px; height: 36px; border-radius: 8px;
-        background: linear-gradient(135deg, var(--ytu-lacivert), #1a5898);
-        color: #fff; font-weight: 900; font-size: 0.95rem;
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .iett-live-box .content { flex: 1; min-width: 0; }
-    .iett-live-box .content p { margin: 0; font-weight: 600; font-size: 0.92rem; color: var(--text-color); }
-    .iett-live-box .content .time-left {
-        display: inline-block; margin-top: 3px;
-        background: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert);
-        border-radius: 6px; padding: 2px 8px; font-weight: 700; font-size: 0.82rem;
-    }
-    .iett-live-box .content small:not(.time-left) { font-size: 0.8rem; color: var(--text-muted); }
-    .ulasim-iett-note {
-        display: flex; align-items: flex-start; gap: 10px; margin-top: 14px;
-        padding: 10px 14px; background: rgba(var(--ytu-lacivert-rgb), 0.06);
-        border-radius: 10px; border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.15);
-        font-size: 0.83rem; color: var(--text-muted); line-height: 1.5;
-    }
-    .ulasim-iett-note i { color: var(--ytu-lacivert); margin-top: 1px; flex-shrink: 0; }
-    .ulasim-badge.blue {
-        display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px;
-        border-radius: 20px; background: rgba(52,152,219,0.12); color: #2980b9;
-        border: 1px solid rgba(52,152,219,0.3); font-size: 0.8rem; font-weight: 700;
-        text-decoration: none; white-space: nowrap; transition: background 0.2s;
-    }
-    .ulasim-badge.blue:hover { background: rgba(52,152,219,0.22); }
-    .ulasim-badge.red {
-        display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px;
-        border-radius: 20px; background: rgba(231,76,60,0.12); color: #e74c3c;
-        border: 1px solid rgba(231,76,60,0.3); font-size: 0.8rem; font-weight: 700;
-    }
-    .iett-no-bus {
-        text-align: center; padding: 24px 20px; color: var(--text-muted); font-size: 0.9rem;
-    }
-    .iett-no-bus i { font-size: 1.6rem; display: block; margin-bottom: 8px; opacity: 0.5; }
+        .ulasim-main {
+            min-width: 0;
+        }
 
-    /* ── GLOBAL OVERRIDES FOR ULASIM ── */
-    .ulasim-card { padding: 20px 20px 16px; }
-    /* ── HEADER ── */
-    .ulasim-header { padding: 20px 20px 18px; }
+        .ulasim-shell {
+            display: grid;
+            gap: 16px;
+        }
 
-    /* ── TABS ── */
-    .ulasim-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
-    .ulasim-tab-btn {
-        flex: 1; padding: 11px 14px; border-radius: 12px;
-        border: 1.5px solid var(--border-color);
-        background: var(--card-bg); color: var(--text-muted);
-        font-family: inherit; font-size: 0.88rem; font-weight: 700;
-        cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
-        justify-content: center; gap: 7px;
-    }
-    .ulasim-tab-btn.active {
-        background: var(--ytu-lacivert); color: #fff;
-        border-color: var(--ytu-lacivert);
-        box-shadow: 0 4px 14px rgba(var(--ytu-lacivert-rgb), 0.3);
-    }
+        .ulasim-hero {
+            position: relative;
+            overflow: hidden;
+            padding: 22px;
+            border-radius: 24px;
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.14);
+            background:
+                radial-gradient(circle at top right, rgba(var(--ytu-lacivert-rgb), 0.14), transparent 34%),
+                linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.08), rgba(255,255,255,0.02)),
+                var(--card-bg);
+            box-shadow: var(--shadow);
+        }
 
-    /* ── 41AT TRACKER ── */
-    .tracker-header {
-        display: flex; align-items: center; justify-content: space-between;
-        margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
-    }
-    .tracker-line-badge {
-        display: inline-flex; align-items: center; gap: 8px;
-        background: var(--ytu-lacivert); color: #fff;
-        padding: 8px 16px; border-radius: 10px;
-        font-weight: 900; font-size: 1.2rem; letter-spacing: 0.5px;
-    }
-    .tracker-line-badge small {
-        font-size: 0.72rem; font-weight: 600; opacity: 0.85; line-height: 1.2;
-    }
-    .tracker-status-row {
-        display: flex; align-items: center; gap: 8px;
-    }
-    .tracker-live-dot {
-        width: 8px; height: 8px; border-radius: 50%;
-        background: #2ecc71; box-shadow: 0 0 0 3px rgba(46,204,113,0.25);
-        animation: dot-pulse 2s infinite;
-    }
-    .tracker-live-dot.error { background: #e74c3c; box-shadow: 0 0 0 3px rgba(231,76,60,0.25); animation: none; }
-    @keyframes dot-pulse {
-        0%,100% { box-shadow: 0 0 0 3px rgba(46,204,113,0.25); }
-        50% { box-shadow: 0 0 0 6px rgba(46,204,113,0.1); }
-    }
-    .tracker-live-label { font-size: 0.78rem; font-weight: 700; color: #2ecc71; }
-    .tracker-live-label.error { color: #e67e22; }
-    .tracker-refresh-btn {
-        background: none; border: 1.5px solid var(--border-color);
-        color: var(--text-muted); padding: 5px 10px; border-radius: 8px;
-        font-family: inherit; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
-        display: flex; align-items: center; gap: 5px;
-    }
-    .tracker-refresh-btn:hover { border-color: var(--ytu-lacivert); color: var(--ytu-lacivert); }
-    .tracker-refresh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .ulasim-hero::after {
+            content: '';
+            position: absolute;
+            inset: auto -30px -32px auto;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(var(--ytu-sari-rgb), 0.24), transparent 65%);
+            pointer-events: none;
+            filter: blur(10px);
+        }
 
-    /* ── STOP TRACK LIST ── */
-    .stop-track-list {
-        display: flex; flex-direction: column; gap: 0;
-        position: relative;
-    }
-    /* vertical line */
-    .stop-track-list::before {
-        content: ''; position: absolute;
-        left: 19px; top: 20px; bottom: 20px;
-        width: 2px; background: var(--border-color); z-index: 0;
-    }
-    .stop-track-item {
-        display: flex; align-items: center; gap: 14px;
-        padding: 10px 0; cursor: pointer; position: relative; z-index: 1;
-        transition: background 0.15s;
-    }
-    .stop-track-item:hover .stop-track-name { color: var(--ytu-lacivert); }
-    /* the circle */
-    .stop-track-dot {
-        width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
-        border: 2.5px solid var(--border-color);
-        background: var(--card-bg);
-        transition: all 0.3s; z-index: 1;
-        display: flex; align-items: center; justify-content: center;
-    }
-    .stop-track-item.active .stop-track-dot {
-        background: var(--ytu-lacivert);
-        border-color: var(--ytu-lacivert);
-        box-shadow: 0 0 0 4px rgba(var(--ytu-lacivert-rgb), 0.2);
-    }
-    .stop-track-item.has-bus .stop-track-dot {
-        background: #2ecc71; border-color: #27ae60;
-        box-shadow: 0 0 0 4px rgba(46,204,113,0.2);
-        animation: dot-pulse-green 2s infinite;
-    }
-    @keyframes dot-pulse-green {
-        0%,100% { box-shadow: 0 0 0 4px rgba(46,204,113,0.2); }
-        50% { box-shadow: 0 0 0 8px rgba(46,204,113,0.05); }
-    }
-    .stop-track-dot-inner {
-        width: 8px; height: 8px; border-radius: 50%;
-        background: var(--border-color); transition: all 0.3s;
-    }
-    .stop-track-item.active .stop-track-dot-inner,
-    .stop-track-item.has-bus .stop-track-dot-inner { background: #fff; }
+        .ulasim-hero-top {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
 
-    .stop-track-info { flex: 1; min-width: 0; }
-    .stop-track-name {
-        font-size: 0.92rem; font-weight: 700; color: var(--text-color);
-        transition: color 0.2s; line-height: 1.2;
-    }
-    .stop-track-item.active .stop-track-name { color: var(--ytu-lacivert); }
-    .stop-track-code { font-size: 0.72rem; color: var(--text-muted); margin-top: 1px; }
+        .ulasim-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.12);
+            color: var(--ytu-lacivert);
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
 
-    .stop-track-arrival {
-        font-size: 0.8rem; font-weight: 700; text-align: right; min-width: 52px;
-        color: var(--text-muted);
-    }
-    .stop-track-arrival.arriving { color: #2ecc71; }
-    .stop-track-arrival.soon { color: #e67e22; }
-    .stop-track-arrival.loading { opacity: 0.35; }
+        .ulasim-hero h1 {
+            margin: 12px 0 8px;
+            font-size: clamp(1.55rem, 3vw, 2.25rem);
+            line-height: 1.05;
+            font-weight: 900;
+            color: var(--text-color);
+            letter-spacing: -0.03em;
+        }
 
-    /* ── ARRIVAL PANEL ── */
-    .arrival-panel {
-        margin-top: 18px; border-top: 1px solid var(--border-color); padding-top: 16px;
-    }
-    .arrival-panel-title {
-        font-size: 0.78rem; font-weight: 700; color: var(--text-muted);
-        text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;
-    }
-    .arrival-panel-title span { color: var(--ytu-lacivert); font-size: 0.84rem; text-transform: none; }
-    .arrival-card {
-        background: rgba(var(--ytu-lacivert-rgb), 0.05);
-        border: 1.5px solid rgba(var(--ytu-lacivert-rgb), 0.18);
-        border-radius: 14px; padding: 14px 16px;
-        display: flex; align-items: center; gap: 14px;
-    }
-    .arrival-card-line {
-        min-width: 52px; height: 42px; border-radius: 10px;
-        background: var(--ytu-lacivert); color: #fff;
-        font-weight: 900; font-size: 1.05rem;
-        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .arrival-card-body { flex: 1; min-width: 0; }
-    .arrival-card-route { font-weight: 700; font-size: 0.9rem; color: var(--text-color); line-height: 1.3; }
-    .arrival-card-time {
-        display: inline-flex; align-items: center; gap: 5px; margin-top: 5px;
-        background: #2ecc71; color: #fff; border-radius: 7px;
-        padding: 3px 10px; font-weight: 800; font-size: 0.88rem;
-    }
-    .arrival-card-time.orange { background: #e67e22; }
-    .arrival-card-time.gray { background: var(--text-muted); opacity: 0.7; }
-    .arrival-empty {
-        text-align: center; padding: 20px 16px; color: var(--text-muted); font-size: 0.88rem;
-    }
-    .arrival-empty i { font-size: 1.4rem; display: block; margin-bottom: 7px; opacity: 0.4; }
-    .arrival-loading {
-        display: flex; align-items: center; justify-content: center; gap: 10px;
-        padding: 18px 0; color: var(--text-muted); font-size: 0.85rem;
-    }
-    .arrival-spinner {
-        width: 18px; height: 18px; border: 2px solid var(--border-color);
-        border-top-color: var(--ytu-lacivert); border-radius: 50%;
-        animation: ulasim-spin 0.7s linear infinite;
-    }
-    @keyframes ulasim-spin { to { transform: rotate(360deg); } }
-    .iett-b-note {
-        margin-top: 12px; font-size: 0.78rem; color: var(--text-muted);
-        display: flex; align-items: flex-start; gap: 6px; line-height: 1.5;
-    }
-    .iett-b-note i { color: var(--ytu-lacivert); flex-shrink:0; margin-top:1px; }
+        .ulasim-hero p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-width: 64ch;
+        }
 
-    /* ── Ring timetable ── */
-    .ring-section { margin-top: 14px; }
-    .ring-period-label {
-        font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
-        text-transform: uppercase; letter-spacing: 0.5px;
-        margin: 14px 0 8px; padding-bottom: 4px;
-        border-bottom: 1px solid var(--border-color);
-    }
+        .ulasim-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
 
-    /* ── COUNTDOWN BAR ── */
-    .countdown-bar {
-        display: flex; align-items: center; justify-content: flex-end;
-        gap: 8px; margin-bottom: 14px;
-    }
-    .countdown-pill {
-        font-size: 0.74rem; color: var(--text-muted); font-weight: 600;
-        background: var(--bg-light); border: 1px solid var(--border-color);
-        padding: 3px 9px; border-radius: 20px;
-    }
+        .ulasim-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            font-size: 0.86rem;
+            font-weight: 800;
+            transition: all 0.18s ease;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+        }
 
-    /* ── DIRECTION TOGGLE ── */
-    .dir-toggle-row {
-        display: flex; gap: 8px; margin-bottom: 14px;
-    }
-    .dir-btn {
-        flex: 1; padding: 9px 10px; border-radius: 10px;
-        border: 1.5px solid var(--border-color);
-        background: var(--card-bg); color: var(--text-muted);
-        font-family: inherit; font-size: 0.82rem; font-weight: 700;
-        cursor: pointer; transition: all 0.2s;
-        display: flex; align-items: center; justify-content: center; gap: 6px;
-        line-height: 1.3; text-align: center;
-    }
-    .dir-btn.active {
-        background: var(--ytu-lacivert); color: #fff;
-        border-color: var(--ytu-lacivert);
-        box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);
-    }
-    .dir-btn:not(.active):hover { border-color: var(--ytu-lacivert); color: var(--ytu-lacivert); }
+        .ulasim-btn.primary {
+            background: var(--ytu-lacivert);
+            color: #fff;
+            border-color: var(--ytu-lacivert);
+            box-shadow: 0 12px 26px rgba(var(--ytu-lacivert-rgb), 0.22);
+        }
+
+        .ulasim-btn.primary:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        .ulasim-btn.ghost {
+            background: rgba(var(--ytu-lacivert-rgb), 0.06);
+            color: var(--ytu-lacivert);
+        }
+
+        .ulasim-btn.ghost:hover {
+            background: rgba(var(--ytu-lacivert-rgb), 0.1);
+        }
+
+        .ulasim-stats {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .ulasim-stat {
+            padding: 12px 13px;
+            border-radius: 16px;
+            background: rgba(var(--card-bg-rgb), 0.75);
+            border: 1px solid var(--border-color);
+            min-width: 0;
+        }
+
+        .ulasim-stat small {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .ulasim-stat strong {
+            display: block;
+            color: var(--text-color);
+            font-size: 0.92rem;
+            font-weight: 900;
+            line-height: 1.25;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ulasim-tabs {
+            display: flex;
+            gap: 8px;
+            margin: 16px 0 6px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 2px;
+        }
+
+        .ulasim-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .ulasim-tab {
+            flex: 0 0 auto;
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+
+        .ulasim-tab:hover {
+            border-color: rgba(var(--ytu-lacivert-rgb), 0.4);
+            color: var(--ytu-lacivert);
+        }
+
+        .ulasim-tab.active {
+            background: var(--ytu-lacivert);
+            color: #fff;
+            border-color: var(--ytu-lacivert);
+            box-shadow: 0 8px 18px rgba(var(--ytu-lacivert-rgb), 0.22);
+        }
+
+        .ulasim-panel {
+            display: none;
+        }
+
+        .ulasim-panel.active {
+            display: block;
+        }
+
+        .ulasim-grid-live {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+            gap: 16px;
+        }
+
+        .ulasim-grid-route {
+            display: grid;
+            gap: 16px;
+        }
+
+        .ulasim-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .ulasim-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 18px;
+            background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.06), rgba(255,255,255,0.02));
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ulasim-card-title {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ulasim-card-title h3 {
+            margin: 0 0 4px;
+            color: var(--text-color);
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+
+        .ulasim-card-title p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.45;
+        }
+
+        .ulasim-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.1);
+            color: var(--ytu-lacivert);
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.18);
+            font-size: 0.74rem;
+            font-weight: 900;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .ulasim-card-body {
+            padding: 16px 18px 18px;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-size: 0.76rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .chip i {
+            color: var(--ytu-lacivert);
+            font-size: 0.72rem;
+        }
+
+        .note-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .note-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 12px 13px;
+            border-radius: 14px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.06);
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.13);
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            line-height: 1.55;
+        }
+
+        .note-item i {
+            color: var(--ytu-lacivert);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .route-direction-grid {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .direction-card {
+            display: grid;
+            gap: 14px;
+            padding: 16px;
+            border-radius: 18px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.03);
+        }
+
+        .direction-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .direction-head h4 {
+            margin: 0 0 4px;
+            color: var(--text-color);
+            font-size: 0.98rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+
+        .direction-head p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.45;
+        }
+
+        .direction-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.09);
+            color: var(--ytu-lacivert);
+            font-size: 0.72rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .direction-badge i {
+            font-size: 0.72rem;
+        }
+
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .section-label i {
+            color: var(--ytu-lacivert);
+        }
+
+        .stop-picker {
+            display: grid;
+            gap: 8px;
+            max-height: 460px;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        .stop-item {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.18s ease;
+            font-family: inherit;
+        }
+
+        .stop-item:hover {
+            border-color: rgba(var(--ytu-lacivert-rgb), 0.42);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .stop-item.active {
+            border-color: var(--ytu-lacivert);
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            box-shadow: 0 10px 22px rgba(var(--ytu-lacivert-rgb), 0.09);
+        }
+
+        .stop-index {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.72));
+            color: #fff;
+            font-size: 0.76rem;
+            font-weight: 900;
+        }
+
+        .stop-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .stop-body strong {
+            display: block;
+            color: var(--text-color);
+            font-size: 0.88rem;
+            font-weight: 800;
+            line-height: 1.3;
+        }
+
+        .stop-body small {
+            display: block;
+            margin-top: 2px;
+            color: var(--text-muted);
+            font-size: 0.74rem;
+        }
+
+        .stop-arrival {
+            min-width: 56px;
+            text-align: right;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .stop-arrival.loading {
+            opacity: 0.45;
+        }
+
+        .stop-arrival.near {
+            color: #16a34a;
+        }
+
+        .stop-arrival.soon {
+            color: #d97706;
+        }
+
+        .route-stop-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 13px 14px;
+            border-radius: 16px;
+            background: linear-gradient(180deg, var(--bg-light), rgba(var(--ytu-lacivert-rgb), 0.025));
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.03);
+        }
+
+        .route-stop-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .route-stop-row .stop-arrival {
+            min-width: auto;
+            margin-left: auto;
+            color: var(--ytu-lacivert);
+            font-size: 0.72rem;
+            line-height: 1.35;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            max-width: 42%;
+            text-align: right;
+            padding: 0;
+            background: none;
+        }
+
+        .route-stop-tag {
+            margin-left: auto;
+            color: var(--ytu-lacivert);
+            font-size: 0.72rem;
+            line-height: 1.35;
+            font-weight: 800;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            max-width: 42%;
+            text-align: right;
+            min-width: 0;
+        }
+
+        .route-stop-row .stop-index {
+            width: 32px;
+            height: 32px;
+            font-size: 0.72rem;
+        }
+
+        .route-stop-row .stop-body {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .route-stop-row .stop-body strong {
+            font-size: 0.86rem;
+        }
+
+        .route-stop-row .stop-body small {
+            font-size: 0.72rem;
+        }
+
+        .arrival-shell {
+            display: grid;
+            gap: 12px;
+        }
+
+        .live-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .live-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.16);
+            animation: ulasim-dot-pulse 2s infinite;
+        }
+
+        .live-dot.error {
+            background: #ef4444;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+            animation: none;
+        }
+
+        @keyframes ulasim-dot-pulse {
+            0%, 100% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.16); }
+            50% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.06); }
+        }
+
+        .live-label {
+            font-size: 0.78rem;
+            font-weight: 900;
+            color: #16a34a;
+        }
+
+        .live-label.error {
+            color: #d97706;
+        }
+
+        .refresh-btn {
+            background: none;
+            border: 1.5px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .refresh-btn:hover {
+            border-color: var(--ytu-lacivert);
+            color: var(--ytu-lacivert);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .countdown {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .arrival-card {
+            padding: 16px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.06), rgba(var(--ytu-sari-rgb), 0.08));
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.16);
+        }
+
+        .arrival-line {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 14px;
+            background: var(--ytu-lacivert);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+        }
+
+        .arrival-route {
+            margin-top: 12px;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            font-weight: 900;
+            line-height: 1.45;
+        }
+
+        .arrival-time {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: var(--ytu-lacivert);
+            color: #fff;
+            font-size: 0.92rem;
+            font-weight: 900;
+            box-shadow: 0 12px 26px rgba(var(--ytu-lacivert-rgb), 0.2);
+        }
+
+        .arrival-time.soon {
+            background: #d97706;
+        }
+
+        .arrival-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .arrival-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-size: 0.76rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .arrival-pill i {
+            color: var(--ytu-lacivert);
+            font-size: 0.72rem;
+        }
+
+        .arrival-empty {
+            text-align: center;
+            padding: 24px 18px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        .arrival-empty i {
+            font-size: 1.4rem;
+            display: block;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
+
+        .arrival-note {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.5;
+        }
+
+        .arrival-note i {
+            color: var(--ytu-lacivert);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .schedule-days {
+            display: grid;
+            gap: 10px;
+        }
+
+        .schedule-day {
+            border-radius: 14px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.04);
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.11);
+            padding: 12px;
+        }
+
+        .schedule-day-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .schedule-day-head strong {
+            color: var(--text-color);
+            font-size: 0.86rem;
+            font-weight: 900;
+        }
+
+        .schedule-day-head span {
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .schedule-time-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-height: 190px;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        .schedule-time {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 9px;
+            border-radius: 999px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-size: 0.75rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .schedule-y {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--ytu-lacivert);
+            color: #fff;
+            font-size: 0.62rem;
+            font-weight: 900;
+        }
+
+        .schedule-footer {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.55;
+            margin-top: 10px;
+        }
+
+        .schedule-footer i {
+            color: var(--ytu-lacivert);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .mob-header {
+            display: none;
+        }
+
+        .mob-left-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+
+        .mob-left-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 82%;
+            max-width: 320px;
+            background: var(--card-bg);
+            z-index: 2001;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+
+        .mob-left-drawer.open {
+            transform: translateX(0);
+        }
+
+        .mob-drawer-profile {
+            padding: 28px 22px 16px;
+        }
+
+        .mob-drawer-avatar {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--ytu-lacivert);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .mob-drawer-name {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 0 0 2px;
+        }
+
+        .mob-drawer-score {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7));
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        .mob-drawer-nav {
+            padding: 8px 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .mob-drawer-link {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 14px 22px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1.05rem;
+            font-weight: 700;
+            transition: background 0.15s;
+        }
+
+        .mob-drawer-link:active {
+            background: var(--bg-light);
+        }
+
+        .mob-drawer-link i {
+            width: 26px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+
+        .mob-drawer-link.active,
+        .mob-drawer-link.active i {
+            color: var(--ytu-lacivert);
+        }
+
+        .mob-drawer-link.active {
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            border-left: 3px solid var(--ytu-lacivert);
+            padding-left: 19px;
+            border-radius: 0 14px 14px 0;
+        }
+
+        .mob-drawer-logout {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 14px 22px;
+            text-decoration: none;
+            color: #e74c3c;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .mob-drawer-logout i {
+            width: 26px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 1100px) {
+            .ulasim-grid-live,
+            .route-direction-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ulasim-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                display: none !important;
+            }
+
+            .mob-header {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                height: 54px;
+                background: var(--card-bg);
+                border-bottom: 1px solid var(--border-color);
+                align-items: center;
+                padding: 0 14px;
+                justify-content: space-between;
+                box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+            }
+
+            .mob-header-avatar {
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid var(--ytu-lacivert);
+                cursor: pointer;
+                display: block;
+            }
+
+            .mob-header-logo {
+                font-size: 1.1rem;
+                font-weight: 900;
+                color: var(--ytu-lacivert);
+                letter-spacing: -0.5px;
+                text-decoration: none;
+            }
+
+            .mob-header-logo span {
+                color: var(--ytu-sari);
+            }
+
+            .mob-header-right {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .mob-header-icon {
+                background: none;
+                border: none;
+                color: var(--text-color);
+                font-size: 1.15rem;
+                cursor: pointer;
+                padding: 6px;
+                display: flex;
+                align-items: center;
+            }
+
+            .main-layout.ulasim-layout {
+                grid-template-columns: 1fr !important;
+                margin: 58px 0 80px !important;
+                padding: 0 12px !important;
+                gap: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .left-sidebar {
+                display: none !important;
+            }
+
+            .ulasim-hero {
+                padding: 16px;
+                border-radius: 20px;
+            }
+
+            .ulasim-actions {
+                justify-content: flex-start;
+            }
+
+            .ulasim-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .ulasim-card-head,
+            .ulasim-card-body {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .stop-picker,
+            .schedule-time-grid {
+                max-height: none;
+            }
+
+            .route-stop-row {
+                flex-wrap: wrap;
+            }
+
+            .route-stop-tag {
+                margin-left: 0;
+                width: 100%;
+                max-width: 100%;
+                text-align: left;
+            }
+
+            .route-direction-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mobile-bottom-nav {
+                display: flex;
+            }
+        }
+
+        .bus-layout {
+            grid-template-columns: 280px minmax(0, 1fr);
+        }
+
+        .bus-main {
+            min-width: 0;
+        }
+
+        .bus-app {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 18px 0 96px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .bus-topbar {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-right: 52px;
+        }
+
+        .bus-location-shell {
+            position: relative;
+            width: min(100%, 380px);
+        }
+
+        .bus-location-pill {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+            padding: 13px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .bus-location-pill i:first-child {
+            color: var(--ytu-lacivert);
+        }
+
+        .bus-location-pill i:last-child {
+            color: var(--text-muted);
+            font-size: 0.86rem;
+        }
+
+        .bus-refresh-btn {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            background: var(--card-bg);
+            color: var(--text-color);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+        }
+
+        .bus-stop-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            right: 0;
+            z-index: 45;
+            max-height: 290px;
+            overflow: auto;
+            padding: 8px;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18);
+        }
+
+        .bus-stop-menu.open {
+            display: grid;
+            gap: 6px;
+        }
+
+        .bus-stop-item {
+            border: 1px solid transparent;
+            border-radius: 16px;
+            background: var(--bg-light);
+            padding: 10px 12px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.18s ease;
+        }
+
+        .bus-stop-item:hover {
+            transform: translateY(-1px);
+            border-color: rgba(var(--ytu-lacivert-rgb), 0.15);
+            background: rgba(var(--ytu-lacivert-rgb), 0.06);
+        }
+
+        .bus-stop-item.active {
+            border-color: rgba(var(--ytu-lacivert-rgb), 0.24);
+            background: rgba(var(--ytu-lacivert-rgb), 0.1);
+        }
+
+        .bus-stop-item strong {
+            display: block;
+            color: var(--text-color);
+            font-size: 0.92rem;
+            font-weight: 900;
+            line-height: 1.3;
+        }
+
+        .bus-stop-item small {
+            display: block;
+            margin-top: 4px;
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        .bus-stop-live {
+            align-self: center;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            color: var(--ytu-lacivert);
+            font-size: 0.74rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .bus-direction-switch {
+            display: flex;
+            gap: 26px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            border-bottom: 2px solid rgba(var(--ytu-lacivert-rgb), 0.12);
+            padding: 0 4px;
+        }
+
+        .bus-direction-switch::-webkit-scrollbar {
+            display: none;
+        }
+
+        .bus-direction-btn {
+            position: relative;
+            padding: 14px 4px 15px;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 900;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .bus-direction-btn::after {
+            content: '';
+            position: absolute;
+            inset: auto 0 -2px 0;
+            height: 4px;
+            border-radius: 999px;
+            background: transparent;
+            opacity: 0;
+            transform: scaleX(0.4);
+            transition: 0.2s ease;
+        }
+
+        .bus-direction-btn.active {
+            color: var(--ytu-lacivert);
+        }
+
+        .bus-direction-btn.active::after {
+            background: var(--ytu-lacivert);
+            opacity: 1;
+            transform: scaleX(1);
+        }
+
+        .bus-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 26px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .bus-hero-card {
+            padding: 18px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .bus-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .bus-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            color: var(--ytu-lacivert);
+            font-size: 0.74rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .bus-card-head h1 {
+            margin: 10px 0 6px;
+            color: var(--text-color);
+            font-size: clamp(1.55rem, 5vw, 2.25rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+        }
+
+        .bus-card-head p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.94rem;
+            line-height: 1.55;
+        }
+
+        .bus-live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 11px;
+            border-radius: 999px;
+            background: rgba(34, 197, 94, 0.12);
+            color: #16a34a;
+            font-size: 0.74rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .bus-live-badge.error {
+            background: rgba(239, 68, 68, 0.12);
+            color: #dc2626;
+        }
+
+        .bus-next-block {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 0 6px;
+        }
+
+        .bus-bus-icon {
+            width: 82px;
+            height: 82px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #4d68d8);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 2rem;
+            box-shadow: 0 18px 30px rgba(var(--ytu-lacivert-rgb), 0.2);
+        }
+
+        .bus-next-copy {
+            min-width: 0;
+        }
+
+        .bus-countdown-line {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            color: var(--ytu-lacivert);
+            font-weight: 900;
+        }
+
+        .bus-countdown-line strong {
+            font-size: clamp(2.15rem, 11vw, 4rem);
+            line-height: 1;
+            letter-spacing: -0.05em;
+        }
+
+        .bus-countdown-line span {
+            padding-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.98rem;
+            font-weight: 800;
+        }
+
+        .bus-departure {
+            margin-top: 7px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .bus-upcoming {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .upcoming-card {
+            padding: 11px 12px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upcoming-card.soon {
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            border-color: rgba(var(--ytu-lacivert-rgb), 0.36);
+        }
+
+        .upcoming-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(var(--ytu-lacivert-rgb), 0.12);
+            color: var(--ytu-lacivert);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .upcoming-meta strong {
+            display: block;
+            color: var(--text-color);
+            font-size: 0.98rem;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+
+        .upcoming-meta span {
+            display: block;
+            margin-top: 3px;
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .bus-action-card {
+            padding: 16px 18px 18px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .bus-section-title {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+
+        .bus-section-subtitle {
+            margin: 4px 0 0;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
+        .bus-secondary-btn,
+        .bus-sheet-launch {
+            border: none;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .bus-secondary-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            color: var(--ytu-lacivert);
+            font-size: 0.84rem;
+            font-weight: 900;
+        }
+
+        .bus-summary-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .bus-summary-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.14);
+            color: var(--ytu-lacivert);
+            font-size: 0.74rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .bus-notes {
+            display: grid;
+            gap: 8px;
+        }
+
+        .bus-note {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            line-height: 1.55;
+        }
+
+        .bus-note i {
+            color: var(--ytu-lacivert);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .bus-sheet-launch {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px 18px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #4d68d8);
+            color: #fff;
+            box-shadow: 0 18px 32px rgba(var(--ytu-lacivert-rgb), 0.22);
+            font-size: 0.98rem;
+            font-weight: 900;
+        }
+
+        .bus-sheet-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(15, 23, 42, 0.34);
+            backdrop-filter: blur(2px);
+        }
+
+        .bus-sheet-overlay.open {
+            display: block;
+        }
+
+        .bus-sheet {
+            position: fixed;
+            left: 50%;
+            bottom: 0;
+            transform: translate(-50%, 112%);
+            width: min(680px, calc(100% - 10px));
+            max-height: 86vh;
+            z-index: 2001;
+            display: grid;
+            grid-template-rows: auto auto 1fr;
+            gap: 12px;
+            padding: 10px 14px 16px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 26px 26px 0 0;
+            background: var(--card-bg);
+            box-shadow: 0 -24px 60px rgba(0, 0, 0, 0.18);
+            transition: transform 0.28s ease;
+            overflow: hidden;
+        }
+
+        .bus-sheet.open {
+            transform: translate(-50%, 0);
+        }
+
+        .bus-sheet-handle {
+            width: 46px;
+            height: 5px;
+            margin: 4px auto 0;
+            border-radius: 999px;
+            background: var(--border-color);
+        }
+
+        .bus-sheet-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .bus-sheet-head h3 {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 1.08rem;
+            font-weight: 900;
+        }
+
+        .bus-sheet-head p {
+            margin: 4px 0 0;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .bus-sheet-close {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: var(--bg-light);
+            color: var(--text-color);
+            flex-shrink: 0;
+        }
+
+        .bus-sheet-body {
+            overflow: auto;
+            padding-right: 4px;
+            display: grid;
+            gap: 12px;
+            min-height: 0;
+            max-height: 60vh;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+
+        .bus-sheet-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .bus-sheet-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .bus-sheet-body::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .bus-sheet-body::-webkit-scrollbar-thumb:hover {
+            background: var(--ytu-lacivert);
+        }
+
+        .sheet-day-card {
+            padding: 14px;
+            border-radius: 20px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .sheet-day-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .sheet-day-head strong {
+            display: block;
+            color: var(--text-color);
+            font-size: 0.96rem;
+            font-weight: 900;
+        }
+
+        .sheet-day-head span {
+            display: block;
+            margin-top: 3px;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .sheet-day-badge {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            color: var(--ytu-lacivert);
+            font-size: 0.72rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .sheet-time-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .sheet-time-chip {
+            min-width: 74px;
+            padding: 10px 12px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: #fff;
+            font-size: 0.82rem;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .sheet-time-chip.expired {
+            border-color: rgba(148, 163, 184, 0.3);
+            background: rgba(148, 163, 184, 0.12);
+            color: #94a3b8;
+            text-decoration: line-through;
+            opacity: 0.82;
+        }
+
+        .sheet-time-chip .schedule-y {
+            display: inline-block;
+            margin-left: 4px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-sari-rgb), 0.18);
+            color: #b45309;
+            font-size: 0.68rem;
+            font-weight: 900;
+            text-decoration: none;
+            vertical-align: middle;
+        }
+
+        .sheet-note {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.12);
+            background: rgba(var(--ytu-lacivert-rgb), 0.06);
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+
+        .sheet-note i {
+            color: var(--ytu-lacivert);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 1100px) {
+            .bus-app {
+                max-width: 680px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .bus-layout {
+                grid-template-columns: 1fr !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .bus-app {
+                max-width: 100%;
+                padding: 12px 0 92px;
+                gap: 12px;
+            }
+
+            .bus-topbar {
+                padding-right: 48px;
+            }
+
+            .bus-location-shell {
+                width: 100%;
+            }
+
+            .bus-location-pill {
+                padding: 12px 14px;
+                font-size: 0.95rem;
+            }
+
+            .bus-direction-btn {
+                font-size: 0.94rem;
+                padding: 13px 3px 14px;
+            }
+
+            .bus-hero-card {
+                padding: 16px;
+            }
+
+            .bus-card-head h1 {
+                font-size: clamp(1.4rem, 7vw, 2rem);
+            }
+
+            .bus-bus-icon {
+                width: 72px;
+                height: 72px;
+                border-radius: 22px;
+                font-size: 1.7rem;
+            }
+
+            .bus-upcoming {
+                gap: 8px;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .upcoming-card {
+                padding: 10px 9px;
+                border-radius: 18px;
+            }
+
+            .upcoming-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 0.8rem;
+            }
+
+            .upcoming-meta strong {
+                font-size: 0.9rem;
+            }
+
+            .upcoming-meta span {
+                font-size: 0.72rem;
+            }
+
+            .bus-action-card {
+                padding: 15px 16px 16px;
+            }
+
+            .bus-sheet {
+                width: calc(100% - 6px);
+                border-radius: 22px 22px 0 0;
+            }
+
+            .sheet-time-chip {
+                min-width: 68px;
+                padding: 9px 10px;
+                border-radius: 14px;
+                font-size: 0.79rem;
+            }
+        }
+
     </style>
 </head>
 <body>
-
     {% include 'navbar_partial.html' ignore missing %}
 
-    <!-- MOBİL HEADER -->
     <div class="mob-header" id="mobHeader">
-        <img src="/static/{{ current_user.profile_pic }}" class="mob-header-avatar" onclick="openMobileDrawer()" alt="Profil">
+        <button type="button" class="mob-header-icon" onclick="openMobileDrawer()" aria-label="Menüyü aç">
+            <img src="/static/{{ current_user.profile_pic }}" class="mob-header-avatar" alt="Profil">
+        </button>
         <a href="/" class="mob-header-logo">YTU<span>SOCIAL</span></a>
         <div class="mob-header-right">
-            <button class="mob-header-icon" onclick="toggleDarkMode()" title="Tema">🌙</button>
+            <button class="mob-header-icon" type="button" onclick="toggleDarkMode()" title="Tema">🌙</button>
         </div>
     </div>
 
-    <div class="main-layout">
+    <div class="main-layout ulasim-layout bus-layout">
+        {% include 'sidebar_partial.html' %}
 
-        <!-- SOL SIDEBAR -->
-        <aside class="left-sidebar sticky-sidebar">
-            <div style="background: var(--card-bg); border-radius: 20px; padding: 25px 20px; border: 1px solid var(--border-color);">
-                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
-                    <img src="/static/{{ current_user.profile_pic }}" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ytu-lacivert); object-fit: cover; margin-bottom: 12px;">
-                    <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin: 0 0 8px 0;">{{ current_user.username }}</h3>
-                    <span style="background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7)); color: white; display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(var(--ytu-lacivert-rgb), 0.3);">⭐ {{ current_user.score }} Puan</span>
+        <main class="ulasim-main bus-main">
+            <div class="bus-app">
+                <div class="bus-topbar">
+                    <div class="bus-location-shell">
+                        <button type="button" class="bus-location-pill" id="stopSelectButton" onclick="toggleStopMenu()">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span id="selected-stop-label">Konum seç</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="bus-stop-menu" id="stopMenu"></div>
+                    </div>
+                    <button class="bus-refresh-btn" type="button" onclick="refreshSelectedStop()" title="Yenile">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
                 </div>
-                <nav style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="/" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
-                    <a href="{{ url_for('main.explore') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
-                    <a href="{{ url_for('main.reels') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
-                    <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-regular fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
-                    <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
-                    <a href="{{ url_for('main.clubs_full_list') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi</a>
-                    <a href="{{ url_for('main.adverts') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bullhorn" style="width: 20px; text-align: center;"></i> İlanlar</a>
-                    <a href="{{ url_for('main.notifications') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
-                        <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
-                        {% if unread_count > 0 %}<span class="notification-badge">{{ unread_count }}</span>{% endif %}
-                    </a>
-                    <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
-                        <i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
-                        {% if unread_msg_count > 0 %}<span class="msg-badge">{{ unread_msg_count }}</span>{% endif %}
-                    </a>
-                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bus" style="width: 20px; text-align: center;"></i> Ulaşım</a>
-                </nav>
-            </div>
-        </aside>
 
-        <!-- ANA İÇERİK -->
-        <main style="min-width: 0;">
-
-            <!-- Sayfa Başlığı -->
-            <div class="ulasim-header">
-                <div class="ulasim-header-icon">
-                    <i class="fa-solid fa-bus"></i>
+                <div class="bus-direction-switch" role="tablist" aria-label="41AT yön seçimi">
+                    <button class="bus-direction-btn active" id="dir-btn-in" type="button" onclick="switchDirection('in')">Kampüse doğru</button>
+                    <button class="bus-direction-btn" id="dir-btn-out" type="button" onclick="switchDirection('out')">Kampüsten çıkış</button>
                 </div>
-                <div class="ulasim-header-text">
-                    <h1>YTÜ Ulaşım Rehberi</h1>
-                    <p>Davutpaşa Kampüsü anlık İETT bilgisi ve hat güzergahları</p>
-                </div>
-            </div>
 
-            <!-- Sekmeler -->
-            <div class="ulasim-tabs">
-                <button class="ulasim-tab-btn active" onclick="switchTab('anlik', this)">
-                    <i class="fa-solid fa-signal"></i> Anlık Bilgi
-                </button>
-                <button class="ulasim-tab-btn" onclick="switchTab('hatlar', this)">
-                    <i class="fa-solid fa-route"></i> Hat Bilgileri
+                <section class="bus-card bus-hero-card">
+                    <div class="bus-card-head">
+                        <div>
+                            <span class="bus-kicker"><i class="fa-solid fa-bus"></i> 41AT CANLI</span>
+                            <h1 id="hero-title">41AT · Kampüse doğru</h1>
+                            <p id="hero-subtitle">Seçili durak ve canlı varışlar yükleniyor.</p>
+                        </div>
+                        <span class="bus-live-badge" id="live-label">Canlı</span>
+                    </div>
+
+                    <div class="bus-next-block">
+                        <div class="bus-bus-icon"><i class="fa-solid fa-bus-simple"></i></div>
+                        <div class="bus-next-copy">
+                            <div class="bus-countdown-line">
+                                <strong id="next-countdown">--</strong>
+                                <span id="next-unit">dk</span>
+                            </div>
+                            <div class="bus-departure" id="next-departure">Kalkış: --:--</div>
+                        </div>
+                    </div>
+
+                    <div class="bus-upcoming" id="upcoming-list"></div>
+                </section>
+
+                <button class="bus-sheet-launch" type="button" onclick="openScheduleSheet()">
+                    <i class="fa-regular fa-calendar"></i> Tüm Seferler
                 </button>
             </div>
-
-            <!-- === ANLIK BİLGİ PANELİ === -->
-            <div class="ulasim-panel active" id="panel-anlik">
-
-                <!-- ━━━ 41AT TRACKER KARTI ━━━ -->
-                <div class="ulasim-card" id="card-41at">
-
-                    <!-- Üst başlık -->
-                    <div class="tracker-header">
-                        <div class="tracker-line-badge">
-                            <span>41AT</span>
-                            <div style="display:flex;flex-direction:column;">
-                                <small id="dir-from-lbl">AYAZAĞA</small>
-                                <small id="dir-to-lbl"><b>DAVUTPAŞA YTÜ</b></small>
-                            </div>
-                        </div>
-                        <div class="tracker-status-row">
-                            <div class="tracker-live-dot" id="live-dot"></div>
-                            <span class="tracker-live-label" id="live-label">Canlı</span>
-                            <button class="tracker-refresh-btn" id="refresh-btn" onclick="refreshAll()" title="Yenile">
-                                <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Countdown -->
-                    <div class="countdown-bar">
-                        <span class="countdown-pill" id="refresh-countdown">30 sn</span>
-                    </div>
-
-                    <!-- Yön seçimi -->
-                    <div class="dir-toggle-row">
-                        <button class="dir-btn active" id="dir-btn-in" onclick="switchDirection('in')">
-                            <i class="fa-solid fa-right-to-bracket"></i> Kampüse Gidiyorum
-                        </button>
-                        <button class="dir-btn" id="dir-btn-out" onclick="switchDirection('out')">
-                            <i class="fa-solid fa-right-from-bracket"></i> Kampüsten Çıkıyorum
-                        </button>
-                    </div>
-
-                    <!-- Neredesin etiketi -->
-                    <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">
-                        <i class="fa-solid fa-location-dot" style="color:var(--ytu-lacivert);margin-right:4px;"></i>
-                        Hangi duraksınızda? — Başlağanız durağa dokunun
-                    </div>
-
-                    <!-- Durak listesi (JS tarafından doldurulur) -->
-                    <div class="stop-track-list" id="stop-track-list"></div>
-
-                    <!-- Varış paneli (seçili duraga göre) -->
-                    <div class="arrival-panel" id="arrival-panel" style="display:none;">
-                        <div class="arrival-panel-title">
-                            Seçili Durak: <span id="arrival-stop-name"></span>
-                        </div>
-                        <div id="arrival-content">
-                            <div class="arrival-loading">
-                                <div class="arrival-spinner"></div> Yükleniyor...
-                            </div>
-                        </div>
-                        <div class="iett-b-note">
-                            <i class="fa-solid fa-circle-info"></i>
-                            <span><b>B</b> işaretli saat: Henüz sefere başlamayanlar. Varış süresi tahminidir.</span>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- ━━━ RING KARTI ━━━ -->
-                <div class="ulasim-card" id="card-ring" style="margin-top:14px;">
-                    <div class="tracker-header" style="margin-bottom:12px;">
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <div style="width:48px;height:36px;border-radius:8px;background:linear-gradient(135deg,#1d6fa5,#2980b9);display:flex;align-items:center;justify-content:center;">
-                                <i class="fa-solid fa-rotate" style="color:#fff;font-size:1rem;"></i>
-                            </div>
-                            <div>
-                                <div style="font-size:1rem;font-weight:800;color:var(--text-color);">YTÜ Ring</div>
-                                <div style="font-size:0.75rem;color:var(--text-muted);">Kampüs içi · Ücretsiz</div>
-                            </div>
-                        </div>
-                        <span style="background:rgba(39,174,96,0.12);color:#27ae60;border:1.5px solid rgba(39,174,96,0.3);border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:700;">Ücretsiz</span>
-                    </div>
-
-                    <div class="ulasim-info-row" style="margin-bottom:0;">
-                        <span class="ulasim-info-chip"><i class="fa-regular fa-clock"></i> 07:30 – 22:00</span>
-                        <span class="ulasim-info-chip"><i class="fa-solid fa-arrows-rotate"></i> 15–20 dk'da bir</span>
-                        <span class="ulasim-info-chip"><i class="fa-solid fa-calendar-days"></i> Hafta içi</span>
-                    </div>
-
-                    <div class="ring-section">
-                        <p class="ring-period-label">Sabah seferleri</p>
-                        <div class="schedule-grid">
-                            <span class="schedule-chip">07:30</span><span class="schedule-chip">07:45</span><span class="schedule-chip">08:00</span>
-                            <span class="schedule-chip">08:15</span><span class="schedule-chip">08:30</span><span class="schedule-chip">08:45</span>
-                            <span class="schedule-chip">09:00</span><span class="schedule-chip">09:30</span><span class="schedule-chip">10:00</span>
-                            <span class="schedule-chip">10:30</span><span class="schedule-chip">11:00</span>
-                        </div>
-                        <p class="ring-period-label">Öğle &amp; Akşam seferleri</p>
-                        <div class="schedule-grid">
-                            <span class="schedule-chip">12:00</span><span class="schedule-chip">12:30</span><span class="schedule-chip">13:00</span>
-                            <span class="schedule-chip">13:30</span><span class="schedule-chip">14:00</span><span class="schedule-chip">15:00</span>
-                            <span class="schedule-chip">16:00</span><span class="schedule-chip">16:30</span><span class="schedule-chip">17:00</span>
-                            <span class="schedule-chip">17:30</span><span class="schedule-chip">18:00</span><span class="schedule-chip">19:00</span>
-                            <span class="schedule-chip">20:00</span><span class="schedule-chip">21:00</span><span class="schedule-chip">22:00</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- === HAT BİLGİLERİ PANELİ === -->
-            <div class="ulasim-panel" id="panel-hatlar">
-
-                <!-- 41AT Hattı -->
-                <div class="ulasim-card">
-                    <div class="ulasim-card-head">
-                        <div class="ulasim-card-icon" style="background: linear-gradient(135deg, #e67e22, #d35400);">
-                            <i class="fa-solid fa-bus-simple"></i>
-                        </div>
-                        <div class="ulasim-card-title">
-                            <h3>41AT</h3>
-                            <p>AYAZAĞA — DAVUTPAŞA Y.T.Ü</p>
-                        </div>
-                        <a href="https://iett.istanbul/RouteDetail?hkod=41AT&routename=AYAZA%C4%9EA%20-%20DAVUTPA%C5%9EA%20Y.T.%C3%9C"
-                           target="_blank" rel="noopener" class="ulasim-badge blue">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> İETT
-                        </a>
-                    </div>
-
-                    <div class="ulasim-info-row">
-                        <span class="ulasim-info-chip"><i class="fa-solid fa-map-pin"></i> Ayazağa Metro</span>
-                        <span class="ulasim-info-chip"><i class="fa-solid fa-flag-checkered"></i> YTÜ Kampüsü</span>
-                        <span class="ulasim-info-chip"><i class="fa-solid fa-coins"></i> İstanbulkart</span>
-                    </div>
-
-                    <div class="ulasim-section-label">Kampüs Güzergahı <small>(SON DURAK Yönü)</small></div>
-                    <div class="durak-timeline">
-                        <div class="durak-item first">🎓 YTÜ Davutpaşa Kampüsü (kalkış)</div>
-                        <div class="durak-item">🏛️ İktisadi ve İdari Bilimler Fakültesi</div>
-                        <div class="durak-item">🚪 Fakülte B Kapısı</div>
-                        <div class="durak-item">🕌 Üniversite Camii</div>
-                        <div class="durak-item">📚 Eğitim Fakültesi</div>
-                        <div class="durak-item">⚽ Spor Kompleksi</div>
-                        <div class="durak-item">🏗️ İnşaat Fakültesi</div>
-                        <div class="durak-item">🌐 Yabancı Diller Okulu</div>
-                        <div class="durak-item">📖 Kütüphane</div>
-                        <div class="durak-item">🏫 Davutpaşa Kampüsü</div>
-                        <div class="durak-item">🚉 Davutpaşa</div>
-                        <div class="durak-item last">🚇 Davutpaşa Metro</div>
-                    </div>
-                </div>
-
-                <!-- Ring Hattı -->
-                <div class="ulasim-card">
-                    <div class="ulasim-card-head">
-                        <div class="ulasim-card-icon" style="background: linear-gradient(135deg, #1d6fa5, #2980b9);">
-                            <i class="fa-solid fa-rotate"></i>
-                        </div>
-                        <div class="ulasim-card-title">
-                            <h3>YTÜ Ring</h3>
-                            <p>Kampüs içi döngüsel hat</p>
-                        </div>
-                        <span class="ulasim-badge green">Ücretsiz</span>
-                    </div>
-
-                    <div class="ulasim-info-row">
-                        <span class="ulasim-info-chip"><i class="fa-regular fa-clock"></i> 07:30 – 22:00</span>
-                        <span class="ulasim-info-chip"><i class="fa-solid fa-arrows-rotate"></i> 15–20 dk'da bir</span>
-                        <span class="ulasim-info-chip"><i class="fa-solid fa-calendar-days"></i> Hafta içi</span>
-                    </div>
-
-                    <div class="ulasim-section-label" style="margin-top:14px;">Güzergah (Döngüsel)</div>
-                    <div class="durak-timeline">
-                        <div class="durak-item first">🏛️ Merkez / Ana Kapı</div>
-                        <div class="durak-item">📚 Kütüphane</div>
-                        <div class="durak-item">🏠 Yurt Girişi</div>
-                        <div class="durak-item">🏗️ D Blok (Mühendislik)</div>
-                        <div class="durak-item">⚽ Spor Tesisi</div>
-                        <div class="durak-item">☕ Kafeterya</div>
-                        <div class="durak-item last">🏛️ Merkez / Ana Kapı</div>
-                    </div>
-
-                    <div class="ulasim-uyari" style="margin-top:14px; margin-bottom:0;">
-                        <i class="fa-solid fa-circle-info"></i>
-                        <span>Ring hattı kampüs içi ücretsiz servistir. Hafta sonu ve tatil günlerinde sefer bulunmayabilir. Kesin bilgi için YTÜ Öğrenci İşleri'ne başvurunuz.</span>
-                    </div>
-                </div>
-
-            </div>
-
         </main>
     </div>
 
+    <div class="bus-sheet-overlay" id="scheduleOverlay" onclick="closeScheduleSheet()"></div>
+    <div class="bus-sheet" id="scheduleSheet" aria-hidden="true">
+        <div class="bus-sheet-handle"></div>
+        <div class="bus-sheet-head">
+            <div>
+                <h3 id="sheet-title">Tüm Seferler</h3>
+                <p id="sheet-subtitle">41AT · Kampüse doğru</p>
+            </div>
+            <button type="button" class="bus-sheet-close" onclick="closeScheduleSheet()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="bus-sheet-body" id="scheduleSheetContent"></div>
+    </div>
 
-    <!-- Mobil Alt Nav -->
     <div class="mobile-bottom-nav">
         <a href="/" class="nav-item">
             <i class="fa-solid fa-house"></i>
@@ -632,10 +1959,8 @@
         </a>
     </div>
 
-    <!-- Mobil Sol Overlay -->
     <div class="mob-left-overlay" id="mobOverlay" onclick="closeMobileDrawer()"></div>
 
-    <!-- Mobil Sol Drawer -->
     <div class="mob-left-drawer" id="mobDrawer">
         <div class="mob-drawer-profile">
             <img src="/static/{{ current_user.profile_pic }}" class="mob-drawer-avatar" alt="{{ current_user.username }}">
@@ -663,7 +1988,7 @@
             <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
                 <i class="fa-solid fa-bullhorn"></i> İlanlar
             </a>
-            <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link active" onclick="closeMobileDrawer()">
+            <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link active" onclick="closeMobileDrawer()" aria-current="page">
                 <i class="fa-solid fa-bus"></i> Ulaşım
             </a>
             <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
@@ -678,264 +2003,601 @@
 
     <script src="/static/script.js"></script>
     <script>
-    // Tab switching
-    function switchTab(name, btn) {
-        document.querySelectorAll('.ulasim-panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.ulasim-tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('panel-' + name).classList.add('active');
-        btn.classList.add('active');
+    const ROUTE_LINK = 'https://iett.istanbul/RouteDetail?hkod=41AT&routename=AYAZA%C4%9EA%20-%20DAVUTPA%C5%9EA%20Y.T.%C3%9C';
+    const ROUTE_REFRESH_INTERVAL = 30;
+    const FALLBACK_TRACKER_STOPS = {
+        in: [
+            { code: '125851', name: 'YTÜ Davutpaşa Kampüsü', district: 'Esenler' },
+            { code: '133702', name: 'İktisadi ve İdari Bilimler Fak.', district: 'Esenler' },
+            { code: '132632', name: 'Fakülte B Kapısı', district: 'Güngören' },
+            { code: '132642', name: 'Üniversite Camii', district: 'Güngören' },
+            { code: '132912', name: 'Eğitim Fakültesi', district: 'Güngören' },
+            { code: '102312', name: 'İnşaat Fakültesi', district: 'Esenler' },
+            { code: '129792', name: 'Yabancı Diller Okulu', district: 'Esenler' },
+            { code: '302511', name: 'Davutpaşa Kampüsü', district: 'Esenler' }
+        ],
+        out: [
+            { code: '125851', name: 'YTÜ Davutpaşa Kampüsü', district: 'Esenler' },
+            { code: '133701', name: 'İktisadi ve İdari Bilimler Fak.', district: 'Esenler' },
+            { code: '132631', name: 'Fakülte B Kapısı', district: 'Güngören' },
+            { code: '132641', name: 'Üniversite Camii', district: 'Güngören' },
+            { code: '132911', name: 'Eğitim Fakültesi', district: 'Güngören' },
+            { code: '102311', name: 'İnşaat Fakültesi', district: 'Esenler' },
+            { code: '129791', name: 'Yabancı Diller Okulu', district: 'Esenler' },
+            { code: '122881', name: 'Davutpaşa Metro', district: 'Güngören' }
+        ]
+    };
+
+    const FALLBACK_ROUTE = {
+        route: {
+            title: '41AT',
+            display_name: 'Ayazağa - YTÜ Davutpaşa',
+            route_link: ROUTE_LINK,
+            notes: ['IETT rota verisi şu anda alınamadı.'],
+            directions: [
+                { title: 'Ayazağa - YTÜ Davutpaşa', days: [] },
+                { title: 'YTÜ Davutpaşa - Ayazağa', days: [] }
+            ]
+        },
+        tracker: FALLBACK_TRACKER_STOPS,
+        refresh_interval: ROUTE_REFRESH_INTERVAL
+    };
+
+    let routePayload = FALLBACK_ROUTE;
+    let routeStatus = 'loading';
+    let currentDirection = 'in';
+    let currentStops = FALLBACK_TRACKER_STOPS.in;
+    let selectedStopIndex = 0;
+    let arrivalCache = {};
+    let pendingStops = new Set();
+    let countdown = ROUTE_REFRESH_INTERVAL;
+    let countdownTimer = null;
+    let selectedStopMenuOpen = false;
+    let scheduleSheetOpen = false;
+
+    function getCurrentMinutes() {
+        const now = new Date();
+        return now.getHours() * 60 + now.getMinutes();
     }
 
-    // Mobile drawer
+    function escapeHtml(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function normalizeText(value) {
+        return String(value || '').trim().replace(/\s+/g, ' ');
+    }
+
+    function timeToMinutes(value) {
+        const match = String(value || '').match(/^(\d{2}):(\d{2})$/);
+        if (!match) return null;
+        return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+    }
+
+    function formatTimeValue(value) {
+        return String(value || '').replace(/\s*Y\s*$/i, '').trim();
+    }
+
+    function getDayScheduleGroup(days) {
+        return Array.isArray(days) && days.length ? days : [];
+    }
+
+    function getStops() {
+        if (routePayload && routePayload.tracker && routePayload.tracker[currentDirection] && routePayload.tracker[currentDirection].length) {
+            return routePayload.tracker[currentDirection];
+        }
+        return FALLBACK_TRACKER_STOPS[currentDirection];
+    }
+
+    function setDirectionUi() {
+        const selectedStop = currentStops[selectedStopIndex];
+        const heroTitle = document.getElementById('hero-title');
+        const heroSubtitle = document.getElementById('hero-subtitle');
+        const sheetSubtitle = document.getElementById('sheet-subtitle');
+        const metricDirection = document.getElementById('metric-direction');
+        document.getElementById('dir-btn-in').classList.toggle('active', currentDirection === 'in');
+        document.getElementById('dir-btn-out').classList.toggle('active', currentDirection === 'out');
+        const directionLabel = currentDirection === 'in' ? 'Kampüse doğru' : 'Kampüsten çıkış';
+        if (heroTitle) heroTitle.textContent = `41AT · ${directionLabel}`;
+        if (heroSubtitle) {
+            if (selectedStop) {
+                heroSubtitle.textContent = `${selectedStop.name} durağına göre canlı varışlar ve planlı seferler.`;
+            } else {
+                heroSubtitle.textContent = 'Bir durak seçin, canlı varışlar ve sefer saatleri burada görünür.';
+            }
+        }
+        if (sheetSubtitle) sheetSubtitle.textContent = `41AT · ${directionLabel}`;
+        const selectedStopLabel = document.getElementById('selected-stop-label');
+        if (selectedStopLabel) {
+            selectedStopLabel.textContent = selectedStop ? selectedStop.name : 'Konum seç';
+        }
+    }
+
+    function setRefreshLabel(value) {
+        const label = document.getElementById('refresh-countdown');
+        if (label) label.textContent = value + ' sn';
+    }
+
+    function updateStopMenuLabel() {
+        const selectedStop = currentStops[selectedStopIndex];
+        const selectedStopLabel = document.getElementById('selected-stop-label');
+        if (selectedStopLabel) {
+            selectedStopLabel.textContent = selectedStop ? selectedStop.name : 'Konum seç';
+        }
+    }
+
+    function updateLiveBadge(isError) {
+        const liveLabel = document.getElementById('live-label');
+        if (!liveLabel) return;
+        liveLabel.classList.toggle('error', !!isError);
+        liveLabel.innerHTML = isError ? '<i class="fa-solid fa-triangle-exclamation"></i> Veri gecikti' : '<i class="fa-solid fa-signal"></i> Canlı';
+    }
+
+    function updateStopCountBadge() {
+        const selectedStop = currentStops[selectedStopIndex];
+        const label = document.getElementById('route-subtitle');
+        if (label && selectedStop) {
+            label.textContent = `${selectedStop.name} durağına göre 41AT canlı verileri.`;
+        }
+    }
+
+    function buildStopMenu() {
+        const menu = document.getElementById('stopMenu');
+        if (!menu) return;
+        menu.innerHTML = currentStops.map((stop, index) => {
+            const cached = arrivalCache[stop.code] || [];
+            const bus41 = cached.find(item => item.line === '41AT');
+            const liveText = bus41 ? `${bus41.mins} dk` : '—';
+            return `
+                <button type="button" class="bus-stop-item ${selectedStopIndex === index ? 'active' : ''}" onclick="selectStop(${index}); closeStopMenu();">
+                    <div>
+                        <strong>${escapeHtml(stop.name)}</strong>
+                        <small>#${escapeHtml(stop.code)}${stop.district ? ' • ' + escapeHtml(stop.district) : ''}</small>
+                    </div>
+                    <span class="bus-stop-live">${escapeHtml(liveText)}</span>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function renderUpcomingCards(arrivals) {
+        const list = document.getElementById('upcoming-list');
+        if (!list) return;
+        const bus41 = arrivals.filter(item => item.line === '41AT').sort((a, b) => a.mins - b.mins).slice(0, 3);
+        const fallbackTimes = getUpcomingScheduleTimes().slice(0, 3);
+        const cards = bus41.length ? bus41 : fallbackTimes.map(item => ({ 
+            sched: item.display, 
+            mins: getMinutesUntilDeparture(item.matchingMinutes), 
+            planned: true 
+        }));
+
+        list.innerHTML = cards.map((item, index) => {
+            const mins = item.mins;
+            const isSoon = typeof mins === 'number' && mins <= 10;
+            const label = typeof mins === 'number' ? `${mins} dk` : 'Planlı';
+            const sub = item.sched || '—';
+            return `
+                <button type="button" class="upcoming-card ${isSoon ? 'soon' : ''}" onclick="openScheduleSheet()">
+                    <span class="upcoming-icon"><i class="fa-solid fa-bus-simple"></i></span>
+                    <span class="upcoming-meta">
+                        <strong>${escapeHtml(label)}</strong>
+                        <span>${escapeHtml(sub)}</span>
+                    </span>
+                </button>
+            `;
+        }).join('');
+    }
+
+    function renderArrivalLoading(stop) {
+        const countdownEl = document.getElementById('next-countdown');
+        const departureEl = document.getElementById('next-departure');
+        const unitEl = document.getElementById('next-unit');
+        if (countdownEl) countdownEl.textContent = '--';
+        if (unitEl) unitEl.textContent = 'dk';
+        if (departureEl) departureEl.textContent = stop ? `Kalkış: ${stop.name}` : 'Kalkış: --:--';
+        renderUpcomingCards([]);
+        updateLiveBadge(false);
+    }
+
+    function renderArrival(stop, arrivals) {
+        const bus41 = arrivals.find(item => item.line === '41AT');
+        const countdownEl = document.getElementById('next-countdown');
+        const unitEl = document.getElementById('next-unit');
+        const departureEl = document.getElementById('next-departure');
+        const liveLabel = document.getElementById('live-label');
+
+        if (bus41) {
+            if (countdownEl) countdownEl.textContent = String(bus41.mins);
+            if (unitEl) unitEl.textContent = 'dk';
+            if (departureEl) departureEl.textContent = `Kalkış: ${bus41.sched || '--:--'}`;
+            if (liveLabel) liveLabel.classList.remove('error');
+        } else {
+            const plannedTimes = getUpcomingScheduleTimes();
+            const nextPlan = plannedTimes[0] || null;
+            if (nextPlan) {
+                const plannedCountdown = nextPlan.matchingMinutes != null ? getMinutesUntilDeparture(nextPlan.matchingMinutes) : nextPlan.display;
+                if (countdownEl) countdownEl.textContent = String(plannedCountdown);
+                if (unitEl) unitEl.textContent = 'dk';
+                if (departureEl) departureEl.textContent = `Kalkış: ${nextPlan.display}`;
+            } else {
+                if (countdownEl) countdownEl.textContent = '--';
+                if (unitEl) unitEl.textContent = 'dk';
+                if (departureEl) departureEl.textContent = `Kalkış: --:--`;
+            }
+        }
+
+        renderUpcomingCards(arrivals);
+    }
+
+    function parseArrivalHtml(html) {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+        const items = Array.from(wrapper.querySelectorAll('.line-item, .item, li'));
+        const results = [];
+
+        items.forEach(item => {
+            const text = normalizeText(item.textContent || '');
+            if (!text) return;
+            const lineMatch = text.match(/^([A-Z0-9İĞÜŞÇÖ-]+)/i);
+            const minsMatch = text.match(/(\d+)\s*dk/i);
+            const timeMatch = text.match(/\((\d{2}:\d{2})\)/);
+            if (lineMatch && minsMatch) {
+                results.push({
+                    line: normalizeText(lineMatch[1]).toUpperCase().replace(/\s+/g, ''),
+                    mins: parseInt(minsMatch[1], 10),
+                    sched: timeMatch ? timeMatch[1] : null,
+                    raw: text
+                });
+            }
+        });
+
+        return results;
+    }
+
+    function getCurrentDirectionScheduleTimes() {
+        const directions = routePayload && routePayload.route && Array.isArray(routePayload.route.directions) ? routePayload.route.directions : [];
+        const direction = currentDirection === 'in' ? directions[0] : directions[1];
+        const days = getDayScheduleGroup(direction && direction.days);
+        const flattened = [];
+        days.forEach(day => {
+            (day.times || []).forEach(time => {
+                const clean = formatTimeValue(time);
+                const mins = timeToMinutes(clean);
+                flattened.push({
+                    display: clean,
+                    matchingMinutes: mins,
+                    dayLabel: day.label || 'Sefer',
+                    hasY: /\bY\b/.test(String(time || ''))
+                });
+            });
+        });
+        flattened.sort((a, b) => {
+            if (a.matchingMinutes == null && b.matchingMinutes == null) return 0;
+            if (a.matchingMinutes == null) return 1;
+            if (b.matchingMinutes == null) return -1;
+            return a.matchingMinutes - b.matchingMinutes;
+        });
+        return flattened;
+    }
+
+    function getUpcomingScheduleTimes() {
+        const currentMinutes = getCurrentMinutes();
+        const scheduleTimes = getCurrentDirectionScheduleTimes();
+        const future = scheduleTimes.filter(item => item.matchingMinutes != null && item.matchingMinutes >= currentMinutes);
+        if (future.length) return future;
+        return scheduleTimes;
+    }
+
+    function getMinutesUntilDeparture(scheduleMinutes) {
+        if (scheduleMinutes == null) return null;
+        const currentMinutes = getCurrentMinutes();
+        const remaining = scheduleMinutes - currentMinutes;
+        return remaining >= 0 ? remaining : remaining + 24 * 60;
+    }
+
+    function renderScheduleSheet() {
+        const content = document.getElementById('scheduleSheetContent');
+        const route = routePayload.route;
+        const directions = currentDirection === 'in'
+            ? (route.directions && route.directions[0] ? route.directions[0] : { title: 'Ayazağa - YTÜ Davutpaşa', days: [] })
+            : (route.directions && route.directions[1] ? route.directions[1] : { title: 'YTÜ Davutpaşa - Ayazağa', days: [] });
+        const days = getDayScheduleGroup(directions.days);
+        const selectedStop = currentStops[selectedStopIndex];
+
+        document.getElementById('sheet-title').textContent = 'Tüm Seferler';
+        document.getElementById('sheet-subtitle').textContent = `41AT · ${currentDirection === 'in' ? 'Kampüse doğru' : 'Kampüsten çıkış'}${selectedStop ? ' · ' + selectedStop.name : ''}`;
+
+        content.innerHTML = days.map(day => {
+            const times = (day.times || []).map(time => {
+                const clean = formatTimeValue(time);
+                const mins = timeToMinutes(clean);
+                const expired = mins != null && mins < getCurrentMinutes();
+                return `<span class="sheet-time-chip ${expired ? 'expired' : ''}">${escapeHtml(clean)}${/\bY\b/.test(String(time || '')) ? ' <span class="schedule-y">Y</span>' : ''}</span>`;
+            }).join('') || '<span class="sheet-time-chip">Saat yok</span>';
+
+            return `
+                <div class="sheet-day-card">
+                    <div class="sheet-day-head">
+                        <div>
+                            <strong>${escapeHtml(day.label || 'Sefer')}</strong>
+                            <span>${escapeHtml((day.summary && day.summary.first) || '-')} - ${escapeHtml((day.summary && day.summary.last) || '-')}</span>
+                        </div>
+                        <span class="sheet-day-badge">41AT</span>
+                    </div>
+                    <div class="sheet-time-grid">${times}</div>
+                </div>
+            `;
+        }).join('');
+
+        if (!content.innerHTML.trim()) {
+            content.innerHTML = `
+                <div class="sheet-note">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Sefer saatleri şu anda alınamadı. Biraz sonra tekrar deneyin.</span>
+                </div>
+            `;
+        }
+    }
+
+    async function fetchStop(index) {
+        const stop = currentStops[index];
+        if (!stop || pendingStops.has(stop.code)) return;
+        pendingStops.add(stop.code);
+
+        try {
+            const response = await fetch('/api/ulasim_live?stop=' + encodeURIComponent(stop.code));
+            if (!response.ok) throw new Error('fetch failed');
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error || 'IETT response failed');
+
+            const arrivals = parseArrivalHtml(data.html);
+            arrivalCache[stop.code] = arrivals;
+
+            const bus41 = arrivals.find(item => item.line === '41AT');
+
+            if (selectedStopIndex === index) {
+                renderArrival(stop, arrivals);
+                if (bus41 && bus41.mins <= 3) {
+                    updateLiveBadge(false);
+                }
+            }
+        } catch (error) {
+            if (selectedStopIndex === index) {
+                updateLiveBadge(true);
+            }
+        } finally {
+            pendingStops.delete(stop.code);
+            buildStopMenu();
+        }
+    }
+
+    function selectStop(index) {
+        selectedStopIndex = index;
+        buildStopMenu();
+        updateStopMenuLabel();
+        updateStopCountBadge();
+
+        const stop = currentStops[index];
+        if (!stop) return;
+        const cached = arrivalCache[stop.code];
+        if (cached) {
+            renderArrival(stop, cached);
+        } else {
+            renderArrivalLoading(stop);
+            fetchStop(index);
+        }
+        setDirectionUi();
+    }
+
+    function switchDirection(direction) {
+        if (direction === currentDirection) return;
+        currentDirection = direction;
+        currentStops = getStops();
+        selectedStopIndex = 0;
+        arrivalCache = {};
+        pendingStops = new Set();
+        setDirectionUi();
+        buildStopMenu();
+        renderArrivalLoading(currentStops[0] || null);
+        if (currentStops.length) selectStop(0);
+        refreshAll();
+    }
+
+    function renderRouteSummary() {
+        const route = routePayload.route;
+        const heroLink = document.getElementById('route-detail-link');
+        if (heroLink) {
+            heroLink.href = route.route_link;
+        }
+    }
+
+    function getCurrentDirectionSchedule() {
+        const route = routePayload.route;
+        const directions = route && Array.isArray(route.directions) ? route.directions : [];
+        const direction = currentDirection === 'in' ? directions[0] : directions[1];
+        return direction && Array.isArray(direction.days) ? direction.days : [];
+    }
+
+    function renderDirectionCards() {
+        renderBusSheet();
+    }
+
+    function renderBusSheet() {
+        const days = getCurrentDirectionSchedule();
+        const content = document.getElementById('scheduleSheetContent');
+        if (!content) return;
+        content.innerHTML = days.length ? days.map(day => {
+            const times = (day.times || []).map(time => {
+                const clean = formatTimeValue(time);
+                const mins = timeToMinutes(clean);
+                const currentMinutes = getCurrentMinutes();
+                const expired = mins != null && mins < currentMinutes;
+                const yMark = /\bY\b/.test(String(time || '')) ? ' <span class="schedule-y">Y</span>' : '';
+                return `<span class="sheet-time-chip ${expired ? 'expired' : ''}">${escapeHtml(clean)}${yMark}</span>`;
+            }).join('') || '<span class="sheet-time-chip">Saat yok</span>';
+
+            return `
+                <div class="sheet-day-card">
+                    <div class="sheet-day-head">
+                        <div>
+                            <strong>${escapeHtml(day.label || 'Sefer')}</strong>
+                            <span>${escapeHtml((day.summary && day.summary.first) || '-')} - ${escapeHtml((day.summary && day.summary.last) || '-')}</span>
+                        </div>
+                        <span class="sheet-day-badge">41AT</span>
+                    </div>
+                    <div class="sheet-time-grid">${times}</div>
+                </div>
+            `;
+        }).join('') : `
+            <div class="sheet-note">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>Sefer saatleri şu anda alınamadı.</span>
+            </div>
+        `;
+    }
+
+    function openScheduleSheet() {
+        scheduleSheetOpen = true;
+        renderBusSheet();
+        document.getElementById('scheduleOverlay').classList.add('open');
+        document.getElementById('scheduleSheet').classList.add('open');
+        document.getElementById('scheduleSheet').setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        const sheetBody = document.getElementById('scheduleSheetContent');
+        if (sheetBody) sheetBody.scrollTop = 0;
+    }
+
+    function closeScheduleSheet() {
+        scheduleSheetOpen = false;
+        document.getElementById('scheduleOverlay').classList.remove('open');
+        document.getElementById('scheduleSheet').classList.remove('open');
+        document.getElementById('scheduleSheet').setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    function toggleStopMenu(forceOpen) {
+        const menu = document.getElementById('stopMenu');
+        selectedStopMenuOpen = typeof forceOpen === 'boolean' ? forceOpen : !selectedStopMenuOpen;
+        if (menu) menu.classList.toggle('open', selectedStopMenuOpen);
+    }
+
+    function closeStopMenu() {
+        selectedStopMenuOpen = false;
+        const menu = document.getElementById('stopMenu');
+        if (menu) menu.classList.remove('open');
+    }
+
+    function refreshSelectedStop() {
+        refreshAll();
+    }
+
+    function refreshAll() {
+        const refreshBtn = document.querySelector('.bus-refresh-btn');
+        const liveBadge = document.getElementById('live-label');
+        const updated = document.getElementById('metric-updated');
+
+        if (refreshBtn) refreshBtn.disabled = true;
+        if (liveBadge) liveBadge.classList.remove('error');
+
+        const promises = currentStops.map((_, index) => fetchStop(index));
+        Promise.allSettled(promises).then(() => {
+            if (refreshBtn) refreshBtn.disabled = false;
+            countdown = ROUTE_REFRESH_INTERVAL;
+            if (updated) {
+                updated.textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            }
+            setRefreshLabel(ROUTE_REFRESH_INTERVAL);
+            buildStopMenu();
+            renderBusSheet();
+            // Ensure the currently selected stop's data is rendered with fresh cache
+            if (selectedStopIndex < currentStops.length) {
+                const stop = currentStops[selectedStopIndex];
+                const cached = arrivalCache[stop.code];
+                if (cached) {
+                    renderArrival(stop, cached);
+                }
+            }
+        });
+    }
+
+    function startCountdown() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        countdownTimer = setInterval(() => {
+            countdown -= 1;
+            if (countdown <= 0) {
+                countdown = ROUTE_REFRESH_INTERVAL;
+                refreshAll();
+            } else {
+                setRefreshLabel(countdown);
+            }
+        }, 1000);
+    }
+
+    async function loadRouteData() {
+        try {
+            const response = await fetch('/api/ulasim_41at');
+            if (!response.ok) throw new Error('route fetch failed');
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error || 'route payload error');
+            routePayload = data.route;
+            routeStatus = 'live';
+        } catch (error) {
+            routePayload = FALLBACK_ROUTE;
+            routeStatus = 'fallback';
+        }
+
+        currentStops = getStops();
+        renderRouteSummary();
+        buildStopMenu();
+        renderDirectionCards();
+        setDirectionUi();
+        if (currentStops.length) {
+            selectStop(0);
+        } else {
+            renderArrivalLoading(null);
+        }
+        refreshAll();
+    }
+
     function openMobileDrawer() {
         document.getElementById('mobDrawer').classList.add('open');
         document.getElementById('mobOverlay').classList.add('open');
         document.body.style.overflow = 'hidden';
     }
+
     function closeMobileDrawer() {
         document.getElementById('mobDrawer').classList.remove('open');
         document.getElementById('mobOverlay').classList.remove('open');
         document.body.style.overflow = '';
     }
-    function toggleDarkMode() {
-        document.documentElement.classList.toggle('dark-mode');
-        localStorage.setItem('theme', document.documentElement.classList.contains('dark-mode') ? 'dark' : 'light');
+
+    currentStops = getStops();
+    buildStopMenu();
+    setDirectionUi();
+    if (currentStops.length) {
+        renderArrivalLoading(currentStops[0]);
+    } else {
+        renderArrivalLoading(null);
     }
-
-    // ──────────────────────────────────────────────────────
-    // Stop data
-    const STOPS_TO_CAMPUS = [
-        { name: 'YTÜ Davutpaşa Kampüsü', code: '125851', tag: 'Son Durak' },
-        { name: 'İktisadi ve İdari Bilimler Fak.', code: '133702' },
-        { name: 'Fakülte B Kapısı',      code: '132632' },
-        { name: 'Üniversite Camii',       code: '132642' },
-        { name: 'Eğitim Fakültesi',       code: '132912' },
-        { name: 'İnşaat Fakültesi',       code: '102312' },
-        { name: 'Yabancı Diller Okulu',   code: '129792' },
-        { name: 'Davutpaşa Kampüsü',      code: '182201' },
-    ];
-    const STOPS_FROM_CAMPUS = [
-        { name: 'YTÜ Davutpaşa Kampüsü', code: '125851', tag: 'Kalkış' },
-        { name: 'İktisadi ve İdari Bilimler Fak.', code: '133701' },
-        { name: 'Fakülte B Kapısı',      code: '132631' },
-        { name: 'Üniversite Camii',       code: '132641' },
-        { name: 'Eğitim Fakültesi',       code: '132911' },
-        { name: 'İnşaat Fakültesi',       code: '102311' },
-        { name: 'Yabancı Diller Okulu',   code: '129791' },
-        { name: 'Davutpaşa Metro',        code: '122881' },
-    ];
-    let STOPS      = STOPS_TO_CAMPUS;
-    let currentDir = 'in';   // 'in' = kampüse, 'out' = kampüsten
-
-    const REFRESH_INTERVAL = 30;
-    let countdown    = REFRESH_INTERVAL;
-    let cTimer       = null;
-    let selectedIdx  = null;         // which stop user tapped
-    let arrivalData  = {};           // code -> { mins, raw, ts }
-    let fetching     = new Set();
-
-    // Build the stop list DOM from current STOPS array
-    function initStopList() {
-        const list = document.getElementById('stop-track-list');
-        list.innerHTML = STOPS.map((s, i) => `
-            <div class="stop-track-item" onclick="selectStop(${i})" data-idx="${i}">
-                <div class="stop-track-dot"><div class="stop-track-dot-inner"></div></div>
-                <div class="stop-track-info">
-                    <div class="stop-track-name">${s.name}${s.tag ? ' <span style="font-size:0.7rem;color:var(--text-muted);font-weight:600">('+s.tag+')</span>' : ''}</div>
-                    <div class="stop-track-code">#${s.code}</div>
-                </div>
-                <div class="stop-track-arrival loading" id="arr-${i}">—</div>
-            </div>`
-        ).join('');
-    }
-
-    // Switch bus direction
-    function switchDirection(dir) {
-        if (dir === currentDir) return;
-        currentDir = dir;
-        STOPS = dir === 'in' ? STOPS_TO_CAMPUS : STOPS_FROM_CAMPUS;
-
-        // Update toggle buttons
-        document.getElementById('dir-btn-in').classList.toggle('active', dir === 'in');
-        document.getElementById('dir-btn-out').classList.toggle('active', dir === 'out');
-
-        // Update header direction labels
-        if (dir === 'in') {
-            document.getElementById('dir-from-lbl').innerHTML = 'AYAZAĞA';
-            document.getElementById('dir-to-lbl').innerHTML = '<b>DAVUTPAŞA YTÜ</b>';
-        } else {
-            document.getElementById('dir-from-lbl').innerHTML = '<b>YTÜ</b>';
-            document.getElementById('dir-to-lbl').innerHTML = 'AYAZAĞA';
-        }
-
-        // Reset state
-        selectedIdx = null;
-        arrivalData = {};
-        fetching.clear();
-        document.getElementById('arrival-panel').style.display = 'none';
-
-        // Rebuild stop list and fetch live data
-        initStopList();
-        refreshAll();
-    }
-
-    // Parse minutes from IETT HTML snippet for 41AT
-    function parseArrival(html) {
-        const t = document.createElement('div');
-        t.innerHTML = html;
-        const items = t.querySelectorAll('.line-item:not(:has(.content-header))');
-        const results = [];
-        items.forEach(el => {
-            const text = el.innerText || el.textContent;
-            const lineMatch = text.match(/^\s*(\w+)/);
-            const minsMatch = text.match(/(\d+)\s*dk/);
-            const timeMatch = text.match(/\((\d{2}:\d{2})\)/);
-            if (lineMatch && minsMatch) {
-                results.push({
-                    line:  lineMatch[1].trim(),
-                    mins:  parseInt(minsMatch[1]),
-                    sched: timeMatch ? timeMatch[1] : null,
-                    raw:   text.trim()
-                });
-            }
-        });
-        return results;
-    }
-
-    // Fetch one stop, update dot + arrival label
-    async function fetchStop(idx) {
-        const stop = STOPS[idx];
-        if (fetching.has(stop.code)) return;
-        fetching.add(stop.code);
-
-        const arrEl = document.getElementById('arr-' + idx);
-        const item  = document.querySelector('.stop-track-item[data-idx="' + idx + '"]');
-
-        try {
-            const r = await fetch('/api/ulasim_live?stop=' + stop.code);
-            if (!r.ok) throw new Error();
-            const d = await r.json();
-            if (!d.success) throw new Error();
-
-            const arrivals = parseArrival(d.html);
-            const bus41 = arrivals.find(a => a.line === '41AT');
-
-            arrivalData[stop.code] = { arrivals, ts: Date.now() };
-
-            if (bus41) {
-                item.classList.add('has-bus');
-                arrEl.classList.remove('loading', 'soon');
-                arrEl.classList.add('arriving');
-                arrEl.textContent = bus41.mins + ' dk';
-            } else {
-                item.classList.remove('has-bus');
-                arrEl.classList.remove('loading', 'arriving', 'soon');
-                arrEl.textContent = '—';
-            }
-
-            // If this is selected stop, update arrival panel
-            if (selectedIdx === idx) showArrivalPanel(idx, arrivals);
-
-        } catch(e) {
-            arrEl.classList.remove('loading', 'arriving', 'soon');
-            arrEl.textContent = '?';
-        } finally {
-            fetching.delete(stop.code);
-        }
-    }
-
-    // Fetch all stops in parallel
-    function refreshAll() {
-        const icon = document.getElementById('refresh-icon');
-        const btn  = document.getElementById('refresh-btn');
-        icon.classList.add('fa-spin');
-        btn.disabled = true;
-        const dot  = document.getElementById('live-dot');
-        const lbl  = document.getElementById('live-label');
-        dot.classList.remove('error'); lbl.classList.remove('error');
-        lbl.textContent = 'Canlı';
-
-        const promises = STOPS.map((_, i) => fetchStop(i));
-        Promise.allSettled(promises).then(() => {
-            icon.classList.remove('fa-spin');
-            btn.disabled = false;
-            countdown = REFRESH_INTERVAL;
-        });
-    }
-
-    // Show arrival panel for selected stop
-    function showArrivalPanel(idx, arrivals) {
-        const panel   = document.getElementById('arrival-panel');
-        const nameEl  = document.getElementById('arrival-stop-name');
-        const content = document.getElementById('arrival-content');
-        panel.style.display = '';
-        nameEl.textContent  = STOPS[idx].name;
-
-        const bus41 = arrivals ? arrivals.find(a => a.line === '41AT') : null;
-
-        if (!arrivals) {
-            // still loading
-            content.innerHTML = `<div class="arrival-loading"><div class="arrival-spinner"></div> Yükleniyor...</div>`;
-            return;
-        }
-        if (bus41) {
-            const colorClass = bus41.mins <= 3 ? '' : (bus41.mins <= 8 ? 'orange' : 'gray');
-            const routeText  = currentDir === 'in' ? 'AYAZAĞA → DAVUTPAŞA YTÜ' : 'YTÜ → AYAZAĞA';
-            content.innerHTML = `
-                <div class="arrival-card">
-                    <div class="arrival-card-line">41AT</div>
-                    <div class="arrival-card-body">
-                        <div class="arrival-card-route">${routeText}${bus41.sched ? ' <span style="font-weight:600;font-size:0.8rem;color:var(--text-muted);">('+bus41.sched+')</span>' : ''}</div>
-                        <div class="arrival-card-time ${colorClass}">
-                            <i class="fa-solid fa-clock"></i> ${bus41.mins} dakika
-                        </div>
-                    </div>
-                </div>`;
-        } else {
-            content.innerHTML = `<div class="arrival-empty"><i class="fa-solid fa-bus-slash"></i>Bu duraga yaklaşan 41AT bilgisi yok.</div>`;
-        }
-    }
-
-    // When user taps a stop
-    function selectStop(idx) {
-        selectedIdx = idx;
-        // Update active state
-        document.querySelectorAll('.stop-track-item').forEach((el, i) => {
-            el.classList.toggle('active', i === idx);
-        });
-        // Show panel with existing data or loading
-        const cached = arrivalData[STOPS[idx].code];
-        if (cached) {
-            showArrivalPanel(idx, cached.arrivals);
-        } else {
-            const panel   = document.getElementById('arrival-panel');
-            const nameEl  = document.getElementById('arrival-stop-name');
-            const content = document.getElementById('arrival-content');
-            panel.style.display = '';
-            nameEl.textContent  = STOPS[idx].name;
-            content.innerHTML   = `<div class="arrival-loading"><div class="arrival-spinner"></div> Yükleniyor...</div>`;
-            fetchStop(idx);
-        }
-    }
-
-    // Countdown
-    function startCountdown() {
-        if (cTimer) clearInterval(cTimer);
-        cTimer = setInterval(() => {
-            countdown--;
-            const el = document.getElementById('refresh-countdown');
-            if (el) el.textContent = countdown + ' sn';
-            if (countdown <= 0) {
-                countdown = REFRESH_INTERVAL;
-                refreshAll();
-            }
-        }, 1000);
-    }
-
-    // Init on page load
-    initStopList();
-    refreshAll();
     startCountdown();
+    loadRouteData();
+
+    window.addEventListener('click', (event) => {
+        const menu = document.getElementById('stopMenu');
+        const pill = document.getElementById('stopSelectButton');
+        if (!menu || !pill) return;
+        if (!menu.contains(event.target) && !pill.contains(event.target)) {
+            closeStopMenu();
+        }
+    });
+
+    renderRouteSummary();
+    renderBusSheet();
     </script>
 </body>
 </html>
