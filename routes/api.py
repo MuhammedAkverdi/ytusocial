@@ -54,12 +54,12 @@ def get_story_api(story_id):
 def system_stats():
     import psutil
     from datetime import datetime
-    from utils import ONLINE_USERS
+    from utils import get_online_user_count
     if not current_user.is_admin:
         return jsonify({"error": "Unauthorized"}), 403
     cpu = psutil.cpu_percent()
     ram = psutil.virtual_memory().percent
-    active = len(ONLINE_USERS)
+    active = get_online_user_count()
     return jsonify({"cpu": cpu, "ram": ram, "active": active, "time": datetime.now().strftime('%H:%M:%S')})
 
 @api.route('/api/share_post', methods=['POST'])

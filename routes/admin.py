@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from extensions import db
 from models import User, Post, Feedback, Club, Note, ClubVote, NoteVote, Notification, Advert
-from utils import optimize_and_save_image, allowed_file, ONLINE_USERS
+from utils import optimize_and_save_image, allowed_file, get_online_user_count
 from routes.main import _purge_post_tree
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
@@ -30,7 +30,7 @@ def admin_panel():
                            feedbacks=feedbacks,
                            cpu=psutil.cpu_percent(),
                            ram=psutil.virtual_memory().percent,
-                           active_count=len(ONLINE_USERS),
+                           active_count=get_online_user_count(),
                            users=User.query.limit(50).all(),
                            clubs=Club.query.order_by(Club.name).all(),
                            pending_notes=pending_notes,

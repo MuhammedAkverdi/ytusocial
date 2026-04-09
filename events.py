@@ -1,7 +1,8 @@
+from flask import request
 from flask_socketio import emit, join_room
 from flask_login import current_user
 from extensions import socketio
-from utils import ONLINE_USERS
+from utils import register_online_user, unregister_online_user
 
 @socketio.on('join')
 def on_join(data):
@@ -12,16 +13,19 @@ def on_join(data):
 @socketio.on('connect')
 def handle_connect():
     if current_user.is_authenticated:
-        ONLINE_USERS.add(current_user.id)
         join_room(current_user.username)
-        emit('user_status_change', {'user_id': current_user.id, 'status': 'online'}, broadcast=True)
+        became_online = register_online_user(current_user.id, sid=request.sid)
+        if became_online:
+            emit('user_status_change', {'user_id': current_user.id, 'status': 'online'}, broadcast=True)
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    if current_user.is_authenticated:
-        if current_user.id in ONLINE_USERS:
-            ONLINE_USERS.remove(current_user.id)
-        emit('user_status_change', {'user_id': current_user.id, 'status': 'offline'}, broadcast=True)
+    resolved_user_id, became_offline = unregister_online_user(
+        user_id=current_user.id if current_user.is_authenticated else None,
+        sid=request.sid,
+    )
+    if became_offline and resolved_user_id is not None:
+        emit('user_status_change', {'user_id': resolved_user_id, 'status': 'offline'}, broadcast=True)
 
 @socketio.on('typing')
 def on_typing(data):

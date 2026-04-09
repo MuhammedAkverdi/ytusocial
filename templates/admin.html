@@ -62,8 +62,8 @@
             <div class="admin-card">
                 <i class="fa-solid fa-bolt stat-icon" style="color: #2ecc71;"></i>
                 <div class="stat-info">
-                    <h3>{{ active_count }}</h3>
-                    <p>Online Kullanıcı</p>
+                    <h3 id="liveUserCount">{{ active_count }}</h3>
+                    <p>Canlı Kullanıcı</p>
                 </div>
             </div>
         </div>
@@ -595,6 +595,30 @@
                 btn.innerText = '🌙';
             }
         }
+    </script>
+
+    <script>
+        async function refreshLiveUserCount() {
+            const countEl = document.getElementById('liveUserCount');
+            if (!countEl) return;
+
+            try {
+                const response = await fetch('/api/system_stats', { credentials: 'same-origin' });
+                if (!response.ok) return;
+
+                const data = await response.json();
+                if (typeof data.active !== 'undefined') {
+                    countEl.textContent = data.active;
+                }
+            } catch (error) {
+                console.debug('Canlı kullanıcı sayısı güncellenemedi:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshLiveUserCount();
+            setInterval(refreshLiveUserCount, 5000);
+        });
     </script>
 
 </body>

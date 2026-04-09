@@ -5,8 +5,9 @@ import os
 import json
 import re
 from werkzeug.utils import secure_filename
-from flask import url_for, current_app
+from flask import url_for
 from extensions import db, socketio
+from threading import Lock
 
 BOLUM_KELIMELERI = {
     'Bilgisayar': ['algoritma', 'yazılım', 'kod', 'software', 'java', 'python', 'cpu', 'ram', 'veri', 'network', 'class', 'object', 'döngü', 'loop'],
@@ -18,6 +19,9 @@ BOLUM_KELIMELERI = {
 }
 
 ONLINE_USERS = set()
+ONLINE_USER_CONNECTIONS = {}
+ONLINE_USER_SID_MAP = {}
+ONLINE_USERS_LOCK = Lock()
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi', 'webm', 'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt'}
 DATA_FILE = 'votes.json'
 
@@ -38,6 +42,48 @@ MAX_NOTE_SIZE_BYTES = 15 * 1024 * 1024  # 15 MB
 
 def get_turkey_time():
     return datetime.utcnow() + timedelta(hours=3)
+
+def register_online_user(user_id, sid=None):
+    with ONLINE_USERS_LOCK:
+        if sid is not None:
+            previous_user_id = ONLINE_USER_SID_MAP.get(sid)
+            if previous_user_id is not None and previous_user_id != user_id:
+                previous_count = ONLINE_USER_CONNECTIONS.get(previous_user_id, 0)
+                if previous_count <= 1:
+                    ONLINE_USER_CONNECTIONS.pop(previous_user_id, None)
+                    ONLINE_USERS.discard(previous_user_id)
+                else:
+                    ONLINE_USER_CONNECTIONS[previous_user_id] = previous_count - 1
+            ONLINE_USER_SID_MAP[sid] = user_id
+
+        current_count = ONLINE_USER_CONNECTIONS.get(user_id, 0) + 1
+        ONLINE_USER_CONNECTIONS[user_id] = current_count
+        ONLINE_USERS.add(user_id)
+        return current_count == 1
+
+def unregister_online_user(user_id=None, sid=None):
+    with ONLINE_USERS_LOCK:
+        resolved_user_id = user_id
+        if sid is not None:
+            mapped_user_id = ONLINE_USER_SID_MAP.pop(sid, None)
+            if mapped_user_id is not None:
+                resolved_user_id = mapped_user_id
+
+        if resolved_user_id is None:
+            return None, False
+
+        current_count = ONLINE_USER_CONNECTIONS.get(resolved_user_id, 0)
+        if current_count <= 1:
+            ONLINE_USER_CONNECTIONS.pop(resolved_user_id, None)
+            ONLINE_USERS.discard(resolved_user_id)
+            return resolved_user_id, True
+
+        ONLINE_USER_CONNECTIONS[resolved_user_id] = current_count - 1
+        return resolved_user_id, False
+
+def get_online_user_count():
+    with ONLINE_USERS_LOCK:
+        return len(ONLINE_USERS)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
