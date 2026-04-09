@@ -100,6 +100,7 @@ app = create_app()
 if __name__ == '__main__':
     with app.app_context():
         os.makedirs(app.instance_path, exist_ok=True)
+        db.drop_all() # Önce eski/hatalı her şeyi sil
         db.create_all()
     debug_flag = os.environ.get('FLASK_DEBUG', '1') == '1'
     socketio.run(app, host='0.0.0.0', port=5002, debug=debug_flag)
