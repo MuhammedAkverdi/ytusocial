@@ -16,7 +16,14 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # Sunucudaki proje klasörüne git (Yol farklıysa burayı düzelt)
+            # 1. Doğru klasöre git
             cd /root/ytusocial_project/ytusocial 
-            # GitHub'dan en güncel kodları çek
-            git pull origin main
+            
+            # 2. GitHub'daki en güncel kodların listesini al (henüz indirme)
+            git fetch --all
+            
+            # 3. ZORLA GÜNCELLE: Sunucudaki app.py vb. manuel değişiklikleri ez, GitHub'ı birebir kopyala
+            git reset --hard origin/main
+            
+            # 4. Flask uygulamasını (servisini) yeniden başlat ki yeni kodlar canlıda devreye girsin
+            systemctl restart ytusocial
