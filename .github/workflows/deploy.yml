@@ -17,6 +17,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             # Sunucudaki proje klasörüne git (Yol farklıysa burayı düzelt)
-            cd /root/ytusocial 
+            cd /root/ytusocial_project/ytusocial 
             # GitHub'dan en güncel kodları çek
             git pull origin main

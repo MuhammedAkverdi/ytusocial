@@ -24,12 +24,9 @@ _load_important_env()
 
 def _resolve_database_uri():
     raw_url = (os.environ.get('DATABASE_URL') or '').strip()
-    local_url = (os.environ.get('LOCAL_DATABASE_URL') or '').strip()
 
     if not raw_url:
-        if local_url:
-            return _normalize_sqlite_uri(local_url)
-        raise RuntimeError('DATABASE_URL is not set. Provide a valid remote database URL or LOCAL_DATABASE_URL for local development.')
+        raise RuntimeError('DATABASE_URL is not set. The app now requires a single PostgreSQL database in every environment.')
 
     if raw_url.startswith('postgres://'):
         raw_url = raw_url.replace('postgres://', 'postgresql://', 1)
@@ -38,24 +35,9 @@ def _resolve_database_uri():
         parsed = urlparse(raw_url)
         host = (parsed.hostname or '').strip()
         if not host or '...' in host or '...' in raw_url:
-            if local_url:
-                return _normalize_sqlite_uri(local_url)
-            raise RuntimeError('DATABASE_URL looks truncated or invalid. Set a real remote database URL or LOCAL_DATABASE_URL for local development.')
+            raise RuntimeError('DATABASE_URL looks truncated or invalid. Set a real PostgreSQL connection string.')
 
     return raw_url
-
-
-def _normalize_sqlite_uri(uri):
-    if not uri.startswith('sqlite:///'):
-        return uri
-
-    sqlite_path = uri.replace('sqlite:///', '', 1)
-    if ':' in sqlite_path[:3] or sqlite_path.startswith('/'):
-        return uri
-
-    absolute_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), sqlite_path))
-    absolute_path = absolute_path.replace('\\', '/')
-    return 'sqlite:///' + absolute_path
 
 class Config:
     SECRET_KEY = 'yildiz-teknik-gizli-anahtar'
