@@ -10,20 +10,22 @@ def _env_bool(name, default):
 
 
 def _load_important_env():
-    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'important.env')
-    if not os.path.exists(env_path):
-        return
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    for file_name in ('important.local.env', 'important.env'):
+        env_path = os.path.join(base_dir, file_name)
+        if not os.path.exists(env_path):
+            continue
 
-    with open(env_path, 'r', encoding='utf-8') as env_file:
-        for raw_line in env_file:
-            line = raw_line.strip()
-            if not line or line.startswith('#') or '=' not in line:
-                continue
-            key, value = line.split('=', 1)
-            key = key.strip()
-            value = value.strip()
-            if key and key not in os.environ:
-                os.environ[key] = value
+        with open(env_path, 'r', encoding='utf-8') as env_file:
+            for raw_line in env_file:
+                line = raw_line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+                key, value = line.split('=', 1)
+                key = key.strip()
+                value = value.strip()
+                if key and key not in os.environ:
+                    os.environ[key] = value
 
 
 _load_important_env()
@@ -53,13 +55,18 @@ class Config:
     MAX_CONTENT_LENGTH = 100 * 1024 * 1024 
     WTF_CSRF_CHECK_DEFAULT = False
 
-    # Legacy Flask-Mail settings are kept empty; OTP mail now uses Brevo API.
-    MAIL_SERVER = os.environ.get('MAIL_SERVER', '')
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
     MAIL_USE_TLS = _env_bool('MAIL_USE_TLS', True)
-    MAIL_TIMEOUT = int(os.environ.get('MAIL_TIMEOUT', '8'))
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
+    MAIL_USE_SSL = _env_bool('MAIL_USE_SSL', False)
+    MAIL_TIMEOUT = int(os.environ.get('MAIL_TIMEOUT', '10'))
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'portalytu@gmail.com')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
+    MAIL_DEFAULT_SENDER_NAME = os.environ.get('MAIL_DEFAULT_SENDER_NAME', 'YTU Social')
+    MAIL_DEFAULT_SENDER = os.environ.get(
+        'MAIL_DEFAULT_SENDER',
+        f"{MAIL_DEFAULT_SENDER_NAME} <{MAIL_USERNAME}>" if MAIL_USERNAME else '',
+    )
 
     UPLOAD_FOLDER_NOTES = 'static/note_files'
     AUDIO_UPLOAD_FOLDER = os.path.join('static', 'audio_files')

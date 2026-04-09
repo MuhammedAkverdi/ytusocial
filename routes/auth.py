@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
 import random
+from email.utils import formataddr
 from urllib.parse import urlparse
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from flask_mail import Message as MailMessage
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from extensions import db, socketio
+from extensions import db, mail, socketio
 from models import User
 
 auth = Blueprint('auth', __name__)
@@ -44,32 +46,57 @@ def _otp_is_active(user):
     return bool(user and user.otp_code and user.otp_expires_at and user.otp_expires_at > _now())
 
 
-def _send_otp_email_job(app, email, subject, body):
+def _render_verify(email, next_url=None):
+    return render_template('verify.html', email=email, next_url=next_url)
+
+
+def _mail_sender():
+    sender_email = (current_app.config.get('MAIL_USERNAME') or '').strip()
+    sender_name = (current_app.config.get('MAIL_DEFAULT_SENDER_NAME') or '').strip() or 'YTU Social'
+    if not sender_email:
+        raise RuntimeError('MAIL_USERNAME is not configured.')
+    return formataddr((sender_name, sender_email))
+
+
+def _send_mail_job(app, recipient_email, subject, body, html_body=None):
     with app.app_context():
         try:
-            send_mail = getattr(app, 'send_mail', None)
-            if not callable(send_mail):
-                print(f"Mail gönderim hatası ({email}): app.send_mail bulunamadı")
+            if not app.config.get('MAIL_USERNAME') or not app.config.get('MAIL_PASSWORD'):
+                print(f"Mail gönderim hatası ({recipient_email}): MAIL_USERNAME veya MAIL_PASSWORD eksik.")
                 return False
 
-            if not send_mail(email, subject, body):
-                print(f"Mail gönderim hatası ({email}): Brevo API başarısız döndü")
-                return False
+            message = MailMessage(
+                subject=subject,
+                recipients=[recipient_email],
+                body=body,
+                html=html_body,
+                sender=app.config.get('MAIL_DEFAULT_SENDER') or _mail_sender(),
+            )
+            mail.send(message)
             return True
         except Exception as exc:
-            print(f"Mail gönderim hatası ({email}): {exc}")
+            print(f"Mail gönderim hatası ({recipient_email}): {exc}")
             return False
 
 
-def _queue_otp_email(subject, email, intro_text, otp):
+def _queue_mail(subject, email, body, html_body=None):
     app = current_app._get_current_object()
-    body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
+    if not app.config.get('MAIL_USERNAME') or not app.config.get('MAIL_PASSWORD'):
+        print(f"Mail gönderim hatası ({email}): MAIL_USERNAME veya MAIL_PASSWORD eksik.")
+        return False
+
     try:
-        socketio.start_background_task(_send_otp_email_job, app, email, subject, body)
+        socketio.start_background_task(_send_mail_job, app, email, subject, body, html_body)
         return True
     except Exception as exc:
         print(f"Mail gönderim hatası ({email}): arka plan görevi başlatılamadı: {exc}")
-        return _send_otp_email_job(app, email, subject, body)
+        return _send_mail_job(app, email, subject, body, html_body)
+
+
+def _queue_otp_email(subject, email, intro_text, otp):
+    body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
+    html_body = body.replace('\n', '<br>')
+    return _queue_mail(subject, email, body, html_body)
 
 
 def _verify_redirect(email, next_url=None):
@@ -85,10 +112,6 @@ def _render_register(next_url=None):
 
 def _render_login(next_url=None):
     return render_template('login.html', next_url=next_url)
-
-
-def _render_verify(email, next_url=None):
-    return render_template('verify.html', email=email, next_url=next_url)
 
 
 @auth.route('/register', methods=['GET', 'POST'])
@@ -122,27 +145,7 @@ def register():
                 return _render_register(next_url)
 
             user.password = hashed_pw
-
-            if _otp_is_active(user):
-                try:
-                    db.session.commit()
-                except Exception as e:
-                    db.session.rollback()
-                    print(f"Kayıt Hatası: {e}")
-                    flash("Kayıt güncellenirken bir teknik sorun oluştu!", "danger")
-                    return _render_register(next_url)
-
-                if not _queue_otp_email(
-                    'YTÜ Portal Doğrulama',
-                    email,
-                    'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
-                    user.otp_code,
-                ):
-                    flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", "danger")
-                    return _render_register(next_url)
-                flash("Doğrulama kodu yeniden gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "success")
-                return _verify_redirect(email, next_url)
-
+            user.is_verified = False
             otp = _issue_otp(user)
             try:
                 db.session.commit()
@@ -168,14 +171,13 @@ def register():
         while User.query.filter_by(handle=handle).first():
             handle = base_handle + str(random.randint(1, 999))
 
-        otp = str(random.randint(100000, 999999))
         new_user = User(
             email=email,
             password=hashed_pw,
-            otp_code=otp,
-            otp_expires_at=_now() + timedelta(seconds=OTP_VALIDITY_SECONDS),
             handle=handle,
+            is_verified=False,
         )
+        otp = _issue_otp(new_user)
 
         try:
             db.session.add(new_user)
@@ -320,43 +322,26 @@ def login():
         if user and check_password_hash(user.password, password):
             if not user.is_verified:
                 if _otp_is_active(user):
-                    try:
-                        db.session.commit()
-                        if not _queue_otp_email(
-                            'YTÜ Portal Doğrulama',
-                            email,
-                            'Hesabını doğrulamak için kodun aşağıda.',
-                            user.otp_code,
-                        ):
-                            flash("Doğrulama kodu yeniden gönderilemedi.", "danger")
-                            return _render_login(next_url)
-                    except Exception as e:
-                        db.session.rollback()
-                        print(f"Giriş Hatası: {e}")
-                        flash("Doğrulama kodu yeniden gönderilirken sorun oluştu.", "danger")
-                        return _render_login(next_url)
-
-                    flash("Hesabın henüz doğrulanmamış. Doğrulama kodu yeniden gönderiliyor.", "info")
-                    return _verify_redirect(email, next_url)
-
-                otp = _issue_otp(user)
+                    otp = user.otp_code
+                else:
+                    otp = _issue_otp(user)
                 try:
                     db.session.commit()
                     if not _queue_otp_email(
                         'YTÜ Portal Doğrulama',
                         email,
-                        'Hesabını doğrulamak için yeni kodun aşağıda.',
+                        'Hesabını doğrulamak için kodun aşağıda.',
                         otp,
                     ):
-                        flash("Yeni doğrulama kodu gönderilemedi.", "danger")
+                        flash("Doğrulama kodu yeniden gönderilemedi.", "danger")
                         return _render_login(next_url)
                 except Exception as e:
                     db.session.rollback()
                     print(f"Giriş Hatası: {e}")
-                    flash("Yeni doğrulama kodu gönderilirken sorun oluştu.", "danger")
+                    flash("Doğrulama kodu yeniden gönderilirken sorun oluştu.", "danger")
                     return _render_login(next_url)
 
-                flash("Kodun süresi dolmuştu. Yeni kod gönderiliyor.", "success")
+                flash("Hesabın henüz doğrulanmamış. Doğrulama kodu yeniden gönderiliyor.", "info")
                 return _verify_redirect(email, next_url)
 
             login_user(user)
