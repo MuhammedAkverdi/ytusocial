@@ -72,6 +72,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }, 4000);
 
+    // 3.5. Çift form gönderimini engelle
+    document.querySelectorAll('form[data-disable-double-submit="true"]').forEach(form => {
+        form.addEventListener('submit', () => {
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (!submitButton || submitButton.disabled) return;
+            submitButton.disabled = true;
+            submitButton.dataset.originalHtml = submitButton.innerHTML;
+            submitButton.innerHTML = 'Gönderiliyor...';
+        });
+    });
+
     // 4. Sohbet Sayfasındaysak En Alta Kaydır
     const messageArea = document.getElementById("messageArea");
     if (messageArea) {

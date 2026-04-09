@@ -119,6 +119,7 @@ class User(UserMixin, db.Model):
     profile_pic = db.Column(db.String(200), default='img/default_avatar.png')
     is_verified = db.Column(db.Boolean, default=False)
     otp_code = db.Column(db.String(6))
+    otp_expires_at = db.Column(db.DateTime, nullable=True)
     ban_expiration = db.Column(db.DateTime, nullable=True)
     is_banned = db.Column(db.Boolean, default=False)
     

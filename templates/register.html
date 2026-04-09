@@ -152,7 +152,7 @@
             <p class="auth-subtitle">Yıldızlıların Buluşma Noktası</p>
         </div>
 
-        <form method="POST">
+        <form method="POST" data-disable-double-submit="true">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             {% if next_url %}
             <input type="hidden" name="next" value="{{ next_url }}">

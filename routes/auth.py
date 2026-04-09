@@ -1,14 +1,18 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, login_required
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_mail import Message as MailMessage
-from extensions import db, mail
-from models import User
+from datetime import datetime, timedelta
 import random
-from flask import current_app
 from urllib.parse import urlparse
 
+from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required, login_user, logout_user
+from flask_mail import Message as MailMessage
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from extensions import db, mail
+from models import User
+
 auth = Blueprint('auth', __name__)
+
+OTP_VALIDITY_SECONDS = 90
 
 
 def _safe_next_url(target):
@@ -21,27 +25,114 @@ def _safe_next_url(target):
         return None
     return target
 
+
+def _normalize_email(raw_email):
+    return (raw_email or '').strip().lower()
+
+
+def _now():
+    return datetime.utcnow()
+
+
+def _issue_otp(user):
+    otp = str(random.randint(100000, 999999))
+    user.otp_code = otp
+    user.otp_expires_at = _now() + timedelta(seconds=OTP_VALIDITY_SECONDS)
+    return otp
+
+
+def _otp_is_active(user):
+    return bool(user and user.otp_code and user.otp_expires_at and user.otp_expires_at > _now())
+
+
+def _send_otp_email(email, subject, intro_text, otp):
+    msg = MailMessage(subject, sender=current_app.config['MAIL_USERNAME'], recipients=[email])
+    msg.body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
+    mail.send(msg)
+
+
+def _verify_redirect(email, next_url=None):
+    safe_next = _safe_next_url(next_url)
+    if safe_next:
+        return redirect(url_for('auth.verify', email=email, next=safe_next))
+    return redirect(url_for('auth.verify', email=email))
+
+
+def _render_register(next_url=None):
+    return render_template('register.html', next_url=next_url)
+
+
+def _render_login(next_url=None):
+    return render_template('login.html', next_url=next_url)
+
+
+def _render_verify(email, next_url=None):
+    return render_template('verify.html', email=email, next_url=next_url)
+
+
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
-    next_url = request.args.get('next') or request.form.get('next')
+    next_url = _safe_next_url(request.args.get('next') or request.form.get('next'))
+
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = _normalize_email(request.form.get('email'))
+        password = request.form.get('password') or ''
         accept_terms = request.form.get('accept_terms')
         accept_privacy = request.form.get('accept_privacy')
-        
+
         if not accept_terms or not accept_privacy:
             flash("Hizmet Şartları ve Gizlilik Politikası'nı kabul etmelisin!", "danger")
-            return render_template('register.html')
-        
+            return _render_register(next_url)
+
         if not email.endswith('@std.yildiz.edu.tr'):
             flash("Sadece @std.yildiz.edu.tr uzantılı YTÜ maili kabul edilir!", "danger")
-            return render_template('register.html')
-        
-        user_exists = User.query.filter_by(email=email).first()
-        if user_exists:
-            flash("Bu mail adresiyle daha önce kayıt olunmuş!", "danger")
-            return render_template('register.html')
+            return _render_register(next_url)
+
+        if not password:
+            flash("Şifre boş olamaz!", "danger")
+            return _render_register(next_url)
+
+        user = User.query.filter_by(email=email).first()
+        hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
+
+        if user:
+            if user.is_verified:
+                flash("Bu mail adresiyle zaten kayıtlı bir hesap var. Giriş yapabilirsin.", "danger")
+                return _render_register(next_url)
+
+            user.password = hashed_pw
+
+            if _otp_is_active(user):
+                try:
+                    db.session.flush()
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"Kayıt Hatası: {e}")
+                    flash("Kayıt güncellenirken bir teknik sorun oluştu!", "danger")
+                    return _render_register(next_url)
+
+                flash("Doğrulama kodun zaten aktif. 90 saniye içinde aynı kodu kullanabilirsin.", "info")
+                return _verify_redirect(email, next_url)
+
+            otp = _issue_otp(user)
+            try:
+                db.session.flush()
+                _send_otp_email(
+                    email,
+                    'YTÜ Portal Doğrulama',
+                    'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
+                    otp,
+                )
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print(f"Kayıt Hatası: {e}")
+                flash("Mail gönderilirken bir teknik sorun oluştu!", "danger")
+                return _render_register(next_url)
+
+            flash("Doğrulama kodu mailine gönderildi. Kod 90 saniye geçerli.", "success")
+            return _verify_redirect(email, next_url)
 
         base_handle = email.split('@')[0]
         handle = base_handle
@@ -49,104 +140,184 @@ def register():
             handle = base_handle + str(random.randint(1, 999))
 
         otp = str(random.randint(100000, 999999))
-        hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
-        
-        new_user = User(email=email, password=hashed_pw, otp_code=otp, handle=handle)
+        new_user = User(
+            email=email,
+            password=hashed_pw,
+            otp_code=otp,
+            otp_expires_at=_now() + timedelta(seconds=OTP_VALIDITY_SECONDS),
+            handle=handle,
+        )
+
         try:
             db.session.add(new_user)
+            db.session.flush()
+            _send_otp_email(
+                email,
+                'YTÜ Portal Doğrulama',
+                'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
+                otp,
+            )
             db.session.commit()
-            msg = MailMessage('YTÜ Portal Doğrulama', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-            msg.body = f'Portalımıza hoş geldin! Doğrulama kodun: {otp}'
-            mail.send(msg)
-            verify_target = url_for('auth.verify', email=email)
-            safe_next = _safe_next_url(next_url)
-            if safe_next:
-                verify_target = url_for('auth.verify', email=email, next=safe_next)
-            return redirect(verify_target)
         except Exception as e:
             db.session.rollback()
             print(f"Kayıt Hatası: {e}")
             flash("Mail gönderilirken bir teknik sorun oluştu!", "danger")
-            return render_template('register.html', next_url=next_url)
-    return render_template('register.html', next_url=next_url)
+            return _render_register(next_url)
+
+        flash("Doğrulama kodu mailine gönderildi. Kod 90 saniye geçerli.", "success")
+        return _verify_redirect(email, next_url)
+
+    return _render_register(next_url)
+
 
 @auth.route('/verify/<email>', methods=['GET', 'POST'])
 def verify(email):
-    next_url = request.args.get('next') or request.form.get('next')
+    email = _normalize_email(email)
+    next_url = _safe_next_url(request.args.get('next') or request.form.get('next'))
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        flash("Bu e-posta ile eşleşen bir hesap bulunamadı.", "danger")
+        return redirect(url_for('auth.register', next=next_url) if next_url else url_for('auth.register'))
+
+    if user.is_verified:
+        flash("Hesabın zaten doğrulanmış.", "info")
+        if current_user.is_authenticated and current_user.id == user.id:
+            if next_url:
+                return redirect(next_url)
+            return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login', next=next_url) if next_url else url_for('auth.login'))
+
     if request.method == 'POST':
-        girilen_kod = request.form.get('kod')
-        user = User.query.filter_by(email=email).first()
-        if user and user.otp_code == girilen_kod:
+        girilen_kod = (request.form.get('kod') or '').strip()
+
+        if not _otp_is_active(user):
+            flash("Doğrulama kodunun süresi doldu. Lütfen tekrar giriş yapıp yeni kod iste.", "danger")
+            return _render_verify(email, next_url)
+
+        if user.otp_code == girilen_kod:
             user.is_verified = True
             user.otp_code = None
-            db.session.commit()
+            user.otp_expires_at = None
+            try:
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print(f"Doğrulama Hatası: {e}")
+                flash("Kod onaylanırken bir teknik sorun oluştu!", "danger")
+                return _render_verify(email, next_url)
             login_user(user)
             flash("Kod onaylandı! YTU Social'a hoş geldin.", "success")
-            safe_next = _safe_next_url(next_url)
-            if safe_next:
-                return redirect(safe_next)
+            if next_url:
+                return redirect(next_url)
             return redirect(url_for('main.index'))
-        else:
-            flash("Hata: Girdiğin kod hatalı, lütfen tekrar dene!", "danger")
-            return render_template('verify.html', email=email, next_url=next_url)
-    return render_template('verify.html', email=email, next_url=next_url)
+
+        flash("Hata: Girdiğin kod hatalı, lütfen tekrar dene!", "danger")
+        return _render_verify(email, next_url)
+
+    return _render_verify(email, next_url)
+
 
 @auth.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
-        email = request.form.get('email')
+        email = _normalize_email(request.form.get('email'))
         user = User.query.filter_by(email=email).first()
         if user:
-            otp = str(random.randint(100000, 999999))
-            user.otp_code = otp
-            db.session.commit()
+            otp = _issue_otp(user)
             try:
-                msg = MailMessage('YTÜ Portal Şifre Sıfırlama', sender=current_app.config['MAIL_USERNAME'], recipients=[email])
-                msg.body = f'Şifre sıfırlama kodun: {otp}'
-                mail.send(msg)
+                db.session.flush()
+                _send_otp_email(
+                    email,
+                    'YTÜ Portal Şifre Sıfırlama',
+                    'Şifre sıfırlama kodun aşağıda.',
+                    otp,
+                )
+                db.session.commit()
                 flash("Sıfırlama kodu e-posta adresine gönderildi.", "info")
                 return redirect(url_for('auth.reset_password', email=email))
             except Exception as e:
+                db.session.rollback()
                 print(f"Mail Hatası: {e}")
                 flash("Mail gönderilirken bir hata oluştu.", "danger")
         else:
             flash("Bu e-posta adresi sistemde kayıtlı değil.", "danger")
     return render_template('forgot_password.html')
 
+
 @auth.route('/reset_password/<email>', methods=['GET', 'POST'])
 def reset_password(email):
+    email = _normalize_email(email)
     if request.method == 'POST':
-        kod = request.form.get('kod')
-        password = request.form.get('password')
+        kod = (request.form.get('kod') or '').strip()
+        password = request.form.get('password') or ''
         user = User.query.filter_by(email=email).first()
-        
-        if user and user.otp_code == kod:
+
+        if not password:
+            flash("Şifre boş olamaz!", "danger")
+        elif user and user.otp_code == kod and _otp_is_active(user):
             user.password = generate_password_hash(password, method='pbkdf2:sha256')
             user.otp_code = None
-            db.session.commit()
+            user.otp_expires_at = None
+            try:
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print(f"Şifre Sıfırlama Hatası: {e}")
+                flash("Şifre güncellenirken bir teknik sorun oluştu!", "danger")
+                return render_template('reset_password.html', email=email)
             flash("Şifreniz başarıyla güncellendi. Giriş yapabilirsiniz.", "success")
             return redirect(url_for('auth.login'))
+        elif user and user.otp_code == kod:
+            flash("Kodun süresi doldu. Lütfen yeniden şifre sıfırlama iste.", "danger")
         else:
             flash("Geçersiz doğrulama kodu!", "danger")
     return render_template('reset_password.html', email=email)
 
+
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    next_url = request.args.get('next') or request.form.get('next')
+    next_url = _safe_next_url(request.args.get('next') or request.form.get('next'))
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = _normalize_email(request.form.get('email'))
+        password = request.form.get('password') or ''
         user = User.query.filter_by(email=email).first()
+
         if user and check_password_hash(user.password, password):
+            if not user.is_verified:
+                if _otp_is_active(user):
+                    flash("Hesabın henüz doğrulanmamış. Kod sayfasına yönlendiriliyorsun.", "info")
+                    return _verify_redirect(email, next_url)
+
+                otp = _issue_otp(user)
+                try:
+                    db.session.flush()
+                    _send_otp_email(
+                        email,
+                        'YTÜ Portal Doğrulama',
+                        'Hesabını doğrulamak için yeni kodun aşağıda.',
+                        otp,
+                    )
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"Giriş Hatası: {e}")
+                    flash("Yeni doğrulama kodu gönderilirken sorun oluştu.", "danger")
+                    return _render_login(next_url)
+
+                flash("Kodun süresi dolmuştu. Yeni kodu mailine gönderdik.", "success")
+                return _verify_redirect(email, next_url)
+
             login_user(user)
-            safe_next = _safe_next_url(next_url)
-            if safe_next:
-                return redirect(safe_next)
+            if next_url:
+                return redirect(next_url)
             return redirect(url_for('main.index'))
-        else:
-            flash("Giriş başarısız! Lütfen bilgilerinizi kontrol edin.", "danger")
-            return render_template('login.html', next_url=next_url)
-    return render_template('login.html', next_url=next_url)
+
+        flash("Giriş başarısız! Lütfen bilgilerinizi kontrol edin.", "danger")
+        return _render_login(next_url)
+
+    return _render_login(next_url)
+
 
 @auth.route('/logout')
 @login_required

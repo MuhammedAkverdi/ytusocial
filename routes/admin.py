@@ -6,6 +6,7 @@ from utils import allowed_image_file, upload_club_logo_to_spaces, get_online_use
 from routes.main import _purge_post_tree
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
+from sqlalchemy.exc import IntegrityError
 import os
 import psutil
 
@@ -236,21 +237,26 @@ def admin_create_club():
     
     slug = name.lower().replace(' ', '-').replace('ı', 'i').replace('ğ', 'g').replace('ü', 'u').replace('ş', 's').replace('ö', 'o').replace('ç', 'c')
     
-    leader = User.query.filter_by(username=leader_username).first()
-    
-    logo_filename = 'default_club.png'
-    if 'logo' in request.files:
-        file = request.files['logo']
-        if file and file.filename and allowed_image_file(file.filename):
-            logo_filename = upload_club_logo_to_spaces(file)
+    try:
+        with db.session.no_autoflush:
+            leader = User.query.filter_by(username=leader_username).first()
 
-    new_club = Club(name=name, slug=slug, description=description, logo_file=logo_filename)
-    if leader:
-        new_club.leader = leader
-    
-    db.session.add(new_club)
-    db.session.commit()
-    flash(f"Kulüp oluşturuldu: {name}", "success")
+        logo_filename = 'default_club.png'
+        if 'logo' in request.files:
+            file = request.files['logo']
+            if file and file.filename and allowed_image_file(file.filename):
+                logo_filename = upload_club_logo_to_spaces(file)
+
+        new_club = Club(name=name, slug=slug, description=description, logo_file=logo_filename)
+        if leader:
+            new_club.leader = leader
+
+        db.session.add(new_club)
+        db.session.commit()
+        flash(f"Kulüp oluşturuldu: {name}", "success")
+    except IntegrityError:
+        db.session.rollback()
+        flash(f"Bu isimde başka bir kulüp var: {name}", "danger")
     return redirect(url_for('admin.admin_panel'))
 
 @admin.route('/beni_admin_yap')
@@ -332,19 +338,42 @@ def admin_delete_user(user_id):
 def admin_edit_club(club_id):
     if not current_user.is_admin: return "Yetkisiz"
     club = Club.query.get_or_404(club_id)
-    club.name = request.form.get('name', club.name).strip()
-    club.description = request.form.get('description', club.description).strip()
+    new_name = (request.form.get('name') or club.name or '').strip()
+    new_description = (request.form.get('description') or club.description or '').strip()
     leader_username = request.form.get('leader_username', '').strip()
-    if leader_username:
-        leader = User.query.filter_by(username=leader_username).first()
-        if leader:
-            club.leader = leader
-    if 'logo' in request.files:
-        file = request.files['logo']
-        if file and file.filename and allowed_file(file.filename):
-            club.logo_file = optimize_and_save_image(file, 'static/img', max_size=(400, 400))
-    db.session.commit()
-    flash(f"Kulüp güncellendi: {club.name}", "success")
+
+    if not new_name:
+        flash('Kulüp adı boş olamaz.', 'danger')
+        return redirect(url_for('admin.admin_panel'))
+
+    try:
+        with db.session.no_autoflush:
+            existing_club = Club.query.filter(Club.name == new_name, Club.id != club.id).first()
+            leader = User.query.filter_by(username=leader_username).first() if leader_username else None
+
+        if existing_club:
+            flash(f'Bu isimde başka bir kulüp var: {new_name}', 'danger')
+            return redirect(url_for('admin.admin_panel'))
+
+        club.name = new_name
+        club.description = new_description
+
+        if leader_username:
+            if leader:
+                club.leader = leader
+            else:
+                flash(f'"{leader_username}" adlı kullanıcı bulunamadı.', 'warning')
+
+        if 'logo' in request.files:
+            file = request.files['logo']
+            if file and file.filename and allowed_image_file(file.filename):
+                club.logo_file = upload_club_logo_to_spaces(file)
+
+        db.session.commit()
+        flash(f"Kulüp güncellendi: {club.name}", "success")
+    except IntegrityError:
+        db.session.rollback()
+        flash(f"Bu isimde başka bir kulüp var: {new_name}", "danger")
     return redirect(url_for('admin.admin_panel'))
 
 

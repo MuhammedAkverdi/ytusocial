@@ -48,7 +48,7 @@
             </p>
         </div>
 
-        <form method="POST" class="verify-form">
+        <form method="POST" class="verify-form" data-disable-double-submit="true">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             {% if next_url %}
             <input type="hidden" name="next" value="{{ next_url }}">
@@ -65,7 +65,16 @@
         </form>
 
         <div class="auth-footer-text">
+            <p style="margin-bottom: 10px;">Kod 90 saniye geçerli. Süre dolarsa aynı mail ile tekrar giriş yapıp yeni kod isteyebilirsin.</p>
             <p>Kod gelmedi mi? <b>Spam (Gereksiz)</b> kutusuna bakmayı unutma!</p>
+            <p style="margin-top: 12px;">
+                Yeni kod almak için
+                {% if next_url %}
+                <a href="{{ url_for('auth.login', next=next_url) }}" style="color: var(--ytu-lacivert); font-weight: bold;">tekrar giriş yap</a>.
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" style="color: var(--ytu-lacivert); font-weight: bold;">tekrar giriş yap</a>.
+                {% endif %}
+            </p>
             <p style="margin-top: 15px;">
                 Mail adresi yanlış mı? <br>
                 {% if next_url %}
