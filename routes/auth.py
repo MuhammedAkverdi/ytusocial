@@ -6,7 +6,7 @@ from flask import Blueprint, current_app, flash, redirect, render_template, requ
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from extensions import db
+from extensions import db, socketio
 from models import User
 
 auth = Blueprint('auth', __name__)
@@ -44,8 +44,7 @@ def _otp_is_active(user):
     return bool(user and user.otp_code and user.otp_expires_at and user.otp_expires_at > _now())
 
 
-def _queue_otp_email(subject, email, intro_text, otp):
-    app = current_app._get_current_object()
+def _send_otp_email_job(app, email, subject, body):
     with app.app_context():
         try:
             send_mail = getattr(app, 'send_mail', None)
@@ -53,7 +52,6 @@ def _queue_otp_email(subject, email, intro_text, otp):
                 print(f"Mail gönderim hatası ({email}): app.send_mail bulunamadı")
                 return False
 
-            body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
             if not send_mail(email, subject, body):
                 print(f"Mail gönderim hatası ({email}): Brevo API başarısız döndü")
                 return False
@@ -61,6 +59,17 @@ def _queue_otp_email(subject, email, intro_text, otp):
         except Exception as exc:
             print(f"Mail gönderim hatası ({email}): {exc}")
             return False
+
+
+def _queue_otp_email(subject, email, intro_text, otp):
+    app = current_app._get_current_object()
+    body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
+    try:
+        socketio.start_background_task(_send_otp_email_job, app, email, subject, body)
+        return True
+    except Exception as exc:
+        print(f"Mail gönderim hatası ({email}): arka plan görevi başlatılamadı: {exc}")
+        return _send_otp_email_job(app, email, subject, body)
 
 
 def _verify_redirect(email, next_url=None):
