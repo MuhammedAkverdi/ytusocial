@@ -54,11 +54,12 @@ def _queue_otp_email(subject, email, intro_text, otp):
             try:
                 msg = MailMessage(subject, sender=app.config['MAIL_USERNAME'], recipients=[email])
                 msg.body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
-                mail.send(msg)
+                with mail.connect() as connection:
+                    connection.send(msg)
             except Exception as exc:
                 print(f"Mail gönderim hatası ({email}): {exc}")
 
-    Thread(target=_worker, daemon=True).start()
+    Thread(target=_worker, daemon=False).start()
 
 
 def _verify_redirect(email, next_url=None):
@@ -121,7 +122,7 @@ def register():
                     flash("Kayıt güncellenirken bir teknik sorun oluştu!", "danger")
                     return _render_register(next_url)
 
-                flash("Doğrulama kodun zaten aktif. 90 saniye içinde aynı kodu kullanabilirsin.", "info")
+                flash("Doğrulama kodun zaten aktif. Aynı kodu kullanabilirsin.", "info")
                 return _verify_redirect(email, next_url)
 
             otp = _issue_otp(user)
@@ -139,7 +140,7 @@ def register():
                 flash("Mail gönderilirken bir teknik sorun oluştu!", "danger")
                 return _render_register(next_url)
 
-            flash("Doğrulama kodu mailine gönderildi. Kod 90 saniye geçerli.", "success")
+            flash("Doğrulama kodu gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "success")
             return _verify_redirect(email, next_url)
 
         base_handle = email.split('@')[0]
@@ -171,7 +172,7 @@ def register():
             flash("Mail gönderilirken bir teknik sorun oluştu!", "danger")
             return _render_register(next_url)
 
-        flash("Doğrulama kodu mailine gönderildi. Kod 90 saniye geçerli.", "success")
+        flash("Doğrulama kodu gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "success")
         return _verify_redirect(email, next_url)
 
     return _render_register(next_url)
@@ -310,7 +311,7 @@ def login():
                     flash("Yeni doğrulama kodu gönderilirken sorun oluştu.", "danger")
                     return _render_login(next_url)
 
-                flash("Kodun süresi dolmuştu. Yeni kodu mailine gönderdik.", "success")
+                flash("Kodun süresi dolmuştu. Yeni kod gönderiliyor.", "success")
                 return _verify_redirect(email, next_url)
 
             login_user(user)
