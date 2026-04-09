@@ -2,6 +2,13 @@ import os
 from urllib.parse import urlparse
 
 
+def _env_bool(name, default):
+    raw_value = (os.environ.get(name) or '').strip().lower()
+    if not raw_value:
+        return default
+    return raw_value in {'1', 'true', 'yes', 'on'}
+
+
 def _load_important_env():
     env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'important.env')
     if not os.path.exists(env_path):
@@ -46,12 +53,12 @@ class Config:
     MAX_CONTENT_LENGTH = 100 * 1024 * 1024 
     WTF_CSRF_CHECK_DEFAULT = False
 
-    MAIL_SERVER = 'smtp.gmail.com'
-    MAIL_PORT = 587
-    MAIL_USE_TLS = True
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
+    MAIL_USE_TLS = _env_bool('MAIL_USE_TLS', True)
     MAIL_TIMEOUT = int(os.environ.get('MAIL_TIMEOUT', '8'))
-    MAIL_USERNAME = 'portalytu@gmail.com' 
-    MAIL_PASSWORD = 'xpfj soms rwht ttam' 
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'portalytu@gmail.com')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'xpfj soms rwht ttam')
 
     UPLOAD_FOLDER_NOTES = 'static/note_files'
     AUDIO_UPLOAD_FOLDER = os.path.join('static', 'audio_files')

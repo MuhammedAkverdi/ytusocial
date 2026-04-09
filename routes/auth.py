@@ -1,14 +1,13 @@
 from datetime import datetime, timedelta
 import random
 from urllib.parse import urlparse
-from threading import Thread
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_mail import Message as MailMessage
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from extensions import db, mail
+from extensions import db, mail, socketio
 from models import User
 
 auth = Blueprint('auth', __name__)
@@ -59,7 +58,7 @@ def _queue_otp_email(subject, email, intro_text, otp):
             except Exception as exc:
                 print(f"Mail gönderim hatası ({email}): {exc}")
 
-    Thread(target=_worker, daemon=False).start()
+    socketio.start_background_task(_worker)
 
 
 def _verify_redirect(email, next_url=None):
@@ -122,7 +121,13 @@ def register():
                     flash("Kayıt güncellenirken bir teknik sorun oluştu!", "danger")
                     return _render_register(next_url)
 
-                flash("Doğrulama kodun zaten aktif. Aynı kodu kullanabilirsin.", "info")
+                _queue_otp_email(
+                    'YTÜ Portal Doğrulama',
+                    email,
+                    'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
+                    user.otp_code,
+                )
+                flash("Doğrulama kodu yeniden gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "success")
                 return _verify_redirect(email, next_url)
 
             otp = _issue_otp(user)
@@ -232,7 +237,10 @@ def forgot_password():
         email = _normalize_email(request.form.get('email'))
         user = User.query.filter_by(email=email).first()
         if user:
-            otp = _issue_otp(user)
+            if _otp_is_active(user):
+                otp = user.otp_code
+            else:
+                otp = _issue_otp(user)
             try:
                 db.session.commit()
                 _queue_otp_email(
@@ -241,7 +249,7 @@ def forgot_password():
                     'Şifre sıfırlama kodun aşağıda.',
                     otp,
                 )
-                flash("Sıfırlama kodu e-posta adresine gönderildi.", "info")
+                flash("Sıfırlama kodu gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "info")
                 return redirect(url_for('auth.reset_password', email=email))
             except Exception as e:
                 db.session.rollback()
@@ -293,7 +301,21 @@ def login():
         if user and check_password_hash(user.password, password):
             if not user.is_verified:
                 if _otp_is_active(user):
-                    flash("Hesabın henüz doğrulanmamış. Kod sayfasına yönlendiriliyorsun.", "info")
+                    try:
+                        db.session.commit()
+                        _queue_otp_email(
+                            'YTÜ Portal Doğrulama',
+                            email,
+                            'Hesabını doğrulamak için kodun aşağıda.',
+                            user.otp_code,
+                        )
+                    except Exception as e:
+                        db.session.rollback()
+                        print(f"Giriş Hatası: {e}")
+                        flash("Doğrulama kodu yeniden gönderilirken sorun oluştu.", "danger")
+                        return _render_login(next_url)
+
+                    flash("Hesabın henüz doğrulanmamış. Doğrulama kodu yeniden gönderiliyor.", "info")
                     return _verify_redirect(email, next_url)
 
                 otp = _issue_otp(user)
