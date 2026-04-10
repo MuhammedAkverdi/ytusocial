@@ -1864,11 +1864,20 @@ if (typeof socket !== 'undefined') {
 }
 
 // GERİ BİLDİRİM MODALI
-function openFeedbackModal() {
-    document.getElementById('feedbackModal').style.display = 'block';
+function openFeedbackModal(defaultType = 'Öneri') {
+    const modal = document.getElementById('feedbackModal');
+    if (!modal) return;
+
+    const feedbackType = document.getElementById('feedbackType');
+    if (feedbackType && defaultType) {
+        feedbackType.value = defaultType;
+    }
+
+    modal.style.display = 'block';
 }
 function closeFeedbackModal() {
-    document.getElementById('feedbackModal').style.display = 'none';
+    const modal = document.getElementById('feedbackModal');
+    if (modal) modal.style.display = 'none';
 }
 
 // GLOBAL EVENT LISTENERS

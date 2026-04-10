@@ -617,6 +617,11 @@
             <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-gear"></i> Profili Düzenle</a>
         </nav>
         <div class="mob-drawer-sep"></div>
+        <div class="mob-drawer-section-title">💡 Fikir ve Destek</div>
+        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Öneri')"><i class="fa-solid fa-lightbulb"></i> Fikir Öner</a>
+        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Diğer')"><i class="fa-solid fa-comments"></i> Geri Bildirim</a>
+        <a href="{{ url_for('main.settings') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-gear"></i> Ayarlar</a>
+        <div class="mob-drawer-sep"></div>
         <div class="mob-drawer-section-title">
             🔥 Gündem
             <a href="{{ url_for('main.explore') }}">Tümünü Keşfet</a>

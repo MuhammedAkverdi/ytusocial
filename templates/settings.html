@@ -176,6 +176,19 @@
         </div>
 
         <div class="settings-menu">
+            <a href="javascript:void(0)" class="settings-item" onclick="openFeedbackModal('Öneri')">
+                <div class="settings-item-icon">
+                    <i class="fa-solid fa-lightbulb"></i>
+                </div>
+                <div class="settings-item-label">
+                    <div class="settings-item-title">Fikir Önerisi / Geri Bildirim</div>
+                    <div class="settings-item-desc">Fikirlerini ve geri bildirimlerini gönder</div>
+                </div>
+                <div class="settings-item-arrow">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            </a>
+
             <!-- Profili Düzenle -->
             <a href="{{ url_for('main.edit_profile') }}" class="settings-item">
                 <div class="settings-item-icon">
