@@ -3,6 +3,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from flask_login import current_user, logout_user
+from sqlalchemy.exc import SQLAlchemyError
 from extensions import db, login_manager, socketio, csrf, migrate
 from config import Config
 from models import User, Message, Notification
@@ -70,20 +71,32 @@ def create_app():
     # Context processors and filters
     @app.context_processor
     def inject_global_data():
-        trending = get_trending_hashtags()
+        trending = []
         suggested = []
+        try:
+            trending = get_trending_hashtags()
+        except Exception as exc:
+            app.logger.warning('Trending hashtags unavailable: %s', exc, exc_info=True)
+
         if current_user.is_authenticated:
-            followed_ids = [u.id for u in current_user.followed]
-            followed_ids.append(current_user.id)
-            suggested = User.query.filter(~User.id.in_(followed_ids)).order_by(func.random()).limit(5).all()
+            try:
+                followed_ids = [u.id for u in current_user.followed]
+                followed_ids.append(current_user.id)
+                suggested = User.query.filter(~User.id.in_(followed_ids)).order_by(func.random()).limit(5).all()
+            except SQLAlchemyError as exc:
+                app.logger.warning('Suggested users unavailable: %s', exc, exc_info=True)
         return dict(trending_tags=trending, suggested_users=suggested, club_logo_src=club_logo_src)
 
     @app.context_processor
     def inject_notifications():
         if current_user.is_authenticated:
-            notif_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
-            msg_count = Message.query.filter_by(recipient_id=current_user.id, is_read=False).count()
-            return dict(unread_count=notif_count, unread_msg_count=msg_count, online_users=list(ONLINE_USERS))
+            try:
+                notif_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+                msg_count = Message.query.filter_by(recipient_id=current_user.id, is_read=False).count()
+                return dict(unread_count=notif_count, unread_msg_count=msg_count, online_users=list(ONLINE_USERS))
+            except SQLAlchemyError as exc:
+                app.logger.warning('Notification counters unavailable: %s', exc, exc_info=True)
+                return dict(unread_count=0, unread_msg_count=0, online_users=[])
         return dict(unread_count=0, unread_msg_count=0, online_users=[])
 
     @app.template_filter('format_tags')

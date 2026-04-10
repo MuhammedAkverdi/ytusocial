@@ -9,6 +9,7 @@ from urllib import request as urllib_request
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
+from sqlalchemy.exc import SQLAlchemyError
 
 from extensions import db, socketio
 from models import User
@@ -256,6 +257,21 @@ def _render_login(next_url=None):
     return render_template('login.html', next_url=next_url)
 
 
+def _render_database_unavailable(template_name, next_url=None, email=None):
+    flash('Veritabanına şu an ulaşılamıyor. Biraz sonra tekrar dene.', 'danger')
+    if template_name == 'register':
+        return _render_register(next_url)
+    if template_name == 'verify':
+        return _render_verify(email, next_url)
+    if template_name == 'login':
+        return _render_login(next_url)
+    if template_name == 'forgot_password':
+        return render_template('forgot_password.html')
+    if template_name == 'reset_password':
+        return render_template('reset_password.html', email=email)
+    return redirect(url_for('main.index'))
+
+
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     next_url = _safe_next_url(request.args.get('next') or request.form.get('next'))
@@ -278,8 +294,14 @@ def register():
             flash("Şifre boş olamaz!", "danger")
             return _render_register(next_url)
 
-        user = User.query.filter_by(email=email).first()
         hashed_pw = generate_password_hash(password, method='pbkdf2:sha256')
+
+        try:
+            user = User.query.filter_by(email=email).first()
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            _mail_log(f"Kayıt sırasında veritabanı erişilemedi ({email}): {exc}", 'exception')
+            return _render_database_unavailable('register', next_url=next_url)
 
         if user:
             if user.is_verified:
@@ -299,6 +321,10 @@ def register():
                 ):
                     flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", "danger")
                     return _render_register(next_url)
+            except SQLAlchemyError as exc:
+                db.session.rollback()
+                _mail_log(f"Kayıt güncellenirken veritabanı erişilemedi ({email}): {exc}", 'exception')
+                return _render_database_unavailable('register', next_url=next_url)
             except Exception as e:
                 db.session.rollback()
                 print(f"Kayıt Hatası: {e}")
@@ -308,20 +334,20 @@ def register():
             flash("Doğrulama kodu gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "success")
             return _verify_redirect(email, next_url)
 
-        base_handle = email.split('@')[0]
-        handle = base_handle
-        while User.query.filter_by(handle=handle).first():
-            handle = base_handle + str(random.randint(1, 999))
-
-        new_user = User(
-            email=email,
-            password=hashed_pw,
-            handle=handle,
-            is_verified=False,
-        )
-        otp = _issue_otp(new_user)
-
         try:
+            base_handle = email.split('@')[0]
+            handle = base_handle
+            while User.query.filter_by(handle=handle).first():
+                handle = base_handle + str(random.randint(1, 999))
+
+            new_user = User(
+                email=email,
+                password=hashed_pw,
+                handle=handle,
+                is_verified=False,
+            )
+            otp = _issue_otp(new_user)
+
             db.session.add(new_user)
             db.session.commit()
             if not _queue_otp_email(
@@ -332,6 +358,10 @@ def register():
             ):
                 flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", "danger")
                 return _render_register(next_url)
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            _mail_log(f"Kayıt oluşturulurken veritabanı erişilemedi ({email}): {exc}", 'exception')
+            return _render_database_unavailable('register', next_url=next_url)
         except Exception as e:
             db.session.rollback()
             print(f"Kayıt Hatası: {e}")
@@ -348,7 +378,12 @@ def register():
 def verify(email):
     email = _normalize_email(email)
     next_url = _safe_next_url(request.args.get('next') or request.form.get('next'))
-    user = User.query.filter_by(email=email).first()
+    try:
+        user = User.query.filter_by(email=email).first()
+    except SQLAlchemyError as exc:
+        db.session.rollback()
+        _mail_log(f"Doğrulama sırasında veritabanı erişilemedi ({email}): {exc}", 'exception')
+        return _render_database_unavailable('verify', next_url=next_url, email=email)
 
     if not user:
         flash("Bu e-posta ile eşleşen bir hesap bulunamadı.", "danger")
@@ -375,6 +410,10 @@ def verify(email):
             user.otp_expires_at = None
             try:
                 db.session.commit()
+            except SQLAlchemyError as exc:
+                db.session.rollback()
+                _mail_log(f"Doğrulama kodu onaylanırken veritabanı erişilemedi ({email}): {exc}", 'exception')
+                return _render_database_unavailable('verify', next_url=next_url, email=email)
             except Exception as e:
                 db.session.rollback()
                 print(f"Doğrulama Hatası: {e}")
@@ -396,7 +435,12 @@ def verify(email):
 def forgot_password():
     if request.method == 'POST':
         email = _normalize_email(request.form.get('email'))
-        user = User.query.filter_by(email=email).first()
+        try:
+            user = User.query.filter_by(email=email).first()
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            _mail_log(f"Şifre sıfırlama sırasında veritabanı erişilemedi ({email}): {exc}", 'exception')
+            return _render_database_unavailable('forgot_password')
         if user:
             if _otp_is_active(user):
                 otp = user.otp_code
@@ -414,6 +458,10 @@ def forgot_password():
                     return render_template('forgot_password.html')
                 flash("Sıfırlama kodu gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "info")
                 return redirect(url_for('auth.reset_password', email=email))
+            except SQLAlchemyError as exc:
+                db.session.rollback()
+                _mail_log(f"Şifre sıfırlama kodu kaydedilirken veritabanı erişilemedi ({email}): {exc}", 'exception')
+                return _render_database_unavailable('forgot_password')
             except Exception as e:
                 db.session.rollback()
                 print(f"Mail Hatası: {e}")
@@ -429,7 +477,12 @@ def reset_password(email):
     if request.method == 'POST':
         kod = (request.form.get('kod') or '').strip()
         password = request.form.get('password') or ''
-        user = User.query.filter_by(email=email).first()
+        try:
+            user = User.query.filter_by(email=email).first()
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            _mail_log(f"Şifre güncelleme sırasında veritabanı erişilemedi ({email}): {exc}", 'exception')
+            return _render_database_unavailable('reset_password', email=email)
 
         if not password:
             flash("Şifre boş olamaz!", "danger")
@@ -439,6 +492,10 @@ def reset_password(email):
             user.otp_expires_at = None
             try:
                 db.session.commit()
+            except SQLAlchemyError as exc:
+                db.session.rollback()
+                _mail_log(f"Şifre güncellenirken veritabanı erişilemedi ({email}): {exc}", 'exception')
+                return _render_database_unavailable('reset_password', email=email)
             except Exception as e:
                 db.session.rollback()
                 print(f"Şifre Sıfırlama Hatası: {e}")
@@ -459,7 +516,12 @@ def login():
     if request.method == 'POST':
         email = _normalize_email(request.form.get('email'))
         password = request.form.get('password') or ''
-        user = User.query.filter_by(email=email).first()
+        try:
+            user = User.query.filter_by(email=email).first()
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            _mail_log(f"Giriş sırasında veritabanı erişilemedi ({email}): {exc}", 'exception')
+            return _render_database_unavailable('login', next_url=next_url)
 
         if user and check_password_hash(user.password, password):
             if not user.is_verified:
@@ -477,6 +539,10 @@ def login():
                     ):
                         flash("Doğrulama kodu yeniden gönderilemedi.", "danger")
                         return _render_login(next_url)
+                except SQLAlchemyError as exc:
+                    db.session.rollback()
+                    _mail_log(f"Giriş sırasında veritabanı erişilemedi ({email}): {exc}", 'exception')
+                    return _render_database_unavailable('login', next_url=next_url)
                 except Exception as e:
                     db.session.rollback()
                     print(f"Giriş Hatası: {e}")

@@ -10,7 +10,7 @@ import os
 import json
 import re
 from werkzeug.utils import secure_filename
-from flask import url_for
+from flask import url_for, current_app
 from extensions import db, socketio
 from threading import Lock
 
@@ -329,7 +329,14 @@ def create_notification(receiver, actor, verb, post=None):
 
 def get_trending_hashtags():
     from models import Post
-    posts = Post.query.with_entities(Post.content).all()
+    try:
+        posts = Post.query.with_entities(Post.content).all()
+    except Exception as exc:
+        try:
+            current_app.logger.warning('Trending hashtag query unavailable: %s', exc, exc_info=True)
+        except Exception:
+            print(f'Trending hashtag query unavailable: {exc}')
+        return []
     hashtags = {}
     for post in posts:
         if post.content:

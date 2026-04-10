@@ -335,3 +335,4 @@ sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to serve
 	Is the server running on that host and accepting TCP/IP connections?
 
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-10 09:26:07,130 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
