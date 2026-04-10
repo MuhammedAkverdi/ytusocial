@@ -381,10 +381,26 @@ async function likePost(postId, element) {
                     if (countEl) countEl.textContent = data.likes_count;
                 });
             } else {
-                const iconHtml = data.action === 'liked' ? '<i class="fa-solid fa-heart" style="color: #ff4757;"></i>' : '<i class="fa-regular fa-heart"></i>';
-                
+                const iconClass = data.action === 'liked' ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+
                 allLikeBtns.forEach(btn => {
-                    btn.innerHTML = `${iconHtml} <span class="like-count">${data.likes_count}</span>`;
+                    btn.classList.toggle('liked', data.action === 'liked');
+                    btn.classList.toggle('is-liked', data.action === 'liked');
+
+                    const iconEl = btn.querySelector('i');
+                    const countEl = btn.querySelector('.like-count');
+
+                    if (iconEl && countEl) {
+                        iconEl.className = iconClass;
+                        iconEl.style.color = data.action === 'liked' ? '#ff4757' : '';
+                        countEl.textContent = data.likes_count;
+                    } else {
+                        btn.innerHTML = `<i class="${iconClass}"${data.action === 'liked' ? ' style="color: #ff4757;"' : ''}></i> <span class="like-count">${data.likes_count}</span>`;
+                    }
+                });
+
+                document.querySelectorAll(`.js-like-stat-${postId}`).forEach(span => {
+                    span.textContent = data.likes_count;
                 });
             }
 
@@ -1387,10 +1403,18 @@ async function submitComment(e, postId) {
 
             // Yorum Sayılarını Güncelle (Senkronizasyon)
             const countSpans = document.querySelectorAll(`.js-comment-count-${postId}`);
+            const nextCommentCount = countSpans.length > 0
+                ? (parseInt(countSpans[0].innerText.trim()) || 0) + 1
+                : null;
+
             countSpans.forEach(span => {
-                const currentText = span.innerText.trim();
-                const currentCount = parseInt(currentText) || 0;
-                span.innerHTML = `<i class="fa-regular fa-comment"></i> ${currentCount + 1}`;
+                span.innerHTML = `<i class="fa-regular fa-comment"></i> ${nextCommentCount}`;
+            });
+
+            document.querySelectorAll(`.js-comment-stat-${postId}`).forEach(span => {
+                if (nextCommentCount !== null) {
+                    span.textContent = nextCommentCount;
+                }
             });
 
             // 2. Detay Sayfası İçin (YENİ)

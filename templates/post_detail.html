@@ -351,6 +351,582 @@
                 padding-right: 12px;
             }
         }
+
+        /* Modern post detail redesign */
+        .main-layout {
+            align-items: start;
+        }
+
+        .post-detail-main {
+            grid-column: 2;
+            min-width: 0;
+            width: 100%;
+        }
+
+        .post-detail-container {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.98));
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        html.dark-mode .post-detail-container {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.98));
+            box-shadow: 0 22px 48px rgba(0, 0, 0, 0.3);
+        }
+
+        .pd-header {
+            grid-column: 1 / -1;
+            padding: 20px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(90deg, rgba(var(--ytu-lacivert-rgb), 0.04), transparent 70%);
+        }
+
+        .pd-user {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .pd-avatar {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            object-fit: cover;
+            border: 2px solid var(--card-bg);
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+            flex-shrink: 0;
+            background: var(--bg-light);
+        }
+
+        .pd-user-info {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .pd-name-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pd-username {
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: var(--text-color);
+            line-height: 1.2;
+        }
+
+        .pd-handle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .pd-subline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .pd-dept {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.15);
+            color: var(--ytu-lacivert);
+            font-weight: 800;
+            font-size: 0.76rem;
+        }
+
+        .pd-date {
+            font-weight: 600;
+        }
+
+        .pd-menu {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-light);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, color 0.18s ease, background 0.18s ease;
+        }
+
+        .pd-menu:hover {
+            transform: translateY(-1px);
+            color: var(--ytu-lacivert);
+            background: var(--card-bg);
+            box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+        }
+
+        .post-detail-story {
+            grid-column: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 20px;
+            background: linear-gradient(180deg, rgba(var(--ytu-lacivert-rgb), 0.04), transparent 28%);
+        }
+
+        .post-detail-discussion {
+            grid-column: 2;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border-color);
+            background: rgba(var(--ytu-lacivert-rgb), 0.02);
+        }
+
+        .pd-media {
+            width: 100%;
+            display: block;
+            background: #0b1220;
+            min-height: 460px;
+        }
+
+        .pd-media-image,
+        .pd-media-video {
+            width: 100%;
+            height: 100%;
+            max-height: 72vh;
+            object-fit: contain;
+            display: block;
+            background: #0b1220;
+        }
+
+        .pd-media-image {
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.08), rgba(11, 18, 32, 1));
+        }
+
+        .pd-media-placeholder {
+            min-height: 460px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-align: center;
+            color: var(--text-muted);
+            background: linear-gradient(180deg, rgba(var(--ytu-lacivert-rgb), 0.1), rgba(11, 18, 32, 0.96));
+            padding: 24px;
+        }
+
+        .pd-media-placeholder i {
+            font-size: 3rem;
+            color: rgba(var(--ytu-lacivert-rgb), 0.7);
+        }
+
+        .pd-caption {
+            padding: 22px 24px 0;
+            color: var(--text-color);
+            line-height: 1.75;
+            font-size: 0.98rem;
+        }
+
+        .pd-caption a {
+            color: var(--ytu-lacivert);
+            font-weight: 700;
+        }
+
+        .pd-caption p {
+            margin: 0;
+        }
+
+        .pd-stats {
+            padding: 22px 22px 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            border-bottom: none;
+        }
+
+        .pd-stat {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .pd-stat-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .pd-stat-label i {
+            color: var(--ytu-lacivert);
+        }
+
+        .pd-stat-value {
+            font-size: 1.55rem;
+            font-weight: 900;
+            color: var(--text-color);
+            line-height: 1;
+        }
+
+        .pd-actions {
+            padding: 16px 22px 0;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            border-bottom: none;
+        }
+
+        .pd-action-chip {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 13px 14px;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--text-color);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .pd-action-chip:hover {
+            transform: translateY(-1px);
+            border-color: rgba(var(--ytu-lacivert-rgb), 0.24);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.08);
+            background: rgba(var(--ytu-lacivert-rgb), 0.04);
+        }
+
+        .pd-action-chip i {
+            font-size: 1.05rem;
+        }
+
+        .pd-action-chip.liked,
+        .pd-action-chip.is-liked {
+            color: #ff4757;
+        }
+
+        .pd-action-chip.liked i,
+        .pd-action-chip.is-liked i {
+            color: #ff4757;
+        }
+
+        .pd-comments-header {
+            margin: 18px 22px 0;
+            padding: 16px 18px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 18px 18px 0 0;
+            background: var(--card-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pd-comments-header h3 {
+            margin: 0;
+            font-size: 0.98rem;
+            font-weight: 900;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pd-comments-header h3 i {
+            color: var(--ytu-lacivert);
+        }
+
+        .pd-comments-count {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .sort-select {
+            padding: 8px 12px;
+            border-radius: 14px;
+            font-size: 0.84rem;
+            background: var(--bg-light);
+        }
+
+        .post-detail-comments {
+            margin: 0 22px;
+            padding: 8px 18px 18px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 18px 18px;
+            max-height: 420px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 220px;
+        }
+
+        .post-detail-comments::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .post-detail-comments::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .post-detail-comments::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 999px;
+        }
+
+        .post-detail-comments .tw-comment {
+            padding: 14px 0;
+        }
+
+        .post-detail-comments .tw-comment:hover {
+            background: rgba(var(--ytu-lacivert-rgb), 0.03);
+            border-radius: 14px;
+        }
+
+        .pd-empty-comments {
+            padding: 44px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background: linear-gradient(180deg, rgba(var(--ytu-lacivert-rgb), 0.02), transparent);
+            border-radius: 0 0 18px 18px;
+        }
+
+        .pd-empty-comments i {
+            font-size: 2.1rem;
+            margin-bottom: 12px;
+            display: block;
+            color: rgba(var(--ytu-lacivert-rgb), 0.55);
+        }
+
+        .pd-comment-input-section {
+            margin: 16px 22px 22px;
+            padding: 16px 18px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.06);
+        }
+
+        .pd-comment-input-section form {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            width: 100%;
+        }
+
+        .pd-comment-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .pd-comment-field {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .comment-input {
+            width: 100%;
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 14px;
+            border-radius: 16px;
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: var(--ytu-lacivert);
+            box-shadow: 0 0 0 4px rgba(var(--ytu-lacivert-rgb), 0.08);
+            background: var(--card-bg);
+        }
+
+        .comment-submit {
+            min-width: 92px;
+            height: 46px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #123d75);
+            color: #fff;
+            font-weight: 800;
+            box-shadow: 0 12px 24px rgba(18, 61, 117, 0.18);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+        }
+
+        .comment-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(18, 61, 117, 0.24);
+        }
+
+        .comment-submit:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        @media (max-width: 920px) {
+            .post-detail-container {
+                grid-template-columns: 1fr;
+            }
+
+            .post-detail-story,
+            .post-detail-discussion {
+                grid-column: 1 / -1;
+            }
+
+            .post-detail-discussion {
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .pd-media,
+            .pd-media-placeholder {
+                min-height: 320px;
+            }
+
+            .pd-actions {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .pd-comments-header,
+            .post-detail-comments,
+            .pd-comment-input-section {
+                margin-left: 16px;
+                margin-right: 16px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .main-layout {
+                margin-top: 78px;
+            }
+
+            .post-detail-container {
+                border-radius: 22px;
+            }
+
+            .pd-header {
+                padding: 16px;
+                gap: 12px;
+            }
+
+            .pd-user {
+                gap: 10px;
+            }
+
+            .pd-avatar {
+                width: 48px;
+                height: 48px;
+                border-radius: 16px;
+            }
+
+            .pd-username {
+                font-size: 0.98rem;
+            }
+
+            .pd-stats,
+            .pd-actions {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .pd-caption {
+                padding-left: 16px;
+                padding-right: 16px;
+                font-size: 0.96rem;
+            }
+
+            .pd-stats {
+                grid-template-columns: 1fr;
+                padding-top: 16px;
+            }
+
+            .pd-actions {
+                grid-template-columns: 1fr 1fr 1fr;
+                padding-top: 14px;
+            }
+
+            .pd-comments-header {
+                margin-top: 16px;
+                padding: 14px 16px;
+            }
+
+            .post-detail-comments {
+                padding: 8px 14px 14px;
+                max-height: none;
+            }
+
+            .pd-comment-input-section {
+                margin: 14px 16px 18px;
+                padding: 14px;
+            }
+
+            .pd-comment-input-section form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .pd-comment-avatar {
+                width: 38px;
+                height: 38px;
+            }
+
+            .comment-submit {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .post-detail-main {
+                grid-column: 1 / -1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -360,105 +936,135 @@
         {% include 'sidebar_partial.html' %}
 
         <main class="post-detail-main">
-        <div class="post-detail-container">
-            <!-- Header -->
-            <div class="pd-header">
-                <a href="{{ url_for('main.user_profile', handle=post.author.handle) }}" class="pd-user">
-                    <img src="/static/{{ post.author.profile_pic }}" class="pd-avatar">
-                    <div class="pd-user-info">
-                        <span class="pd-username">{{ post.author.username }}</span>
-                        <span class="pd-dept">{{ post.author.department or 'Yıldız Teknik Üniversitesi' }}</span>
-                    </div>
-                </a>
-                {% if post.author == current_user %}
-                    <a href="{{ url_for('main.delete_post', post_id=post.id) }}" class="pd-menu" onclick="return confirm('Silmek istediğine emin misin?')" title="Sil">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </a>
-                {% endif %}
-            </div>
-
-            <!-- Media -->
-            {% if post.image_file %}
-                {% if post.is_video() %}
-                    <video controls class="pd-media pd-media-video" playsinline>
-                        <source src="/static/post_images/{{ post.image_file }}">
-                    </video>
-                {% else %}
-                    <img src="/static/post_images/{{ post.image_file }}" class="pd-media pd-media-image" alt="Post">
-                {% endif %}
-            {% endif %}
-
-            <!-- Caption -->
-            {% if post.content %}
-            <div class="pd-caption">{{ post.content | format_tags }}</div>
-            {% endif %}
-
-            <!-- Stats -->
-            <div class="pd-stats">
-                <div class="pd-stat">
-                    <span class="pd-stat-value">{{ post.liked_by|length }}</span>
-                    <span>Beğenme</span>
-                </div>
-                <div class="pd-stat">
-                    <span class="pd-stat-value">{{ post.comments|length }}</span>
-                    <span>Yorum</span>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="pd-actions">
-                <button class="action-btn {% if current_user in post.liked_by %}liked{% endif %}" onclick="likePost('{{ post.id }}', this)">
-                    <i class="fa-{% if current_user in post.liked_by %}solid{% else %}regular{% endif %} fa-heart"></i>
-                </button>
-                <button class="action-btn" onclick="document.querySelector('.comment-input').focus()">
-                    <i class="fa-regular fa-comment"></i>
-                </button>
-                <button class="action-btn" onclick="openShareModal('post', '{{ post.id }}')">
-                    <i class="fa-regular fa-paper-plane"></i>
-                </button>
-            </div>
-
-            <!-- Comments Header -->
-            <div class="pd-comments-header">
-                <h3>Yorumlar</h3>
-            </div>
-
-            <!-- Comments List -->
-            <div class="pd-comments-list" id="commentsContainer">
-                {% for comment in post.comments %}
-                <div class="comment">
-                    <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}">
-                        <img src="/static/{{ comment.author.profile_pic }}" class="comment-avatar">
-                    </a>
-                    <div class="comment-body">
-                        <div class="comment-meta">
-                            <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="comment-author">
-                                {{ comment.author.username }}
-                            </a>
-                            <span class="comment-handle">@{{ comment.author.handle }}</span>
-                            <span class="comment-dot">·</span>
-                            <span class="comment-time">{{ comment.date_posted.strftime('%H:%M') }}</span>
+            <div class="post-detail-container">
+                <div class="pd-header">
+                    <a href="{{ url_for('main.user_profile', handle=post.author.handle) }}" class="pd-user">
+                        <img src="/static/{{ post.author.profile_pic }}" class="pd-avatar" onerror="this.src='/static/img/default_avatar.png'" alt="{{ post.author.username }}">
+                        <div class="pd-user-info">
+                            <div class="pd-name-row">
+                                <span class="pd-username">{{ post.author.username }}</span>
+                                <span class="pd-handle">@{{ post.author.handle }}</span>
+                            </div>
+                            <div class="pd-subline">
+                                <span class="pd-dept"><i class="fa-solid fa-graduation-cap"></i> {{ post.author.department or 'Yıldız Teknik Üniversitesi' }}</span>
+                                <span class="pd-date">{{ post.date_posted.strftime('%d.%m.%Y %H:%M') }}</span>
+                            </div>
                         </div>
-                        <div class="comment-text" id="comment-text-{{ comment.id }}">{{ comment.text | format_tags }}</div>
-                    </div>
+                    </a>
+                    {% if post.author == current_user %}
+                        <a href="{{ url_for('main.delete_post', post_id=post.id) }}" class="pd-menu" onclick="return confirm('Silmek istediğine emin misin?')" title="Sil">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                    {% endif %}
                 </div>
-                {% endfor %}
-                {% if not post.comments %}
-                <div style="padding: 40px 20px; text-align: center; color: var(--text-muted); border-bottom: 1px solid var(--border-color);">
-                    <i class="fa-regular fa-comments" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                    Henüz yorum yok
-                </div>
-                {% endif %}
-            </div>
 
-            <!-- Comment Input -->
-            <div class="pd-comment-input-section">
-                <form onsubmit="submitComment(event, '{{ post.id }}')" style="display: flex; gap: 12px; width: 100%;">
-                    <input type="text" class="comment-input" placeholder="Yorum ekle..." required autocomplete="off" data-mention="true">
-                    <button type="submit" class="comment-submit">Paylaş</button>
-                </form>
+                <section class="post-detail-story">
+                    {% if post.image_file %}
+                        {% if post.is_video() %}
+                            <video controls class="pd-media pd-media-video" playsinline>
+                                <source src="/static/post_images/{{ post.image_file }}">
+                            </video>
+                        {% else %}
+                            <img src="/static/post_images/{{ post.image_file }}" class="pd-media pd-media-image" alt="Post" loading="lazy">
+                        {% endif %}
+                    {% else %}
+                        <div class="pd-media-placeholder">
+                            <i class="fa-regular fa-image"></i>
+                            <div>Bu gönderide medya yok</div>
+                        </div>
+                    {% endif %}
+
+                    {% if post.content %}
+                    <div class="pd-caption">{{ post.content | format_tags }}</div>
+                    {% endif %}
+                </section>
+
+                <aside class="post-detail-discussion">
+                    <div class="pd-stats">
+                        <div class="pd-stat">
+                            <span class="pd-stat-label"><i class="fa-regular fa-heart"></i> Beğeni</span>
+                            <span class="pd-stat-value js-like-stat-{{ post.id }}">{{ post.liked_by|length }}</span>
+                        </div>
+                        <div class="pd-stat">
+                            <span class="pd-stat-label"><i class="fa-regular fa-comment"></i> Yorum</span>
+                            <span class="pd-stat-value js-comment-stat-{{ post.id }}">{{ post.comments|length }}</span>
+                        </div>
+                    </div>
+
+                    <div class="pd-actions">
+                        <span class="action-item pd-action-chip js-like-{{ post.id }} {% if current_user in post.liked_by %}liked{% endif %}" onclick="likePost('{{ post.id }}', this)">
+                            <i class="fa-{% if current_user in post.liked_by %}solid{% else %}regular{% endif %} fa-heart" {% if current_user in post.liked_by %}style="color: #ff4757;"{% endif %}></i>
+                            <span class="like-count">{{ post.liked_by|length }}</span>
+                        </span>
+                        <span class="action-item pd-action-chip js-comment-count-{{ post.id }}" onclick="document.querySelector('.pd-comment-input-section .comment-input').focus()">
+                            <i class="fa-regular fa-comment"></i>
+                            <span>{{ post.comments|length }}</span>
+                        </span>
+                        <span class="action-item pd-action-chip" onclick="openShareModal('post', '{{ post.id }}')">
+                            <i class="fa-regular fa-paper-plane"></i>
+                            <span>Paylaş</span>
+                        </span>
+                    </div>
+
+                    <div class="pd-comments-header">
+                        <h3><i class="fa-regular fa-comments"></i> Yorumlar</h3>
+                        <span class="pd-comments-count js-comment-stat-{{ post.id }}">{{ post.comments|length }}</span>
+                    </div>
+
+                    <div class="post-detail-comments" id="commentsContainer">
+                        {% for comment in post.comments %}
+                        <div class="tw-comment" id="comment-container-{{ comment.id }}">
+                            <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="tw-comment-avatar-link">
+                                <img src="/static/{{ comment.author.profile_pic }}" class="tw-comment-avatar" onerror="this.src='/static/img/default_avatar.png'">
+                            </a>
+                            <div class="tw-comment-body">
+                                <div class="tw-comment-meta">
+                                    <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="tw-comment-name">{{ comment.author.username }}</a>
+                                    <span class="tw-comment-handle">@{{ comment.author.handle }}</span>
+                                    <span class="tw-comment-dot">·</span>
+                                    <span class="tw-comment-time">{{ comment.date_posted.strftime('%H:%M') }}</span>
+                                    {% if comment.author == current_user %}
+                                    <div class="tw-comment-menu-wrap">
+                                        <button type="button" class="tw-comment-menu-btn" onclick="toggleMenu('menu-{{ comment.id }}', event)">⋮</button>
+                                        <div id="menu-{{ comment.id }}" class="comment-dropdown">
+                                            <button type="button" class="comment-action" onclick="openEditMode('{{ comment.id }}')">✏️ Düzenle</button>
+                                            <button type="button" class="comment-action delete" onclick="deleteCommentJS('{{ comment.id }}', '{{ post.id }}', this)">🗑️ Sil</button>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="tw-comment-text" id="comment-text-{{ comment.id }}">{{ comment.text | format_tags }}</div>
+                                {% if comment.author == current_user %}
+                                <form action="{{ url_for('main.edit_comment', comment_id=comment.id) }}" method="POST" class="edit-comment-form" id="edit-form-{{ comment.id }}">
+                                    <input type="text" name="new_text" value="{{ comment.text }}" class="comment-input tw-comment-input" data-mention="true">
+                                    <div class="edit-actions">
+                                        <button type="button" onclick="closeEditMode('{{ comment.id }}')" class="btn-cancel">İptal</button>
+                                        <button type="submit" class="btn-vote btn-sm">Kaydet</button>
+                                    </div>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if not post.comments %}
+                        <div class="pd-empty-comments">
+                            <i class="fa-regular fa-comments"></i>
+                            Henüz yorum yok
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="pd-comment-input-section">
+                        <form onsubmit="submitComment(event, '{{ post.id }}')" class="tw-comment-input-row js-comment-form-{{ post.id }}">
+                            <img src="/static/{{ current_user.profile_pic }}" class="pd-comment-avatar" onerror="this.src='/static/img/default_avatar.png'" alt="{{ current_user.username }}">
+                            <div class="pd-comment-field">
+                                <input type="text" name="comment_text" class="comment-input tw-comment-input" placeholder="Yorum ekle..." required autocomplete="off" data-mention="true">
+                            </div>
+                            <button type="submit" class="comment-submit">Gönder</button>
+                        </form>
+                    </div>
+                </aside>
             </div>
-        </div>
 
         </main>
 
