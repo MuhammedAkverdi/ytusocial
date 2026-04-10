@@ -1050,6 +1050,29 @@ def privacy():
     from datetime import date
     return render_template('privacy.html', today=date.today().strftime('%d.%m.%Y'), contact_email='support@ytusocial.com')
 
+
+@main.route('/sitemap.xml')
+def sitemap():
+    lastmod = datetime.utcnow().date().isoformat()
+    urls = [
+        (url_for('auth.login', _external=True), 'weekly', '0.9'),
+        (url_for('auth.register', _external=True), 'weekly', '0.9'),
+        (url_for('auth.forgot_password', _external=True), 'monthly', '0.6'),
+        (url_for('main.terms', _external=True), 'yearly', '0.3'),
+        (url_for('main.privacy', _external=True), 'yearly', '0.3'),
+    ]
+    return current_app.response_class(
+        render_template('sitemap.xml', urls=urls, lastmod=lastmod),
+        mimetype='application/xml',
+    )
+
+
+@main.route('/robots.txt')
+def robots_txt():
+    sitemap_url = url_for('main.sitemap', _external=True)
+    robots_text = f'User-agent: *\nAllow: /\nSitemap: {sitemap_url}\n'
+    return current_app.response_class(robots_text, mimetype='text/plain')
+
 @main.route('/delete_account', methods=['POST'])
 @login_required
 def delete_account():
