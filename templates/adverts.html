@@ -316,9 +316,10 @@
             .ad-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
 
             /* Kart bileşenleri */
-            .ad-card { padding: 18px !important; min-height: unset !important; }
-            .ad-title { font-size: 1.05rem !important; margin-top: 30px !important; }
-            .ad-desc { font-size: 0.88rem !important; }
+            .ad-card { padding: 18px 18px 20px !important; min-height: unset !important; }
+            .ad-title { font-size: 1.05rem !important; margin-top: 42px !important; line-height: 1.35 !important; }
+            .ad-desc { font-size: 0.88rem !important; margin-bottom: 18px !important; }
+            .ad-contact-box { margin-top: 18px !important; }
 
             /* Filtre bölümü yatay scroll */
             .filter-container {
@@ -402,7 +403,7 @@
                 <div class="ad-desc" style="white-space: pre-line;">{{ ad.description }}</div>
                 
                 {% if ad.contact_info %}
-                <div style="font-size: 0.9rem; background: rgba(var(--ytu-lacivert-rgb), 0.05); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color); color: var(--text-color);">
+                <div class="ad-contact-box" style="font-size: 0.9rem; background: rgba(var(--ytu-lacivert-rgb), 0.05); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color); color: var(--text-color);">
                     <i class="fas fa-phone-alt" style="margin-right: 5px; color: var(--ytu-lacivert);"></i> 
                     <b>İletişim:</b> {{ ad.contact_info }}
                 </div>
