@@ -139,7 +139,21 @@
             background: #dc2626;
         }
 
+        .settings-mobile-topbar,
+        .mobile-bottom-nav {
+            display: none;
+        }
+
         @media (max-width: 768px) {
+            .navbar {
+                display: none !important;
+            }
+
+            body {
+                padding-top: 58px;
+                padding-bottom: 66px;
+            }
+
             .settings-container {
                 padding: 10px;
             }
@@ -163,10 +177,107 @@
                 height: 36px;
                 font-size: 1rem;
             }
+
+            .settings-mobile-topbar {
+                display: flex !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 58px;
+                background: var(--card-bg);
+                border-bottom: 1px solid var(--border-color);
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 14px;
+                z-index: 5000;
+                box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+            }
+
+            .settings-mobile-topbar-title {
+                font-size: 1rem;
+                font-weight: 900;
+                color: var(--text-color);
+                letter-spacing: -0.01em;
+            }
+
+            .settings-mobile-topbar-back {
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: none;
+                background: none;
+                color: var(--text-color);
+                border-radius: 50%;
+                cursor: pointer;
+            }
+
+            .settings-mobile-topbar-spacer {
+                width: 36px;
+                height: 36px;
+            }
+
+            .mobile-bottom-nav {
+                display: flex !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 56px;
+                background: var(--card-bg);
+                border-top: 1px solid var(--border-color);
+                justify-content: space-around;
+                align-items: center;
+                z-index: 5000;
+                padding: 0 4px;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+                box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.06);
+            }
+
+            .mobile-bottom-nav .nav-item {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+                padding: 8px 0;
+                color: var(--text-muted);
+                text-decoration: none;
+                position: relative;
+                transition: color 0.2s;
+            }
+
+            .mobile-bottom-nav .nav-item.active {
+                color: var(--ytu-lacivert);
+            }
+
+            .mob-nav-badge {
+                position: absolute;
+                top: 4px;
+                right: calc(50% - 18px);
+                background: #ff4757;
+                color: #fff;
+                font-size: 0.55rem;
+                padding: 1px 5px;
+                border-radius: 10px;
+                font-weight: 700;
+                min-width: 16px;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="settings-mobile-topbar">
+        <button type="button" class="settings-mobile-topbar-back" onclick="history.back()" aria-label="Geri dön">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="settings-mobile-topbar-title">Ayarlar</div>
+        <div class="settings-mobile-topbar-spacer"></div>
+    </div>
+
     {% include 'navbar_partial.html' %}
 
     <div class="settings-container">
@@ -242,6 +353,25 @@
                 <i class="fa-solid fa-trash"></i> Hesabı Sil
             </button>
         </div>
+    </div>
+
+    <div class="mobile-bottom-nav">
+        <a href="/" class="nav-item {{ 'active' if request.path == '/' else '' }}">
+            <i class="fa-solid fa-house"></i>
+        </a>
+        <a href="{{ url_for('main.explore') }}" class="nav-item {{ 'active' if 'explore' in request.path else '' }}">
+            <i class="fa-regular fa-compass"></i>
+        </a>
+        <a href="{{ url_for('main.adverts') }}" class="nav-item {{ 'active' if 'adverts' in request.path else '' }}">
+            <i class="fa-solid fa-bullhorn"></i>
+        </a>
+        <a href="{{ url_for('main.messages_inbox') }}" class="nav-item {{ 'active' if 'inbox' in request.path or 'chat' in request.path else '' }}">
+            <i class="fa-regular fa-envelope"></i>
+            {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('main.settings') }}" class="nav-item {{ 'active' if 'settings' in request.path or 'change_password' in request.path else '' }}">
+            <i class="fa-solid fa-gear"></i>
+        </a>
     </div>
 
     <script src="/static/script.js"></script>
