@@ -119,9 +119,21 @@
         /* Media */
         .pd-media {
             width: 100%;
+            display: block;
+            background: #000;
+        }
+
+        .pd-media-image {
             aspect-ratio: 16 / 9;
             object-fit: cover;
             background: var(--hover-bg);
+        }
+
+        .pd-media-video {
+            height: auto;
+            max-height: 70vh;
+            object-fit: contain;
+            background: #000;
         }
 
         .pd-media-placeholder {
@@ -326,6 +338,10 @@
                 padding: 12px;
             }
 
+            .pd-media-video {
+                max-height: 55vh;
+            }
+
             .pd-caption,
             .pd-stats,
             .pd-actions,
@@ -364,11 +380,11 @@
             <!-- Media -->
             {% if post.image_file %}
                 {% if post.is_video() %}
-                    <video controls class="pd-media" style="aspect-ratio: auto;">
+                    <video controls class="pd-media pd-media-video" playsinline>
                         <source src="/static/post_images/{{ post.image_file }}">
                     </video>
                 {% else %}
-                    <img src="/static/post_images/{{ post.image_file }}" class="pd-media" alt="Post">
+                    <img src="/static/post_images/{{ post.image_file }}" class="pd-media pd-media-image" alt="Post">
                 {% endif %}
             {% else %}
                 <div class="pd-media-placeholder">
