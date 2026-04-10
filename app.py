@@ -110,12 +110,16 @@ def create_app():
 
     @app.before_request
     def check_ban():
-        if current_user.is_authenticated:
-            if current_user.is_banned or (current_user.ban_expiration and current_user.ban_expiration > datetime.now()):
-                if request.endpoint not in ['auth.logout', 'static', 'auth.login']:
-                    logout_user()
-                    flash("🚫 Hesabınız yasaklandı veya uzaklaştırıldı.", "danger")
-                    return redirect(url_for('auth.login'))
+        try:
+            if current_user.is_authenticated:
+                if current_user.is_banned or (current_user.ban_expiration and current_user.ban_expiration > datetime.now()):
+                    if request.endpoint not in ['auth.logout', 'static', 'auth.login']:
+                        logout_user()
+                        flash("🚫 Hesabınız yasaklandı veya uzaklaştırıldı.", "danger")
+                        return redirect(url_for('auth.login'))
+        except SQLAlchemyError as exc:
+            app.logger.warning('Ban check skipped because database is unavailable: %s', exc, exc_info=True)
+            return None
 
     @app.before_request
     def start_timer():

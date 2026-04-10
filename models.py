@@ -1,6 +1,7 @@
 from extensions import db, login_manager
 from flask_login import UserMixin
 from datetime import datetime, timedelta
+from sqlalchemy.exc import SQLAlchemyError
 from utils import get_turkey_time
 
 followers = db.Table('followers',
@@ -309,4 +310,10 @@ class StoryView(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    try:
+        return User.query.get(int(user_id))
+    except (TypeError, ValueError):
+        return None
+    except SQLAlchemyError:
+        db.session.remove()
+        return None

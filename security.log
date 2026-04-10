@@ -337,3 +337,756 @@ sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to serve
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
 2026-04-10 09:26:07,130 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
 2026-04-10 10:06:23,021 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-10 15:04:09,760 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-10 15:04:34,302 ERROR app: Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3309, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\default.py", line 630, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "ytusocial-db-do-user-33023628-0.j.db.ondigitalocean.com" (138.197.189.187), port 25060 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 915, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 1291, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "D:\Projelerim\ytusocial\app.py", line 113, in check_ban
+    if current_user.is_authenticated:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\werkzeug\local.py", line 318, in __get__
+    obj = instance._get_current_object()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\werkzeug\local.py", line 526, in _get_current_object
+    return get_name(local())
+                    ~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\utils.py", line 25, in <lambda>
+    current_user = LocalProxy(lambda: _get_user())
+                                      ~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\utils.py", line 370, in _get_user
+    current_app.login_manager._load_user()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\login_manager.py", line 364, in _load_user
+    user = self._user_callback(user_id)
+  File "D:\Projelerim\ytusocial\models.py", line 312, in load_user
+    return User.query.get(int(user_id))
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "<string>", line 2, in get
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\deprecations.py", line 386, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\query.py", line 1126, in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\query.py", line 1135, in _get_impl
+    return self.session._get_impl(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<6 lines>...
+        execution_options=self._execution_options,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 3859, in _get_impl
+    return db_load_fn(
+        self,
+    ...<5 lines>...
+        bind_arguments=bind_arguments,
+    )
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\loading.py", line 695, in load_on_pk_identity
+    session.execute(
+    ~~~~~~~~~~~~~~~^
+        q,
+        ^^
+    ...<2 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2239, in _execute_internal
+    conn = self._connection_for_bind(bind)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2108, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 1187, in _connection_for_bind
+    conn = bind.connect()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3285, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 145, in __init__
+    Connection._handle_dbapi_exception_noconnection(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        err, dialect, engine
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 2448, in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3309, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\default.py", line 630, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to server at "ytusocial-db-do-user-33023628-0.j.db.ondigitalocean.com" (138.197.189.187), port 25060 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-10 15:04:48,642 ERROR app: Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3309, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\default.py", line 630, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "ytusocial-db-do-user-33023628-0.j.db.ondigitalocean.com" (138.197.189.187), port 25060 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 915, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 1291, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "D:\Projelerim\ytusocial\app.py", line 113, in check_ban
+    if current_user.is_authenticated:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\werkzeug\local.py", line 318, in __get__
+    obj = instance._get_current_object()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\werkzeug\local.py", line 526, in _get_current_object
+    return get_name(local())
+                    ~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\utils.py", line 25, in <lambda>
+    current_user = LocalProxy(lambda: _get_user())
+                                      ~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\utils.py", line 370, in _get_user
+    current_app.login_manager._load_user()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\login_manager.py", line 364, in _load_user
+    user = self._user_callback(user_id)
+  File "D:\Projelerim\ytusocial\models.py", line 312, in load_user
+    return User.query.get(int(user_id))
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "<string>", line 2, in get
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\deprecations.py", line 386, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\query.py", line 1126, in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\query.py", line 1135, in _get_impl
+    return self.session._get_impl(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<6 lines>...
+        execution_options=self._execution_options,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 3859, in _get_impl
+    return db_load_fn(
+        self,
+    ...<5 lines>...
+        bind_arguments=bind_arguments,
+    )
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\loading.py", line 695, in load_on_pk_identity
+    session.execute(
+    ~~~~~~~~~~~~~~~^
+        q,
+        ^^
+    ...<2 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2239, in _execute_internal
+    conn = self._connection_for_bind(bind)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2108, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 1187, in _connection_for_bind
+    conn = bind.connect()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3285, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 145, in __init__
+    Connection._handle_dbapi_exception_noconnection(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        err, dialect, engine
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 2448, in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3309, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\default.py", line 630, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to server at "ytusocial-db-do-user-33023628-0.j.db.ondigitalocean.com" (138.197.189.187), port 25060 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-10 15:05:09,840 ERROR app: Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3309, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\default.py", line 630, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "ytusocial-db-do-user-33023628-0.j.db.ondigitalocean.com" (138.197.189.187), port 25060 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 915, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 1291, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "D:\Projelerim\ytusocial\app.py", line 113, in check_ban
+    if current_user.is_authenticated:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\werkzeug\local.py", line 318, in __get__
+    obj = instance._get_current_object()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\werkzeug\local.py", line 526, in _get_current_object
+    return get_name(local())
+                    ~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\utils.py", line 25, in <lambda>
+    current_user = LocalProxy(lambda: _get_user())
+                                      ~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\utils.py", line 370, in _get_user
+    current_app.login_manager._load_user()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\login_manager.py", line 364, in _load_user
+    user = self._user_callback(user_id)
+  File "D:\Projelerim\ytusocial\models.py", line 312, in load_user
+    return User.query.get(int(user_id))
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "<string>", line 2, in get
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\deprecations.py", line 386, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\query.py", line 1126, in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\query.py", line 1135, in _get_impl
+    return self.session._get_impl(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<6 lines>...
+        execution_options=self._execution_options,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 3859, in _get_impl
+    return db_load_fn(
+        self,
+    ...<5 lines>...
+        bind_arguments=bind_arguments,
+    )
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\loading.py", line 695, in load_on_pk_identity
+    session.execute(
+    ~~~~~~~~~~~~~~~^
+        q,
+        ^^
+    ...<2 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2239, in _execute_internal
+    conn = self._connection_for_bind(bind)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2108, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 1187, in _connection_for_bind
+    conn = bind.connect()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3285, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 145, in __init__
+    Connection._handle_dbapi_exception_noconnection(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        err, dialect, engine
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 2448, in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3309, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\default.py", line 630, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to server at "ytusocial-db-do-user-33023628-0.j.db.ondigitalocean.com" (138.197.189.187), port 25060 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-04-10 15:05:31,073 ERROR app: Exception on /favicon.ico [GET]
+Traceback (most recent call last):
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3309, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\default.py", line 630, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: connection to server at "ytusocial-db-do-user-33023628-0.j.db.ondigitalocean.com" (138.197.189.187), port 25060 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 915, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 1291, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "D:\Projelerim\ytusocial\app.py", line 113, in check_ban
+    if current_user.is_authenticated:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\werkzeug\local.py", line 318, in __get__
+    obj = instance._get_current_object()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\werkzeug\local.py", line 526, in _get_current_object
+    return get_name(local())
+                    ~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\utils.py", line 25, in <lambda>
+    current_user = LocalProxy(lambda: _get_user())
+                                      ~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\utils.py", line 370, in _get_user
+    current_app.login_manager._load_user()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask_login\login_manager.py", line 364, in _load_user
+    user = self._user_callback(user_id)
+  File "D:\Projelerim\ytusocial\models.py", line 312, in load_user
+    return User.query.get(int(user_id))
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "<string>", line 2, in get
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\deprecations.py", line 386, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\query.py", line 1126, in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\query.py", line 1135, in _get_impl
+    return self.session._get_impl(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<6 lines>...
+        execution_options=self._execution_options,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 3859, in _get_impl
+    return db_load_fn(
+        self,
+    ...<5 lines>...
+        bind_arguments=bind_arguments,
+    )
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\loading.py", line 695, in load_on_pk_identity
+    session.execute(
+    ~~~~~~~~~~~~~~~^
+        q,
+        ^^
+    ...<2 lines>...
+        bind_arguments=bind_arguments,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2239, in _execute_internal
+    conn = self._connection_for_bind(bind)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 2108, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in _connection_for_bind
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\orm\session.py", line 1187, in _connection_for_bind
+    conn = bind.connect()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3285, in connect
+    return self._connection_cls(self)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 145, in __init__
+    Connection._handle_dbapi_exception_noconnection(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        err, dialect, engine
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 2448, in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3309, in raw_connection
+    return self.pool.connect()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
+    return self._create_connection()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\default.py", line 630, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\psycopg2\__init__.py", line 135, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to server at "ytusocial-db-do-user-33023628-0.j.db.ondigitalocean.com" (138.197.189.187), port 25060 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
