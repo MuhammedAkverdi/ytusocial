@@ -604,19 +604,31 @@ def send_message(rid):
     msg_type = 'text'
     file_path = None 
     if file and file.filename != '':
-        msg_type = 'file'
         filename = secure_filename(file.filename)
         import uuid
         ext = os.path.splitext(filename)[1].lower()
+        mime_type = (file.mimetype or '').lower()
+        audio_exts = {'.webm', '.wav', '.ogg', '.mp3', '.m4a', '.aac', '.flac'}
+        image_exts = {'.png', '.jpg', '.jpeg', '.gif', '.webp'}
+        video_exts = {'.mp4', '.mov', '.avi', '.webm', '.mkv', '.flv'}
+
+        if mime_type.startswith('audio/') or (ext in audio_exts and not mime_type.startswith('video/')):
+            msg_type = 'audio'
+            upload_folder = current_app.config.get('AUDIO_UPLOAD_FOLDER', os.path.join('static', 'audio_files'))
+        else:
+            upload_folder = current_app.config['MESSAGE_FILE_UPLOAD_FOLDER']
+            msg_type = 'file'
+            if mime_type.startswith('image/') or ext in image_exts:
+                msg_type = 'image'
+            elif mime_type.startswith('video/') or ext in video_exts:
+                msg_type = 'video'
+
         unique_filename = str(uuid.uuid4()) + ext
-        file.save(os.path.join(current_app.config['MESSAGE_FILE_UPLOAD_FOLDER'], unique_filename))
+        os.makedirs(upload_folder, exist_ok=True)
+        file.save(os.path.join(upload_folder, unique_filename))
         file_path = unique_filename
-        if ext in ['.png', '.jpg', '.jpeg', '.gif', '.webp']:
-            msg_type = 'image'
-        elif ext in ['.mp4', '.mov', '.avi', '.webm', '.mkv', '.flv']:
-            msg_type = 'video'
         if not b:
-            b = filename
+            b = '🎵 Sesli Mesaj' if msg_type == 'audio' else filename
     elif story_id:
         msg_type = 'story'
         b = story_id

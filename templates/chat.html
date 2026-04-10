@@ -102,21 +102,27 @@
         .x-attach-wrap{position:relative;flex-shrink:0;}
         .x-attach-plus{width:38px;height:38px;border-radius:50%;background:var(--border-color);border:none;color:var(--text-color);font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
         .x-attach-plus:hover{background:var(--text-muted);color:#fff;}
-        .x-plus-menu{display:none;position:absolute;right:0;bottom:calc(100% + 10px);background:var(--card-bg);border:1px solid var(--border-color);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.18);min-width:155px;overflow:hidden;z-index:9999;transform-origin:bottom right;}
-        .x-plus-menu.open{display:block;}
-        .x-plus-menu-item{display:flex;align-items:center;gap:12px;padding:13px 18px;color:var(--text-color);font-size:.93rem;font-weight:600;cursor:pointer;border:none;background:none;width:100%;transition:background .15s;text-decoration:none;font-family:inherit;}
-        .x-plus-menu-item:hover{background:var(--hover-bg);}
-        .x-plus-menu-item i{font-size:1.1rem;width:20px;text-align:center;flex-shrink:0;}
+        .x-plus-menu{display:none;position:absolute;right:0;bottom:calc(100% + 10px);background:var(--card-bg);border:1px solid var(--border-color);border-radius:18px;box-shadow:0 18px 40px rgba(0,0,0,.18);width:min(320px,calc(100vw - 24px));padding:10px;gap:8px;z-index:9999;transform-origin:bottom right;}
+        .x-plus-menu.open{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}
+        .x-plus-menu-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 10px;color:var(--text-color);font-size:.82rem;font-weight:700;cursor:pointer;border:1px solid var(--border-color);background:var(--input-bg);width:100%;min-height:72px;border-radius:14px;transition:transform .15s,background .15s,border-color .15s;text-decoration:none;font-family:inherit;text-align:center;}
+        .x-plus-menu-item:hover{background:var(--hover-bg);border-color:rgba(var(--ytu-lacivert-rgb),.25);transform:translateY(-1px);}
+        .x-plus-menu-item i{font-size:1.12rem;text-align:center;flex-shrink:0;}
+        .x-plus-menu-item-wide{grid-column:1 / -1;flex-direction:row;justify-content:flex-start;gap:10px;min-height:54px;}
+        .x-plus-menu-item-wide i{width:20px;}
         /* X-style preview strip */
         .x-preview-strip{display:none;padding:10px 14px;background:var(--card-bg);border-top:1px solid var(--border-color);}
         .x-preview-strip.visible{display:block;}
-        .x-preview-card{position:relative;display:inline-block;max-width:240px;border-radius:16px;overflow:hidden;}
-        .x-preview-card img{display:block;max-height:200px;max-width:100%;object-fit:cover;border-radius:16px;}
-        .x-preview-card video{display:block;max-height:200px;max-width:100%;object-fit:cover;border-radius:16px;}
+        .x-preview-card{position:relative;display:inline-block;max-width:280px;border-radius:16px;overflow:hidden;}
+        .x-preview-card img{display:block;max-height:220px;max-width:100%;object-fit:cover;border-radius:16px;}
+        .x-preview-card video{display:block;max-height:220px;max-width:100%;object-fit:cover;border-radius:16px;}
         .x-preview-close{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.75rem;z-index:2;}
         .x-preview-file{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--input-bg);border:1px solid var(--border-color);border-radius:14px;}
         .x-preview-file i{font-size:2rem;color:var(--ytu-lacivert);}
         .x-preview-file span{font-size:.9rem;font-weight:600;color:var(--text-color);word-break:break-all;}
+        .x-preview-audio{display:flex;flex-direction:column;gap:12px;padding:14px 16px;background:var(--input-bg);border:1px solid var(--border-color);border-radius:16px;min-width:min(100%,280px);}
+        .x-preview-audio i{font-size:1.9rem;color:var(--ytu-lacivert);}
+        .x-preview-audio span{font-size:.9rem;font-weight:600;color:var(--text-color);word-break:break-all;}
+        .x-preview-audio audio{width:100%;}
         .ig-send-btn{background:#1d9bf0 !important;}
         /* X-style profile bottom sheet */
         .x-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:3000;}
@@ -268,10 +274,7 @@
 
                     {% elif msg.msg_type == "audio" %}
                     <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}">
-                        <audio controls controlsList="nodownload" class="ig-audio-msg">
-                            <source src="/static/audio_files/{{ msg.file_path }}" type="audio/webm">
-                            <source src="/static/audio_files/{{ msg.file_path }}" type="audio/mp4">
-                        </audio>
+                        <audio controls controlsList="nodownload" class="ig-audio-msg" src="/static/audio_files/{{ msg.file_path }}"></audio>
                         <span class="ig-msg-time">{{ msg.timestamp.strftime("%H:%M") }}</span>
                     </div>
 
@@ -327,13 +330,15 @@
                 <div class="x-attach-wrap">
                     <button type="button" class="x-attach-plus" id="plusBtn" onclick="togglePlusMenu(event)" title="Ekle"><i class="fas fa-plus"></i></button>
                     <div class="x-plus-menu" id="plusMenu">
-                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); closePlusMenu(); toggleEmojiPicker(event)"><i class="fa-regular fa-face-smile"></i> Emoji</button>
-                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); closePlusMenu(); document.getElementById('chatGifInput').click()"><i class="fa-solid fa-icons"></i> GIF</button>
-                        <label class="x-plus-menu-item" for="chatFileInput" onclick="event.stopPropagation(); closePlusMenu()"><i class="fa-solid fa-paperclip"></i> Yükle</label>
+                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); closePlusMenu(); toggleEmojiPicker(event)"><i class="fa-regular fa-face-smile"></i><span>Emoji</span></button>
+                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); closePlusMenu(); document.getElementById('chatGifInput').click()"><i class="fa-solid fa-icons"></i><span>GIF</span></button>
+                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); openAttachmentPicker('photo')"><i class="fa-solid fa-image"></i><span>Fotoğraf</span></button>
+                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); openAttachmentPicker('audio')"><i class="fa-solid fa-music"></i><span>Müzik</span></button>
+                        <button type="button" class="x-plus-menu-item x-plus-menu-item-wide" onclick="event.stopPropagation(); openAttachmentPicker('file')"><i class="fa-solid fa-paperclip"></i><span>Dosya</span></button>
                     </div>
                     <div class="x-emoji-grid" id="emojiPicker"></div>
                 </div>
-                <input type="file" id="chatFileInput" accept="image/*,video/*,.pdf,.doc,.docx,.zip,.rar,.txt" style="display:none;" onchange="onFileSelected(this)">
+                <input type="file" id="chatFileInput" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.zip,.rar,.txt" style="display:none;" onchange="onFileSelected(this)">
                 <input type="file" id="chatGifInput" accept="image/gif" style="display:none;" onchange="onFileSelected(this)">
                 <input type="text" id="messageInput" class="ig-text-field" placeholder="Mesaj" autocomplete="off"
                     oninput="onInputChange()"
@@ -477,6 +482,17 @@
         window.addEventListener("DOMContentLoaded",function(){var a=document.getElementById("messageArea");if(a)a.scrollTop=a.scrollHeight;});
         function onInputChange(){var v=document.getElementById("messageInput").value.trim();var f=document.getElementById("filePreviewStrip")&&document.getElementById("filePreviewStrip").classList.contains("visible");document.getElementById("sendBtn").style.display=(v||f)?"flex":"none";document.getElementById("recordBtn").style.display=(v||f)?"none":"flex";}
         function formatFileSize(b){if(b<1024)return b+" B";if(b<1048576)return(b/1024).toFixed(1)+" KB";return(b/1048576).toFixed(1)+" MB";}
+        function openAttachmentPicker(kind){
+            var input=document.getElementById('chatFileInput');
+            if(!input)return;
+            closePlusMenu();
+            closeEmojiPicker();
+            input.value='';
+            if(kind==='photo') input.accept='image/*';
+            else if(kind==='audio') input.accept='audio/*,.mp3,.wav,.ogg,.m4a,.webm';
+            else input.accept='video/*,.pdf,.doc,.docx,.zip,.rar,.txt';
+            input.click();
+        }
         function onFileSelected(input){
             if(!input.files||!input.files[0])return;
             var file=input.files[0];
@@ -488,6 +504,9 @@
             }else if(file.type.startsWith("video/")){
                 var url=URL.createObjectURL(file);
                 thumbEl.innerHTML='<video src="'+url+'" controls></video>';
+            }else if(file.type.startsWith("audio/")){
+                var url=URL.createObjectURL(file);
+                thumbEl.innerHTML='<div class="x-preview-audio"><i class="fa-solid fa-music"></i><audio controls controlsList="nodownload" src="'+url+'"></audio><span>'+file.name+'</span></div>';
             }else{
                 thumbEl.innerHTML='<div class="x-preview-file"><i class="fas fa-file-alt"></i><span>'+file.name+'</span></div>';
             }

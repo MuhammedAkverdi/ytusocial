@@ -1495,6 +1495,9 @@ async function sendMessage(event) {
         } else if (capturedFile.type.startsWith('video/')) {
             msgType = 'video';
             localFilePath = URL.createObjectURL(capturedFile);
+        } else if (capturedFile.type.startsWith('audio/')) {
+            msgType = 'audio';
+            localFilePath = URL.createObjectURL(capturedFile);
         } else {
             msgType = 'file';
             localFilePath = URL.createObjectURL(capturedFile); // indirme icin
@@ -1705,7 +1708,8 @@ function appendMessageToChat(msg) {
             const imgPath = msg.story_img ? `/static/story_images/${msg.story_img}` : '/static/img/story_placeholder.jpg';
             contentHtml = `<div class="ig-bubble ${sideClass} media"><div class="ig-story-card" onclick="viewSharedStory(event,'${msg.body}')"><div class="ig-story-overlay"><i class="fas fa-play" style="font-size:1.8rem;margin-bottom:6px;"></i><span style="font-size:.8rem;font-weight:700;">Hikayeyi İzle</span></div><img src="${imgPath}" class="ig-story-img" onerror="this.src='/static/img/story_placeholder.jpg'"></div></div>`;
         } else if (msg.msg_type === 'audio') {
-            contentHtml = `<div class="ig-bubble ${sideClass}"><audio controls controlsList="nodownload" class="ig-audio-msg"><source src="/static/audio_files/${msg.file_path}" type="audio/webm"><source src="/static/audio_files/${msg.file_path}" type="audio/mp4"></audio>${timeHtml}</div>`;
+            const audioSrc = (msg.is_local && msg.file_path) ? msg.file_path : `/static/audio_files/${msg.file_path}`;
+            contentHtml = `<div class="ig-bubble ${sideClass}"><audio controls controlsList="nodownload" class="ig-audio-msg" src="${audioSrc}"></audio>${timeHtml}</div>`;
         } else if (msg.msg_type === 'image') {
             const imgPath = (msg.is_local && msg.file_path) ? msg.file_path : `/static/message_files/${msg.file_path}`;
             contentHtml = `<div class="ig-bubble ${sideClass} media"><img src="${imgPath}" class="ig-img-msg" onclick="openLightbox(this.src)" alt="Resim">${timeHtml}</div>`;
@@ -1738,7 +1742,8 @@ function appendMessageToChat(msg) {
             const imgPath = msg.story_img ? `/static/story_images/${msg.story_img}` : '/static/img/story_placeholder.jpg';
             contentHtml = `<div class="story-share-card" onclick="viewSharedStory(event,'${msg.body}')" style="cursor:pointer;max-width:200px;position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.2);"><div style="background:rgba(0,0,0,0.4);position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;color:white;z-index:2;"><i class="fas fa-play-circle" style="font-size:3rem;margin-bottom:10px;"></i><span>Hikayeyi İzle</span></div><img src="${imgPath}" style="width:100%;height:280px;object-fit:cover;display:block;" onerror="this.onerror=null;this.src='/static/img/default_avatar.png'"></div>`;
         } else if (msg.msg_type === 'audio') {
-            contentHtml = `<audio controls controlsList="nodownload" class="audio-msg"><source src="/static/audio_files/${msg.file_path}" type="audio/webm"><source src="/static/audio_files/${msg.file_path ? msg.file_path.replace('.webm','.mp4') : ''}" type="audio/mp4"></audio>`;
+            const audioSrc = (msg.is_local && msg.file_path) ? msg.file_path : `/static/audio_files/${msg.file_path}`;
+            contentHtml = `<audio controls controlsList="nodownload" class="audio-msg" src="${audioSrc}"></audio>`;
         } else if (msg.msg_type === 'image') {
             const imgPath = (msg.is_local && msg.file_path) ? msg.file_path : `/static/message_files/${msg.file_path}`;
             contentHtml = `<div class="chat-image-container"><img src="${imgPath}" class="chat-image" onclick="openLightbox(this.src)"></div>`;
