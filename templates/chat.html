@@ -102,7 +102,7 @@
         .x-attach-wrap{position:relative;flex-shrink:0;}
         .x-attach-plus{width:38px;height:38px;border-radius:50%;background:var(--border-color);border:none;color:var(--text-color);font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
         .x-attach-plus:hover{background:var(--text-muted);color:#fff;}
-        .x-plus-menu{display:none;position:fixed;background:var(--card-bg);border:1px solid var(--border-color);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.18);min-width:155px;overflow:hidden;z-index:9999;}
+        .x-plus-menu{display:none;position:absolute;right:0;bottom:calc(100% + 10px);background:var(--card-bg);border:1px solid var(--border-color);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.18);min-width:155px;overflow:hidden;z-index:9999;transform-origin:bottom right;}
         .x-plus-menu.open{display:block;}
         .x-plus-menu-item{display:flex;align-items:center;gap:12px;padding:13px 18px;color:var(--text-color);font-size:.93rem;font-weight:600;cursor:pointer;border:none;background:none;width:100%;transition:background .15s;text-decoration:none;font-family:inherit;}
         .x-plus-menu-item:hover{background:var(--hover-bg);}
@@ -170,7 +170,7 @@
         .x-nick-input:focus{border-color:#1d9bf0;}
         .x-nick-input::placeholder{color:var(--text-muted);}
         /* Emoji picker */
-        .x-emoji-grid{position:fixed;background:var(--card-bg);border:1px solid var(--border-color);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.18);width:280px;max-height:220px;overflow-y:auto;z-index:9999;display:none;padding:8px;}
+        .x-emoji-grid{position:absolute;right:0;bottom:calc(100% + 10px);background:var(--card-bg);border:1px solid var(--border-color);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.18);width:280px;max-height:220px;overflow-y:auto;z-index:9999;display:none;padding:8px;transform-origin:bottom right;}
         .x-emoji-grid.open{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;}
         .x-emoji-btn{background:none;border:none;font-size:1.4rem;cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .12s;line-height:1;}
         .x-emoji-btn:hover{background:var(--border-color);}
@@ -187,6 +187,8 @@
             .ig-input-bar { padding:8px 10px; gap:6px; }
             .ig-text-field { font-size:0.9rem; padding:9px 14px; }
             .ig-attach-btn, .ig-send-btn, .ig-mic-btn, .x-attach-plus { width:38px; height:38px; }
+            .x-plus-menu{right:auto;left:0;}
+            .x-emoji-grid{right:auto;left:0;width:min(280px,calc(100vw - 24px));}
         }
     </style>
 </head>
@@ -323,15 +325,16 @@
             <!-- INPUT BAR -->
             <div class="ig-input-bar">
                 <div class="x-attach-wrap">
-                    <button type="button" class="x-attach-plus" id="plusBtn" onclick="togglePlusMenu()" title="Ekle"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="x-attach-plus" id="plusBtn" onclick="togglePlusMenu(event)" title="Ekle"><i class="fas fa-plus"></i></button>
                     <div class="x-plus-menu" id="plusMenu">
-                        <button class="x-plus-menu-item" onclick="closePlusMenu();toggleEmojiPicker()"><i class="fa-regular fa-face-smile"></i> Emoji</button>
-                        <button class="x-plus-menu-item" onclick="closePlusMenu();insertGifPlaceholder()"><i class="fa-solid fa-icons"></i> GIF</button>
-                        <label class="x-plus-menu-item" for="chatFileInput" onclick="closePlusMenu()"><i class="fa-solid fa-paperclip"></i> Yükle</label>
+                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); closePlusMenu(); toggleEmojiPicker(event)"><i class="fa-regular fa-face-smile"></i> Emoji</button>
+                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); closePlusMenu(); document.getElementById('chatGifInput').click()"><i class="fa-solid fa-icons"></i> GIF</button>
+                        <label class="x-plus-menu-item" for="chatFileInput" onclick="event.stopPropagation(); closePlusMenu()"><i class="fa-solid fa-paperclip"></i> Yükle</label>
                     </div>
                     <div class="x-emoji-grid" id="emojiPicker"></div>
                 </div>
                 <input type="file" id="chatFileInput" accept="image/*,video/*,.pdf,.doc,.docx,.zip,.rar,.txt" style="display:none;" onchange="onFileSelected(this)">
+                <input type="file" id="chatGifInput" accept="image/gif" style="display:none;" onchange="onFileSelected(this)">
                 <input type="text" id="messageInput" class="ig-text-field" placeholder="Mesaj" autocomplete="off"
                     oninput="onInputChange()"
                     onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage(event);}">
@@ -496,22 +499,19 @@
         function clearFilePreview(){
             document.getElementById("filePreviewStrip").classList.remove("visible");
             document.getElementById("chatFileInput").value="";
+            var gifInput = document.getElementById("chatGifInput");
+            if (gifInput) gifInput.value = "";
             document.getElementById("filePreviewThumb").innerHTML="";
             document.getElementById("messageInput").value="";
             onInputChange();
             var ma=document.getElementById("messageArea");
             ma.scrollTop=ma.scrollHeight;
         }
-        function positionAboveBtn(menu,btn){
-            var r=btn.getBoundingClientRect();
-            menu.style.left=r.left+'px';
-            menu.style.bottom=(window.innerHeight-r.top+8)+'px';
-        }
-        function togglePlusMenu(){
+        function togglePlusMenu(event){
+            if(event) event.stopPropagation();
             var m=document.getElementById('plusMenu');
-            var b=document.getElementById('plusBtn');
             m.classList.toggle('open');
-            if(m.classList.contains('open'))positionAboveBtn(m,b);
+            if(m.classList.contains('open'))closeEmojiPicker();
         }
         function closePlusMenu(){document.getElementById('plusMenu').classList.remove('open');}
         document.addEventListener('click',function(e){if(!e.target.closest('.x-attach-wrap'))closePlusMenu();});
@@ -545,16 +545,15 @@
                 grid.appendChild(b);
             });
         })();
-        function toggleEmojiPicker(){
+        function toggleEmojiPicker(event){
+            if(event) event.stopPropagation();
             var m=document.getElementById('emojiPicker');
-            var b=document.getElementById('plusBtn');
             m.classList.toggle('open');
-            if(m.classList.contains('open'))positionAboveBtn(m,b);
+            if(m.classList.contains('open'))closePlusMenu();
         }
         function closeEmojiPicker(){document.getElementById('emojiPicker').classList.remove('open');}
         document.addEventListener('click',function(e){if(!e.target.closest('.x-attach-wrap'))closeEmojiPicker();});
         function insertEmoji(em){var inp=document.getElementById('messageInput');var s=inp.selectionStart||inp.value.length;inp.value=inp.value.substring(0,s)+em+inp.value.substring(s);inp.focus();inp.selectionStart=inp.selectionEnd=s+em.length;onInputChange();}
-        function insertGifPlaceholder(){alert('GIF özelliği yakında!');}
         /* Block user */
         var _isBlocked = false;
         function blockUserToggle(userId, btn){

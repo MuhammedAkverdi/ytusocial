@@ -1474,14 +1474,16 @@ async function sendMessage(event) {
 
     const input = document.getElementById('messageInput');
     const fileInput = document.getElementById('chatFileInput');
+    const gifInput = document.getElementById('chatGifInput');
     const text = input.value.trim();
     const recipientId = document.getElementById('recipientId')?.value;
     const hasFile = fileInput && fileInput.files.length > 0;
+    const hasGif = gifInput && gifInput.files.length > 0;
 
-    if ((!text && !hasFile) || !recipientId) return;
+    if ((!text && !hasFile && !hasGif) || !recipientId) return;
 
     // Dosyayı input temizlenmeden ÖNCE yakala
-    const capturedFile = hasFile ? fileInput.files[0] : null;
+    const capturedFile = hasFile ? fileInput.files[0] : (hasGif ? gifInput.files[0] : null);
 
     let msgType = 'text';
     let localFilePath = null;
@@ -1513,6 +1515,7 @@ async function sendMessage(event) {
 
     input.value = "";
     if (fileInput) fileInput.value = "";
+    if (gifInput) gifInput.value = "";
     // Dosya preview alanını temizle
     const previewStrip = document.getElementById('filePreviewStrip');
     if (previewStrip) previewStrip.classList.remove('visible');
