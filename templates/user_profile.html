@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ user.username }} | Profil</title>
+    <title>{{ user.display_name }} | Profil</title>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -534,7 +534,7 @@
 <div class="prof-mob-header" style="display:none;">
     <button class="prof-mob-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
     <div class="prof-mob-title">
-        {{ user.username }}
+        {{ user.display_name }}
         <span>@{{ user.handle }} · {{ user.followers.count() }} takipçi</span>
     </div>
 </div>
@@ -571,7 +571,7 @@
                 </div>
 
                 <div class="profile-names">
-                    <h1 class="p-real-name">{{ user.username }}</h1>
+                    <h1 class="p-real-name">{{ user.display_name }}</h1>
                     <div class="p-username">@{{ user.handle }}</div>
                 </div>
 
@@ -614,13 +614,13 @@
                     {% if post.repost_of %}
                     <div class="repost-header">
                         <span>🔁</span>
-                        <b>{{ user.username }}</b> yeniden gönderdi
+                        <b>{{ user.display_name }}</b> yeniden gönderdi
                     </div>
                     {% endif %}
 
                     <div class="t-header">
                         <div>
-                            <span class="t-name">{{ display_post.author.username }}</span>
+                            <span class="t-name">{{ display_post.author.display_name }}</span>
                             <span class="t-handle">@{{ display_post.author.handle }} · {{ display_post.date_posted.strftime('%d %b') }}</span>
                         </div>
                         {% if user == current_user and not post.repost_of %}
@@ -685,7 +685,7 @@
                     
                     <div class="ad-footer">
                         <img src="/static/{{ user.profile_pic }}" style="width: 24px; height: 24px; border-radius: 50%;">
-                        <span><strong>{{ user.username }}</strong> · {{ ad.date_posted.strftime('%d %b') }}</span>
+                        <span><strong>{{ user.display_name }}</strong> · {{ ad.date_posted.strftime('%d %b') }}</span>
                     </div>
                 </div>
                 {% else %}
@@ -749,7 +749,7 @@
 
 <!-- Profile photo lightbox -->
 <div class="photo-lightbox" id="profilePhotoLightbox" onclick="closeProfilePhotoLightbox()" style="display:none;">
-    <img src="/static/{{ user.profile_pic }}" alt="{{ user.username }}">
+    <img src="/static/{{ user.profile_pic }}" alt="{{ user.display_name }}">
 </div>
 
 </body>

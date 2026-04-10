@@ -132,6 +132,21 @@ class User(UserMixin, db.Model):
     messages_received = db.relationship('Message', foreign_keys='Message.recipient_id', backref='recipient', lazy='dynamic')
     saved_posts = db.relationship('SavedPost', back_populates='user', lazy=True, cascade="all, delete-orphan")
 
+    @property
+    def display_name(self):
+        raw_username = (self.username or '').strip()
+        if raw_username and raw_username.lower() not in {'none', 'null'}:
+            return raw_username
+
+        handle_value = (self.handle or '').strip()
+        if not handle_value:
+            handle_value = (self.email or '').split('@')[0].strip()
+
+        if handle_value:
+            return handle_value.replace('.', ' ').strip()
+
+        return ''
+
     followed = db.relationship(
         'User', secondary=followers,
         primaryjoin=(followers.c.follower_id == id),

@@ -251,7 +251,7 @@
     <div class="reels-container">
         {% for post in posts %}
         <div class="reel-item">
-            <video src="/static/post_images/{{ post.image_file }}" class="reel-video" loop playsinline {% if loop.index <= 2 %}preload="auto"{% else %}preload="none"{% endif %}></video>
+            <video src="/static/post_images/{{ post.image_file }}" class="reel-video" loop playsinline webkit-playsinline muted preload="metadata" onclick="event.stopPropagation()"></video>
 
             <!-- Dokunma katmanı: tek tık oynat/durdur, çift tık beğeni -->
             <div class="reel-tap-overlay" data-post-id="{{ post.id }}"></div>
@@ -330,7 +330,7 @@
            ====================================================== */
 
         // Global ses durumu: true = sessiz, false = sesli
-        var _reelSoundMuted = false;
+        var _reelSoundMuted = true;
         var _reelSoundUnlocked = false;
 
         function _unlockReelSound() {
@@ -372,6 +372,10 @@
 
             function playVideo(video) {
                 manuallyPaused.set(video, false);
+                video.playsInline = true;
+                video.setAttribute('playsinline', '');
+                video.setAttribute('webkit-playsinline', '');
+                video.preload = 'metadata';
                 video.muted = _reelSoundMuted; // ses durumunu uygula
                 var p = video.play();
                 if (p !== undefined) p.catch(function(){});
@@ -405,7 +409,7 @@
                 entries.forEach(function (entry) {
                     var video = entry.target;
                     if (entry.isIntersecting) {
-                        video.preload = 'auto';
+                        video.preload = 'metadata';
                         if (!manuallyPaused.get(video)) {
                             playVideo(video);
                         }
@@ -413,7 +417,7 @@
                         var cur = video.closest('.reel-item');
                         for (var i = 0; i < 2; i++) {
                             cur = cur && cur.nextElementSibling;
-                            if (cur) { var nv = cur.querySelector('.reel-video'); if (nv) nv.preload = 'auto'; }
+                            if (cur) { var nv = cur.querySelector('.reel-video'); if (nv) nv.preload = 'metadata'; }
                         }
                     } else {
                         manuallyPaused.set(video, false);
@@ -486,6 +490,7 @@
                     if (dx > 12 || dy > 12) return;
 
                     e.preventDefault();
+                    e.stopPropagation();
                     _unlockReelSound();
 
                     var now  = Date.now();
@@ -517,13 +522,14 @@
                 });
 
                 overlay.addEventListener('click', function (e) {
-                    if (e.sourceCapabilities && !e.sourceCapabilities.firesTouchEvents === false) return;
+                    if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) return;
                     var postId = this.dataset.postId;
                     var self   = this;
                     var now    = Date.now();
                     var prev   = lastTap[postId] || 0;
                     if (now - prev < 500 && touchStartPos[postId]) return;
                     lastTap[postId] = now;
+                    e.stopPropagation();
                     _unlockReelSound();
                     tapTimer[postId] = setTimeout(function () {
                         tapTimer[postId] = null;

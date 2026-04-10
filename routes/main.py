@@ -5,6 +5,7 @@ from models import User, Post, Story, Club, ClubVote, ClubPost, Poll, PollOption
 from utils import optimize_and_save_image, allowed_file, create_notification, get_trending_hashtags, get_file_size_str, icerik_temiz_mi, scan_file_safety, ALLOWED_NOTE_EXTENSIONS, allowed_image_file, upload_club_logo_to_spaces
 from sqlalchemy import or_, func
 from datetime import datetime, timedelta
+import random
 import os
 import re
 import secrets
@@ -38,6 +39,39 @@ def _purge_post_tree(post):
         db.session.delete(post)
 
     return deleted_count
+
+
+def _soft_shuffle_reels(posts, user_id):
+    if len(posts) <= 6:
+        return posts
+
+    bucket = int(datetime.utcnow().timestamp() // (60 * 60 * 3))
+    rng = random.Random(f"reels:{user_id}:{bucket}:{len(posts)}")
+
+    head_count = 3 if len(posts) >= 12 else 2
+    head = list(posts[:head_count])
+    body = list(posts[head_count:])
+
+    mixed_body = []
+    block_size = 5
+    for start in range(0, len(body), block_size):
+        block = body[start:start + block_size]
+        if len(block) > 1:
+            rng.shuffle(block)
+        mixed_body.extend(block)
+
+    if len(head) <= 1 or len(mixed_body) <= 4:
+        return head + mixed_body
+
+    final = [head[0]]
+    remaining_head = head[1:]
+    for index, post in enumerate(mixed_body, start=1):
+        if remaining_head and index % 4 == 0:
+            final.append(remaining_head.pop(0))
+        final.append(post)
+
+    final.extend(remaining_head)
+    return final
 
 @main.route('/', methods=['GET', 'POST'])
 @login_required
@@ -947,7 +981,8 @@ def send_audio():
 @login_required
 def reels():
     video_posts = Post.query.filter(or_(Post.image_file.ilike('%.mp4'), Post.image_file.ilike('%.mov'), Post.image_file.ilike('%.avi'), Post.image_file.ilike('%.webm'), Post.image_file.ilike('%.mkv'))).order_by(Post.date_posted.desc()).all()
-    return render_template('reels.html', posts=video_posts)
+    mixed_posts = _soft_shuffle_reels(video_posts, current_user.id)
+    return render_template('reels.html', posts=mixed_posts)
 
 @main.route('/adverts', methods=['GET', 'POST'])
 @login_required

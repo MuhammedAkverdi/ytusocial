@@ -109,6 +109,22 @@ def create_app():
         return Markup(tags)
 
     @app.before_request
+    def fill_missing_username():
+        try:
+            if current_user.is_authenticated:
+                current_username = (current_user.username or '').strip()
+                if not current_username or current_username.lower() in {'none', 'null'}:
+                    fallback_name = current_user.display_name
+                    if fallback_name:
+                        current_user.username = fallback_name
+                        db.session.commit()
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            app.logger.warning('Missing username fallback skipped because database is unavailable: %s', exc, exc_info=True)
+        except Exception as exc:
+            app.logger.warning('Missing username fallback failed: %s', exc, exc_info=True)
+
+    @app.before_request
     def check_ban():
         try:
             if current_user.is_authenticated:

@@ -594,7 +594,7 @@
                     <div id="image-preview" class="image-preview-container" style="display: none;">
                         <div style="position: relative; display: inline-block;">
                             <img id="preview-img" src="" class="preview-img-style" style="display: none;">
-                            <video id="preview-video" class="preview-img-style" controls
+                            <video id="preview-video" class="preview-img-style" controls playsinline webkit-playsinline muted preload="metadata" onclick="event.stopPropagation()"
                                 style="display: none; height: 150px; background: black;"></video>
                             <span onclick="clearImage()" class="preview-close-btn">✕</span>
                         </div>
@@ -678,7 +678,7 @@
                     {% if ftype != 'none' %}
                     <div class="post-image-container">
                         {% if ftype == 'video' %}
-                        <video controls playsinline class="post-image" style="background: black;">
+                        <video controls playsinline webkit-playsinline muted preload="metadata" class="post-image" style="background: black;" onclick="event.stopPropagation()">
                             <source src="/static/post_images/{{ display_post.image_file }}" type="video/mp4">
                             Tarayıcınız video oynatmayı desteklemiyor.
                         </video>

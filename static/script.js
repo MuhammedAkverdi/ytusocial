@@ -1070,6 +1070,11 @@ function previewImage(input) {
 
         if (file.type.startsWith('video/')) {
             previewVideo.style.display = 'block';
+            previewVideo.playsInline = true;
+            previewVideo.setAttribute('playsinline', '');
+            previewVideo.setAttribute('webkit-playsinline', '');
+            previewVideo.muted = true;
+            previewVideo.preload = 'metadata';
             previewVideo.src = URL.createObjectURL(file);
             previewVideo.load();
             container.style.display = 'block';
@@ -1263,7 +1268,7 @@ function createPostHTML(data) {
     if (data.image_file) {
         const ext = data.image_file.split('.').pop().toLowerCase();
         if (['mp4', 'mov', 'avi', 'webm'].includes(ext)) {
-            mediaHTML = `<div class="post-image-container"><video controls class="post-image" style="background:black;"><source src="/static/post_images/${data.image_file}" type="video/mp4"></video></div>`;
+            mediaHTML = `<div class="post-image-container"><video controls playsinline webkit-playsinline muted preload="metadata" class="post-image" style="background:black;" onclick="event.stopPropagation()"><source src="/static/post_images/${data.image_file}" type="video/mp4"></video></div>`;
         } else if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
             mediaHTML = `<div class="post-image-container"><img src="/static/post_images/${data.image_file}" class="post-image" onclick="openLightbox(this.src)"></div>`;
         } else {
