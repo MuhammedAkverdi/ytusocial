@@ -52,8 +52,69 @@
         .btn-upload-hero:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.2); }
 
         .np-toolbar {
-            display: flex; justify-content: space-between; align-items: center;
-            gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+            display: grid;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .np-toolbar-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .np-search-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            flex-wrap: wrap;
+        }
+        .np-search-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 240px;
+        }
+        .np-search-icon {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        .np-search-input {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+        .np-search-input::placeholder { color: var(--text-muted); }
+        .np-search-submit {
+            border: none;
+            background: var(--ytu-lacivert);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 9px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        .np-search-clear {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.84rem;
+            padding: 8px 10px;
+            border-radius: 10px;
+        }
+        .np-search-clear:hover {
+            color: var(--ytu-lacivert);
+            background: rgba(var(--ytu-lacivert-rgb),.08);
         }
         .np-filters { display: flex; gap: 8px; flex-wrap: wrap; }
         .np-filter-btn {
@@ -365,6 +426,12 @@
             .np-form-grid { grid-template-columns: 1fr; }
             .np-drawer { width: 90%; }
             .btn-upload-hero { display: none !important; }
+            .np-toolbar-row { flex-direction: column; align-items: stretch; }
+            .np-search-form { width: 100%; }
+            .np-search-input-wrap { min-width: 0; width: 100%; }
+            .np-search-submit { width: 100%; }
+            .np-filters { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+            .np-sort-select { width: 100%; }
 
             /* ---- mobil üst bar ---- */
             .nm-top-bar {
@@ -543,21 +610,37 @@
     </div>
 
     <div class="np-toolbar">
+        <form class="np-search-form" method="get" action="{{ url_for('main.notes_pool') }}">
+            <input type="hidden" name="dept" value="{{ selected_dept or '' }}">
+            <input type="hidden" name="sort" value="{{ current_sort }}">
+            <div class="np-search-input-wrap">
+                <i class="fas fa-search np-search-icon"></i>
+                <input type="text" name="q" class="np-search-input" placeholder="Ders kodu veya ders adı ile ara" value="{{ search_query or '' }}">
+            </div>
+            <button type="submit" class="np-search-submit">Ara</button>
+            {% if search_query %}
+            <a href="{{ url_for('main.notes_pool', dept=selected_dept or '', sort=current_sort) }}" class="np-search-clear">Temizle</a>
+            {% endif %}
+        </form>
+
+        <div class="np-toolbar-row">
         <div class="np-filters">
-            <a href="/notes"                    class="np-filter-btn {% if not selected_dept %}active{% endif %}">Tümü</a>
-            <a href="/notes?dept=Hazırlık"      class="np-filter-btn {% if selected_dept=='Hazırlık' %}active{% endif %}">🇬🇧 Hazırlık</a>
-            <a href="/notes?dept=Bilgisayar"    class="np-filter-btn {% if selected_dept=='Bilgisayar' %}active{% endif %}">💻 Bilgisayar</a>
-            <a href="/notes?dept=Makine"        class="np-filter-btn {% if selected_dept=='Makine' %}active{% endif %}">⚙️ Makine</a>
-            <a href="/notes?dept=Ortak Dersler" class="np-filter-btn {% if selected_dept=='Ortak Dersler' %}active{% endif %}">📚 Ortak</a>
+            <a href="{{ url_for('main.notes_pool', dept='', sort=current_sort, q=search_query or '') }}" class="np-filter-btn {% if not selected_dept %}active{% endif %}">Tümü</a>
+            <a href="{{ url_for('main.notes_pool', dept='Hazırlık', sort=current_sort, q=search_query or '') }}" class="np-filter-btn {% if selected_dept=='Hazırlık' %}active{% endif %}">🇬🇧 Hazırlık</a>
+            <a href="{{ url_for('main.notes_pool', dept='Bilgisayar', sort=current_sort, q=search_query or '') }}" class="np-filter-btn {% if selected_dept=='Bilgisayar' %}active{% endif %}">💻 Bilgisayar</a>
+            <a href="{{ url_for('main.notes_pool', dept='Makine', sort=current_sort, q=search_query or '') }}" class="np-filter-btn {% if selected_dept=='Makine' %}active{% endif %}">⚙️ Makine</a>
+            <a href="{{ url_for('main.notes_pool', dept='Ortak Dersler', sort=current_sort, q=search_query or '') }}" class="np-filter-btn {% if selected_dept=='Ortak Dersler' %}active{% endif %}">📚 Ortak</a>
         </div>
         <select class="np-sort-select" onchange="location = this.value;">
-            <option value="{{ url_for('main.notes_pool', dept=selected_dept, sort='newest') }}"  {% if current_sort=='newest'  %}selected{% endif %}>🕒 En Yeniler</option>
-            <option value="{{ url_for('main.notes_pool', dept=selected_dept, sort='popular') }}" {% if current_sort=='popular' %}selected{% endif %}>🔥 Popüler</option>
-            <option value="{{ url_for('main.notes_pool', dept=selected_dept, sort='rated') }}"   {% if current_sort=='rated'   %}selected{% endif %}>⭐ Puan</option>
+            <option value="{{ url_for('main.notes_pool', dept=selected_dept or '', sort='newest', q=search_query or '') }}"  {% if current_sort=='newest'  %}selected{% endif %}>🕒 En Yeniler</option>
+            <option value="{{ url_for('main.notes_pool', dept=selected_dept or '', sort='popular', q=search_query or '') }}" {% if current_sort=='popular' %}selected{% endif %}>🔥 Popüler</option>
+            <option value="{{ url_for('main.notes_pool', dept=selected_dept or '', sort='rated', q=search_query or '') }}"   {% if current_sort=='rated'   %}selected{% endif %}>⭐ Puan</option>
         </select>
+        </div>
     </div>
 
     <div>
+        {% if notes %}
         {% for note in notes %}
         {% set ft = note.file_type | lower %}
         <div class="np-item">
@@ -637,13 +720,19 @@
                 </div>
             </div>
         </div>
+        {% endfor %}
         {% else %}
         <div class="np-empty">
             <i class="fas fa-folder-open"></i>
+            {% if search_query %}
+            <h3>Sonuç bulunamadı.</h3>
+            <p>"{{ search_query }}" için ders kodu veya ders adı eşleşmedi.</p>
+            {% else %}
             <h3>Henüz not yok.</h3>
             <p>İlk notu yükleyen sen ol ve +10 puan kazan!</p>
+            {% endif %}
         </div>
-        {% endfor %}
+        {% endif %}
     </div>
 
 </main>

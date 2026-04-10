@@ -652,9 +652,13 @@ def send_message(rid):
 def notes_pool():
     dept_filter = request.args.get('dept')
     sort_by = request.args.get('sort', 'newest')
+    search_query = request.args.get('q', '').strip()
     query = Note.query.filter_by(is_approved=True)
     if dept_filter:
         query = query.filter_by(department=dept_filter)
+    if search_query:
+        like_query = f"%{search_query}%"
+        query = query.filter(or_(Note.title.ilike(like_query), Note.course_code.ilike(like_query)))
     if sort_by == 'popular':
         query = query.order_by(Note.downloads.desc())
     elif sort_by == 'rated':
@@ -662,7 +666,7 @@ def notes_pool():
     else:
         query = query.order_by(Note.date_posted.desc())
     notes = query.all()
-    return render_template('notes.html', notes=notes, selected_dept=dept_filter, current_sort=sort_by)
+    return render_template('notes.html', notes=notes, selected_dept=dept_filter, current_sort=sort_by, search_query=search_query)
 
 @main.route('/rate_note/<int:note_id>/<int:score>', methods=['POST'])
 @login_required
