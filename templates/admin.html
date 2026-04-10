@@ -14,6 +14,385 @@
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body.admin-mode.admin-modal-open {
+            overflow: hidden;
+        }
+
+        .admin-hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .admin-hero-copy {
+            min-width: 0;
+        }
+
+        .admin-hero-copy h1 {
+            font-weight: 900;
+            font-size: clamp(1.7rem, 2.8vw, 2.35rem);
+            color: var(--text-color);
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .admin-hero-copy p {
+            color: var(--text-muted);
+            margin: 8px 0 0;
+            font-size: 0.95rem;
+        }
+
+        .admin-hero-status {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .admin-action-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            padding: 20px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .admin-action-copy {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .admin-action-copy h3 {
+            margin: 0 0 6px;
+            color: var(--text-color);
+            font-size: 1.08rem;
+            font-weight: 900;
+        }
+
+        .admin-action-copy p {
+            margin: 0;
+            color: var(--text-muted);
+            line-height: 1.55;
+            font-size: 0.92rem;
+        }
+
+        .admin-action-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .admin-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.12);
+            color: var(--ytu-lacivert);
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .admin-open-sheet-btn {
+            border: none;
+            cursor: pointer;
+            border-radius: 14px;
+            padding: 12px 18px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #123d75);
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(18, 61, 117, 0.18);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+            white-space: nowrap;
+        }
+
+        .admin-open-sheet-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(18, 61, 117, 0.24);
+        }
+
+        .admin-section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .admin-sheet-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 12000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 22px;
+        }
+
+        .admin-sheet-modal.is-open {
+            display: flex;
+        }
+
+        .admin-sheet-panel {
+            width: min(1320px, 100%);
+            max-height: min(88vh, 900px);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+            animation: adminSheetRise 0.22s ease-out;
+        }
+
+        @keyframes adminSheetRise {
+            from { transform: translateY(24px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .admin-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(var(--ytu-lacivert-rgb), 0.08), rgba(var(--ytu-lacivert-rgb), 0.03));
+        }
+
+        .admin-sheet-title {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: var(--text-color);
+        }
+
+        .admin-sheet-subtitle {
+            margin: 6px 0 0;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.45;
+        }
+
+        .admin-sheet-close {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-light);
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .admin-sheet-close:hover {
+            color: var(--ytu-lacivert);
+        }
+
+        .admin-sheet-body {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            padding: 18px 22px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .admin-sheet-body .admin-table-wrapper {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            max-height: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .admin-sheet-body .admin-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: var(--card-bg);
+        }
+
+        .admin-sheet-body .admin-table-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .admin-sheet-body .admin-table-wrapper::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 999px;
+        }
+
+        .admin-sheet-body .admin-table-wrapper::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .admin-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .admin-system-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .admin-user-table {
+            min-width: 820px;
+        }
+
+        .admin-club-table {
+            min-width: 1040px;
+        }
+
+        .admin-create-user-form {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto !important;
+            gap: 15px !important;
+            align-items: end !important;
+        }
+
+        .admin-create-club-form {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 15px !important;
+        }
+
+        .admin-add-moderator-form {
+            display: flex !important;
+            gap: 10px !important;
+            align-items: center !important;
+            margin-bottom: 30px !important;
+        }
+
+        .admin-admin-form-note {
+            color: var(--text-muted);
+            margin-top: 10px;
+            display: block;
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        #clubEditModal {
+            z-index: 13000;
+        }
+
+        @media (max-width: 900px) {
+            .admin-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 0 14px;
+                margin-top: 72px;
+                gap: 22px;
+            }
+
+            .admin-hero {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .admin-hero-status {
+                justify-content: flex-start;
+            }
+
+            .admin-action-card {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 18px;
+            }
+
+            .admin-open-sheet-btn {
+                width: 100%;
+            }
+
+            .admin-sheet-modal {
+                align-items: flex-end;
+                padding: 0;
+            }
+
+            .admin-sheet-panel {
+                width: 100%;
+                max-height: 92vh;
+                border-radius: 22px 22px 0 0;
+            }
+
+            .admin-system-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .admin-sheet-header,
+            .admin-sheet-body {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .admin-create-user-form,
+            .admin-create-club-form {
+                grid-template-columns: 1fr !important;
+            }
+
+            .admin-add-moderator-form {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+
+            .admin-add-moderator-form input,
+            .admin-add-moderator-form button {
+                width: 100%;
+            }
+
+            .admin-create-user-form button,
+            .admin-create-club-form button {
+                width: 100%;
+            }
+
+            .admin-stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-container {
+                padding: 0 12px;
+            }
+
+            .admin-card {
+                padding: 18px;
+            }
+
+            .admin-sheet-title {
+                font-size: 1rem;
+            }
+
+            .admin-sheet-panel {
+                max-height: 94vh;
+            }
+        }
+    </style>
 </head>
 <body class="admin-mode">
 
@@ -27,12 +406,12 @@
 
     <div class="admin-container">
         
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1 style="font-weight: 900; font-size: 2.2rem; color: var(--text-color); margin: 0;">Zabıta Merkezi 👮‍♂️</h1>
+        <div class="admin-hero">
+            <div class="admin-hero-copy">
+                <h1>Zabıta Merkezi 👮‍♂️</h1>
                 <p style="color: var(--text-muted);">YTÜ Portal Yönetim Paneli</p>
             </div>
-            <div style="text-align: right;">
+            <div class="admin-hero-status">
                 <span class="badge bg-green" style="font-size: 1rem; padding: 10px;">🟢 Sistem Aktif</span>
             </div>
         </div>
@@ -287,53 +666,21 @@
             </div>
 
             <h2 class="admin-section-title" style="margin-top: 30px;">👥 Kullanıcı Yönetimi</h2>
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Kullanıcı</th>
-                            <th>Durum</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <img src="/static/{{ user.profile_pic }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                                    <div>
-                                        <b>{{ user.username }}</b><br>
-                                        <small style="color:var(--text-muted);">{{ user.email }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                {% if user.is_banned %}
-                                <span class="badge bg-red" style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 10px;">Yasaklı</span>
-                                {% else %}
-                                <span class="badge bg-green" style="background: #2ecc71; color: white; padding: 5px 10px; border-radius: 10px;">Aktif</span>
-                                {% endif %}
-                            </td>
-                            <td style="display: flex; gap: 5px; flex-wrap: wrap;">
-                                {% if user.is_banned %}
-                                <a href="{{ url_for('admin.admin_ban_user', user_id=user.id, action='unban') }}" class="btn-action" style="background: #2ecc71; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;">Yasağı Kaldır</a>
-                                {% else %}
-                                <a href="{{ url_for('admin.admin_ban_user', user_id=user.id, action='perm') }}" class="btn-action" style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('Kullanıcı kalıcı olarak engellenecek!')">Banla</a>
-                                {% endif %}
-                                <a href="{{ url_for('admin.admin_reset_bio', user_id=user.id) }}" class="btn-action" style="background: #f39c12; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('Bio sıfırlansin mı?')">Bio Sıfırla</a>
-                                <a href="{{ url_for('admin.admin_delete_user_posts', user_id=user.id) }}" class="btn-action" style="background: #34495e; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('Tüm postlar silinsin mi?')">Postları Sil</a>
-                                <a href="{{ url_for('admin.admin_delete_user', user_id=user.id) }}" class="btn-action btn-ban" style="background: #7b0000; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('{{ user.username }} hesabı ve tüm içerikleri kalıcı olarak silinecek! Geri alınamaz!')">🗑️ Hesabı Sil</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="admin-action-card">
+                <div class="admin-action-copy">
+                    <h3>Modal içinde kaydırmalı kullanıcı listesi</h3>
+                    <p>{{ users|length }} kullanıcı için ban, bio sıfırlama, post silme ve hesap silme işlemleri tek panelde toplanır.</p>
+                    <div class="admin-action-meta">
+                        <span class="admin-chip"><i class="fa-solid fa-arrows-up-down"></i> İçeride kaydır</span>
+                        <span class="admin-chip"><i class="fa-solid fa-users"></i> {{ users|length }} kayıt</span>
+                    </div>
+                </div>
+                <button type="button" class="admin-open-sheet-btn" onclick="openAdminModal('userManagementModal')">Kullanıcıları Aç</button>
             </div>
 
             <h2 class="admin-section-title">🛠️ Hızlı Kullanıcı Oluştur</h2>
             <div class="admin-card" style="display: block;">
-                <form action="{{ url_for('admin.admin_create_user') }}" method="POST" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
+                <form action="{{ url_for('admin.admin_create_user') }}" method="POST" class="admin-create-user-form">
                     
                     <div>
                         <label style="font-weight: bold; font-size: 0.8rem; color: var(--text-muted);">E-Mail</label>
@@ -369,12 +716,12 @@
                     </button>
 
                 </form>
-                <small style="color: var(--text-muted); margin-top: 10px; display: block;">* Bu panelden oluşturulan kullanıcılar otomatik olarak <b>Onaylı (Verified)</b> sayılır.</small>
+                <small class="admin-admin-form-note">* Bu panelden oluşturulan kullanıcılar otomatik olarak <b>Onaylı (Verified)</b> sayılır.</small>
             </div>
             
             <h2 class="admin-section-title" style="margin-top: 30px;">🏆 Yeni Kulüp Oluştur</h2>
             <div class="admin-card" style="display:block;">
-                <form action="{{ url_for('admin.admin_create_club') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <form action="{{ url_for('admin.admin_create_club') }}" method="POST" enctype="multipart/form-data" class="admin-create-club-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <div style="grid-column: 1 / -1;">
@@ -448,52 +795,19 @@
         </form>
 
         <h2 class="admin-section-title" style="margin-top: 30px;">🏆 Kulüp Yönetimi</h2>
-        <div class="admin-table-wrapper">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Logo</th>
-                        <th>Kulüp</th>
-                        <th>Başkan</th>
-                        <th>Üye / Oy</th>
-                        <th>İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for club in clubs %}
-                    <tr>
-                        <td><img src="{{ club_logo_src(club.logo_file) }}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--border-color);" onerror="this.src='/static/img/default_club.png'"></td>
-                        <td>
-                            <b>{{ club.name }}</b><br>
-                            <small style="color:var(--text-muted);">{{ club.slug }}</small>
-                        </td>
-                        <td>{{ club.leader.username if club.leader else '—' }}</td>
-                        <td>
-                            <span class="badge" style="background:#1B3A6B;color:#fff;padding:4px 10px;border-radius:8px;">
-                                {{ club.followers|length }} üye &bull; {{ club.votes }} oy
-                            </span>
-                        </td>
-                        <td style="display:flex;gap:5px;flex-wrap:wrap;">
-                            <button class="btn-action btn-view"
-                                    onclick="openClubEdit({{ club.id }}, this)"
-                                    data-name="{{ club.name | e }}"
-                                    data-desc="{{ club.description | e }}"
-                                    data-leader="{{ club.leader.username if club.leader else '' }}">✏️ Düzenle</button>
-                            <a href="{{ url_for('admin.admin_delete_club', club_id=club.id) }}"
-                               class="btn-action btn-ban"
-                               onclick="return confirm('{{ club.name | e }} kulübü kalıcı olarak silinecek!')">🗑️ Sil</a>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted);">Henüz kulüp yok.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="admin-action-card">
+            <div class="admin-action-copy">
+                <h3>Modal içinde kaydırmalı kulüp listesi</h3>
+                <p>{{ clubs|length }} kulüp için düzenleme ve silme işlemleri tek bir panelde toplanır. Uzun liste sayfayı uzatmaz.</p>
+                <div class="admin-action-meta">
+                    <span class="admin-chip"><i class="fa-solid fa-arrows-up-down"></i> İçeride kaydır</span>
+                    <span class="admin-chip"><i class="fa-solid fa-flag"></i> {{ clubs|length }} kayıt</span>
+                </div>
+            </div>
+            <button type="button" class="admin-open-sheet-btn" onclick="openAdminModal('clubManagementModal')">Kulüpleri Aç</button>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="admin-system-grid">
             <div class="admin-card" style="justify-content: center; flex-direction: column;">
                 <span style="font-size: 0.9rem; font-weight: bold; color: var(--text-muted);">CPU Kullanımı</span>
                 <div style="width: 100%; background: #eee; height: 10px; border-radius: 5px; overflow: hidden; margin: 10px 0;">
@@ -512,6 +826,122 @@
 
     </div>
 
+    <div id="userManagementModal" class="admin-sheet-modal" aria-hidden="true" onclick="if (event.target === this) closeAdminModal('userManagementModal')">
+        <div class="admin-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="userManagementTitle">
+            <div class="admin-sheet-header">
+                <div>
+                    <h3 id="userManagementTitle" class="admin-sheet-title">👥 Kullanıcı Yönetimi</h3>
+                    <p class="admin-sheet-subtitle">{{ users|length }} kullanıcı. Ban, bio sıfırlama ve hesap silme işlemleri bu panelde aşağı doğru kaydırılarak yapılır.</p>
+                </div>
+                <button type="button" class="admin-sheet-close" onclick="closeAdminModal('userManagementModal')" aria-label="Kapat">&times;</button>
+            </div>
+            <div class="admin-sheet-body">
+                <div class="admin-table-wrapper admin-sheet-table-wrap">
+                    <table class="admin-table admin-user-table">
+                        <thead>
+                            <tr>
+                                <th>Kullanıcı</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                                        <img src="/static/{{ user.profile_pic }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                                        <div style="min-width: 0;">
+                                            <b>{{ user.username }}</b><br>
+                                            <small style="color:var(--text-muted);">{{ user.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if user.is_banned %}
+                                    <span class="badge bg-red" style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 10px;">Yasaklı</span>
+                                    {% else %}
+                                    <span class="badge bg-green" style="background: #2ecc71; color: white; padding: 5px 10px; border-radius: 10px;">Aktif</span>
+                                    {% endif %}
+                                </td>
+                                <td style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                    {% if user.is_banned %}
+                                    <a href="{{ url_for('admin.admin_ban_user', user_id=user.id, action='unban') }}" class="btn-action" style="background: #2ecc71; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;">Yasağı Kaldır</a>
+                                    {% else %}
+                                    <a href="{{ url_for('admin.admin_ban_user', user_id=user.id, action='perm') }}" class="btn-action" style="background: #e74c3c; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('Kullanıcı kalıcı olarak engellenecek!')">Banla</a>
+                                    {% endif %}
+                                    <a href="{{ url_for('admin.admin_reset_bio', user_id=user.id) }}" class="btn-action" style="background: #f39c12; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('Bio sıfırlansin mı?')">Bio Sıfırla</a>
+                                    <a href="{{ url_for('admin.admin_delete_user_posts', user_id=user.id) }}" class="btn-action" style="background: #34495e; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('Tüm postlar silinsin mi?')">Postları Sil</a>
+                                    <a href="{{ url_for('admin.admin_delete_user', user_id=user.id) }}" class="btn-action btn-ban" style="background: #7b0000; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;" onclick="return confirm('{{ user.username }} hesabı ve tüm içerikleri kalıcı olarak silinecek! Geri alınamaz!')">🗑️ Hesabı Sil</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="clubManagementModal" class="admin-sheet-modal" aria-hidden="true" onclick="if (event.target === this) closeAdminModal('clubManagementModal')">
+        <div class="admin-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="clubManagementTitle">
+            <div class="admin-sheet-header">
+                <div>
+                    <h3 id="clubManagementTitle" class="admin-sheet-title">🏆 Kulüp Yönetimi</h3>
+                    <p class="admin-sheet-subtitle">{{ clubs|length }} kulüp. Liste modal içinde aşağı kaydırılır; düzenleme ve silme işlemleri buradan yapılır.</p>
+                </div>
+                <button type="button" class="admin-sheet-close" onclick="closeAdminModal('clubManagementModal')" aria-label="Kapat">&times;</button>
+            </div>
+            <div class="admin-sheet-body">
+                <div class="admin-table-wrapper admin-sheet-table-wrap">
+                    <table class="admin-table admin-club-table">
+                        <thead>
+                            <tr>
+                                <th>Logo</th>
+                                <th>Kulüp</th>
+                                <th>Başkan</th>
+                                <th>Üye / Oy</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for club in clubs %}
+                            <tr>
+                                <td><img src="{{ club_logo_src(club.logo_file) }}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--border-color);" onerror="this.src='/static/img/default_club.png'"></td>
+                                <td>
+                                    <b>{{ club.name }}</b><br>
+                                    <small style="color:var(--text-muted);">{{ club.slug }}</small>
+                                </td>
+                                <td>{{ club.leader.username if club.leader else '—' }}</td>
+                                <td>
+                                    <span class="badge" style="background:#1B3A6B;color:#fff;padding:4px 10px;border-radius:8px;">
+                                        {{ club.followers|length }} üye &bull; {{ club.votes }} oy
+                                    </span>
+                                </td>
+                                <td style="display:flex;gap:5px;flex-wrap:wrap;">
+                                        <button class="btn-action btn-view"
+                                            onclick="openClubEdit(this)"
+                                            data-club-id="{{ club.id }}"
+                                            data-name="{{ club.name | e }}"
+                                            data-desc="{{ club.description | e }}"
+                                            data-leader="{{ club.leader.username if club.leader else '' }}">✏️ Düzenle</button>
+                                    <a href="{{ url_for('admin.admin_delete_club', club_id=club.id) }}"
+                                       class="btn-action btn-ban"
+                                       onclick="return confirm('{{ club.name | e }} kulübü kalıcı olarak silinecek!')">🗑️ Sil</a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted);">Henüz kulüp yok.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="admin-footer">
         Created By Ebu Ubeyde &copy; 2026
     </div>
@@ -519,7 +949,7 @@
     <script src="/static/script.js" defer></script>
 
     <!-- Kulüp Düzenle Modal -->
-    <div id="clubEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;">
+    <div id="clubEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:13000;align-items:center;justify-content:center;">
         <div style="background:var(--card-bg);border-radius:16px;width:90%;max-width:480px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);">
             <div style="background:linear-gradient(135deg,#1B3A6B,#1a4f8c);padding:20px 24px;display:flex;justify-content:space-between;align-items:center;">
                 <h3 style="margin:0;color:#fff;font-weight:800;">✏️ Kulüp Düzenle</h3>
@@ -534,7 +964,7 @@
                                style="width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--border-color);background:var(--bg-color);color:var(--text-color);font-size:.9rem;box-sizing:border-box;">
                     </div>
                     <div style="margin-bottom:12px;">
-                        <label style="font-size:.82rem;font-weight:700;display:block;margin-bottom:5px);">Açıklama</label>
+                        <label style="font-size:.82rem;font-weight:700;display:block;margin-bottom:5px;">Açıklama</label>
                         <textarea id="ceClubDesc" name="description" rows="3"
                                   style="width:100%;padding:9px 12px;border-radius:9px;border:1px solid var(--border-color);background:var(--bg-color);color:var(--text-color);font-size:.9rem;box-sizing:border-box;resize:vertical;"></textarea>
                     </div>
@@ -558,18 +988,58 @@
     </div>
 
     <script>
-        function openClubEdit(id, btn) {
+        function syncAdminModalLock() {
+            const listModalOpen = document.querySelector('.admin-sheet-modal.is-open');
+            const clubEditModal = document.getElementById('clubEditModal');
+            const clubEditOpen = clubEditModal && clubEditModal.style.display === 'flex';
+            document.body.classList.toggle('admin-modal-open', Boolean(listModalOpen || clubEditOpen));
+        }
+
+        function openAdminModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+            syncAdminModalLock();
+        }
+
+        function closeAdminModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+            syncAdminModalLock();
+        }
+
+        function openClubEdit(btn) {
+            const id = btn.dataset.clubId;
             document.getElementById('ceClubName').value   = btn.dataset.name;
             document.getElementById('ceClubDesc').value   = btn.dataset.desc;
             document.getElementById('ceClubLeader').value = btn.dataset.leader;
             document.getElementById('clubEditForm').action = '/admin/edit_club/' + id;
             document.getElementById('clubEditModal').style.display = 'flex';
+            syncAdminModalLock();
         }
         function closeClubEdit() {
             document.getElementById('clubEditModal').style.display = 'none';
+            syncAdminModalLock();
         }
         document.getElementById('clubEditModal').addEventListener('click', function(e) {
             if (e.target === this) closeClubEdit();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key !== 'Escape') return;
+
+            const openListModal = document.querySelector('.admin-sheet-modal.is-open');
+            if (openListModal) {
+                closeAdminModal(openListModal.id);
+                return;
+            }
+
+            if (document.getElementById('clubEditModal').style.display === 'flex') {
+                closeClubEdit();
+            }
         });
     </script>
 
