@@ -1,16 +1,26 @@
 from datetime import datetime, timedelta
 import html
+import json
 import random
 from urllib.parse import urlparse
+from urllib import error as urllib_error
+from urllib import request as urllib_request
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Content, Email, Mail, ReplyTo, To
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from extensions import db, socketio
 from models import User
+
+try:
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Content, Email, Mail, ReplyTo, To
+    _SENDGRID_SDK_AVAILABLE = True
+except ImportError:
+    SendGridAPIClient = None
+    Content = Email = Mail = ReplyTo = To = None
+    _SENDGRID_SDK_AVAILABLE = False
 
 auth = Blueprint('auth', __name__)
 
@@ -133,6 +143,23 @@ def _build_sendgrid_message(subject, recipient_email, text_body, html_body=None)
     return message
 
 
+def _build_sendgrid_payload(subject, recipient_email, text_body, html_body=None):
+    sender_email, sender_name = _sendgrid_sender_details()
+    reply_to_email, reply_to_name = _sendgrid_reply_to_details()
+    payload = {
+        'from': {'email': sender_email, 'name': sender_name},
+        'personalizations': [{'to': [{'email': recipient_email}]}],
+        'subject': subject,
+        'content': [
+            {'type': 'text/plain', 'value': text_body},
+            {'type': 'text/html', 'value': html_body or text_body.replace('\n', '<br>')},
+        ],
+    }
+    if reply_to_email:
+        payload['reply_to'] = {'email': reply_to_email, 'name': reply_to_name}
+    return payload
+
+
 def _send_sendgrid_job(app, recipient_email, subject, text_body, html_body=None):
     with app.app_context():
         try:
@@ -145,16 +172,39 @@ def _send_sendgrid_job(app, recipient_email, subject, text_body, html_body=None)
                 print(f"SendGrid gönderim hatası ({recipient_email}): SENDGRID_API_KEY eksik.")
                 return False
 
-            message = _build_sendgrid_message(subject, recipient_email, text_body, html_body)
-            response = SendGridAPIClient(api_key).send(message)
-            if response.status_code in (200, 202):
-                return True
+            if _SENDGRID_SDK_AVAILABLE:
+                message = _build_sendgrid_message(subject, recipient_email, text_body, html_body)
+                response = SendGridAPIClient(api_key).send(message)
+                if response.status_code in (200, 202):
+                    return True
 
-            response_body = getattr(response, 'body', b'')
-            if isinstance(response_body, bytes):
-                response_body = response_body.decode('utf-8', errors='ignore')
-            print(f"SendGrid API Hatası ({response.status_code}) ({recipient_email}): {response_body}")
-            return False
+                response_body = getattr(response, 'body', b'')
+                if isinstance(response_body, bytes):
+                    response_body = response_body.decode('utf-8', errors='ignore')
+                print(f"SendGrid API Hatası ({response.status_code}) ({recipient_email}): {response_body}")
+                return False
+
+            payload = _build_sendgrid_payload(subject, recipient_email, text_body, html_body)
+            raw_request = urllib_request.Request(
+                'https://api.sendgrid.com/v3/mail/send',
+                data=json.dumps(payload).encode('utf-8'),
+                headers={
+                    'Authorization': f'Bearer {api_key}',
+                    'Content-Type': 'application/json',
+                },
+                method='POST',
+            )
+            try:
+                with urllib_request.urlopen(raw_request, timeout=15) as response:
+                    if response.status in (200, 202):
+                        return True
+                    response_body = response.read().decode('utf-8', errors='ignore')
+                    print(f"SendGrid API Hatası ({response.status}) ({recipient_email}): {response_body}")
+                    return False
+            except urllib_error.HTTPError as exc:
+                response_body = exc.read().decode('utf-8', errors='ignore')
+                print(f"SendGrid API Hatası ({exc.code}) ({recipient_email}): {response_body}")
+                return False
         except Exception as exc:
             print(f"SendGrid mail gönderim hatası ({recipient_email}): {exc}")
             return False
