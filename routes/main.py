@@ -1053,18 +1053,7 @@ def privacy():
 
 @main.route('/sitemap.xml')
 def sitemap():
-    lastmod = datetime.utcnow().date().isoformat()
-    urls = [
-        (url_for('auth.login', _external=True), 'weekly', '0.9'),
-        (url_for('auth.register', _external=True), 'weekly', '0.9'),
-        (url_for('auth.forgot_password', _external=True), 'monthly', '0.6'),
-        (url_for('main.terms', _external=True), 'yearly', '0.3'),
-        (url_for('main.privacy', _external=True), 'yearly', '0.3'),
-    ]
-    return current_app.response_class(
-        render_template('sitemap.xml', urls=urls, lastmod=lastmod),
-        mimetype='application/xml',
-    )
+    return send_from_directory(current_app.root_path, 'sitemap.xml', mimetype='application/xml')
 
 
 @main.route('/robots.txt')
