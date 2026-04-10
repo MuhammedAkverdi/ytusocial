@@ -1073,7 +1073,7 @@ function previewImage(input) {
             previewVideo.playsInline = true;
             previewVideo.setAttribute('playsinline', '');
             previewVideo.setAttribute('webkit-playsinline', '');
-            previewVideo.muted = true;
+            previewVideo.muted = false;
             previewVideo.preload = 'metadata';
             previewVideo.src = URL.createObjectURL(file);
             previewVideo.load();
@@ -1268,7 +1268,7 @@ function createPostHTML(data) {
     if (data.image_file) {
         const ext = data.image_file.split('.').pop().toLowerCase();
         if (['mp4', 'mov', 'avi', 'webm'].includes(ext)) {
-            mediaHTML = `<div class="post-image-container"><video controls playsinline webkit-playsinline muted preload="metadata" class="post-image" style="background:black;" onclick="event.stopPropagation()"><source src="/static/post_images/${data.image_file}" type="video/mp4"></video></div>`;
+            mediaHTML = `<div class="post-image-container"><video controls playsinline webkit-playsinline preload="none" data-src="/static/post_images/${data.image_file}" class="post-image" style="background:black;" onclick="event.stopPropagation()">Tarayıcınız video oynatmayı desteklemiyor.</video></div>`;
         } else if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
             mediaHTML = `<div class="post-image-container"><img src="/static/post_images/${data.image_file}" class="post-image" onclick="openLightbox(this.src)"></div>`;
         } else {
@@ -2043,6 +2043,68 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+});
+
+// Anasayfa video kartları görünüm dışına çıkınca otomatik durur.
+document.addEventListener('DOMContentLoaded', function () {
+    const feedContainer = document.getElementById('feedContainer');
+    if (!feedContainer || document.body.classList.contains('reels-mode')) return;
+
+    function prepareFeedVideo(video) {
+        if (!video) return;
+        video.playsInline = true;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+        video.preload = 'metadata';
+        video.muted = false;
+        if (!video.src) {
+            const source = video.dataset.src;
+            if (source) {
+                video.src = source;
+                video.load();
+            }
+        }
+    }
+
+    function pauseFeedCardVideo(card) {
+        if (!card) return;
+        const video = card.querySelector('video.post-image');
+        if (video && !video.paused) {
+            video.pause();
+        }
+    }
+
+    const feedObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            const card = entry.target;
+            const video = card.querySelector('video.post-image');
+            if (!video) return;
+
+            prepareFeedVideo(video);
+
+            if (!entry.isIntersecting) {
+                pauseFeedCardVideo(card);
+            }
+        });
+    }, { threshold: 0.35, rootMargin: '150px 0px' });
+
+    function observeFeedCards() {
+        feedContainer.querySelectorAll('.post-card').forEach(function (card) {
+            if (card.dataset.homeVideoObserved === '1') return;
+            const video = card.querySelector('video.post-image');
+            if (!video) return;
+            card.dataset.homeVideoObserved = '1';
+            feedObserver.observe(card);
+        });
+    }
+
+    observeFeedCards();
+
+    const feedMutationObserver = new MutationObserver(function () {
+        observeFeedCards();
+    });
+
+    feedMutationObserver.observe(feedContainer, { childList: true, subtree: true });
 });
 
 // ==========================================

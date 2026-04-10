@@ -251,7 +251,7 @@
     <div class="reels-container">
         {% for post in posts %}
         <div class="reel-item">
-            <video src="/static/post_images/{{ post.image_file }}" class="reel-video" loop playsinline webkit-playsinline muted preload="metadata" onclick="event.stopPropagation()"></video>
+            <video data-src="/static/post_images/{{ post.image_file }}" class="reel-video" loop playsinline webkit-playsinline muted preload="none" onclick="event.stopPropagation()"></video>
 
             <!-- Dokunma katmanı: tek tık oynat/durdur, çift tık beğeni -->
             <div class="reel-tap-overlay" data-post-id="{{ post.id }}"></div>
@@ -333,6 +333,20 @@
         var _reelSoundMuted = true;
         var _reelSoundUnlocked = false;
 
+        function ensureReelVideoSource(video) {
+            if (!video) return;
+            video.playsInline = true;
+            video.setAttribute('playsinline', '');
+            video.setAttribute('webkit-playsinline', '');
+            if (!video.src) {
+                var source = video.dataset.src;
+                if (source) {
+                    video.src = source;
+                    video.load();
+                }
+            }
+        }
+
         function _unlockReelSound() {
             if (_reelSoundUnlocked) return;
             _reelSoundUnlocked = true;
@@ -372,9 +386,7 @@
 
             function playVideo(video) {
                 manuallyPaused.set(video, false);
-                video.playsInline = true;
-                video.setAttribute('playsinline', '');
-                video.setAttribute('webkit-playsinline', '');
+                ensureReelVideoSource(video);
                 video.preload = 'metadata';
                 video.muted = _reelSoundMuted; // ses durumunu uygula
                 var p = video.play();
@@ -402,6 +414,7 @@
             });
 
             // İlk video hemen oynat
+            ensureReelVideoSource(videos[0]);
             playVideo(videos[0]);
 
             // IntersectionObserver: sadece görünen video oynar
@@ -409,6 +422,7 @@
                 entries.forEach(function (entry) {
                     var video = entry.target;
                     if (entry.isIntersecting) {
+                        ensureReelVideoSource(video);
                         video.preload = 'metadata';
                         if (!manuallyPaused.get(video)) {
                             playVideo(video);
@@ -417,7 +431,13 @@
                         var cur = video.closest('.reel-item');
                         for (var i = 0; i < 2; i++) {
                             cur = cur && cur.nextElementSibling;
-                            if (cur) { var nv = cur.querySelector('.reel-video'); if (nv) nv.preload = 'metadata'; }
+                            if (cur) {
+                                var nv = cur.querySelector('.reel-video');
+                                if (nv) {
+                                    ensureReelVideoSource(nv);
+                                    nv.preload = 'metadata';
+                                }
+                            }
                         }
                     } else {
                         manuallyPaused.set(video, false);
@@ -470,6 +490,7 @@
 
             // Tap overlay: tek tık = oynat/durdur, çift tık = beğen
             var lastTap   = {};
+            var lastTouchEndAt = {};
             var tapTimer  = {};
             var touchStartPos = {};
 
@@ -491,6 +512,7 @@
 
                     e.preventDefault();
                     e.stopPropagation();
+                    lastTouchEndAt[postId] = Date.now();
                     _unlockReelSound();
 
                     var now  = Date.now();
@@ -526,6 +548,7 @@
                     var postId = this.dataset.postId;
                     var self   = this;
                     var now    = Date.now();
+                    if (lastTouchEndAt[postId] && now - lastTouchEndAt[postId] < 700) return;
                     var prev   = lastTap[postId] || 0;
                     if (now - prev < 500 && touchStartPos[postId]) return;
                     lastTap[postId] = now;
