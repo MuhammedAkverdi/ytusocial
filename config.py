@@ -55,18 +55,12 @@ class Config:
     MAX_CONTENT_LENGTH = 100 * 1024 * 1024 
     WTF_CSRF_CHECK_DEFAULT = False
 
-    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
-    MAIL_USE_TLS = _env_bool('MAIL_USE_TLS', True)
-    MAIL_USE_SSL = _env_bool('MAIL_USE_SSL', False)
-    MAIL_TIMEOUT = int(os.environ.get('MAIL_TIMEOUT', '10'))
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'portalytu@gmail.com')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
-    MAIL_DEFAULT_SENDER_NAME = os.environ.get('MAIL_DEFAULT_SENDER_NAME', 'YTU Social')
-    MAIL_DEFAULT_SENDER = os.environ.get(
-        'MAIL_DEFAULT_SENDER',
-        f"{MAIL_DEFAULT_SENDER_NAME} <{MAIL_USERNAME}>" if MAIL_USERNAME else '',
-    )
+    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
+    SENDGRID_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL', 'portalytu@gmail.com')
+    SENDGRID_FROM_NAME = os.environ.get('SENDGRID_FROM_NAME', 'YTU Social')
+    SENDGRID_REPLY_TO_EMAIL = os.environ.get('SENDGRID_REPLY_TO_EMAIL', SENDGRID_FROM_EMAIL)
+    SENDGRID_REPLY_TO_NAME = os.environ.get('SENDGRID_REPLY_TO_NAME', SENDGRID_FROM_NAME)
+    SENDGRID_SANDBOX_MODE = _env_bool('SENDGRID_SANDBOX_MODE', False)
 
     UPLOAD_FOLDER_NOTES = 'static/note_files'
     AUDIO_UPLOAD_FOLDER = os.path.join('static', 'audio_files')

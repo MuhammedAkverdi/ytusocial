@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta
+import html
 import random
-from email.utils import formataddr
 from urllib.parse import urlparse
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
-from flask_mail import Message as MailMessage
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Content, Email, Mail, ReplyTo, To
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from extensions import db, mail, socketio
+from extensions import db, socketio
 from models import User
 
 auth = Blueprint('auth', __name__)
@@ -50,53 +51,133 @@ def _render_verify(email, next_url=None):
     return render_template('verify.html', email=email, next_url=next_url)
 
 
-def _mail_sender():
-    sender_email = (current_app.config.get('MAIL_USERNAME') or '').strip()
-    sender_name = (current_app.config.get('MAIL_DEFAULT_SENDER_NAME') or '').strip() or 'YTU Social'
+def _sendgrid_api_key():
+    return (current_app.config.get('SENDGRID_API_KEY') or '').strip()
+
+
+def _sendgrid_sender_details():
+    sender_email = (current_app.config.get('SENDGRID_FROM_EMAIL') or '').strip()
+    sender_name = (current_app.config.get('SENDGRID_FROM_NAME') or '').strip() or 'YTU Social'
     if not sender_email:
-        raise RuntimeError('MAIL_USERNAME is not configured.')
-    return formataddr((sender_name, sender_email))
+        raise RuntimeError('SENDGRID_FROM_EMAIL is not configured.')
+    return sender_email, sender_name
 
 
-def _send_mail_job(app, recipient_email, subject, body, html_body=None):
+def _sendgrid_reply_to_details():
+    reply_to_email = (current_app.config.get('SENDGRID_REPLY_TO_EMAIL') or '').strip()
+    reply_to_name = (current_app.config.get('SENDGRID_REPLY_TO_NAME') or '').strip()
+    if not reply_to_name:
+        reply_to_name = (current_app.config.get('SENDGRID_FROM_NAME') or '').strip() or 'YTU Social'
+    return reply_to_email, reply_to_name
+
+
+def _build_otp_email_payload(subject, intro_text, otp):
+    text_body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
+    escaped_subject = html.escape(subject)
+    escaped_intro = html.escape(intro_text)
+    html_body = f'''<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0;padding:0;background:#eef4fb;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef4fb;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 18px 50px rgba(15,45,82,.12);">
+          <tr>
+            <td style="padding:32px 40px;background:linear-gradient(135deg,#0f2d52,#1d4f91);color:#fff;">
+              <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.75;">YTU Social</div>
+              <div style="margin-top:10px;font-size:30px;line-height:1.2;font-weight:700;">{escaped_subject}</div>
+              <div style="margin-top:14px;font-size:15px;line-height:1.7;opacity:.94;">{escaped_intro}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px;">
+              <div style="font-size:15px;line-height:1.8;color:#29415f;margin-bottom:18px;">Aşağıdaki doğrulama kodunu uygulamaya gir:</div>
+              <div style="text-align:center;padding:18px 16px;border:1px dashed #b7c7da;border-radius:18px;background:#f8fbff;color:#0f2d52;font-size:42px;letter-spacing:.28em;font-weight:800;">{otp}</div>
+              <div style="margin-top:20px;font-size:14px;line-height:1.8;color:#5b6f86;">Bu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir. Güvenliğin için kimseyle paylaşma.</div>
+              <div style="margin-top:12px;font-size:13px;line-height:1.7;color:#7f8da3;">Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin.</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 40px 28px;">
+              <div style="height:1px;background:#e4ebf3;"></div>
+              <div style="margin-top:16px;font-size:12px;line-height:1.6;color:#9aa7b8;">YTU Social transactional mail</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>'''
+    return text_body, html_body
+
+
+def _build_sendgrid_message(subject, recipient_email, text_body, html_body=None):
+    sender_email, sender_name = _sendgrid_sender_details()
+    message = Mail(
+        from_email=Email(sender_email, sender_name),
+        to_emails=To(recipient_email),
+        subject=subject,
+        plain_text_content=Content('text/plain', text_body),
+        html_content=Content('text/html', html_body or text_body.replace('\n', '<br>')),
+    )
+
+    reply_to_email, reply_to_name = _sendgrid_reply_to_details()
+    if reply_to_email:
+        message.reply_to = ReplyTo(reply_to_email, reply_to_name)
+
+    return message
+
+
+def _send_sendgrid_job(app, recipient_email, subject, text_body, html_body=None):
     with app.app_context():
         try:
-            if not app.config.get('MAIL_USERNAME') or not app.config.get('MAIL_PASSWORD'):
-                print(f"Mail gönderim hatası ({recipient_email}): MAIL_USERNAME veya MAIL_PASSWORD eksik.")
+            if app.config.get('SENDGRID_SANDBOX_MODE'):
+                print(f"SendGrid sandbox modu açık ({recipient_email}); gerçek gönderim atlandı.")
+                return True
+
+            api_key = (app.config.get('SENDGRID_API_KEY') or '').strip()
+            if not api_key:
+                print(f"SendGrid gönderim hatası ({recipient_email}): SENDGRID_API_KEY eksik.")
                 return False
 
-            message = MailMessage(
-                subject=subject,
-                recipients=[recipient_email],
-                body=body,
-                html=html_body,
-                sender=app.config.get('MAIL_DEFAULT_SENDER') or _mail_sender(),
-            )
-            mail.send(message)
-            return True
+            message = _build_sendgrid_message(subject, recipient_email, text_body, html_body)
+            response = SendGridAPIClient(api_key).send(message)
+            if response.status_code in (200, 202):
+                return True
+
+            response_body = getattr(response, 'body', b'')
+            if isinstance(response_body, bytes):
+                response_body = response_body.decode('utf-8', errors='ignore')
+            print(f"SendGrid API Hatası ({response.status_code}) ({recipient_email}): {response_body}")
+            return False
         except Exception as exc:
-            print(f"Mail gönderim hatası ({recipient_email}): {exc}")
+            print(f"SendGrid mail gönderim hatası ({recipient_email}): {exc}")
             return False
 
 
-def _queue_mail(subject, email, body, html_body=None):
+def _queue_sendgrid_email(subject, email, text_body, html_body=None):
     app = current_app._get_current_object()
-    if not app.config.get('MAIL_USERNAME') or not app.config.get('MAIL_PASSWORD'):
-        print(f"Mail gönderim hatası ({email}): MAIL_USERNAME veya MAIL_PASSWORD eksik.")
+    api_key = (app.config.get('SENDGRID_API_KEY') or '').strip()
+    if not api_key:
+        print(f"SendGrid gönderim hatası ({email}): SENDGRID_API_KEY eksik.")
         return False
 
     try:
-        socketio.start_background_task(_send_mail_job, app, email, subject, body, html_body)
+        socketio.start_background_task(_send_sendgrid_job, app, email, subject, text_body, html_body)
         return True
     except Exception as exc:
-        print(f"Mail gönderim hatası ({email}): arka plan görevi başlatılamadı: {exc}")
-        return _send_mail_job(app, email, subject, body, html_body)
+        print(f"SendGrid gönderim hatası ({email}): arka plan görevi başlatılamadı: {exc}")
+        return _send_sendgrid_job(app, email, subject, text_body, html_body)
 
 
 def _queue_otp_email(subject, email, intro_text, otp):
-    body = f'{intro_text}\n\nKodun: {otp}\nBu kod {OTP_VALIDITY_SECONDS} saniye geçerlidir.'
-    html_body = body.replace('\n', '<br>')
-    return _queue_mail(subject, email, body, html_body)
+    text_body, html_body = _build_otp_email_payload(subject, intro_text, otp)
+    return _queue_sendgrid_email(subject, email, text_body, html_body)
 
 
 def _verify_redirect(email, next_url=None):

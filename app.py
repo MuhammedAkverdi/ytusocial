@@ -1,7 +1,7 @@
 from flask import Flask, g, redirect, url_for, flash, request
 import os
 from flask_login import current_user, logout_user
-from extensions import db, login_manager, mail, socketio, csrf, migrate
+from extensions import db, login_manager, socketio, csrf, migrate
 from config import Config
 from models import User, Message, Notification
 from routes.auth import auth as auth_blueprint
@@ -27,7 +27,6 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    mail.init_app(app)
     socketio.init_app(app)
     csrf.init_app(app)
 
