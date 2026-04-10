@@ -24,7 +24,10 @@ def _load_important_env():
                 key, value = line.split('=', 1)
                 key = key.strip()
                 value = value.strip()
-                if key and key not in os.environ:
+                if not key or not value:
+                    continue
+                existing_value = (os.environ.get(key) or '').strip()
+                if not existing_value:
                     os.environ[key] = value
 
 
