@@ -46,10 +46,34 @@ def moderator_panel():
     pending_notes = Note.query.filter_by(is_approved=False).order_by(Note.date_posted.desc()).all()
     reported_notes = Note.query.filter(Note.report_count > 0, Note.is_approved == True).order_by(Note.report_count.desc()).all()
     reported_posts = Post.query.filter(Post.report_count > 0).order_by(Post.report_count.desc()).all()
+    moderator_tasks = [
+        {
+            'anchor': 'pending-notes',
+            'title': 'Bekleyen notları incele',
+            'description': 'Onay bekleyen notları tek tek kontrol et. Uygun olanları onayla, uygun olmayanları reddet.',
+            'count': len(pending_notes),
+            'icon': 'fa-clipboard-check',
+        },
+        {
+            'anchor': 'reported-notes',
+            'title': 'Bildirilen notları değerlendir',
+            'description': 'Şikayet edilen notları gözden geçir, içerik kurallarına uymuyorsa sil.',
+            'count': len(reported_notes),
+            'icon': 'fa-triangle-exclamation',
+        },
+        {
+            'anchor': 'reported-posts',
+            'title': 'Bildirilen gönderileri temizle',
+            'description': 'Şikayet edilen gönderileri incele. Gerekirse kaldır, gerekirse kullanıcıyı işaretle.',
+            'count': len(reported_posts),
+            'icon': 'fa-bullhorn',
+        },
+    ]
     return render_template('moderator.html',
                            pending_notes=pending_notes,
                            reported_notes=reported_notes,
-                           reported_posts=reported_posts)
+                           reported_posts=reported_posts,
+                           moderator_tasks=moderator_tasks)
 
 
 @admin.route('/admin/approve_note/<int:note_id>')

@@ -12,8 +12,299 @@
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .moderator-hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .moderator-hero-copy h1 {
+            font-weight: 900;
+            font-size: clamp(1.7rem, 2.8vw, 2.3rem);
+            color: var(--text-color);
+            margin: 0;
+            line-height: 1.15;
+        }
+
+        .moderator-hero-copy p {
+            color: var(--text-muted);
+            margin: 8px 0 0;
+            line-height: 1.5;
+        }
+
+        .moderator-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(46, 204, 113, 0.12);
+            color: #27ae60;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .moderator-scope-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 18px;
+        }
+
+        .moderator-scope-card h3 {
+            margin: 0 0 8px;
+            color: var(--text-color);
+            font-size: 1.05rem;
+            font-weight: 900;
+        }
+
+        .moderator-scope-card p {
+            margin: 0;
+            color: var(--text-muted);
+            line-height: 1.55;
+            font-size: 0.92rem;
+        }
+
+        .moderator-task-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 26px;
+        }
+
+        .moderator-task-card {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+            min-height: 170px;
+        }
+
+        .moderator-task-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(var(--ytu-lacivert-rgb), 0.35);
+            box-shadow: 0 18px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .moderator-task-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .moderator-task-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            color: var(--ytu-lacivert);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .moderator-task-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 38px;
+            height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(39, 174, 96, 0.12);
+            color: #27ae60;
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+
+        .moderator-task-body {
+            flex: 1;
+        }
+
+        .moderator-task-body h4 {
+            margin: 0 0 6px;
+            color: var(--text-color);
+            font-size: 1rem;
+            font-weight: 900;
+            line-height: 1.35;
+        }
+
+        .moderator-task-body p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.55;
+        }
+
+        .moderator-task-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--ytu-lacivert);
+            margin-top: auto;
+        }
+
+        .moderator-section {
+            margin-top: 26px;
+            scroll-margin-top: 90px;
+        }
+
+        .moderator-section .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .moderator-section .admin-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .moderator-mobile-topbar,
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                display: none !important;
+            }
+
+            body {
+                padding-top: 58px;
+                padding-bottom: 66px;
+            }
+
+            .admin-container {
+                padding-top: 10px;
+            }
+
+            .moderator-mobile-topbar {
+                display: flex !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 58px;
+                background: var(--card-bg);
+                border-bottom: 1px solid var(--border-color);
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 14px;
+                z-index: 5000;
+                box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+            }
+
+            .moderator-mobile-topbar-title {
+                font-size: 1rem;
+                font-weight: 900;
+                color: var(--text-color);
+            }
+
+            .moderator-mobile-topbar-back,
+            .moderator-mobile-topbar-spacer {
+                width: 36px;
+                height: 36px;
+            }
+
+            .moderator-task-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .moderator-task-card {
+                min-height: auto;
+            }
+
+            .moderator-hero {
+                margin-bottom: 18px;
+            }
+
+            .mobile-bottom-nav {
+                display: flex !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 56px;
+                background: var(--card-bg);
+                border-top: 1px solid var(--border-color);
+                justify-content: space-around;
+                align-items: center;
+                z-index: 5000;
+                padding: 0 4px;
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+                box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.06);
+            }
+
+            .mobile-bottom-nav .nav-item {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.25rem;
+                padding: 8px 0;
+                color: var(--text-muted);
+                text-decoration: none;
+                position: relative;
+            }
+
+            .mobile-bottom-nav .nav-item.active {
+                color: var(--ytu-lacivert);
+            }
+
+            .mob-nav-badge {
+                position: absolute;
+                top: 4px;
+                right: calc(50% - 18px);
+                background: #ff4757;
+                color: #fff;
+                font-size: 0.55rem;
+                padding: 1px 5px;
+                border-radius: 10px;
+                font-weight: 700;
+                min-width: 16px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .moderator-scope-card,
+            .moderator-task-card {
+                border-radius: 16px;
+                padding: 16px;
+            }
+        }
+    </style>
 </head>
 <body class="admin-mode">
+    <div class="moderator-mobile-topbar">
+        <button type="button" class="moderator-mobile-topbar-back" onclick="history.back()" aria-label="Geri dön">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="moderator-mobile-topbar-title">Moderatör Paneli</div>
+        <div class="moderator-mobile-topbar-spacer"></div>
+    </div>
 
     <a href="/" class="admin-back-btn">
         <i class="fa-solid fa-arrow-left"></i> Ana Sayfaya Dön
@@ -23,18 +314,41 @@
 
     <div class="admin-container">
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-            <div>
-                <h1 style="font-weight:900; font-size:2.2rem; color:var(--text-color); margin:0;">Moderatör Paneli 🛡️</h1>
-                <p style="color:var(--text-muted);">Not havuzu inceleme & içerik yönetimi</p>
+        <div class="moderator-hero">
+            <div class="moderator-hero-copy">
+                <h1>Moderatör Paneli 🛡️</h1>
+                <p>Görevin içerik denetimi. Kullanıcı ve kulüp işlemleri admin'e aittir; burada not ve gönderi akışını yönetirsin.</p>
             </div>
-            <span class="badge bg-green" style="font-size:1rem; padding:10px;">
+            <span class="moderator-hero-badge">
                 🟢 {{ pending_notes|length }} Bekleyen Not
             </span>
         </div>
 
+        <div class="moderator-scope-card">
+            <h3>Görev Dağılımı</h3>
+            <p>Bu panelde sana üç ana görev atanır: bekleyen notları onaylamak, bildirilen notları temizlemek ve bildirilen gönderileri denetlemek. Her kart ilgili inceleme bölümüne götürür.</p>
+        </div>
+
+        <div class="moderator-task-grid">
+            {% for task in moderator_tasks %}
+            <a href="#{{ task.anchor }}" class="moderator-task-card">
+                <div class="moderator-task-top">
+                    <div class="moderator-task-icon"><i class="fa-solid {{ task.icon }}"></i></div>
+                    <div class="moderator-task-count">{{ task.count }}</div>
+                </div>
+                <div class="moderator-task-body">
+                    <h4>{{ task.title }}</h4>
+                    <p>{{ task.description }}</p>
+                </div>
+                <div class="moderator-task-action">
+                    Göreve git <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
         <!-- ========== BEKLEYen NOTLAR ========== -->
-        <div class="admin-section">
+        <div class="admin-section moderator-section" id="pending-notes">
             <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                 <h2 class="admin-section-title" style="margin:0;">📋 Onay Bekleyen Notlar</h2>
                 <span class="badge" style="background:#f39c12;color:#fff;padding:6px 14px;border-radius:10px;font-weight:700;">
@@ -114,8 +428,8 @@
 
         <!-- ========== BİLDİRİLEN NOTLAR ========== -->
         {% if reported_notes %}
-        <div class="admin-section" style="margin-top:30px;">
-            <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <div class="admin-section moderator-section" id="reported-notes">
+            <div class="section-header">
                 <h2 class="admin-section-title" style="margin:0;">🚩 Bildirilen Notlar</h2>
                 <span class="badge bg-red">{{ reported_notes|length }} bildirim</span>
             </div>
@@ -153,8 +467,8 @@
 
         <!-- ========== BİLDİRİLEN GÖNDERILER ========== -->
         {% if reported_posts %}
-        <div class="admin-section" style="margin-top:30px;">
-            <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <div class="admin-section moderator-section" id="reported-posts">
+            <div class="section-header">
                 <h2 class="admin-section-title" style="margin:0;">🚨 Bildirilen Gönderiler</h2>
                 <span class="badge bg-red">{{ reported_posts|length }} bildirim</span>
             </div>
@@ -207,6 +521,24 @@
     </div>
 
     <div class="admin-footer">Moderatör Paneli &mdash; YTU Social &copy; 2026</div>
+
+    <div class="mobile-bottom-nav">
+        <a href="/" class="nav-item {{ 'active' if request.path == '/' else '' }}">
+            <i class="fa-solid fa-house"></i>
+        </a>
+        <a href="{{ url_for('main.explore') }}" class="nav-item {{ 'active' if 'explore' in request.path else '' }}">
+            <i class="fa-regular fa-compass"></i>
+        </a>
+        <a href="{{ url_for('main.adverts') }}" class="nav-item {{ 'active' if 'adverts' in request.path else '' }}">
+            <i class="fa-solid fa-bullhorn"></i>
+        </a>
+        <a href="{{ url_for('main.notifications') }}" class="nav-item {{ 'active' if 'notifications' in request.path else '' }}">
+            <i class="fa-regular fa-bell"></i>
+        </a>
+        <a href="{{ url_for('main.messages_inbox') }}" class="nav-item {{ 'active' if 'inbox' in request.path or 'chat' in request.path else '' }}">
+            <i class="fa-regular fa-envelope"></i>
+        </a>
+    </div>
 
     <script src="/static/script.js" defer></script>
     <script>
