@@ -47,7 +47,7 @@ def create_app():
     app.logger.info(
         'App started. SendGrid loaded=%s sender=%s',
         bool(app.config.get('SENDGRID_API_KEY')),
-        app.config.get('SENDGRID_FROM_EMAIL') or '',
+        app.config.get('MAIL_DEFAULT_SENDER') or '',
     )
 
     # Initialize extensions

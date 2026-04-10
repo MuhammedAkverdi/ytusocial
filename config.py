@@ -59,10 +59,7 @@ class Config:
     WTF_CSRF_CHECK_DEFAULT = False
 
     SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
-    SENDGRID_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL', 'portalytu@gmail.com')
-    SENDGRID_FROM_NAME = os.environ.get('SENDGRID_FROM_NAME', 'YTU Social')
-    SENDGRID_REPLY_TO_EMAIL = os.environ.get('SENDGRID_REPLY_TO_EMAIL', SENDGRID_FROM_EMAIL)
-    SENDGRID_REPLY_TO_NAME = os.environ.get('SENDGRID_REPLY_TO_NAME', SENDGRID_FROM_NAME)
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'portalytu@gmail.com')
     SENDGRID_SANDBOX_MODE = _env_bool('SENDGRID_SANDBOX_MODE', False)
 
     UPLOAD_FOLDER_NOTES = 'static/note_files'

@@ -1,26 +1,24 @@
 from datetime import datetime, timedelta
 import html
-import json
 import random
+from email.utils import parseaddr
 from urllib.parse import urlparse
-from urllib import error as urllib_error
-from urllib import request as urllib_request
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy.exc import SQLAlchemyError
 
-from extensions import db, socketio
+from extensions import db
 from models import User
 
 try:
     from sendgrid import SendGridAPIClient
-    from sendgrid.helpers.mail import Content, Email, Mail, ReplyTo, To
+    from sendgrid.helpers.mail import Content, Email, Mail, To
     _SENDGRID_SDK_AVAILABLE = True
 except ImportError:
     SendGridAPIClient = None
-    Content = Email = Mail = ReplyTo = To = None
+    Content = Email = Mail = To = None
     _SENDGRID_SDK_AVAILABLE = False
 
 auth = Blueprint('auth', __name__)
@@ -67,19 +65,16 @@ def _sendgrid_api_key():
 
 
 def _sendgrid_sender_details():
-    sender_email = (current_app.config.get('SENDGRID_FROM_EMAIL') or '').strip()
-    sender_name = (current_app.config.get('SENDGRID_FROM_NAME') or '').strip() or 'YTU Social'
+    raw_sender = (current_app.config.get('MAIL_DEFAULT_SENDER') or '').strip()
+    if not raw_sender:
+        raise RuntimeError('MAIL_DEFAULT_SENDER is not configured.')
+
+    sender_name, sender_email = parseaddr(raw_sender)
+    sender_email = (sender_email or raw_sender).strip()
+    sender_name = (sender_name or '').strip() or 'YTU Social'
     if not sender_email:
-        raise RuntimeError('SENDGRID_FROM_EMAIL is not configured.')
+        raise RuntimeError('MAIL_DEFAULT_SENDER is not configured.')
     return sender_email, sender_name
-
-
-def _sendgrid_reply_to_details():
-    reply_to_email = (current_app.config.get('SENDGRID_REPLY_TO_EMAIL') or '').strip()
-    reply_to_name = (current_app.config.get('SENDGRID_REPLY_TO_NAME') or '').strip()
-    if not reply_to_name:
-        reply_to_name = (current_app.config.get('SENDGRID_FROM_NAME') or '').strip() or 'YTU Social'
-    return reply_to_email, reply_to_name
 
 
 def _build_otp_email_payload(subject, intro_text, otp):
@@ -147,29 +142,7 @@ def _build_sendgrid_message(subject, recipient_email, text_body, html_body=None)
         plain_text_content=Content('text/plain', text_body),
         html_content=Content('text/html', html_body or text_body.replace('\n', '<br>')),
     )
-
-    reply_to_email, reply_to_name = _sendgrid_reply_to_details()
-    if reply_to_email:
-        message.reply_to = ReplyTo(reply_to_email, reply_to_name)
-
     return message
-
-
-def _build_sendgrid_payload(subject, recipient_email, text_body, html_body=None):
-    sender_email, sender_name = _sendgrid_sender_details()
-    reply_to_email, reply_to_name = _sendgrid_reply_to_details()
-    payload = {
-        'from': {'email': sender_email, 'name': sender_name},
-        'personalizations': [{'to': [{'email': recipient_email}]}],
-        'subject': subject,
-        'content': [
-            {'type': 'text/plain', 'value': text_body},
-            {'type': 'text/html', 'value': html_body or text_body.replace('\n', '<br>')},
-        ],
-    }
-    if reply_to_email:
-        payload['reply_to'] = {'email': reply_to_email, 'name': reply_to_name}
-    return payload
 
 
 def _send_sendgrid_job(app, recipient_email, subject, text_body, html_body=None):
@@ -184,39 +157,20 @@ def _send_sendgrid_job(app, recipient_email, subject, text_body, html_body=None)
                 _mail_log(f"SendGrid gönderim hatası ({recipient_email}): SENDGRID_API_KEY eksik.")
                 return False
 
-            if _SENDGRID_SDK_AVAILABLE:
-                message = _build_sendgrid_message(subject, recipient_email, text_body, html_body)
-                response = SendGridAPIClient(api_key).send(message)
-                if response.status_code in (200, 202):
-                    return True
-
-                response_body = getattr(response, 'body', b'')
-                if isinstance(response_body, bytes):
-                    response_body = response_body.decode('utf-8', errors='ignore')
-                _mail_log(f"SendGrid API Hatası ({response.status_code}) ({recipient_email}): {response_body}")
+            if not _SENDGRID_SDK_AVAILABLE:
+                _mail_log(f"SendGrid gönderim hatası ({recipient_email}): SendGrid SDK yüklü değil.")
                 return False
 
-            payload = _build_sendgrid_payload(subject, recipient_email, text_body, html_body)
-            raw_request = urllib_request.Request(
-                'https://api.sendgrid.com/v3/mail/send',
-                data=json.dumps(payload).encode('utf-8'),
-                headers={
-                    'Authorization': f'Bearer {api_key}',
-                    'Content-Type': 'application/json',
-                },
-                method='POST',
-            )
-            try:
-                with urllib_request.urlopen(raw_request, timeout=15) as response:
-                    if response.status in (200, 202):
-                        return True
-                    response_body = response.read().decode('utf-8', errors='ignore')
-                    _mail_log(f"SendGrid API Hatası ({response.status}) ({recipient_email}): {response_body}")
-                    return False
-            except urllib_error.HTTPError as exc:
-                response_body = exc.read().decode('utf-8', errors='ignore')
-                _mail_log(f"SendGrid API Hatası ({exc.code}) ({recipient_email}): {response_body}")
-                return False
+            message = _build_sendgrid_message(subject, recipient_email, text_body, html_body)
+            response = SendGridAPIClient(api_key).send(message)
+            if response.status_code in (200, 202):
+                return True
+
+            response_body = getattr(response, 'body', b'')
+            if isinstance(response_body, bytes):
+                response_body = response_body.decode('utf-8', errors='ignore')
+            _mail_log(f"SendGrid API Hatası ({response.status_code}) ({recipient_email}): {response_body}")
+            return False
         except Exception as exc:
             _mail_log(f"SendGrid mail gönderim hatası ({recipient_email}): {exc}", 'exception')
             return False
@@ -229,12 +183,7 @@ def _queue_sendgrid_email(subject, email, text_body, html_body=None):
         _mail_log(f"SendGrid gönderim hatası ({email}): SENDGRID_API_KEY eksik.")
         return False
 
-    try:
-        socketio.start_background_task(_send_sendgrid_job, app, email, subject, text_body, html_body)
-        return True
-    except Exception as exc:
-        _mail_log(f"SendGrid gönderim hatası ({email}): arka plan görevi başlatılamadı: {exc}", 'exception')
-        return _send_sendgrid_job(app, email, subject, text_body, html_body)
+    return _send_sendgrid_job(app, email, subject, text_body, html_body)
 
 
 def _queue_otp_email(subject, email, intro_text, otp):
@@ -255,6 +204,14 @@ def _render_register(next_url=None):
 
 def _render_login(next_url=None):
     return render_template('login.html', next_url=next_url)
+
+
+def _redirect_register_with_flash(message, next_url=None):
+    flash(message, 'danger')
+    safe_next = _safe_next_url(next_url)
+    if safe_next:
+        return redirect(url_for('auth.register', next=safe_next))
+    return redirect(url_for('auth.register'))
 
 
 def _render_database_unavailable(template_name, next_url=None, email=None):
@@ -319,8 +276,7 @@ def register():
                     'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
                     otp,
                 ):
-                    flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", "danger")
-                    return _render_register(next_url)
+                    return _redirect_register_with_flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", next_url)
             except SQLAlchemyError as exc:
                 db.session.rollback()
                 _mail_log(f"Kayıt güncellenirken veritabanı erişilemedi ({email}): {exc}", 'exception')
@@ -328,8 +284,7 @@ def register():
             except Exception as e:
                 db.session.rollback()
                 print(f"Kayıt Hatası: {e}")
-                flash("Mail gönderilirken bir teknik sorun oluştu!", "danger")
-                return _render_register(next_url)
+                return _redirect_register_with_flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", next_url)
 
             flash("Doğrulama kodu gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "success")
             return _verify_redirect(email, next_url)
@@ -356,8 +311,7 @@ def register():
                 'Portalımıza hoş geldin! Doğrulama kodun aşağıda.',
                 otp,
             ):
-                flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", "danger")
-                return _render_register(next_url)
+                return _redirect_register_with_flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", next_url)
         except SQLAlchemyError as exc:
             db.session.rollback()
             _mail_log(f"Kayıt oluşturulurken veritabanı erişilemedi ({email}): {exc}", 'exception')
@@ -365,8 +319,7 @@ def register():
         except Exception as e:
             db.session.rollback()
             print(f"Kayıt Hatası: {e}")
-            flash("Mail gönderilirken bir teknik sorun oluştu!", "danger")
-            return _render_register(next_url)
+            return _redirect_register_with_flash("Doğrulama kodu gönderilemedi. Lütfen tekrar dene.", next_url)
 
         flash("Doğrulama kodu gönderiliyor. Birkaç saniye içinde mailinde olmalı.", "success")
         return _verify_redirect(email, next_url)
