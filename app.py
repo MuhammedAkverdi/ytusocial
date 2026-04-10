@@ -1,5 +1,7 @@
 from flask import Flask, g, redirect, url_for, flash, request
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 from flask_login import current_user, logout_user
 from extensions import db, login_manager, socketio, csrf, migrate
 from config import Config
@@ -22,6 +24,30 @@ importlib.import_module('events')
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    log_candidates = [
+        os.path.join(app.root_path, 'security.log'),
+        os.path.join(app.instance_path, 'logs', 'security.log'),
+    ]
+    for log_file in log_candidates:
+        if any(getattr(handler, 'baseFilename', None) == log_file for handler in app.logger.handlers):
+            continue
+        try:
+            os.makedirs(os.path.dirname(log_file), exist_ok=True)
+            file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=3, encoding='utf-8')
+            file_handler.setLevel(logging.INFO)
+            file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(name)s: %(message)s'))
+            app.logger.addHandler(file_handler)
+            break
+        except OSError:
+            continue
+    app.logger.setLevel(logging.INFO)
+    app.logger.propagate = False
+    app.logger.info(
+        'App started. SendGrid loaded=%s sender=%s',
+        bool(app.config.get('SENDGRID_API_KEY')),
+        app.config.get('SENDGRID_FROM_EMAIL') or '',
+    )
 
     # Initialize extensions
     db.init_app(app)

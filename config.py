@@ -11,7 +11,7 @@ def _env_bool(name, default):
 
 def _load_important_env():
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    for file_name in ('important.local.env', 'important.env'):
+    for file_name in ('instance/important.local.env', 'important.local.env', 'important.env'):
         env_path = os.path.join(base_dir, file_name)
         if not os.path.exists(env_path):
             continue

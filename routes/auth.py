@@ -126,6 +126,17 @@ def _build_otp_email_payload(subject, intro_text, otp):
     return text_body, html_body
 
 
+def _mail_log(message, level='error'):
+    try:
+        logger = current_app.logger
+    except RuntimeError:
+        print(message)
+        return
+
+    log_method = getattr(logger, level, logger.error)
+    log_method(message)
+
+
 def _build_sendgrid_message(subject, recipient_email, text_body, html_body=None):
     sender_email, sender_name = _sendgrid_sender_details()
     message = Mail(
@@ -164,12 +175,12 @@ def _send_sendgrid_job(app, recipient_email, subject, text_body, html_body=None)
     with app.app_context():
         try:
             if app.config.get('SENDGRID_SANDBOX_MODE'):
-                print(f"SendGrid sandbox modu açık ({recipient_email}); gerçek gönderim atlandı.")
+                _mail_log(f"SendGrid sandbox modu açık ({recipient_email}); gerçek gönderim atlandı.", 'warning')
                 return True
 
             api_key = (app.config.get('SENDGRID_API_KEY') or '').strip()
             if not api_key:
-                print(f"SendGrid gönderim hatası ({recipient_email}): SENDGRID_API_KEY eksik.")
+                _mail_log(f"SendGrid gönderim hatası ({recipient_email}): SENDGRID_API_KEY eksik.")
                 return False
 
             if _SENDGRID_SDK_AVAILABLE:
@@ -181,7 +192,7 @@ def _send_sendgrid_job(app, recipient_email, subject, text_body, html_body=None)
                 response_body = getattr(response, 'body', b'')
                 if isinstance(response_body, bytes):
                     response_body = response_body.decode('utf-8', errors='ignore')
-                print(f"SendGrid API Hatası ({response.status_code}) ({recipient_email}): {response_body}")
+                _mail_log(f"SendGrid API Hatası ({response.status_code}) ({recipient_email}): {response_body}")
                 return False
 
             payload = _build_sendgrid_payload(subject, recipient_email, text_body, html_body)
@@ -199,14 +210,14 @@ def _send_sendgrid_job(app, recipient_email, subject, text_body, html_body=None)
                     if response.status in (200, 202):
                         return True
                     response_body = response.read().decode('utf-8', errors='ignore')
-                    print(f"SendGrid API Hatası ({response.status}) ({recipient_email}): {response_body}")
+                    _mail_log(f"SendGrid API Hatası ({response.status}) ({recipient_email}): {response_body}")
                     return False
             except urllib_error.HTTPError as exc:
                 response_body = exc.read().decode('utf-8', errors='ignore')
-                print(f"SendGrid API Hatası ({exc.code}) ({recipient_email}): {response_body}")
+                _mail_log(f"SendGrid API Hatası ({exc.code}) ({recipient_email}): {response_body}")
                 return False
         except Exception as exc:
-            print(f"SendGrid mail gönderim hatası ({recipient_email}): {exc}")
+            _mail_log(f"SendGrid mail gönderim hatası ({recipient_email}): {exc}", 'exception')
             return False
 
 
@@ -214,14 +225,14 @@ def _queue_sendgrid_email(subject, email, text_body, html_body=None):
     app = current_app._get_current_object()
     api_key = (app.config.get('SENDGRID_API_KEY') or '').strip()
     if not api_key:
-        print(f"SendGrid gönderim hatası ({email}): SENDGRID_API_KEY eksik.")
+        _mail_log(f"SendGrid gönderim hatası ({email}): SENDGRID_API_KEY eksik.")
         return False
 
     try:
         socketio.start_background_task(_send_sendgrid_job, app, email, subject, text_body, html_body)
         return True
     except Exception as exc:
-        print(f"SendGrid gönderim hatası ({email}): arka plan görevi başlatılamadı: {exc}")
+        _mail_log(f"SendGrid gönderim hatası ({email}): arka plan görevi başlatılamadı: {exc}", 'exception')
         return _send_sendgrid_job(app, email, subject, text_body, html_body)
 
 
