@@ -1487,6 +1487,452 @@
                 padding: 14px;
             }
         }
+
+        .exam-detail-page {
+            --exam-display-font: 'Space Grotesk', 'Inter', sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(27, 58, 107, 0.10), transparent 28%),
+                radial-gradient(circle at top right, rgba(255, 204, 0, 0.10), transparent 24%),
+                linear-gradient(180deg, #f8fbff 0%, #f5f6f8 38%, var(--bg-color) 100%);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        .exam-layout {
+            align-items: start;
+            max-width: 1340px;
+            grid-template-columns: 292px minmax(0, 1fr);
+            gap: 20px;
+        }
+
+        .exam-layout .left-sidebar {
+            margin-left: 12px;
+        }
+
+        .exam-main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .exam-detail-shell {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            box-shadow: 0 18px 36px rgba(16, 36, 72, 0.08);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-detail-shell::before {
+            content: '';
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 8px;
+            background: linear-gradient(180deg, var(--ytu-lacivert), #2f6fd8);
+        }
+
+        .exam-detail-shell-top {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(300px, 380px);
+            gap: 16px;
+            align-items: stretch;
+            position: relative;
+            z-index: 1;
+        }
+
+        .exam-detail-shell-copy {
+            display: grid;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .exam-detail-shell-copy h1 {
+            margin: 0;
+            font-family: var(--exam-display-font);
+            font-size: clamp(1.9rem, 2.6vw, 2.8rem);
+            font-weight: 800;
+            line-height: 1.04;
+            letter-spacing: -0.04em;
+        }
+
+        .exam-detail-shell-copy p {
+            margin: 0;
+            max-width: 720px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        .exam-detail-shell-actions {
+            display: grid;
+            gap: 10px;
+            align-content: start;
+        }
+
+        .exam-selector-btn {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            text-align: left;
+            padding: 14px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: linear-gradient(180deg, rgba(var(--ytu-lacivert-rgb), 0.05), rgba(var(--ytu-lacivert-rgb), 0.02));
+            color: var(--text-color);
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(11, 33, 67, 0.06);
+        }
+
+        .exam-selector-btn strong {
+            font-family: var(--exam-display-font);
+            font-size: 1.28rem;
+            line-height: 1;
+        }
+
+        .exam-selector-btn span,
+        .exam-selector-btn small {
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .exam-selector-btn small {
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .exam-detail-shell-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .exam-detail-shell-note {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background: rgba(var(--ytu-lacivert-rgb), 0.04);
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        .exam-detail-hero,
+        .exam-toolbar,
+        .exam-question-side,
+        .right-sidebar {
+            display: none !important;
+        }
+
+        .exam-question-card {
+            grid-template-columns: 1fr !important;
+            padding: 20px;
+        }
+
+        .exam-question-head h2 {
+            font-family: var(--exam-display-font);
+            font-size: 1.35rem;
+            letter-spacing: -0.03em;
+        }
+
+        .exam-discussion-card {
+            padding: 20px;
+        }
+
+        .exam-discussion-head h3 {
+            font-family: var(--exam-display-font);
+            font-size: 1.08rem;
+        }
+
+        .exam-picker-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 12000;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+        }
+
+        .exam-picker-modal[hidden] {
+            display: none !important;
+        }
+
+        .exam-picker-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.62);
+            backdrop-filter: blur(8px);
+        }
+
+        .exam-picker-card {
+            position: relative;
+            width: min(980px, 100%);
+            max-height: min(84vh, 820px);
+            overflow: hidden;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 26px;
+            box-shadow: 0 28px 60px rgba(2, 6, 23, 0.35);
+            padding: 18px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .exam-picker-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .exam-picker-head h2 {
+            margin: 6px 0 0;
+            font-family: var(--exam-display-font);
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .exam-picker-head p {
+            margin: 8px 0 0;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .exam-picker-close {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1.4rem;
+        }
+
+        .exam-picker-stepper {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .exam-picker-stepper span {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .exam-picker-stepper span.is-active {
+            background: rgba(var(--ytu-lacivert-rgb), 0.1);
+            color: var(--ytu-lacivert);
+            border-color: rgba(var(--ytu-lacivert-rgb), 0.16);
+        }
+
+        .exam-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        .exam-picker-chip {
+            min-height: 76px;
+            padding: 12px 14px;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            justify-content: center;
+            font-weight: 800;
+            transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+        }
+
+        .exam-picker-chip:hover {
+            transform: translateY(-1px);
+        }
+
+        .exam-picker-chip.is-active {
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            border-color: rgba(var(--ytu-lacivert-rgb), 0.18);
+            color: var(--ytu-lacivert);
+        }
+
+        .exam-picker-chip small {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .exam-picker-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .exam-picker-footnote {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .exam-picker-back-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 10px 14px;
+            background: var(--ytu-lacivert);
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        html.dark-mode .exam-detail-page {
+            background:
+                radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
+                radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 22%),
+                linear-gradient(180deg, #0d1220 0%, #0a0f18 100%);
+            color: #e8eef9;
+        }
+
+        html.dark-mode .exam-detail-page .exam-detail-shell,
+        html.dark-mode .exam-detail-page .exam-question-card,
+        html.dark-mode .exam-detail-page .exam-discussion-card,
+        html.dark-mode .exam-detail-page .exam-picker-card,
+        html.dark-mode .exam-detail-page .exam-selector-btn,
+        html.dark-mode .exam-detail-page .exam-picker-chip,
+        html.dark-mode .exam-detail-page .exam-picker-close,
+        html.dark-mode .exam-detail-page .exam-comment-item,
+        html.dark-mode .exam-detail-page .exam-comment-form,
+        html.dark-mode .exam-detail-page .exam-detail-shell-note,
+        html.dark-mode .exam-detail-page .exam-detail-pill,
+        html.dark-mode .exam-detail-page .exam-question-chip,
+        html.dark-mode .exam-detail-page .exam-stat-chip,
+        html.dark-mode .exam-detail-page .exam-side-panel,
+        html.dark-mode .exam-detail-page .exam-side-stat,
+        html.dark-mode .exam-detail-page .exam-option-btn {
+            background: rgba(17, 24, 39, 0.88);
+            border-color: rgba(148, 163, 184, 0.16);
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.32);
+        }
+
+        html.dark-mode .exam-detail-page .exam-detail-shell-copy p,
+        html.dark-mode .exam-detail-page .exam-detail-shell-note,
+        html.dark-mode .exam-detail-page .exam-picker-head p,
+        html.dark-mode .exam-detail-page .exam-picker-chip small,
+        html.dark-mode .exam-detail-page .exam-comment-top span,
+        html.dark-mode .exam-detail-page .exam-comment-count,
+        html.dark-mode .exam-detail-page .exam-detail-title p,
+        html.dark-mode .exam-detail-page .exam-side-panel p,
+        html.dark-mode .exam-detail-page .exam-side-stat span,
+        html.dark-mode .exam-detail-page .exam-comment-actions small,
+        html.dark-mode .exam-detail-page .exam-picker-footnote {
+            color: rgba(226, 232, 240, 0.72);
+        }
+
+        html.dark-mode .exam-detail-page .exam-detail-shell-copy h1,
+        html.dark-mode .exam-detail-page .exam-selector-btn strong,
+        html.dark-mode .exam-detail-page .exam-question-head h2,
+        html.dark-mode .exam-detail-page .exam-discussion-head h3,
+        html.dark-mode .exam-detail-page .exam-picker-head h2,
+        html.dark-mode .exam-detail-page .widget-title,
+        html.dark-mode .exam-detail-page .exam-side-stat strong,
+        html.dark-mode .exam-detail-page .exam-detail-pill,
+        html.dark-mode .exam-detail-page .exam-question-chip,
+        html.dark-mode .exam-detail-page .exam-stat-chip,
+        html.dark-mode .exam-detail-page .exam-picker-chip,
+        html.dark-mode .exam-detail-page .exam-picker-close {
+            color: #f8fbff;
+        }
+
+        html.dark-mode .exam-detail-page .exam-detail-shell::before {
+            background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+        }
+
+        html.dark-mode .exam-detail-page .exam-selector-btn,
+        html.dark-mode .exam-detail-page .exam-picker-chip,
+        html.dark-mode .exam-detail-page .exam-picker-close {
+            background: rgba(15, 23, 42, 0.92);
+        }
+
+        html.dark-mode .exam-detail-page .exam-picker-chip.is-active,
+        html.dark-mode .exam-detail-page .exam-selector-btn {
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        @media (max-width: 980px) {
+            .exam-layout {
+                grid-template-columns: 280px minmax(0, 1fr);
+            }
+
+            .exam-detail-shell-top {
+                grid-template-columns: 1fr;
+            }
+
+            .exam-picker-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .exam-options {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .exam-question-card {
+                padding: 18px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .exam-layout {
+                grid-template-columns: 1fr !important;
+                margin: 78px 0 70px !important;
+                padding: 0 12px !important;
+                gap: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .exam-layout .left-sidebar,
+            .exam-layout .right-sidebar {
+                display: none !important;
+            }
+
+            .exam-detail-shell,
+            .exam-question-card,
+            .exam-discussion-card {
+                border-radius: 22px;
+            }
+
+            .exam-detail-shell {
+                padding: 16px;
+            }
+
+            .exam-selector-btn {
+                width: 100%;
+            }
+
+            .exam-picker-card {
+                padding: 16px;
+                max-height: 88vh;
+            }
+
+            .exam-picker-grid,
+            .exam-options {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
     </style>
 </head>
 <body class="exam-page exam-detail-page">
@@ -1497,57 +1943,36 @@
         {% include 'sidebar_partial.html' %}
 
         <main class="exam-main">
-            <section class="exam-detail-hero">
-                <div class="exam-detail-top">
-                    <div class="exam-detail-title">
-                        <div class="exam-detail-kicker"><i class="fa-solid fa-circle-info"></i> Canlı soru verisi</div>
+            <section class="exam-detail-shell">
+                <div class="exam-detail-shell-top">
+                    <div class="exam-detail-shell-copy">
+                        <div class="exam-detail-kicker"><i class="fa-solid fa-shield-heart"></i> Tartışma sayfası</div>
                         <h1>{{ exam.title }} - Soru {{ question_no }}</h1>
                         <p>{{ disclaimer }}</p>
-                        <div class="exam-detail-summary">
+                        <div class="exam-detail-shell-meta">
                             <span class="exam-detail-pill"><i class="fa-solid fa-code"></i> {{ exam.code }}</span>
                             <span class="exam-detail-pill"><i class="fa-solid fa-list-ol"></i> {{ question.total }} oy</span>
                             <span class="exam-detail-pill"><i class="fa-solid fa-comments"></i> {{ comment_count }} yorum</span>
                             <span class="exam-detail-pill"><i class="fa-solid fa-shield-halved"></i> {% if exam.comments_enabled %}Yorum açık{% else %}Yorum kapalı{% endif %}</span>
                         </div>
+                        <div class="exam-detail-shell-note">
+                            Önce kitapçığı seç, sonra soru numarasını aç. Seçim kilitlenince tartışma akışı doğrudan o kitapçıkta devam eder.
+                        </div>
                     </div>
-                    <div class="exam-detail-hero-panel">
-                        <div class="exam-detail-hero-panel-grid">
-                            <div class="exam-detail-metric">
-                                <strong id="detailActiveGroupLabel">{{ selected_group }}</strong>
-                                <span>Aktif kitapçık</span>
-                            </div>
-                            <div class="exam-detail-metric">
-                                <strong id="detailLockLabel">{% if attempt %}Kilitli{% else %}Serbest{% endif %}</strong>
-                                <span>Kitapçık durumu</span>
-                            </div>
-                            <div class="exam-detail-metric">
-                                <strong id="detailTotalVotesLabel">{{ question.total }}</strong>
-                                <span>Toplam oy</span>
-                            </div>
-                            <div class="exam-detail-metric">
-                                <strong id="detailCommentCountLabel">{{ comment_count }}</strong>
-                                <span>Yorum</span>
-                            </div>
-                        </div>
-                        <div class="exam-detail-panel-note">
-                            Bu soru başlığı kullanıcı oylarını ve tartışmayı tek yerde toplar; uzun yorumlar ana akışı bozmaz.
-                        </div>
+                    <div class="exam-detail-shell-actions">
+                        <button type="button" class="exam-selector-btn" data-open-picker data-picker-step="group">
+                            <small>Kitapçık türü</small>
+                            <strong id="detailActiveGroupLabel">{{ selected_group }}</strong>
+                            <span>Kilidi buradan aç</span>
+                        </button>
+                        <button type="button" class="exam-selector-btn" data-open-picker data-picker-step="question">
+                            <small>Soru numarası</small>
+                            <strong id="detailQuestionLabel">Soru {{ question_no }}</strong>
+                            <span>Önce kitapçık, sonra soru</span>
+                        </button>
                     </div>
                 </div>
             </section>
-
-            <div class="exam-toolbar">
-                <div class="exam-group-switch">
-                    {% for group in groups %}
-                    <button type="button" class="exam-group-btn {% if selected_group == group %}is-active{% endif %}" data-group="{{ group }}" {% if attempt and selected_group != group %}disabled{% endif %} onclick="setActiveGroup('{{ group }}')">
-                        {{ group }} Kitapçığı
-                    </button>
-                    {% endfor %}
-                </div>
-                <div class="exam-stats">
-                    <span class="exam-stat-chip"><i class="fa-solid fa-lock"></i> İlk seçim kitapçığı kilitler</span>
-                </div>
-            </div>
 
             <article class="exam-question-card" data-question-no="{{ question_no }}">
                 <div class="exam-question-main">
@@ -1559,9 +1984,10 @@
                                 {% if question.selected_option %}
                                 <span class="exam-question-chip">Seçimin: {{ question.selected_option }}</span>
                                 {% endif %}
+                                <span class="exam-question-chip">Kitapçık: <span data-question-group>{{ selected_group }}</span></span>
                             </div>
                         </div>
-                        <div class="exam-question-meta">Kitapçık: <span data-question-group>{{ selected_group }}</span></div>
+                        <div class="exam-question-meta">{% if question.selected_option %}Bu soruya oy verdin{% else %}Henüz oy vermedin{% endif %}</div>
                     </div>
 
                     <div class="exam-options">
@@ -1627,62 +2053,52 @@
                 {% endif %}
             </section>
         </main>
+    </div>
 
-        <aside class="right-sidebar sticky-sidebar">
-            <div class="right-widget">
-                <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-list"></i> Soru Gezgini</h3>
+    <div id="examPickerModal" class="exam-picker-modal" hidden>
+        <div class="exam-picker-backdrop" data-close-picker></div>
+        <div class="exam-picker-card" role="dialog" aria-modal="true" aria-labelledby="examPickerTitle">
+            <div class="exam-picker-head">
+                <div>
+                    <div class="exam-detail-kicker"><i class="fa-solid fa-layer-group"></i> Sıralı seçim</div>
+                    <h2 id="examPickerTitle">Önce kitapçık, sonra soru</h2>
+                    <p>Kitapçığı seç, kilitle, ardından soru numarasına geç. Açılan sayfa doğrudan tartışma ekranı olur.</p>
                 </div>
-                <div class="exam-side-body exam-question-nav">
-                    {% for item in question_numbers %}
-                    <a href="{{ url_for('main.exam_question_detail', exam_code=exam.code, question_no=item) }}" class="exam-jump-item {% if item == question_no %}is-active{% endif %}">
-                        <span>Soru {{ item }}</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </a>
+                <button type="button" class="exam-picker-close" data-close-picker aria-label="Kapat">&times;</button>
+            </div>
+
+            <div class="exam-picker-stepper">
+                <span class="is-active" data-step-indicator="group">1. Kitapçık</span>
+                <span data-step-indicator="question">2. Soru</span>
+            </div>
+
+            <section data-picker-panel="group">
+                <div class="exam-picker-grid">
+                    {% for group in groups %}
+                    <button type="button" class="exam-picker-chip {% if selected_group == group %}is-active{% endif %}" data-booklet-chip data-group="{{ group }}" {% if attempt and selected_group != group %}disabled{% endif %}>
+                        <span>{{ group }} Kitapçığı</span>
+                        <small>{% if selected_group == group %}Seçili{% elif attempt and selected_group != group %}Kilitli{% else %}Tıkla ve kilitle{% endif %}</small>
+                    </button>
                     {% endfor %}
                 </div>
-            </div>
+            </section>
 
-            <div class="right-widget">
-                <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-shield-heart"></i> Kilit notlar</h3>
+            <section data-picker-panel="question" hidden>
+                <div class="exam-picker-grid">
+                    {% for item in question_numbers %}
+                    <button type="button" class="exam-picker-chip {% if item == question_no %}is-active{% endif %}" data-question-chip data-question-no="{{ item }}">
+                        <span>Soru {{ item }}</span>
+                        <small>Aktif kitapçık: <b data-picker-active-group>{{ selected_group }}</b></small>
+                    </button>
+                    {% endfor %}
                 </div>
-                <div class="exam-side-note-list">
-                    <div class="exam-side-note">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <p>Tek soru için tek oy verilir.</p>
-                    </div>
-                    <div class="exam-side-note">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <p>Bir kitapçık seçildikten sonra başka kitapçığa geçilmez.</p>
-                    </div>
-                    <div class="exam-side-note">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <p>Görünen sonuçlar resmi değil, topluluk verisidir.</p>
-                    </div>
-                </div>
-            </div>
+            </section>
 
-            <div class="right-widget">
-                <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-chart-simple"></i> Canlı özet</h3>
-                </div>
-                <div class="exam-side-stats">
-                    <div class="exam-side-stat">
-                        <strong>{{ question.total }}</strong>
-                        <span>Oy</span>
-                    </div>
-                    <div class="exam-side-stat">
-                        <strong>{{ comment_count }}</strong>
-                        <span>Yorum</span>
-                    </div>
-                    <div class="exam-side-stat">
-                        <strong>{{ selected_group }}</strong>
-                        <span>Kitapçık</span>
-                    </div>
-                </div>
+            <div class="exam-picker-footer">
+                <div class="exam-picker-footnote">Kitapçık seçimi ilk oyda kilitlenir. Sonraki sorular aynı kitapçıkta açılır.</div>
+                <button type="button" class="exam-picker-back-btn" data-picker-back hidden>Kitapçığa dön</button>
             </div>
-        </aside>
+        </div>
     </div>
 
     <div id="examToast" class="exam-toast"></div>
@@ -1691,8 +2107,13 @@
         const EXAM_CODE = {{ exam.code | tojson }};
         const CSRF_TOKEN = {{ csrf_token() | tojson }};
         const ALLOWED_GROUPS = {{ groups | tojson }};
+        const CURRENT_QUESTION_NO = {{ question_no | tojson }};
         let activeGroup = {{ selected_group | tojson }};
         let groupLocked = {{ 'true' if attempt else 'false' }};
+        let pickerStep = 'group';
+        const pickerModal = document.getElementById('examPickerModal');
+        const pickerPanels = pickerModal ? pickerModal.querySelectorAll('[data-picker-panel]') : [];
+        const pickerStepIndicators = pickerModal ? pickerModal.querySelectorAll('[data-step-indicator]') : [];
 
         function showExamToast(message) {
             const toast = document.getElementById('examToast');
@@ -1723,26 +2144,104 @@
                 heroLockLabel.textContent = groupLocked ? 'Kilitli' : 'Serbest';
             }
 
+            const detailActiveGroupLabel = document.getElementById('detailActiveGroupLabel');
+            if (detailActiveGroupLabel) {
+                detailActiveGroupLabel.textContent = group;
+            }
+
+            const pickerGroupLabels = document.querySelectorAll('[data-picker-active-group]');
+            pickerGroupLabels.forEach((label) => {
+                label.textContent = group;
+            });
+
+            document.querySelectorAll('[data-booklet-chip]').forEach((button) => {
+                button.classList.toggle('is-active', button.dataset.group === group);
+                button.disabled = groupLocked && button.dataset.group !== group;
+            });
+
             document.querySelectorAll('.exam-group-btn').forEach((button) => {
                 button.classList.toggle('is-active', button.dataset.group === group);
                 button.disabled = groupLocked && button.dataset.group !== group;
             });
+
+            syncPickerUi();
+        }
+
+        function syncPickerUi() {
+            if (!pickerModal) {
+                return;
+            }
+
+            pickerStepIndicators.forEach((indicator) => {
+                indicator.classList.toggle('is-active', indicator.dataset.stepIndicator === pickerStep);
+            });
+
+            pickerPanels.forEach((panel) => {
+                panel.hidden = panel.dataset.pickerPanel !== pickerStep;
+            });
+
+            const backButton = pickerModal.querySelector('[data-picker-back]');
+            if (backButton) {
+                backButton.hidden = pickerStep === 'group';
+            }
+
+            const currentQuestionLabel = document.getElementById('detailQuestionLabel');
+            if (currentQuestionLabel) {
+                currentQuestionLabel.textContent = 'Soru ' + CURRENT_QUESTION_NO;
+            }
+        }
+
+        function showPickerStep(step) {
+            pickerStep = step === 'question' ? 'question' : 'group';
+            syncPickerUi();
+        }
+
+        function openPicker(step = 'group') {
+            if (!pickerModal) {
+                return;
+            }
+
+            pickerModal.hidden = false;
+            document.body.style.overflow = 'hidden';
+            showPickerStep(step);
+            syncGroupUi(activeGroup);
+        }
+
+        function closePicker() {
+            if (!pickerModal) {
+                return;
+            }
+
+            pickerModal.hidden = true;
+            document.body.style.overflow = '';
+        }
+
+        async function chooseBooklet(group) {
+            const selected = await setActiveGroup(group);
+            if (selected) {
+                showPickerStep('question');
+            }
+        }
+
+        function navigateToQuestion(questionNo) {
+            const targetPath = window.location.pathname.replace(/\/question\/\d+$/, '/question/' + questionNo);
+            window.location.href = `${targetPath}?group=${encodeURIComponent(activeGroup)}`;
         }
 
         async function setActiveGroup(group) {
             if (!ALLOWED_GROUPS.includes(group)) {
                 showExamToast('Geçersiz kitapçık seçimi.');
-                return;
+                return false;
             }
 
             if (groupLocked && group !== activeGroup) {
                 showExamToast('Bu sınav için kitapçık seçimin kilitli.');
-                return;
+                return false;
             }
 
             if (groupLocked && group === activeGroup) {
                 syncGroupUi(group);
-                return;
+                return true;
             }
 
             try {
@@ -1763,14 +2262,16 @@
                         syncGroupUi(data.locked_group);
                     }
                     showExamToast(data.message || 'Kitapçık seçimi kaydedilemedi.');
-                    return;
+                    return false;
                 }
 
                 groupLocked = true;
                 syncGroupUi(data.group || group);
                 showExamToast(data.message || 'Kitapçık seçimi kilitlendi.');
+                return true;
             } catch (error) {
                 showExamToast('Bağlantı hatası oluştu.');
+                return false;
             }
         }
 
@@ -1992,6 +2493,55 @@
                 button.dataset.pending = '0';
             }
         }
+
+        document.querySelectorAll('[data-open-picker]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const requestedStep = button.dataset.pickerStep || 'group';
+                openPicker(requestedStep === 'question' ? 'question' : 'group');
+            });
+        });
+
+        document.querySelectorAll('[data-close-picker]').forEach((button) => {
+            button.addEventListener('click', closePicker);
+        });
+
+        document.querySelectorAll('[data-booklet-chip]').forEach((button) => {
+            button.addEventListener('click', async () => {
+                if (button.disabled) {
+                    if (groupLocked && button.dataset.group !== activeGroup) {
+                        showExamToast('Bu kitapçık kilitli.');
+                    }
+                    return;
+                }
+
+                const chosen = button.dataset.group;
+                await chooseBooklet(chosen);
+            });
+        });
+
+        document.querySelectorAll('[data-question-chip]').forEach((button) => {
+            button.addEventListener('click', () => {
+                navigateToQuestion(button.dataset.questionNo);
+            });
+        });
+
+        const pickerBackdrop = pickerModal ? pickerModal.querySelector('.exam-picker-backdrop') : null;
+        if (pickerBackdrop) {
+            pickerBackdrop.addEventListener('click', closePicker);
+        }
+
+        document.querySelector('[data-picker-back]')?.addEventListener('click', () => {
+            showPickerStep('group');
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && pickerModal && !pickerModal.hidden) {
+                closePicker();
+            }
+        });
+
+        syncGroupUi(activeGroup);
+        syncPickerUi();
     </script>
 </body>
 </html>

@@ -1145,8 +1145,12 @@ def exam_question_detail(exam_code, question_no):
         abort(404)
 
     attempt = ExamAttempt.query.filter_by(user_id=current_user.id, exam_id=exam.code).first()
-    selected_group = attempt.group if attempt else 'A'
+    requested_group = (request.args.get('group') or '').strip().upper()
+    if requested_group not in EXAM_GROUPS:
+        requested_group = 'A'
+    selected_group = attempt.group if attempt else requested_group
     question = _exam_snapshot(exam, question_no)
+    question['group'] = selected_group
     comments = (
         ExamComment.query
         .filter_by(exam_id=exam.code, question_no=question_no, is_hidden=False)
