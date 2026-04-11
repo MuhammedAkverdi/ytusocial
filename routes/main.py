@@ -1,8 +1,10 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, current_app, send_from_directory
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, current_app, send_from_directory, abort
 from flask_login import login_required, current_user
 from extensions import db, socketio
-from models import User, Post, Story, Club, ClubVote, ClubPost, Poll, PollOption, PollVote, SavedPost, Comment, Message, Notification, Feedback, Note, NoteVote, Advert, StoryView, likes
+from models import User, Post, Story, Club, ClubVote, ClubPost, Poll, PollOption, PollVote, SavedPost, Comment, Message, Notification, Feedback, Note, NoteVote, Advert, StoryView, likes, ExamAnalysis, ExamAttempt, ExamResponse, ExamComment
 from utils import optimize_and_save_image, allowed_file, create_notification, get_trending_hashtags, get_file_size_str, icerik_temiz_mi, scan_file_safety, ALLOWED_NOTE_EXTENSIONS, allowed_image_file, upload_club_logo_to_spaces
+from flask_wtf.csrf import validate_csrf
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_, func
 from datetime import datetime, timedelta
 import random
@@ -72,6 +74,121 @@ def _soft_shuffle_reels(posts, user_id):
 
     final.extend(remaining_head)
     return final
+
+
+EXAM_GROUPS = ('A', 'B', 'C')
+EXAM_OPTIONS = ('A', 'B', 'C', 'D', 'E')
+EXAM_DISCLAIMER = 'Bu sonuçlar kullanıcı oylarıyla oluşmaktadır, resmi cevap anahtarı değildir.'
+
+
+def _exam_csrf_valid():
+    token = request.headers.get('X-CSRFToken') or request.headers.get('X-CSRF-Token')
+    if not token:
+        payload = request.get_json(silent=True) or {}
+        token = payload.get('csrf_token') or request.form.get('csrf_token')
+
+    try:
+        validate_csrf(token)
+        return True
+    except Exception:
+        return False
+
+
+def _exam_access_allowed(exam):
+    return exam.is_published or current_user.is_admin or exam.created_by_id == current_user.id
+
+
+def _exam_snapshot(exam, question_no):
+    counts = {option: 0 for option in EXAM_OPTIONS}
+    rows = (
+        db.session.query(ExamResponse.selected_option, func.count(ExamResponse.id))
+        .filter(ExamResponse.exam_id == exam.code, ExamResponse.question_no == question_no)
+        .group_by(ExamResponse.selected_option)
+        .all()
+    )
+    total = 0
+    for selected_option, count in rows:
+        if selected_option in counts:
+            counts[selected_option] = int(count)
+            total += int(count)
+
+    options = []
+    for option in EXAM_OPTIONS:
+        count = counts[option]
+        percentage = int((count / total) * 100) if total else 0
+        options.append({
+            'option': option,
+            'count': count,
+            'percentage': percentage,
+        })
+
+    selected = None
+    attempt = ExamAttempt.query.filter_by(user_id=current_user.id, exam_id=exam.code).first()
+    user_vote = ExamResponse.query.filter_by(user_id=current_user.id, exam_id=exam.code, question_no=question_no).first()
+    if user_vote:
+        selected = user_vote.selected_option
+
+    return {
+        'question_no': question_no,
+        'total': total,
+        'options': options,
+        'selected_option': selected,
+        'group': attempt.group if attempt else None,
+    }
+
+
+def _exam_full_snapshot(exam):
+    question_stats = {}
+    all_responses = ExamResponse.query.filter_by(exam_id=exam.code).all()
+    user_responses = ExamResponse.query.filter_by(exam_id=exam.code, user_id=current_user.id).all()
+    user_response_map = {response.question_no: response.selected_option for response in user_responses}
+
+    for question_no in range(1, exam.question_count + 1):
+        question_stats[question_no] = {
+            'question_no': question_no,
+            'total': 0,
+            'options': {option: {'count': 0, 'percentage': 0} for option in EXAM_OPTIONS},
+            'selected_option': user_response_map.get(question_no),
+        }
+
+    for response in all_responses:
+        question = question_stats.get(response.question_no)
+        if not question or response.selected_option not in question['options']:
+            continue
+        question['total'] += 1
+        question['options'][response.selected_option]['count'] += 1
+
+    for question in question_stats.values():
+        total = question['total']
+        for option in EXAM_OPTIONS:
+            count = question['options'][option]['count']
+            question['options'][option]['percentage'] = int((count / total) * 100) if total else 0
+
+    comments_by_question = {question_no: [] for question_no in range(1, exam.question_count + 1)}
+    comment_counts = {question_no: 0 for question_no in range(1, exam.question_count + 1)}
+    visible_comments = (
+        ExamComment.query
+        .filter_by(exam_id=exam.code, is_hidden=False)
+        .order_by(ExamComment.created_at.desc())
+        .all()
+    )
+    for comment in visible_comments:
+        if comment.question_no not in comments_by_question:
+            continue
+        comment_counts[comment.question_no] += 1
+        if len(comments_by_question[comment.question_no]) < 3:
+            comments_by_question[comment.question_no].append(comment)
+
+    return question_stats, comments_by_question, comment_counts
+
+
+def _exam_groups_payload(exam, selected_group):
+    return {
+        'exam': exam,
+        'groups': EXAM_GROUPS,
+        'selected_group': selected_group,
+        'disclaimer': exam.disclaimer or EXAM_DISCLAIMER,
+    }
 
 @main.route('/', methods=['GET', 'POST'])
 @login_required
@@ -935,6 +1052,233 @@ def vote_poll(poll_id, option_id):
     db.session.add(vote)
     db.session.commit()
     return jsonify({"success": True})
+
+
+@main.route('/exam/<string:exam_code>')
+@login_required
+def exam_analysis_page(exam_code):
+    if not current_user.is_verified:
+        return redirect(url_for('auth.verify', email=current_user.email))
+
+    exam = ExamAnalysis.query.filter_by(code=exam_code).first_or_404()
+    if not _exam_access_allowed(exam):
+        abort(404)
+
+    attempt = ExamAttempt.query.filter_by(user_id=current_user.id, exam_id=exam.code).first()
+    selected_group = attempt.group if attempt else 'A'
+    question_stats, comments_by_question, comment_counts = _exam_full_snapshot(exam)
+    total_votes = sum(question['total'] for question in question_stats.values())
+
+    return render_template(
+        'exam_analysis.html',
+        exam=exam,
+        question_stats=question_stats,
+        comments_by_question=comments_by_question,
+        comment_counts=comment_counts,
+        question_numbers=list(range(1, exam.question_count + 1)),
+        selected_group=selected_group,
+        total_votes=total_votes,
+        groups=EXAM_GROUPS,
+        exam_options=EXAM_OPTIONS,
+        disclaimer=exam.disclaimer or EXAM_DISCLAIMER,
+        attempt=attempt,
+    )
+
+
+@main.route('/exam-analyses')
+@login_required
+def exam_analyses():
+    if not current_user.is_verified:
+        return redirect(url_for('auth.verify', email=current_user.email))
+
+    analyses = ExamAnalysis.query.order_by(ExamAnalysis.created_at.desc()).all()
+    visible_analyses = [analysis for analysis in analyses if _exam_access_allowed(analysis)]
+    return render_template(
+        'exam_analyses.html',
+        analyses=visible_analyses,
+        total_count=len(visible_analyses),
+    )
+
+
+@main.route('/api/exams/<string:exam_code>/vote', methods=['POST'])
+@login_required
+def exam_vote_api(exam_code):
+    if not current_user.is_verified:
+        return jsonify({'success': False, 'message': 'Önce hesabını doğrulamalısın.'}), 403
+    if not _exam_csrf_valid():
+        return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
+
+    exam = ExamAnalysis.query.filter_by(code=exam_code).first_or_404()
+    if not _exam_access_allowed(exam):
+        return jsonify({'success': False, 'message': 'Bu sınav henüz yayınlanmadı.'}), 404
+
+    payload = request.get_json(silent=True) or request.form
+    try:
+        question_no = int(payload.get('question_no'))
+    except (TypeError, ValueError):
+        return jsonify({'success': False, 'message': 'Geçersiz soru numarası.'}), 400
+
+    selected_option = (payload.get('selected_option') or '').strip().upper()
+    selected_group = (payload.get('group') or 'A').strip().upper()
+
+    if selected_group not in EXAM_GROUPS:
+        return jsonify({'success': False, 'message': 'Geçersiz kitapçık seçimi.'}), 400
+    if selected_option not in EXAM_OPTIONS:
+        return jsonify({'success': False, 'message': 'Geçersiz şık seçimi.'}), 400
+    if question_no < 1 or question_no > exam.question_count:
+        return jsonify({'success': False, 'message': 'Soru numarası sınır dışında.'}), 400
+
+    attempt = ExamAttempt.query.filter_by(user_id=current_user.id, exam_id=exam.code).first()
+    if attempt and attempt.group != selected_group:
+        return jsonify({
+            'success': False,
+            'message': f'Bu sınav için kitapçık seçimin kilitli: {attempt.group}.',
+            'locked_group': attempt.group,
+        }), 400
+    if not attempt:
+        attempt = ExamAttempt(user_id=current_user.id, exam_id=exam.code, group=selected_group)
+        db.session.add(attempt)
+
+    existing = ExamResponse.query.filter_by(
+        user_id=current_user.id,
+        exam_id=exam.code,
+        question_no=question_no,
+    ).first()
+    if existing:
+        snapshot = _exam_snapshot(exam, question_no)
+        snapshot['selected_option'] = existing.selected_option
+        snapshot['group'] = attempt.group
+        return jsonify({
+            'success': False,
+            'already_voted': True,
+            'message': 'Bu soruya zaten oy verdin.',
+            'question': snapshot,
+            'group': attempt.group,
+        }), 200
+
+    response = ExamResponse(
+        user_id=current_user.id,
+        exam_id=exam.code,
+        group=attempt.group,
+        question_no=question_no,
+        selected_option=selected_option,
+    )
+    db.session.add(response)
+
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        attempt = ExamAttempt.query.filter_by(user_id=current_user.id, exam_id=exam.code).first()
+        snapshot = _exam_snapshot(exam, question_no)
+        snapshot['group'] = attempt.group if attempt else selected_group
+        return jsonify({
+            'success': False,
+            'already_voted': True,
+            'message': 'Bu soruya zaten oy verdin.',
+            'question': snapshot,
+            'group': attempt.group if attempt else selected_group,
+        }), 200
+
+    snapshot = _exam_snapshot(exam, question_no)
+    snapshot['selected_option'] = selected_option
+    snapshot['group'] = attempt.group
+    return jsonify({
+        'success': True,
+        'message': 'Oyun kaydedildi.',
+        'group': attempt.group,
+        'question': snapshot,
+    })
+
+
+@main.route('/api/exams/<string:exam_code>/comment', methods=['POST'])
+@login_required
+def exam_comment_api(exam_code):
+    if not current_user.is_verified:
+        return jsonify({'success': False, 'message': 'Önce hesabını doğrulamalısın.'}), 403
+    if not _exam_csrf_valid():
+        return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
+
+    exam = ExamAnalysis.query.filter_by(code=exam_code).first_or_404()
+    if not _exam_access_allowed(exam):
+        return jsonify({'success': False, 'message': 'Bu sınav henüz yayınlanmadı.'}), 404
+    if not exam.comments_enabled:
+        return jsonify({'success': False, 'message': 'Bu sınavda yorumlar kapalı.'}), 403
+
+    payload = request.get_json(silent=True) or request.form
+    try:
+        question_no = int(payload.get('question_no'))
+    except (TypeError, ValueError):
+        return jsonify({'success': False, 'message': 'Geçersiz soru numarası.'}), 400
+
+    body = (payload.get('body') or '').strip()
+    selected_group = (payload.get('group') or 'A').strip().upper()
+
+    if not body:
+        return jsonify({'success': False, 'message': 'Yorum boş olamaz.'}), 400
+    if len(body) > 500:
+        return jsonify({'success': False, 'message': 'Yorum en fazla 500 karakter olabilir.'}), 400
+    if selected_group not in EXAM_GROUPS:
+        return jsonify({'success': False, 'message': 'Geçersiz kitapçık seçimi.'}), 400
+    if question_no < 1 or question_no > exam.question_count:
+        return jsonify({'success': False, 'message': 'Soru numarası sınır dışında.'}), 400
+
+    attempt = ExamAttempt.query.filter_by(user_id=current_user.id, exam_id=exam.code).first()
+    if attempt and attempt.group != selected_group:
+        return jsonify({
+            'success': False,
+            'message': f'Bu sınav için kitapçık seçimin kilitli: {attempt.group}.',
+            'locked_group': attempt.group,
+        }), 400
+    if not attempt:
+        attempt = ExamAttempt(user_id=current_user.id, exam_id=exam.code, group=selected_group)
+        db.session.add(attempt)
+
+    comment = ExamComment(
+        user_id=current_user.id,
+        exam_id=exam.code,
+        group=attempt.group,
+        question_no=question_no,
+        body=body,
+    )
+    db.session.add(comment)
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': 'Yorum eklendi.',
+        'group': attempt.group,
+        'comment': {
+            'id': comment.id,
+            'author_name': current_user.display_name,
+            'profile_pic': current_user.profile_pic,
+            'body': comment.body,
+            'created_at': comment.created_at.strftime('%d %b %H:%M'),
+            'question_no': comment.question_no,
+            'group': comment.group,
+        }
+    })
+
+
+@main.route('/api/exams/<string:exam_code>/comments/<int:comment_id>/report', methods=['POST'])
+@login_required
+def report_exam_comment_api(exam_code, comment_id):
+    if not current_user.is_verified:
+        return jsonify({'success': False, 'message': 'Önce hesabını doğrulamalısın.'}), 403
+    if not _exam_csrf_valid():
+        return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
+
+    exam = ExamAnalysis.query.filter_by(code=exam_code).first_or_404()
+    if not _exam_access_allowed(exam):
+        return jsonify({'success': False, 'message': 'Bu sınav henüz yayınlanmadı.'}), 404
+
+    comment = ExamComment.query.filter_by(id=comment_id, exam_id=exam.code).first_or_404()
+    if comment.user_id == current_user.id:
+        return jsonify({'success': False, 'message': 'Kendi yorumunu bildiremezsin.'}), 400
+
+    comment.report_count += 1
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Yorum bildirildi.', 'report_count': comment.report_count})
 
 @main.route('/send_audio', methods=['POST'])
 @login_required

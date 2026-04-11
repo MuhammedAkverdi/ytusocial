@@ -151,4 +151,41 @@ if (typeof window.toggleDarkMode !== 'function') {
         }
     };
 }
+
+if (typeof window.injectExamAnalysisNavLink !== 'function') {
+    window.injectExamAnalysisNavLink = function () {
+        const examUrl = "{{ url_for('main.exam_analyses') }}";
+        document.querySelectorAll('.mob-drawer-nav').forEach((nav) => {
+            if (!nav || nav.querySelector('[data-nav="exam-analysis"]')) {
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.href = examUrl;
+            link.className = 'mob-drawer-link';
+            link.setAttribute('data-nav', 'exam-analysis');
+            if (window.location.pathname === examUrl || window.location.pathname.startsWith('/exam/')) {
+                link.classList.add('active');
+            }
+            link.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Sınav Analizi';
+            link.addEventListener('click', function () {
+                if (typeof closeMobileDrawer === 'function') {
+                    closeMobileDrawer();
+                }
+            });
+
+            const notesLink = Array.from(nav.querySelectorAll('a[href*="/notes"]')).find((anchor) => {
+                return (anchor.textContent || '').includes('Not Havuzu');
+            });
+
+            if (notesLink && notesLink.parentNode === nav) {
+                notesLink.insertAdjacentElement('afterend', link);
+            } else {
+                nav.appendChild(link);
+            }
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', window.injectExamAnalysisNavLink);
+}
 </script>

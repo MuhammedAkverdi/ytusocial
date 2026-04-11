@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sınav Analizleri | YTU Social</title>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+    </script>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body.exam-list-page {
+            background:
+                radial-gradient(circle at top left, rgba(27, 58, 107, 0.10), transparent 30%),
+                radial-gradient(circle at top right, rgba(255, 204, 0, 0.12), transparent 26%),
+                var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .exam-list-layout {
+            align-items: start;
+        }
+
+        .exam-list-main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .exam-list-hero {
+            background: linear-gradient(145deg, rgba(27, 58, 107, 0.96), rgba(18, 61, 117, 0.88));
+            color: #fff;
+            border-radius: 26px;
+            padding: 26px;
+            box-shadow: 0 24px 50px rgba(14, 42, 82, 0.18);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-list-hero::after {
+            content: '';
+            position: absolute;
+            inset: auto -50px -80px auto;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            filter: blur(6px);
+        }
+
+        .exam-list-hero-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .exam-list-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .exam-list-hero h1 {
+            margin: 12px 0 0;
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            font-weight: 900;
+            line-height: 1.08;
+        }
+
+        .exam-list-hero p {
+            margin: 10px 0 0;
+            max-width: 760px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .exam-list-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            min-width: min(100%, 360px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .exam-list-stat {
+            background: rgba(255, 255, 255, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 14px 12px;
+            text-align: center;
+        }
+
+        .exam-list-stat strong {
+            display: block;
+            font-size: 1.35rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .exam-list-stat span {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.84);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .exam-list-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .exam-list-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            font-size: 0.84rem;
+            font-weight: 800;
+        }
+
+        .exam-list-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .exam-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-height: 220px;
+        }
+
+        .exam-card-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .exam-card-code {
+            font-size: 0.8rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--ytu-lacivert);
+        }
+
+        .exam-card h2 {
+            margin: 6px 0 0;
+            font-size: 1.08rem;
+            font-weight: 900;
+            color: var(--text-color);
+            line-height: 1.35;
+        }
+
+        .exam-card p {
+            margin: 0;
+            color: var(--text-muted);
+            line-height: 1.55;
+            font-size: 0.92rem;
+        }
+
+        .exam-card-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .exam-stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            color: var(--ytu-lacivert);
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .exam-card-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .exam-card-footer small {
+            color: var(--text-muted);
+        }
+
+        .exam-card-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #123d75);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .exam-empty {
+            background: var(--card-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 22px;
+            padding: 28px;
+            text-align: center;
+            color: var(--text-muted);
+            box-shadow: var(--shadow);
+        }
+
+        .exam-empty i {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 2.4rem;
+            color: var(--ytu-lacivert);
+        }
+
+        .exam-side-stack {
+            display: grid;
+            gap: 16px;
+        }
+
+        .exam-side-body {
+            padding: 16px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .exam-side-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background: var(--bg-color);
+        }
+
+        .exam-side-step-no {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #123d75);
+            color: #fff;
+            font-weight: 900;
+            font-size: 0.82rem;
+        }
+
+        .exam-side-step strong {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            color: var(--text-color);
+        }
+
+        .exam-side-step p,
+        .exam-side-note-list p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            line-height: 1.5;
+        }
+
+        .exam-side-note-list {
+            display: grid;
+            gap: 10px;
+            padding: 16px;
+        }
+
+        .exam-side-note {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .exam-side-note i {
+            color: var(--ytu-lacivert);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .exam-side-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            padding: 16px;
+        }
+
+        .exam-side-stat {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 14px 10px;
+            text-align: center;
+        }
+
+        .exam-side-stat strong {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--ytu-lacivert);
+            line-height: 1;
+        }
+
+        .exam-side-stat span {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        @media (max-width: 980px) {
+            .exam-list-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .exam-list-layout {
+                grid-template-columns: 1fr !important;
+                margin: 78px 0 70px !important;
+                padding: 0 12px !important;
+                gap: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .exam-list-layout .left-sidebar,
+            .exam-list-layout .right-sidebar {
+                display: none !important;
+            }
+
+            .exam-list-hero {
+                border-radius: 22px;
+                padding: 20px;
+            }
+
+            .exam-list-stats {
+                min-width: 100%;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .exam-list-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .exam-side-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="exam-list-page">
+    {% include 'navbar_partial.html' ignore missing %}
+
+    {% set published_count = analyses | selectattr('is_published') | list | length %}
+
+    <div class="main-layout exam-list-layout">
+        {% include 'sidebar_partial.html' %}
+
+        <main class="exam-list-main">
+            <section class="exam-list-hero">
+                <div class="exam-list-hero-top">
+                    <div>
+                        <div class="exam-list-kicker"><i class="fa-solid fa-square-poll-vertical"></i> Canlı topluluk verisi</div>
+                        <h1>Sınav Analizleri</h1>
+                        <p>Kitapçığını seç, sorulara oy ver ve yüzdeleri anında gör. Tartışma alanları soru bazlıdır; resmi cevap anahtarı değil, topluluk verisi gösterilir.</p>
+                    </div>
+
+                    <div class="exam-list-stats">
+                        <div class="exam-list-stat">
+                            <strong>{{ total_count }}</strong>
+                            <span>Erişilebilir</span>
+                        </div>
+                        <div class="exam-list-stat">
+                            <strong>{{ published_count }}</strong>
+                            <span>Yayında</span>
+                        </div>
+                        <div class="exam-list-stat">
+                            <strong>{{ total_count - published_count }}</strong>
+                            <span>Taslak</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-list-meta">
+                    <span class="exam-list-chip"><i class="fa-solid fa-shield-halved"></i> Tek kullanıcı - tek soru - tek oy</span>
+                    <span class="exam-list-chip"><i class="fa-solid fa-comments"></i> Soru bazlı tartışma</span>
+                    <span class="exam-list-chip"><i class="fa-solid fa-triangle-exclamation"></i> Resmi cevap anahtarı değildir</span>
+                </div>
+            </section>
+
+            {% if analyses %}
+            <section class="exam-list-grid">
+                {% for analysis in analyses %}
+                <article class="exam-card">
+                    <div class="exam-card-top">
+                        <div>
+                            <div class="exam-card-code">{{ analysis.code }}</div>
+                            <h2>{{ analysis.title }}</h2>
+                        </div>
+                        {% if analysis.is_published %}
+                        <span class="badge" style="background:#2ecc71;color:#fff;padding:6px 10px;border-radius:10px;font-weight:800;">Yayında</span>
+                        {% else %}
+                        <span class="badge" style="background:#f39c12;color:#fff;padding:6px 10px;border-radius:10px;font-weight:800;">Taslak</span>
+                        {% endif %}
+                    </div>
+
+                    <p>{{ analysis.disclaimer[:130] if analysis.disclaimer else 'Bu analiz kullanıcı oylarına dayanır.' }}{% if analysis.disclaimer and analysis.disclaimer|length > 130 %}...{% endif %}</p>
+
+                    <div class="exam-card-stats">
+                        <span class="exam-stat"><i class="fa-solid fa-list-ol"></i> {{ analysis.question_count }} soru</span>
+                        <span class="exam-stat"><i class="fa-solid fa-comment-dots"></i> {{ analysis.comments|length }} yorum</span>
+                        <span class="exam-stat"><i class="fa-solid fa-vote-yea"></i> {{ analysis.responses|length }} oy</span>
+                    </div>
+
+                    <div class="exam-card-footer">
+                        <div>
+                            <small>Oluşturan: <b>{{ analysis.created_by.display_name if analysis.created_by else '—' }}</b></small><br>
+                            <small>{{ analysis.created_at.strftime('%d %b %H:%M') }}</small>
+                        </div>
+                        <a class="exam-card-action" href="{{ url_for('main.exam_analysis_page', exam_code=analysis.code) }}">
+                            Analizi Aç <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </article>
+                {% endfor %}
+            </section>
+            {% else %}
+            <div class="exam-empty">
+                <i class="fa-regular fa-folder-open"></i>
+                Şu anda erişebileceğin sınav analizi yok.
+            </div>
+            {% endif %}
+        </main>
+
+        <aside class="right-sidebar sticky-sidebar">
+            <div class="right-widget">
+                <div class="widget-header">
+                    <h3 class="widget-title"><i class="fa-solid fa-circle-info"></i> Nasıl Çalışır</h3>
+                </div>
+                <div class="exam-side-body">
+                    <div class="exam-side-step">
+                        <span class="exam-side-step-no">1</span>
+                        <div>
+                            <strong>Kitapçığını seç</strong>
+                            <p>A, B veya C seçimi ilk oyla kilitlenir.</p>
+                        </div>
+                    </div>
+                    <div class="exam-side-step">
+                        <span class="exam-side-step-no">2</span>
+                        <div>
+                            <strong>Soruyu oylayın</strong>
+                            <p>Her soru için tek oy kaydedilir ve yüzdeler canlı güncellenir.</p>
+                        </div>
+                    </div>
+                    <div class="exam-side-step">
+                        <span class="exam-side-step-no">3</span>
+                        <div>
+                            <strong>Tartışmaya katıl</strong>
+                            <p>Yorumlar soru bazlıdır; uygunsuz içerikler moderasyonla kaldırılabilir.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-widget">
+                <div class="widget-header">
+                    <h3 class="widget-title"><i class="fa-solid fa-shield-heart"></i> Kurallar</h3>
+                </div>
+                <div class="exam-side-note-list">
+                    <div class="exam-side-note">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <p>Tek soru için tek oy verilir.</p>
+                    </div>
+                    <div class="exam-side-note">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <p>Yorumlar ve şikayetler moderatör gözetimindedir.</p>
+                    </div>
+                    <div class="exam-side-note">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <p>Görünen sonuçlar resmi değil, topluluk verisidir.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-widget">
+                <div class="widget-header">
+                    <h3 class="widget-title"><i class="fa-solid fa-chart-simple"></i> İstatistik</h3>
+                </div>
+                <div class="exam-side-stats">
+                    <div class="exam-side-stat">
+                        <strong>{{ total_count }}</strong>
+                        <span>Analiz</span>
+                    </div>
+                    <div class="exam-side-stat">
+                        <strong>{{ published_count }}</strong>
+                        <span>Yayında</span>
+                    </div>
+                    <div class="exam-side-stat">
+                        <strong>{{ total_count - published_count }}</strong>
+                        <span>Taslak</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</body>
+</html>

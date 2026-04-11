@@ -518,6 +518,65 @@
         </div>
         {% endif %}
 
+        {% if reported_exam_comments %}
+        <div class="admin-section moderator-section" id="reported-exam-comments">
+            <div class="section-header">
+                <h2 class="admin-section-title" style="margin:0;">💬 Şikayet Edilen Sınav Yorumları</h2>
+                <span class="badge bg-red">{{ reported_exam_comments|length }} bildirim</span>
+            </div>
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Sınav / Soru</th>
+                            <th>Yorum</th>
+                            <th>Kullanıcı</th>
+                            <th>Şikayet</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comment in reported_exam_comments %}
+                        <tr>
+                            <td>
+                                <b>{{ comment.exam_id }}</b><br>
+                                <small style="color:var(--text-muted);">Soru {{ comment.question_no }} • Kitapçık {{ comment.group }}</small>
+                            </td>
+                            <td style="max-width:360px;">{{ comment.body | truncate(140) }}</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <img src="/static/{{ comment.user.profile_pic }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">
+                                    <div>
+                                        <b>{{ comment.user.display_name }}</b><br>
+                                        <small style="color:var(--text-muted);">{{ comment.user.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-red">{{ comment.report_count }} 🚩</span></td>
+                            <td style="display:flex;gap:6px;flex-wrap:wrap;">
+                                <form action="{{ url_for('admin.hide_exam_comment', comment_id=comment.id) }}" method="POST" style="display:inline-flex;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn-action btn-view" style="background:#34495e;color:#fff;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;">Gizle</button>
+                                </form>
+                                {% if current_user.is_admin %}
+                                <form action="{{ url_for('admin.delete_exam_comment', comment_id=comment.id) }}" method="POST" style="display:inline-flex;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn-action btn-ban" style="background:#7b0000;color:#fff;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;">Sil</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted);">Şikayet edilen sınav yorumu yok.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 
     <div class="admin-footer">Moderatör Paneli &mdash; YTU Social &copy; 2026</div>

@@ -523,6 +523,9 @@
                     <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link"
                         style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
                             class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
+                    <a href="{{ url_for('main.exam_analyses') }}" class="sidebar-link" data-nav="exam-analysis"
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
+                            class="fa-solid fa-square-poll-vertical" style="width: 20px; text-align: center;"></i> Sınav Analizi</a>
                     <a href="{{ url_for('main.clubs_full_list') }}" class="nav-item"
                         style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
                             class="fa-solid fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi
@@ -1012,6 +1015,9 @@
             </a>
             <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
                 <i class="fa-solid fa-book-open"></i> Not Havuzu
+            </a>
+            <a href="{{ url_for('main.exam_analyses') }}" class="mob-drawer-link" data-nav="exam-analysis" onclick="closeMobileDrawer()">
+                <i class="fa-solid fa-square-poll-vertical"></i> Sınav Analizi
             </a>
             <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
                 <i class="fa-regular fa-bookmark"></i> Kaydedilenler

@@ -718,6 +718,112 @@
                 </form>
                 <small class="admin-admin-form-note">* Bu panelden oluşturulan kullanıcılar otomatik olarak <b>Onaylı (Verified)</b> sayılır.</small>
             </div>
+
+            <h2 class="admin-section-title" style="margin-top: 30px;">📊 Sınav Analizi Oluştur</h2>
+            <div class="admin-card" style="display:block;">
+                <div class="admin-action-copy" style="margin-bottom:16px;">
+                    <h3>Soru bazlı oy toplama paneli</h3>
+                    <p>Sınav kodu, adı ve soru sayısı girildiğinde sistem soru bloklarını otomatik oluşturur. Kullanıcılar A/B/C kitapçığını seçip her soru için tek oy bırakır.</p>
+                    <div class="admin-action-meta">
+                        <span class="admin-chip"><i class="fa-solid fa-shield-halved"></i> Tek kullanıcı - tek soru - tek oy</span>
+                        <span class="admin-chip"><i class="fa-solid fa-comments"></i> Tartışma alanı aktif</span>
+                        <span class="admin-chip"><i class="fa-solid fa-triangle-exclamation"></i> Resmî cevap anahtarı değildir</span>
+                    </div>
+                </div>
+                <form action="{{ url_for('admin.create_exam_analysis') }}" method="POST" class="admin-create-exam-form" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div style="grid-column:1 / -1;">
+                        <label style="font-weight:bold;font-size:0.8rem;color:var(--text-muted);">Sınav Adı</label>
+                        <input type="text" name="title" placeholder="Matematik II Vize 1" required
+                               style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color);">
+                    </div>
+                    <div>
+                        <label style="font-weight:bold;font-size:0.8rem;color:var(--text-muted);">Sınav Kodu</label>
+                        <input type="text" name="code" placeholder="MAT2_Vize1" required
+                               style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color);">
+                    </div>
+                    <div>
+                        <label style="font-weight:bold;font-size:0.8rem;color:var(--text-muted);">Soru Sayısı</label>
+                        <input type="number" name="question_count" min="1" max="200" placeholder="30" required
+                               style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color);">
+                    </div>
+                    <div style="grid-column:1 / -1;">
+                        <label style="font-weight:bold;font-size:0.8rem;color:var(--text-muted);">Üst Uyarı Metni</label>
+                        <textarea name="disclaimer" rows="3" placeholder="Bu sonuçlar kullanıcı oylarıyla oluşmaktadır, resmi cevap anahtarı değildir."
+                                  style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color);resize:vertical;"></textarea>
+                    </div>
+                    <div style="grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:14px;align-items:center;">
+                        <label style="display:inline-flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--text-color);font-weight:700;">
+                            <input type="checkbox" name="comments_enabled" checked>
+                            Yorumları aç
+                        </label>
+                        <label style="display:inline-flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--text-color);font-weight:700;">
+                            <input type="checkbox" name="is_published" checked>
+                            Hemen yayınla
+                        </label>
+                    </div>
+                    <button type="submit" style="grid-column:1 / -1;background:linear-gradient(135deg,var(--ytu-lacivert),#123d75);color:#fff;padding:12px 18px;border:none;border-radius:10px;font-weight:800;cursor:pointer;">
+                        + Sınav Analizi Oluştur
+                    </button>
+                </form>
+
+                <div class="admin-table-wrapper" style="margin-top:18px;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Sınav</th>
+                                <th>Soru</th>
+                                <th>Durum</th>
+                                <th>İstatistik</th>
+                                <th>Oluşturan</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in exam_analyses %}
+                            <tr>
+                                <td>
+                                    <b>{{ exam.code }}</b><br>
+                                    <small style="color:var(--text-muted);">{{ exam.title }}</small>
+                                </td>
+                                <td>{{ exam.question_count }}</td>
+                                <td>
+                                    {% if exam.is_published %}
+                                    <span class="badge" style="background:#2ecc71;color:#fff;padding:4px 10px;border-radius:8px;">Yayında</span><br>
+                                    {% else %}
+                                    <span class="badge" style="background:#f39c12;color:#fff;padding:4px 10px;border-radius:8px;">Taslak</span><br>
+                                    {% endif %}
+                                    <small style="color:var(--text-muted);">{{ 'Yorum açık' if exam.comments_enabled else 'Yorum kapalı' }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge" style="background:#1B3A6B;color:#fff;padding:4px 10px;border-radius:8px;">{{ exam.response_count }} oy</span><br>
+                                    <small style="color:var(--text-muted);">{{ exam.comment_count }} yorum • {{ exam.attempt_count }} katılım</small>
+                                </td>
+                                <td>
+                                    <b>{{ exam.created_by.display_name if exam.created_by else '—' }}</b><br>
+                                    <small style="color:var(--text-muted);">{{ exam.created_at.strftime('%d %b %H:%M') }}</small>
+                                </td>
+                                <td style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <a href="{{ url_for('main.exam_analysis_page', exam_code=exam.code) }}" target="_blank" class="btn-action btn-view" style="text-decoration:none;">Aç</a>
+                                    <form action="{{ url_for('admin.toggle_exam_publish', exam_code=exam.code) }}" method="POST" style="display:inline-flex;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn-action" style="background:#34495e;color:#fff;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;">{% if exam.is_published %}Yayından Kaldır{% else %}Yayınla{% endif %}</button>
+                                    </form>
+                                    <form action="{{ url_for('admin.delete_exam_analysis', exam_code=exam.code) }}" method="POST" style="display:inline-flex;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn-action btn-ban" style="background:#7b0000;color:#fff;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;" onclick="return confirm('{{ exam.code | e }} sınav analizi ve tüm oylar/yorumlar silinsin mi?')">Sil</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">Henüz sınav analizi oluşturulmadı.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             
             <h2 class="admin-section-title" style="margin-top: 30px;">🏆 Yeni Kulüp Oluştur</h2>
             <div class="admin-card" style="display:block;">
