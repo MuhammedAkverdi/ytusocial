@@ -36,8 +36,8 @@
             background: linear-gradient(145deg, rgba(27, 58, 107, 0.96), rgba(18, 61, 117, 0.88));
             color: #fff;
             border-radius: 26px;
-            padding: 26px;
-            box-shadow: 0 24px 50px rgba(14, 42, 82, 0.18);
+            padding: 18px 20px;
+            box-shadow: 0 18px 36px rgba(14, 42, 82, 0.16);
             position: relative;
             overflow: hidden;
         }
@@ -45,9 +45,9 @@
         .exam-list-hero::after {
             content: '';
             position: absolute;
-            inset: auto -50px -80px auto;
-            width: 240px;
-            height: 240px;
+            inset: auto -35px -50px auto;
+            width: 160px;
+            height: 160px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.08);
             filter: blur(6px);
@@ -76,8 +76,8 @@
         }
 
         .exam-list-hero h1 {
-            margin: 12px 0 0;
-            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            margin: 10px 0 0;
+            font-size: clamp(1.55rem, 2.4vw, 2.15rem);
             font-weight: 900;
             line-height: 1.08;
         }
@@ -89,38 +89,30 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
-        .exam-list-stats {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 10px;
-            min-width: min(100%, 360px);
+        .exam-list-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 12px;
+            margin-top: 12px;
             position: relative;
             z-index: 1;
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 0.84rem;
+            font-weight: 800;
         }
 
-        .exam-list-stat {
+        .exam-list-summary span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 11px;
+            border-radius: 999px;
             background: rgba(255, 255, 255, 0.10);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 18px;
-            padding: 14px 12px;
-            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.10);
         }
 
-        .exam-list-stat strong {
-            display: block;
-            font-size: 1.35rem;
-            font-weight: 900;
-            line-height: 1;
-        }
-
-        .exam-list-stat span {
-            display: block;
-            margin-top: 6px;
-            font-size: 0.76rem;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.84);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
+        .exam-list-summary i {
+            font-size: 0.8rem;
         }
 
         .exam-list-meta {
@@ -157,10 +149,27 @@
             border-radius: 22px;
             box-shadow: var(--shadow);
             padding: 18px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 190px;
+            gap: 16px;
+            align-items: stretch;
+            min-height: 220px;
+        }
+
+        .exam-card-main {
+            min-width: 0;
             display: flex;
             flex-direction: column;
             gap: 14px;
-            min-height: 220px;
+        }
+
+        .exam-card-side {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+            padding-left: 16px;
+            border-left: 1px solid var(--border-color);
         }
 
         .exam-card-top {
@@ -212,12 +221,10 @@
         }
 
         .exam-card-footer {
-            margin-top: auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            margin-top: 0;
+            display: grid;
+            gap: 8px;
+            justify-items: start;
         }
 
         .exam-card-footer small {
@@ -235,6 +242,8 @@
             text-decoration: none;
             font-weight: 800;
             white-space: nowrap;
+            width: 100%;
+            justify-content: center;
         }
 
         .exam-empty {
@@ -359,6 +368,17 @@
             .exam-list-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
+
+            .exam-card {
+                grid-template-columns: 1fr;
+            }
+
+            .exam-card-side {
+                padding-left: 0;
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+                padding-top: 14px;
+            }
         }
 
         @media (max-width: 768px) {
@@ -377,12 +397,7 @@
 
             .exam-list-hero {
                 border-radius: 22px;
-                padding: 20px;
-            }
-
-            .exam-list-stats {
-                min-width: 100%;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
+                padding: 16px;
             }
 
             .exam-list-grid {
@@ -397,6 +412,7 @@
 </head>
 <body class="exam-list-page">
     {% include 'navbar_partial.html' ignore missing %}
+    {% include 'exam_mobile_shell.html' %}
 
     {% set published_count = analyses | selectattr('is_published') | list | length %}
 
@@ -410,20 +426,10 @@
                         <div class="exam-list-kicker"><i class="fa-solid fa-square-poll-vertical"></i> Canlı topluluk verisi</div>
                         <h1>Sınav Analizleri</h1>
                         <p>Kitapçığını seç, sorulara oy ver ve yüzdeleri anında gör. Tartışma alanları soru bazlıdır; resmi cevap anahtarı değil, topluluk verisi gösterilir.</p>
-                    </div>
-
-                    <div class="exam-list-stats">
-                        <div class="exam-list-stat">
-                            <strong>{{ total_count }}</strong>
-                            <span>Erişilebilir</span>
-                        </div>
-                        <div class="exam-list-stat">
-                            <strong>{{ published_count }}</strong>
-                            <span>Yayında</span>
-                        </div>
-                        <div class="exam-list-stat">
-                            <strong>{{ total_count - published_count }}</strong>
-                            <span>Taslak</span>
+                        <div class="exam-list-summary">
+                            <span><i class="fa-solid fa-check"></i> {{ total_count }} erişilebilir</span>
+                            <span><i class="fa-solid fa-circle-play"></i> {{ published_count }} yayında</span>
+                            <span><i class="fa-solid fa-layer-group"></i> {{ total_count - published_count }} taslak</span>
                         </div>
                     </div>
                 </div>
@@ -439,30 +445,34 @@
             <section class="exam-list-grid">
                 {% for analysis in analyses %}
                 <article class="exam-card">
-                    <div class="exam-card-top">
-                        <div>
-                            <div class="exam-card-code">{{ analysis.code }}</div>
-                            <h2>{{ analysis.title }}</h2>
+                    <div class="exam-card-main">
+                        <div class="exam-card-top">
+                            <div>
+                                <div class="exam-card-code">{{ analysis.code }}</div>
+                                <h2>{{ analysis.title }}</h2>
+                            </div>
+                            {% if analysis.is_published %}
+                            <span class="badge" style="background:#2ecc71;color:#fff;padding:6px 10px;border-radius:10px;font-weight:800;">Yayında</span>
+                            {% else %}
+                            <span class="badge" style="background:#f39c12;color:#fff;padding:6px 10px;border-radius:10px;font-weight:800;">Taslak</span>
+                            {% endif %}
                         </div>
-                        {% if analysis.is_published %}
-                        <span class="badge" style="background:#2ecc71;color:#fff;padding:6px 10px;border-radius:10px;font-weight:800;">Yayında</span>
-                        {% else %}
-                        <span class="badge" style="background:#f39c12;color:#fff;padding:6px 10px;border-radius:10px;font-weight:800;">Taslak</span>
-                        {% endif %}
+
+                        <p>{{ analysis.disclaimer[:130] if analysis.disclaimer else 'Bu analiz kullanıcı oylarına dayanır.' }}{% if analysis.disclaimer and analysis.disclaimer|length > 130 %}...{% endif %}</p>
+
+                        <div class="exam-card-stats">
+                            <span class="exam-stat"><i class="fa-solid fa-list-ol"></i> {{ analysis.question_count }} soru</span>
+                            <span class="exam-stat"><i class="fa-solid fa-comment-dots"></i> {{ analysis.comments|length }} yorum</span>
+                            <span class="exam-stat"><i class="fa-solid fa-vote-yea"></i> {{ analysis.responses|length }} oy</span>
+                        </div>
                     </div>
 
-                    <p>{{ analysis.disclaimer[:130] if analysis.disclaimer else 'Bu analiz kullanıcı oylarına dayanır.' }}{% if analysis.disclaimer and analysis.disclaimer|length > 130 %}...{% endif %}</p>
-
-                    <div class="exam-card-stats">
-                        <span class="exam-stat"><i class="fa-solid fa-list-ol"></i> {{ analysis.question_count }} soru</span>
-                        <span class="exam-stat"><i class="fa-solid fa-comment-dots"></i> {{ analysis.comments|length }} yorum</span>
-                        <span class="exam-stat"><i class="fa-solid fa-vote-yea"></i> {{ analysis.responses|length }} oy</span>
-                    </div>
-
-                    <div class="exam-card-footer">
-                        <div>
-                            <small>Oluşturan: <b>{{ analysis.created_by.display_name if analysis.created_by else '—' }}</b></small><br>
-                            <small>{{ analysis.created_at.strftime('%d %b %H:%M') }}</small>
+                    <div class="exam-card-side">
+                        <div class="exam-card-footer">
+                            <div>
+                                <small>Oluşturan: <b>{{ analysis.created_by.display_name if analysis.created_by else '—' }}</b></small><br>
+                                <small>{{ analysis.created_at.strftime('%d %b %H:%M') }}</small>
+                            </div>
                         </div>
                         <a class="exam-card-action" href="{{ url_for('main.exam_analysis_page', exam_code=analysis.code) }}">
                             Analizi Aç <i class="fa-solid fa-arrow-right"></i>

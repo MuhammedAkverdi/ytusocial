@@ -76,7 +76,7 @@ def _soft_shuffle_reels(posts, user_id):
     return final
 
 
-EXAM_GROUPS = ('A', 'B', 'C')
+EXAM_GROUPS = ('A', 'B', 'C', 'D')
 EXAM_OPTIONS = ('A', 'B', 'C', 'D', 'E')
 EXAM_DISCLAIMER = 'Bu sonuçlar kullanıcı oylarıyla oluşmaktadır, resmi cevap anahtarı değildir.'
 
@@ -1078,6 +1078,44 @@ def exam_analysis_page(exam_code):
         question_numbers=list(range(1, exam.question_count + 1)),
         selected_group=selected_group,
         total_votes=total_votes,
+        groups=EXAM_GROUPS,
+        exam_options=EXAM_OPTIONS,
+        disclaimer=exam.disclaimer or EXAM_DISCLAIMER,
+        attempt=attempt,
+    )
+
+
+@main.route('/exam/<string:exam_code>/question/<int:question_no>')
+@login_required
+def exam_question_detail(exam_code, question_no):
+    if not current_user.is_verified:
+        return redirect(url_for('auth.verify', email=current_user.email))
+
+    exam = ExamAnalysis.query.filter_by(code=exam_code).first_or_404()
+    if not _exam_access_allowed(exam):
+        abort(404)
+    if question_no < 1 or question_no > exam.question_count:
+        abort(404)
+
+    attempt = ExamAttempt.query.filter_by(user_id=current_user.id, exam_id=exam.code).first()
+    selected_group = attempt.group if attempt else 'A'
+    question = _exam_snapshot(exam, question_no)
+    comments = (
+        ExamComment.query
+        .filter_by(exam_id=exam.code, question_no=question_no, is_hidden=False)
+        .order_by(ExamComment.created_at.desc())
+        .all()
+    )
+
+    return render_template(
+        'exam_question_detail.html',
+        exam=exam,
+        question=question,
+        question_no=question_no,
+        comments=comments,
+        comment_count=len(comments),
+        question_numbers=list(range(1, exam.question_count + 1)),
+        selected_group=selected_group,
         groups=EXAM_GROUPS,
         exam_options=EXAM_OPTIONS,
         disclaimer=exam.disclaimer or EXAM_DISCLAIMER,

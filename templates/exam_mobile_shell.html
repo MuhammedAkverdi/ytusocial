@@ -1,0 +1,312 @@
+{% if current_user.is_authenticated %}
+<style>
+    .mob-header,
+    .mob-left-overlay,
+    .mob-left-drawer,
+    .mobile-bottom-nav {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .navbar {
+            display: none !important;
+        }
+
+        .mob-header {
+            display: flex;
+        }
+
+        .mob-left-overlay {
+            display: block;
+        }
+
+        .mob-left-drawer {
+            display: flex;
+        }
+
+        .mobile-bottom-nav {
+            display: flex;
+        }
+    }
+
+    .mob-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        height: 54px;
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--border-color);
+        align-items: center;
+        padding: 0 14px;
+        justify-content: space-between;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    .mob-header-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--ytu-lacivert);
+        cursor: pointer;
+    }
+
+    .mob-header-logo {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: var(--ytu-lacivert);
+        letter-spacing: -0.5px;
+        text-decoration: none;
+    }
+
+    .mob-header-logo span {
+        color: var(--ytu-sari);
+    }
+
+    .mob-header-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .mob-header-icon {
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 1.15rem;
+        cursor: pointer;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mob-left-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+    }
+
+    .mob-left-drawer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 82%;
+        max-width: 320px;
+        background: var(--card-bg);
+        z-index: 10001;
+        flex-direction: column;
+        overflow-y: auto;
+        transform: translateX(-100%);
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+
+    .mob-left-drawer.open {
+        transform: translateX(0);
+    }
+
+    .mob-drawer-profile {
+        padding: 28px 22px 16px;
+    }
+
+    .mob-drawer-avatar {
+        width: 62px;
+        height: 62px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--ytu-lacivert);
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .mob-drawer-name {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--text-color);
+        margin: 0 0 2px;
+    }
+
+    .mob-drawer-score {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--ytu-lacivert), rgba(var(--ytu-lacivert-rgb), 0.7));
+        color: #fff;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        margin-top: 6px;
+    }
+
+    .mob-drawer-nav {
+        padding: 8px 0;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .mob-drawer-link {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 14px 22px;
+        text-decoration: none;
+        color: var(--text-color);
+        font-size: 1.05rem;
+        font-weight: 700;
+        transition: background 0.15s;
+    }
+
+    .mob-drawer-link:active {
+        background: var(--bg-light);
+    }
+
+    .mob-drawer-link i {
+        width: 26px;
+        text-align: center;
+        font-size: 1.2rem;
+        color: var(--text-color);
+    }
+
+    .mob-drawer-link.active,
+    .mob-drawer-link.active i {
+        color: var(--ytu-lacivert);
+    }
+
+    .mobile-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: var(--card-bg);
+        border-top: 1px solid var(--border-color);
+        align-items: center;
+        justify-content: space-around;
+        z-index: 5000;
+        box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.07);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .mobile-bottom-nav a {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        text-decoration: none;
+        color: var(--text-muted);
+        font-size: 0.62rem;
+        font-weight: 600;
+        padding: 6px 0;
+        transition: color 0.15s;
+    }
+
+    .mobile-bottom-nav a i {
+        font-size: 1.15rem;
+    }
+
+    .mobile-bottom-nav a.active {
+        color: var(--ytu-lacivert);
+    }
+
+    @media (max-width: 768px) {
+        body.exam-page,
+        body.exam-list-page {
+            padding-top: 54px;
+            padding-bottom: 70px;
+        }
+
+        .exam-layout,
+        .exam-list-layout {
+            grid-template-columns: 1fr !important;
+            margin: 58px 0 70px !important;
+            padding: 0 12px !important;
+            gap: 0 !important;
+            max-width: 100% !important;
+        }
+
+        .exam-layout .left-sidebar,
+        .exam-layout .right-sidebar,
+        .exam-list-layout .left-sidebar,
+        .exam-list-layout .right-sidebar {
+            display: none !important;
+        }
+    }
+</style>
+
+<div class="mob-header" id="mobHeader">
+    <img src="/static/{{ current_user.profile_pic }}" class="mob-header-avatar" onclick="openMobileDrawer()" alt="Profil">
+    <a href="/" class="mob-header-logo">YTU<span>SOCIAL</span></a>
+    <div class="mob-header-right">
+        <button class="mob-header-icon" onclick="toggleDarkMode()" title="Tema">🌙</button>
+    </div>
+</div>
+
+<div class="mob-left-overlay" id="mobOverlay" onclick="closeMobileDrawer()"></div>
+
+<div class="mob-left-drawer" id="mobDrawer">
+    <div class="mob-drawer-profile">
+        <img src="/static/{{ current_user.profile_pic }}" class="mob-drawer-avatar" alt="Profil">
+        <h3 class="mob-drawer-name">{{ current_user.username }}</h3>
+        <span class="mob-drawer-score">⭐ {{ current_user.score }} Puan</span>
+    </div>
+
+    <nav class="mob-drawer-nav">
+        <a href="{{ url_for('main.index') }}" class="mob-drawer-link {% if request.endpoint == 'main.index' %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
+        <a href="{{ url_for('main.explore') }}" class="mob-drawer-link {% if request.endpoint in ['main.explore', 'main.trending_full_list'] %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-regular fa-compass"></i> Keşfet</a>
+        <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link {% if request.endpoint == 'main.notes_pool' %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-solid fa-book-open"></i> Not Havuzu</a>
+        <a href="{{ url_for('main.exam_analyses') }}" class="mob-drawer-link {% if request.endpoint in ['main.exam_analyses', 'main.exam_analysis_page', 'main.exam_question_detail'] %}active{% endif %}" data-nav="exam-analysis" onclick="closeMobileDrawer()"><i class="fa-solid fa-square-poll-vertical"></i> Sınav Analizi</a>
+        <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link {% if request.endpoint == 'main.saved_posts_list' %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-regular fa-bookmark"></i> Kaydedilenler</a>
+        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link {% if request.endpoint == 'main.user_profile' %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-regular fa-user"></i> Profilim</a>
+        <a href="{{ url_for('main.settings') }}" class="mob-drawer-link {% if request.endpoint == 'main.settings' %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-solid fa-gear"></i> Ayarlar</a>
+        <a href="{{ url_for('auth.logout') }}" class="mob-drawer-link" style="color:#e74c3c;" onclick="closeMobileDrawer()"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</a>
+    </nav>
+</div>
+
+<nav class="mobile-bottom-nav">
+    <a href="{{ url_for('main.index') }}" class="nav-item {% if request.endpoint == 'main.index' %}active{% endif %}"><i class="fa-solid fa-house"></i></a>
+    <a href="{{ url_for('main.explore') }}" class="nav-item {% if request.endpoint in ['main.explore', 'main.trending_full_list'] %}active{% endif %}"><i class="fa-regular fa-compass"></i></a>
+    <a href="{{ url_for('main.notes_pool') }}" class="nav-item {% if request.endpoint == 'main.notes_pool' %}active{% endif %}"><i class="fa-solid fa-book-open"></i></a>
+    <a href="{{ url_for('main.exam_analyses') }}" class="nav-item {% if request.endpoint in ['main.exam_analyses', 'main.exam_analysis_page', 'main.exam_question_detail'] %}active{% endif %}"><i class="fa-solid fa-square-poll-vertical"></i></a>
+    <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="nav-item {% if request.endpoint == 'main.user_profile' %}active{% endif %}"><i class="fa-regular fa-user"></i></a>
+</nav>
+
+<script>
+function openMobileDrawer() {
+    const drawer = document.getElementById('mobDrawer');
+    const overlay = document.getElementById('mobOverlay');
+    if (drawer) drawer.classList.add('open');
+    if (overlay) overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMobileDrawer() {
+    const drawer = document.getElementById('mobDrawer');
+    const overlay = document.getElementById('mobOverlay');
+    if (drawer) drawer.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+(function () {
+    const drawer = document.getElementById('mobDrawer');
+    if (!drawer) {
+        return;
+    }
+
+    let startX = 0;
+    drawer.addEventListener('touchstart', (event) => {
+        startX = event.touches[0].clientX;
+    }, { passive: true });
+    drawer.addEventListener('touchend', (event) => {
+        if (startX - event.changedTouches[0].clientX > 70) {
+            closeMobileDrawer();
+        }
+    }, { passive: true });
+})();
+</script>
+{% endif %}

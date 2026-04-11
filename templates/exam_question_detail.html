@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ exam.title }} | Sınav Analizi</title>
+    <title>{{ exam.title }} | Soru {{ question_no }}</title>
     <script>
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark-mode');
@@ -13,10 +13,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body.exam-overview-page {
+        body.exam-detail-page {
             background:
                 radial-gradient(circle at top left, rgba(27, 58, 107, 0.08), transparent 30%),
-                radial-gradient(circle at top right, rgba(255, 204, 0, 0.10), transparent 28%),
+                radial-gradient(circle at top right, rgba(243, 156, 18, 0.08), transparent 28%),
                 var(--bg-color);
             color: var(--text-color);
         }
@@ -32,7 +32,7 @@
             gap: 16px;
         }
 
-        .exam-hero {
+        .exam-detail-hero {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-top: 5px solid var(--ytu-lacivert);
@@ -43,7 +43,7 @@
             overflow: hidden;
         }
 
-        .exam-hero::after {
+        .exam-detail-hero::after {
             content: '';
             position: absolute;
             top: -48px;
@@ -55,7 +55,7 @@
             pointer-events: none;
         }
 
-        .exam-hero-top {
+        .exam-detail-top {
             display: flex;
             justify-content: space-between;
             gap: 16px;
@@ -65,7 +65,7 @@
             z-index: 1;
         }
 
-        .exam-title h1 {
+        .exam-detail-title h1 {
             margin: 8px 0 0;
             font-size: clamp(1.65rem, 2.7vw, 2.35rem);
             font-weight: 900;
@@ -73,14 +73,14 @@
             color: var(--text-color);
         }
 
-        .exam-title p {
+        .exam-detail-title p {
             margin: 10px 0 0;
             max-width: 780px;
             line-height: 1.6;
             color: var(--text-muted);
         }
 
-        .exam-kicker {
+        .exam-detail-kicker {
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -90,17 +90,16 @@
             color: var(--ytu-lacivert);
             font-size: 0.8rem;
             font-weight: 800;
-            letter-spacing: 0.02em;
         }
 
-        .exam-badges {
+        .exam-detail-summary {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 16px;
         }
 
-        .exam-badge {
+        .exam-detail-pill {
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -113,16 +112,16 @@
             font-weight: 800;
         }
 
-        .exam-hero-stats {
+        .exam-detail-quick {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
             min-width: min(100%, 360px);
             position: relative;
             z-index: 1;
         }
 
-        .exam-mini-stat {
+        .exam-detail-mini {
             background: linear-gradient(180deg, rgba(var(--ytu-lacivert-rgb), 0.06), rgba(var(--ytu-lacivert-rgb), 0.03));
             border: 1px solid var(--border-color);
             border-radius: 18px;
@@ -130,25 +129,25 @@
             text-align: center;
         }
 
-        .exam-mini-stat strong {
+        .exam-detail-mini strong {
             display: block;
-            font-size: 1.35rem;
+            font-size: 1.2rem;
             font-weight: 900;
             line-height: 1;
             color: var(--ytu-lacivert);
         }
 
-        .exam-mini-stat span {
+        .exam-detail-mini span {
             display: block;
             margin-top: 6px;
-            font-size: 0.74rem;
+            font-size: 0.72rem;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }
 
-        .exam-hero-note {
+        .exam-detail-note {
             margin-top: 14px;
             display: flex;
             align-items: center;
@@ -159,6 +158,8 @@
             border: 1px solid var(--border-color);
             color: var(--text-color);
             font-weight: 700;
+            position: relative;
+            z-index: 1;
         }
 
         .exam-toolbar {
@@ -219,33 +220,6 @@
             color: var(--text-color);
         }
 
-        .exam-jumpbar {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 8px 2px 6px;
-            scrollbar-width: thin;
-        }
-
-        .exam-jumpbar a {
-            flex: 0 0 auto;
-            text-decoration: none;
-            color: var(--text-color);
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 999px;
-            padding: 8px 12px;
-            font-size: 0.84rem;
-            font-weight: 800;
-            min-width: 44px;
-            text-align: center;
-        }
-
-        .exam-question-list {
-            display: grid;
-            gap: 16px;
-        }
-
         .exam-question-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -275,7 +249,7 @@
 
         .exam-question-head h2 {
             margin: 0;
-            font-size: 1.08rem;
+            font-size: 1.1rem;
             font-weight: 900;
             color: var(--text-color);
         }
@@ -422,21 +396,154 @@
             white-space: nowrap;
         }
 
-        .exam-empty {
+        .exam-discussion-card {
             background: var(--card-bg);
-            border: 1px dashed var(--border-color);
-            border-radius: 22px;
-            padding: 28px;
-            text-align: center;
-            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
             box-shadow: var(--shadow);
+            padding: 18px;
+            display: grid;
+            gap: 14px;
         }
 
-        .exam-empty i {
-            display: block;
-            margin-bottom: 12px;
-            font-size: 2.4rem;
-            color: var(--ytu-lacivert);
+        .exam-discussion-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .exam-discussion-head h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 900;
+        }
+
+        .exam-comment-count {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .exam-comments {
+            display: grid;
+            gap: 10px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .exam-comment-item {
+            border: 1px solid var(--border-color);
+            background: rgba(var(--ytu-lacivert-rgb), 0.04);
+            border-radius: 16px;
+            padding: 12px 14px;
+        }
+
+        .exam-comment-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .exam-comment-top strong {
+            font-size: 0.9rem;
+        }
+
+        .exam-comment-top span {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .exam-report-btn {
+            border: none;
+            background: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-weight: 800;
+            padding: 0;
+            font-size: 0.8rem;
+        }
+
+        .exam-comment-item p {
+            margin: 0;
+            line-height: 1.55;
+            color: var(--text-color);
+            white-space: pre-wrap;
+        }
+
+        .exam-empty-comments {
+            border: 1px dashed var(--border-color);
+            border-radius: 14px;
+            padding: 14px;
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .exam-comment-form {
+            display: grid;
+            gap: 10px;
+        }
+
+        .exam-comment-form textarea {
+            width: 100%;
+            min-height: 88px;
+            resize: vertical;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: 12px 14px;
+            font: inherit;
+        }
+
+        .exam-comment-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .exam-comment-actions small {
+            color: var(--text-muted);
+        }
+
+        .exam-comment-actions button {
+            border: none;
+            cursor: pointer;
+            border-radius: 12px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #123d75);
+            color: #fff;
+            font-weight: 800;
+        }
+
+        .exam-toast {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%) translateY(24px);
+            opacity: 0;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            border-radius: 999px;
+            padding: 12px 16px;
+            z-index: 9999;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+
+        .exam-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
 
         .exam-side-stack {
@@ -558,18 +665,14 @@
         }
 
         @media (max-width: 768px) {
-            .exam-hero {
+            .exam-detail-hero {
                 padding: 16px;
                 border-radius: 22px;
             }
 
-            .exam-hero-stats {
+            .exam-detail-quick {
                 min-width: 100%;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-
-            .exam-mini-stat {
-                padding: 12px 10px;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
             .exam-question-card {
@@ -579,47 +682,41 @@
         }
     </style>
 </head>
-<body class="exam-page exam-overview-page">
+<body class="exam-page exam-detail-page">
     {% include 'navbar_partial.html' ignore missing %}
     {% include 'exam_mobile_shell.html' %}
-
-    {% set total_comment_count = comment_counts.values() | sum %}
 
     <div class="main-layout exam-layout">
         {% include 'sidebar_partial.html' %}
 
         <main class="exam-main">
-            <section class="exam-hero">
-                <div class="exam-hero-top">
-                    <div class="exam-title">
-                        <div class="exam-kicker"><i class="fa-solid fa-square-poll-vertical"></i> Canlı topluluk verisi</div>
-                        <h1>{{ exam.title }}</h1>
+            <section class="exam-detail-hero">
+                <div class="exam-detail-top">
+                    <div class="exam-detail-title">
+                        <div class="exam-detail-kicker"><i class="fa-solid fa-circle-info"></i> Soru detay sayfası</div>
+                        <h1>{{ exam.title }} - Soru {{ question_no }}</h1>
                         <p>{{ disclaimer }}</p>
-                        <div class="exam-badges">
-                            <span class="exam-badge"><i class="fa-solid fa-code"></i> {{ exam.code }}</span>
-                            <span class="exam-badge"><i class="fa-solid fa-list-ol"></i> {{ exam.question_count }} soru</span>
-                            <span class="exam-badge"><i class="fa-solid fa-vote-yea"></i> {{ total_votes }} toplam oy</span>
-                            <span class="exam-badge"><i class="fa-solid fa-comments"></i> {{ total_comment_count }} yorum</span>
+                        <div class="exam-detail-summary">
+                            <span class="exam-detail-pill"><i class="fa-solid fa-code"></i> {{ exam.code }}</span>
+                            <span class="exam-detail-pill"><i class="fa-solid fa-list-ol"></i> {{ question.total }} oy</span>
+                            <span class="exam-detail-pill"><i class="fa-solid fa-comments"></i> {{ comment_count }} yorum</span>
+                            <span class="exam-detail-pill"><i class="fa-solid fa-shield-halved"></i> {% if exam.comments_enabled %}Yorum açık{% else %}Yorum kapalı{% endif %}</span>
                         </div>
                     </div>
-                    <div class="exam-hero-stats">
-                        <div class="exam-mini-stat">
-                            <strong>{{ question_numbers | length }}</strong>
-                            <span>Soru</span>
-                        </div>
-                        <div class="exam-mini-stat">
+                    <div class="exam-detail-quick">
+                        <div class="exam-detail-mini">
                             <strong>{{ selected_group }}</strong>
                             <span>Aktif kitapçık</span>
                         </div>
-                        <div class="exam-mini-stat">
-                            <strong>{% if exam.comments_enabled %}Açık{% else %}Kapalı{% endif %}</strong>
-                            <span>Yorumlar</span>
+                        <div class="exam-detail-mini">
+                            <strong>{% if attempt %}Kilitli{% else %}Serbest{% endif %}</strong>
+                            <span>Kitapçık durumu</span>
                         </div>
                     </div>
                 </div>
-                <div class="exam-hero-note">
-                    <i class="fa-solid fa-circle-info"></i>
-                    Tartışma uzun uzadıya bu sayfada durmuyor. Her soru için detay ve yorumlar ayrı sayfada açılıyor.
+                <div class="exam-detail-note">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Bu soru için yorumlar burada; ana listeyi şişirmeden ayrılmış durumda.
                 </div>
             </section>
 
@@ -632,96 +729,103 @@
                     {% endfor %}
                 </div>
                 <div class="exam-stats">
-                    <span class="exam-stat-chip"><i class="fa-solid fa-lock"></i> {% if attempt %}Kitapçık kilitli{% else %}Kitapçık serbest{% endif %}</span>
-                    <span class="exam-stat-chip"><i class="fa-solid fa-rocket"></i> Sayfa yenilenmeden oylar güncellenir</span>
+                    <span class="exam-stat-chip"><i class="fa-solid fa-rocket"></i> Canlı oylar güncellenir</span>
+                    <span class="exam-stat-chip"><i class="fa-solid fa-lock"></i> İlk seçim kitapçığı kilitler</span>
                 </div>
             </div>
 
-            <div class="exam-jumpbar">
-                {% for question_no in question_numbers %}
-                <a href="#question-{{ question_no }}">{{ question_no }}</a>
-                {% endfor %}
-            </div>
-
-            <section class="exam-question-list">
-                {% for question_no in question_numbers %}
-                {% set question = question_stats[question_no] %}
-                <article class="exam-question-card" id="question-{{ question_no }}" data-question-no="{{ question_no }}">
-                    <div class="exam-question-main">
-                        <div class="exam-question-head">
-                            <div>
-                                <h2>{{ question_no }}. Soru</h2>
-                                <div class="exam-question-meta">
-                                    <span class="exam-question-chip" data-question-count>{{ question.total }} oy</span>
-                                    <span class="exam-question-chip">{{ comment_counts[question_no] }} yorum</span>
-                                    {% if question.selected_option %}
-                                    <span class="exam-question-chip">Seçimin: {{ question.selected_option }}</span>
-                                    {% endif %}
-                                </div>
+            <article class="exam-question-card" data-question-no="{{ question_no }}">
+                <div class="exam-question-main">
+                    <div class="exam-question-head">
+                        <div>
+                            <h2>{{ question_no }}. Soru</h2>
+                            <div class="exam-question-meta">
+                                <span class="exam-question-chip" data-question-count>{{ question.total }} oy</span>
+                                {% if question.selected_option %}
+                                <span class="exam-question-chip">Seçimin: {{ question.selected_option }}</span>
+                                {% endif %}
                             </div>
-                            <div class="exam-question-meta">Kitapçık: <span data-question-group>{{ selected_group }}</span></div>
                         </div>
-
-                        <div class="exam-options">
-                            {% for option in exam_options %}
-                            {% set opt = question.options[option] %}
-                            <button type="button" class="exam-option-btn {% if question.selected_option == option %}is-selected{% endif %}" data-option="{{ option }}" {% if question.selected_option %}disabled{% endif %} onclick="voteExam({{ question_no }}, '{{ option }}', this)">
-                                <span class="exam-option-fill" style="width: {{ opt.percentage }}%;"></span>
-                                <div class="exam-option-content">
-                                    <span class="exam-option-letter">{{ option }}</span>
-                                    <span class="exam-option-percent">{{ opt.percentage }}%</span>
-                                    <span class="exam-option-count">{{ opt.count }} oy</span>
-                                </div>
-                            </button>
-                            {% endfor %}
-                        </div>
+                        <div class="exam-question-meta">Kitapçık: <span data-question-group>{{ selected_group }}</span></div>
                     </div>
 
-                    <aside class="exam-question-side">
-                        <div class="exam-side-panel">
-                            <strong>Detay tartışma ayrı sayfada</strong>
-                            <p>Uzun yorumlar burada şişmesin diye bu soru için tartışmayı özel sayfaya ayırdık.</p>
+                    <div class="exam-options">
+                        {% for option in exam_options %}
+                        {% set opt = question.options[option] %}
+                        <button type="button" class="exam-option-btn {% if question.selected_option == option %}is-selected{% endif %}" data-option="{{ option }}" {% if question.selected_option %}disabled{% endif %} onclick="voteExam({{ question_no }}, '{{ option }}', this)">
+                            <span class="exam-option-fill" style="width: {{ opt.percentage }}%;"></span>
+                            <div class="exam-option-content">
+                                <span class="exam-option-letter">{{ option }}</span>
+                                <span class="exam-option-percent">{{ opt.percentage }}%</span>
+                                <span class="exam-option-count">{{ opt.count }} oy</span>
+                            </div>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <aside class="exam-question-side">
+                    <div class="exam-side-panel">
+                        <strong>Bu soru için tartışma</strong>
+                        <p>Yorumlar burada saklı. Uzun akış, ana ekranın altını doldurmaz.</p>
+                    </div>
+                    <div class="exam-side-panel">
+                        <p><b>Aktif kitapçık:</b> {{ selected_group }}</p>
+                        <p><b>Durum:</b> {% if question.selected_option %}Bu soruya oy verdin{% else %}Henüz oy vermedin{% endif %}</p>
+                    </div>
+                    <a class="exam-question-detail-btn" href="{{ url_for('main.exam_analysis_page', exam_code=exam.code) }}">
+                        Tüm sorulara dön <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                </aside>
+            </article>
+
+            <section class="exam-discussion-card">
+                <div class="exam-discussion-head">
+                    <h3>Yorumlar</h3>
+                    <span class="exam-comment-count" data-comment-count>{{ comment_count }} yorum</span>
+                </div>
+
+                <div class="exam-comments" data-comment-list>
+                    {% for comment in comments %}
+                    <div class="exam-comment-item" data-comment-id="{{ comment.id }}">
+                        <div class="exam-comment-top">
+                            <strong>{{ comment.user.display_name }}</strong>
+                            <span>{{ comment.created_at.strftime('%d %b %H:%M') }} • {{ comment.group }} kitapçığı</span>
+                            <button type="button" class="exam-report-btn" onclick="reportExamComment({{ question_no }}, {{ comment.id }}, this)">Bildir</button>
                         </div>
-                        <div class="exam-side-panel">
-                            <p><b>Aktif kitapçık:</b> {{ selected_group }}</p>
-                            <p><b>Durum:</b> {% if question.selected_option %}Bu soruya oy verdin{% else %}Henüz oy vermedin{% endif %}</p>
-                        </div>
-                        <a class="exam-question-detail-btn" href="{{ url_for('main.exam_question_detail', exam_code=exam.code, question_no=question_no) }}">
-                            Tartışma ve Detay <i class="fa-solid fa-arrow-right"></i>
-                        </a>
-                    </aside>
-                </article>
-                {% endfor %}
+                        <p>{{ comment.body }}</p>
+                    </div>
+                    {% else %}
+                    <div class="exam-empty-comments">Henüz yorum yok. İlk yorumu sen bırak.</div>
+                    {% endfor %}
+                </div>
+
+                {% if exam.comments_enabled %}
+                <form class="exam-comment-form" onsubmit="submitExamComment(event)">
+                    <textarea name="body" maxlength="500" placeholder="Bu soruya dair düşünceni yaz..." required></textarea>
+                    <div class="exam-comment-actions">
+                        <small>Bu yorum ayrı soru sayfasında tutulur.</small>
+                        <button type="submit">Yorum Yap</button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="exam-empty-comments">Yorumlar bu sınav için kapatıldı.</div>
+                {% endif %}
             </section>
         </main>
 
         <aside class="right-sidebar sticky-sidebar">
             <div class="right-widget">
                 <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-circle-info"></i> Nasıl çalışır</h3>
+                    <h3 class="widget-title"><i class="fa-solid fa-list"></i> Soru Gezgini</h3>
                 </div>
                 <div class="exam-side-body">
-                    <div class="exam-side-step">
-                        <span class="exam-side-step-no">1</span>
-                        <div>
-                            <strong>Kitapçığını seç</strong>
-                            <p>A, B, C veya D seçimi ilk oyla kilitlenir.</p>
-                        </div>
-                    </div>
-                    <div class="exam-side-step">
-                        <span class="exam-side-step-no">2</span>
-                        <div>
-                            <strong>Soruyu oylayın</strong>
-                            <p>Her soru için tek oy kaydedilir ve yüzdeler canlı güncellenir.</p>
-                        </div>
-                    </div>
-                    <div class="exam-side-step">
-                        <span class="exam-side-step-no">3</span>
-                        <div>
-                            <strong>Detay sayfasına geç</strong>
-                            <p>Uzun tartışmalar soru detayında ilerler; ana ekran sade kalır.</p>
-                        </div>
-                    </div>
+                    {% for item in question_numbers %}
+                    <a href="{{ url_for('main.exam_question_detail', exam_code=exam.code, question_no=item) }}" class="exam-jump-item" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border-color);border-radius:14px;text-decoration:none;color:var(--text-color);background:{{ 'rgba(var(--ytu-lacivert-rgb),0.08)' if item == question_no else 'var(--bg-color)' }};font-weight:700;">
+                        <span>Soru {{ item }}</span>
+                        <i class="fa-solid fa-arrow-right" style="font-size:0.8rem;color:var(--text-muted);"></i>
+                    </a>
+                    {% endfor %}
                 </div>
             </div>
 
@@ -751,16 +855,16 @@
                 </div>
                 <div class="exam-side-stats">
                     <div class="exam-side-stat">
-                        <strong>{{ question_numbers | length }}</strong>
-                        <span>Soru</span>
-                    </div>
-                    <div class="exam-side-stat">
-                        <strong>{{ total_votes }}</strong>
+                        <strong>{{ question.total }}</strong>
                         <span>Oy</span>
                     </div>
                     <div class="exam-side-stat">
-                        <strong>{{ total_comment_count }}</strong>
+                        <strong>{{ comment_count }}</strong>
                         <span>Yorum</span>
+                    </div>
+                    <div class="exam-side-stat">
+                        <strong>{{ selected_group }}</strong>
+                        <span>Kitapçık</span>
                     </div>
                 </div>
             </div>
@@ -799,36 +903,32 @@
             }
 
             activeGroup = group;
-            const activeLabel = document.getElementById('activeGroupLabel');
-            if (activeLabel) {
-                activeLabel.textContent = group + ' Kitapçığı';
+            const groupLabel = document.querySelector('[data-question-group]');
+            if (groupLabel) {
+                groupLabel.textContent = group;
             }
 
             document.querySelectorAll('.exam-group-btn').forEach((button) => {
                 button.classList.toggle('is-active', button.dataset.group === group);
                 button.disabled = groupLocked && button.dataset.group !== group;
             });
-
-            document.querySelectorAll('.exam-question-card').forEach((card) => {
-                const groupLabel = card.querySelector('[data-question-group]');
-                if (groupLabel) {
-                    groupLabel.textContent = group;
-                }
-            });
         }
 
-        function updateQuestionCard(questionNo, snapshot) {
-            const card = document.querySelector(`.exam-question-card[data-question-no="${questionNo}"]`);
-            if (!card || !snapshot) return;
+        function updateQuestionCard(snapshot) {
+            if (!snapshot) return;
+            const card = document.querySelector('.exam-question-card[data-question-no]');
+            if (!card) return;
 
             const countLabel = card.querySelector('[data-question-count]');
             if (countLabel) {
                 countLabel.textContent = snapshot.total + ' oy';
             }
 
-            const groupLabel = card.querySelector('[data-question-group]');
-            if (groupLabel && snapshot.group) {
-                groupLabel.textContent = snapshot.group;
+            if (snapshot.group) {
+                const groupLabel = card.querySelector('[data-question-group]');
+                if (groupLabel) {
+                    groupLabel.textContent = snapshot.group;
+                }
             }
 
             const selectedOption = snapshot.selected_option || null;
@@ -886,10 +986,137 @@
                     setActiveGroup(data.group);
                 }
 
-                updateQuestionCard(questionNo, data.question);
+                updateQuestionCard(data.question);
                 showExamToast(data.message || 'Oy kaydedildi.');
             } catch (error) {
                 showExamToast('Bağlantı hatası oluştu.');
+            } finally {
+                button.dataset.pending = '0';
+            }
+        }
+
+        function buildCommentElement(comment) {
+            const item = document.createElement('div');
+            item.className = 'exam-comment-item';
+            item.dataset.commentId = comment.id;
+
+            const top = document.createElement('div');
+            top.className = 'exam-comment-top';
+
+            const author = document.createElement('strong');
+            author.textContent = comment.author_name;
+
+            const timestamp = document.createElement('span');
+            timestamp.textContent = comment.created_at + ' • ' + comment.group + ' kitapçığı';
+
+            const reportButton = document.createElement('button');
+            reportButton.type = 'button';
+            reportButton.className = 'exam-report-btn';
+            reportButton.textContent = 'Bildir';
+            reportButton.addEventListener('click', () => reportExamComment(comment.id, reportButton));
+
+            top.appendChild(author);
+            top.appendChild(timestamp);
+            top.appendChild(reportButton);
+
+            const body = document.createElement('p');
+            body.textContent = comment.body;
+
+            item.appendChild(top);
+            item.appendChild(body);
+            return item;
+        }
+
+        async function submitExamComment(event) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const textarea = form.querySelector('textarea');
+            const body = textarea.value.trim();
+
+            if (!body) {
+                showExamToast('Yorum boş olamaz.');
+                return;
+            }
+
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch(`/api/exams/${encodeURIComponent(EXAM_CODE)}/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        question_no: {{ question_no }},
+                        body,
+                        group: activeGroup
+                    })
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    showExamToast(data.message || 'Yorum gönderilemedi.');
+                    if (data.locked_group) {
+                        activeGroup = data.locked_group;
+                        groupLocked = true;
+                        setActiveGroup(data.locked_group);
+                    }
+                    return;
+                }
+
+                groupLocked = true;
+                setActiveGroup(activeGroup);
+
+                const commentList = document.querySelector('[data-comment-list]');
+                const emptyState = commentList.querySelector('.exam-empty-comments');
+                if (emptyState) emptyState.remove();
+                commentList.prepend(buildCommentElement(data.comment));
+
+                const countLabel = document.querySelector('[data-comment-count]');
+                if (countLabel) {
+                    const currentCount = parseInt(countLabel.textContent, 10) || 0;
+                    countLabel.textContent = (currentCount + 1) + ' yorum';
+                }
+
+                textarea.value = '';
+                showExamToast('Yorum eklendi.');
+            } catch (error) {
+                showExamToast('Yorum gönderilirken bağlantı hatası oluştu.');
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+
+        async function reportExamComment(commentId, button) {
+            if (button.dataset.pending === '1') return;
+            button.dataset.pending = '1';
+
+            try {
+                const response = await fetch(`/api/exams/${encodeURIComponent(EXAM_CODE)}/comments/${commentId}/report`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        csrf_token: CSRF_TOKEN,
+                        group: activeGroup
+                    })
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    showExamToast(data.message || 'Yorum bildirilemedi.');
+                    return;
+                }
+
+                showExamToast('Yorum bildirildi.');
+            } catch (error) {
+                showExamToast('Rapor gönderilemedi.');
             } finally {
                 button.dataset.pending = '0';
             }
