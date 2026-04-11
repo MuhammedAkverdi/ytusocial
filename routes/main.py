@@ -1065,9 +1065,19 @@ def exam_analysis_page(exam_code):
         abort(404)
 
     attempt = ExamAttempt.query.filter_by(user_id=current_user.id, exam_id=exam.code).first()
-    selected_group = attempt.group if attempt else 'A'
+    requested_group = (request.args.get('group') or '').strip().upper()
+    if requested_group not in EXAM_GROUPS:
+        requested_group = 'A'
+    selected_group = attempt.group if attempt else requested_group
+
+    requested_question_no = request.args.get('question_no', 1, type=int) or 1
+    if requested_question_no < 1 or requested_question_no > exam.question_count:
+        requested_question_no = 1
+
     question_stats, comments_by_question, comment_counts = _exam_full_snapshot(exam)
     total_votes = sum(question['total'] for question in question_stats.values())
+    active_question = question_stats[requested_question_no]
+    answered_count = sum(1 for question in question_stats.values() if question['selected_option'])
 
     return render_template(
         'exam_analysis.html',
@@ -1075,9 +1085,12 @@ def exam_analysis_page(exam_code):
         question_stats=question_stats,
         comments_by_question=comments_by_question,
         comment_counts=comment_counts,
-        question_numbers=list(range(1, exam.question_count + 1)),
+        question_numbers=list(range(1, min(exam.question_count, 20) + 1)),
+        question_no=requested_question_no,
+        active_question=active_question,
         selected_group=selected_group,
         total_votes=total_votes,
+        answered_count=answered_count,
         groups=EXAM_GROUPS,
         exam_options=EXAM_OPTIONS,
         disclaimer=exam.disclaimer or EXAM_DISCLAIMER,
