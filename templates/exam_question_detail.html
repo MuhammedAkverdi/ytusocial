@@ -22,6 +22,84 @@
             color: var(--text-color);
         }
 
+        .exam-layout .left-sidebar {
+            margin-left: 8px;
+        }
+
+        html.dark-mode .exam-detail-page {
+            background:
+                radial-gradient(circle at top left, rgba(59, 130, 246, 0.20), transparent 26%),
+                radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 22%),
+                linear-gradient(180deg, #0d1220 0%, #0a0f18 100%);
+            color: #e8eef9;
+        }
+
+        html.dark-mode .exam-detail-page .exam-detail-hero,
+        html.dark-mode .exam-detail-page .exam-toolbar,
+        html.dark-mode .exam-detail-page .exam-question-card,
+        html.dark-mode .exam-detail-page .exam-discussion-card,
+        html.dark-mode .exam-detail-page .right-widget,
+        html.dark-mode .exam-detail-page .exam-detail-metric,
+        html.dark-mode .exam-detail-page .exam-side-panel,
+        html.dark-mode .exam-detail-page .exam-jump-item,
+        html.dark-mode .exam-detail-page .exam-side-stat,
+        html.dark-mode .exam-detail-page .exam-stat-chip,
+        html.dark-mode .exam-detail-page .exam-comment-item,
+        html.dark-mode .exam-detail-page .exam-comment-form,
+        html.dark-mode .exam-detail-page .exam-question-side {
+            background: rgba(17, 24, 39, 0.88);
+            border-color: rgba(148, 163, 184, 0.16);
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.32);
+        }
+
+        html.dark-mode .exam-detail-page .exam-detail-panel-note,
+        html.dark-mode .exam-detail-page .exam-side-note,
+        html.dark-mode .exam-detail-page .exam-option-btn {
+            background: rgba(15, 23, 42, 0.92);
+            border-color: rgba(148, 163, 184, 0.14);
+        }
+
+        html.dark-mode .exam-detail-page .exam-detail-kicker,
+        html.dark-mode .exam-detail-page .exam-detail-pill,
+        html.dark-mode .exam-detail-page .exam-question-chip,
+        html.dark-mode .exam-detail-page .exam-stat-chip,
+        html.dark-mode .exam-detail-page .exam-group-btn,
+        html.dark-mode .exam-detail-page .exam-jump-item,
+        html.dark-mode .exam-detail-page .widget-title,
+        html.dark-mode .exam-detail-page .exam-side-stat strong,
+        html.dark-mode .exam-detail-page .exam-detail-metric strong {
+            color: #f8fbff;
+        }
+
+        html.dark-mode .exam-detail-page .exam-detail-title p,
+        html.dark-mode .exam-detail-page .exam-side-panel p,
+        html.dark-mode .exam-detail-page .exam-comment-item p,
+        html.dark-mode .exam-detail-page .exam-comment-top span,
+        html.dark-mode .exam-detail-page .exam-side-stat span,
+        html.dark-mode .exam-detail-page .exam-detail-metric span,
+        html.dark-mode .exam-detail-page .exam-comment-count,
+        html.dark-mode .exam-detail-page .exam-comment-actions small {
+            color: rgba(226, 232, 240, 0.72);
+        }
+
+        html.dark-mode .exam-detail-page .exam-group-btn {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        html.dark-mode .exam-detail-page .exam-group-btn.is-active,
+        html.dark-mode .exam-detail-page .exam-question-detail-btn,
+        html.dark-mode .exam-detail-page .exam-comment-actions button,
+        html.dark-mode .exam-detail-page .exam-comment-form button {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: #fff;
+        }
+
+        html.dark-mode .exam-detail-page .exam-option-btn.is-selected,
+        html.dark-mode .exam-detail-page .exam-jump-item.is-active {
+            border-color: rgba(96, 165, 250, 0.5);
+            background: rgba(30, 41, 59, 0.95);
+        }
+
         .exam-layout {
             align-items: start;
             max-width: 1140px;
@@ -1487,12 +1565,11 @@
                     </div>
 
                     <div class="exam-options">
-                        {% for option in exam_options %}
-                        {% set opt = question.options[option] %}
-                        <button type="button" class="exam-option-btn {% if question.selected_option == option %}is-selected{% endif %}" data-option="{{ option }}" {% if question.selected_option %}disabled{% endif %} onclick="voteExam({{ question_no }}, '{{ option }}', this)">
+                        {% for opt in question.options %}
+                        <button type="button" class="exam-option-btn {% if question.selected_option == opt.option %}is-selected{% endif %}" data-option="{{ opt.option }}" {% if question.selected_option %}disabled{% endif %} onclick="voteExam({{ question_no }}, '{{ opt.option }}', this)">
                             <span class="exam-option-fill" style="width: {{ opt.percentage }}%;"></span>
                             <div class="exam-option-content">
-                                <span class="exam-option-letter">{{ option }}</span>
+                                <span class="exam-option-letter">{{ opt.option }}</span>
                                 <span class="exam-option-percent">{{ opt.percentage }}%</span>
                                 <span class="exam-option-count">{{ opt.count }} oy</span>
                             </div>

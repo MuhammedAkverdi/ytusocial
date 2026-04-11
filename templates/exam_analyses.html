@@ -24,6 +24,86 @@
             overflow-x: hidden;
         }
 
+        .exam-list-layout .left-sidebar {
+            margin-left: 8px;
+        }
+
+        html.dark-mode .exam-list-page {
+            background:
+                radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
+                radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 22%),
+                linear-gradient(180deg, #0d1220 0%, #0a0f18 100%);
+            color: #e8eef9;
+        }
+
+        html.dark-mode .exam-list-page .exam-list-hero,
+        html.dark-mode .exam-list-page .exam-toolbar,
+        html.dark-mode .exam-list-page .exam-card,
+        html.dark-mode .exam-list-page .right-widget,
+        html.dark-mode .exam-list-page .exam-list-metric,
+        html.dark-mode .exam-list-page .exam-list-panel-note,
+        html.dark-mode .exam-list-page .exam-side-step,
+        html.dark-mode .exam-list-page .exam-side-stat,
+        html.dark-mode .exam-list-page .exam-filter-pill,
+        html.dark-mode .exam-list-page .exam-card-status,
+        html.dark-mode .exam-list-page .exam-stat {
+            background: rgba(17, 24, 39, 0.88);
+            border-color: rgba(148, 163, 184, 0.16);
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.32);
+        }
+
+        html.dark-mode .exam-list-page .exam-list-hero,
+        html.dark-mode .exam-list-page .exam-toolbar,
+        html.dark-mode .exam-list-page .exam-card {
+            color: #e8eef9;
+        }
+
+        html.dark-mode .exam-list-page .exam-list-kicker,
+        html.dark-mode .exam-list-page .exam-list-chip,
+        html.dark-mode .exam-list-page .exam-list-summary span,
+        html.dark-mode .exam-list-page .exam-card-code,
+        html.dark-mode .exam-list-page .widget-title,
+        html.dark-mode .exam-list-page .exam-list-metric strong,
+        html.dark-mode .exam-list-page .exam-card h2,
+        html.dark-mode .exam-list-page .exam-card-status,
+        html.dark-mode .exam-list-page .exam-card-action,
+        html.dark-mode .exam-list-page .exam-side-stat strong,
+        html.dark-mode .exam-list-page .exam-side-step-no {
+            color: #f8fbff;
+        }
+
+        html.dark-mode .exam-list-page .exam-list-hero p,
+        html.dark-mode .exam-list-page .exam-list-panel-note,
+        html.dark-mode .exam-list-page .exam-card p,
+        html.dark-mode .exam-list-page .exam-side-step p,
+        html.dark-mode .exam-list-page .exam-side-note-list p,
+        html.dark-mode .exam-list-page .exam-card-footer small,
+        html.dark-mode .exam-list-page .exam-toolbar-count,
+        html.dark-mode .exam-list-page .exam-side-stat span,
+        html.dark-mode .exam-list-page .exam-list-metric span {
+            color: rgba(226, 232, 240, 0.72);
+        }
+
+        html.dark-mode .exam-list-page .exam-card.is-featured {
+            background: linear-gradient(145deg, #17386d, #0f274b);
+            color: #fff;
+        }
+
+        html.dark-mode .exam-list-page .exam-card.is-featured .exam-card-main,
+        html.dark-mode .exam-list-page .exam-card.is-featured .exam-card-main * {
+            color: #fff;
+        }
+
+        html.dark-mode .exam-list-page .exam-card.is-featured .exam-card-footer small,
+        html.dark-mode .exam-list-page .exam-card.is-featured .exam-list-panel-note {
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        html.dark-mode .exam-list-page .exam-card.is-featured .exam-card-action {
+            background: rgba(255, 255, 255, 0.96);
+            color: var(--ytu-lacivert);
+        }
+
         body.exam-list-page {
             color: var(--text-color);
         }
@@ -422,6 +502,11 @@
         .exam-card.is-featured .exam-card-code,
         .exam-card.is-featured .exam-card p {
             color: rgba(255, 255, 255, 0.9);
+        }
+
+        .exam-card.is-featured .exam-card-main,
+        .exam-card.is-featured .exam-card-main * {
+            color: #fff;
         }
 
         .exam-card.is-featured .exam-stat {
