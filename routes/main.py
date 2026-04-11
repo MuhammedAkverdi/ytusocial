@@ -1085,6 +1085,53 @@ def exam_analysis_page(exam_code):
     )
 
 
+@main.route('/api/exams/<string:exam_code>/group', methods=['POST'])
+@login_required
+def exam_group_api(exam_code):
+    if not current_user.is_verified:
+        return jsonify({'success': False, 'message': 'Önce hesabını doğrulamalısın.'}), 403
+    if not _exam_csrf_valid():
+        return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
+
+    exam = ExamAnalysis.query.filter_by(code=exam_code).first_or_404()
+    if not _exam_access_allowed(exam):
+        return jsonify({'success': False, 'message': 'Bu sınav henüz yayınlanmadı.'}), 404
+
+    payload = request.get_json(silent=True) or request.form
+    selected_group = (payload.get('group') or 'A').strip().upper()
+
+    if selected_group not in EXAM_GROUPS:
+        return jsonify({'success': False, 'message': 'Geçersiz kitapçık seçimi.'}), 400
+
+    attempt = ExamAttempt.query.filter_by(user_id=current_user.id, exam_id=exam.code).first()
+    if attempt and attempt.group != selected_group:
+        return jsonify({
+            'success': False,
+            'message': f'Bu sınav için kitapçık seçimin kilitli: {attempt.group}.',
+            'locked_group': attempt.group,
+        }), 400
+
+    if not attempt:
+        attempt = ExamAttempt(user_id=current_user.id, exam_id=exam.code, group=selected_group)
+        db.session.add(attempt)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            attempt = ExamAttempt.query.filter_by(user_id=current_user.id, exam_id=exam.code).first()
+            if attempt and attempt.group != selected_group:
+                return jsonify({
+                    'success': False,
+                    'message': f'Bu sınav için kitapçık seçimin kilitli: {attempt.group}.',
+                    'locked_group': attempt.group,
+                }), 400
+    return jsonify({
+        'success': True,
+        'message': 'Kitapçık seçimi kilitlendi.',
+        'group': attempt.group if attempt else selected_group,
+    })
+
+
 @main.route('/exam/<string:exam_code>/question/<int:question_no>')
 @login_required
 def exam_question_detail(exam_code, question_no):

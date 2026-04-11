@@ -23,8 +23,8 @@
 
         .exam-layout {
             align-items: start;
-            max-width: 1500px;
-            grid-template-columns: 280px minmax(0, 1.35fr) 340px;
+            max-width: 1600px;
+            grid-template-columns: 280px minmax(0, 1fr);
             gap: 24px;
         }
 
@@ -548,6 +548,18 @@
         }
 
         @media (max-width: 768px) {
+            .exam-layout {
+                grid-template-columns: 1fr !important;
+                margin: 78px 0 70px !important;
+                padding: 0 12px !important;
+                gap: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .exam-layout .left-sidebar {
+                display: none !important;
+            }
+
             .exam-hero {
                 padding: 16px;
                 border-radius: 22px;
@@ -598,7 +610,7 @@
                             <span>Soru</span>
                         </div>
                         <div class="exam-mini-stat">
-                            <strong>{{ selected_group }}</strong>
+                            <strong id="activeGroupLabel">{{ selected_group }}</strong>
                             <span>Aktif kitapçık</span>
                         </div>
                         <div class="exam-mini-stat">
@@ -679,77 +691,6 @@
                 {% endfor %}
             </section>
         </main>
-
-        <aside class="right-sidebar sticky-sidebar">
-            <div class="right-widget">
-                <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-circle-info"></i> Nasıl çalışır</h3>
-                </div>
-                <div class="exam-side-body">
-                    <div class="exam-side-step">
-                        <span class="exam-side-step-no">1</span>
-                        <div>
-                            <strong>Kitapçığını seç</strong>
-                            <p>A, B, C veya D seçimi ilk oyla kilitlenir.</p>
-                        </div>
-                    </div>
-                    <div class="exam-side-step">
-                        <span class="exam-side-step-no">2</span>
-                        <div>
-                            <strong>Soruyu oylayın</strong>
-                            <p>Her soru için tek oy kaydedilir ve yüzdeler canlı güncellenir.</p>
-                        </div>
-                    </div>
-                    <div class="exam-side-step">
-                        <span class="exam-side-step-no">3</span>
-                        <div>
-                            <strong>Detay sayfasına geç</strong>
-                            <p>Uzun tartışmalar soru detayında ilerler; ana ekran sade kalır.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="right-widget">
-                <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-shield-heart"></i> Kurallar</h3>
-                </div>
-                <div class="exam-side-note-list">
-                    <div class="exam-side-note">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <p>Tek soru için tek oy verilir.</p>
-                    </div>
-                    <div class="exam-side-note">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <p>Bir kitapçık seçildikten sonra başka kitapçığa geçilmez.</p>
-                    </div>
-                    <div class="exam-side-note">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <p>Görünen sonuçlar resmi değil, topluluk verisidir.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="right-widget">
-                <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-chart-simple"></i> İstatistik</h3>
-                </div>
-                <div class="exam-side-stats">
-                    <div class="exam-side-stat">
-                        <strong>{{ question_numbers | length }}</strong>
-                        <span>Soru</span>
-                    </div>
-                    <div class="exam-side-stat">
-                        <strong>{{ total_votes }}</strong>
-                        <span>Oy</span>
-                    </div>
-                    <div class="exam-side-stat">
-                        <strong>{{ total_comment_count }}</strong>
-                        <span>Yorum</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
     </div>
 
     <div id="examToast" class="exam-toast"></div>
@@ -772,21 +713,12 @@
             window.__examToastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
         }
 
-        function setActiveGroup(group) {
-            if (!ALLOWED_GROUPS.includes(group)) {
-                showExamToast('Geçersiz kitapçık seçimi.');
-                return;
-            }
-
-            if (groupLocked && group !== activeGroup) {
-                showExamToast('Bu sınav için kitapçık seçimin kilitli.');
-                return;
-            }
-
+        function syncGroupUi(group) {
             activeGroup = group;
+
             const activeLabel = document.getElementById('activeGroupLabel');
             if (activeLabel) {
-                activeLabel.textContent = group + ' Kitapçığı';
+                activeLabel.textContent = group;
             }
 
             document.querySelectorAll('.exam-group-btn').forEach((button) => {
@@ -800,6 +732,51 @@
                     groupLabel.textContent = group;
                 }
             });
+        }
+
+        async function setActiveGroup(group) {
+            if (!ALLOWED_GROUPS.includes(group)) {
+                showExamToast('Geçersiz kitapçık seçimi.');
+                return;
+            }
+
+            if (groupLocked && group !== activeGroup) {
+                showExamToast('Bu sınav için kitapçık seçimin kilitli.');
+                return;
+            }
+
+            if (groupLocked && group === activeGroup) {
+                syncGroupUi(group);
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/exams/${encodeURIComponent(EXAM_CODE)}/group`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ group })
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    if (data.locked_group) {
+                        groupLocked = true;
+                        syncGroupUi(data.locked_group);
+                    }
+                    showExamToast(data.message || 'Kitapçık seçimi kaydedilemedi.');
+                    return;
+                }
+
+                groupLocked = true;
+                syncGroupUi(data.group || group);
+                showExamToast(data.message || 'Kitapçık seçimi kilitlendi.');
+            } catch (error) {
+                showExamToast('Bağlantı hatası oluştu.');
+            }
         }
 
         function updateQuestionCard(questionNo, snapshot) {
