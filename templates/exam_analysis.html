@@ -742,8 +742,8 @@
                         </div>
                         <div class="exam-title-row">
                             <span class="exam-code-badge"><i class="fa-solid fa-qrcode"></i> {{ exam.code }}</span>
-                            <span class="exam-meta-pill"><i class="fa-solid fa-vote-yea"></i> {{ total_votes }} Total Votes</span>
-                            <span class="exam-meta-pill"><i class="fa-solid fa-shield-halved"></i> Community data, not official</span>
+                            <span class="exam-meta-pill"><i class="fa-solid fa-vote-yea"></i> {{ total_votes }} oy</span>
+                            <span class="exam-meta-pill"><i class="fa-solid fa-shield-halved"></i> Topluluk verisi, resmi değildir</span>
                         </div>
                         <p class="exam-disclaimer">{{ disclaimer }}</p>
                     </div>
@@ -751,15 +751,15 @@
                     <div class="exam-summary-grid">
                         <div class="exam-mini-stat">
                             <strong>{{ selected_group }}</strong>
-                            <span>Current booklet</span>
+                            <span>Aktif kitapçık</span>
                         </div>
                         <div class="exam-mini-stat">
                             <strong>{{ question_no }}</strong>
-                            <span>Active question</span>
+                            <span>Aktif soru</span>
                         </div>
                         <div class="exam-mini-stat">
                             <strong>{{ question.total }}</strong>
-                            <span>Votes on this question</span>
+                            <span>Bu sorudaki oy</span>
                         </div>
                     </div>
                 </div>
@@ -768,17 +768,17 @@
             <section class="exam-control-card exam-reveal" data-reveal>
                 <div class="exam-control-head">
                     <div>
-                        <h2>Booklet Selector</h2>
-                        <small>Choose A, B, C or D first. The first vote locks the booklet.</small>
+                        <h2>Kitapçık Seçici</h2>
+                        <small>Önce A, B, C veya D kitapçığını seçin. İlk oy kitapçığı kilitler.</small>
                     </div>
-                    <small>{% if attempt %}Locked to {{ selected_group }}{% else %}Ready to choose{% endif %}</small>
+                    <small>{% if attempt %}{{ selected_group }} kitapçığına kilitli{% else %}Seçim yapmaya hazır{% endif %}</small>
                 </div>
 
-                <div class="exam-booklet-strip" role="tablist" aria-label="Booklet selector">
+                <div class="exam-booklet-strip" role="tablist" aria-label="Kitapçık seçici">
                     {% for group in groups %}
                     <button type="button" class="exam-booklet-btn {% if selected_group == group %}is-active{% endif %}" data-booklet-btn data-group="{{ group }}" {% if attempt and selected_group != group %}disabled{% endif %} aria-pressed="{% if selected_group == group %}true{% else %}false{% endif %}">
-                        <span>{{ group }} Booklet</span>
-                        <small>{% if selected_group == group %}Active{% elif attempt and selected_group != group %}Locked{% else %}Tap to activate{% endif %}</small>
+                        <span>{{ group }} Kitapçığı</span>
+                        <small>{% if selected_group == group %}Seçili{% elif attempt and selected_group != group %}Kilitli{% else %}Etkinleştirmek için dokun{% endif %}</small>
                     </button>
                     {% endfor %}
                 </div>
@@ -787,13 +787,13 @@
             <section class="exam-control-card exam-reveal" data-reveal>
                 <div class="exam-control-head">
                     <div>
-                        <h2>Question Navigation</h2>
-                        <small>Swipe horizontally through the questions from 1 to 20.</small>
+                        <h2>Soru Gezgini</h2>
+                        <small>1'den 20'ye sorular arasında yatay kaydırın.</small>
                     </div>
-                    <small>{% if question.selected_option %}Answered{% else %}Unanswered{% endif %}</small>
+                    <small>{% if question.selected_option %}Cevaplandı{% else %}Cevaplanmadı{% endif %}</small>
                 </div>
 
-                <div class="exam-question-strip" aria-label="Question navigation">
+                <div class="exam-question-strip" aria-label="Soru gezgini">
                     {% for item in question_numbers %}
                     {% set item_question = question_stats[item] %}
                     <a
@@ -814,18 +814,18 @@
             <article class="exam-vote-card exam-reveal" data-reveal data-question-no="{{ question_no }}">
                 <div class="exam-vote-head">
                     <div>
-                        <div class="exam-kicker"><i class="fa-solid fa-circle-question"></i> Question {{ question_no }}</div>
-                        <h2 class="mt-2">Current Booklet: {{ selected_group }}</h2>
-                        <small>{% if question.selected_option %}Your Selection: {{ question.selected_option }}{% else %}Choose one option to lock your vote.{% endif %}</small>
+                        <div class="exam-kicker"><i class="fa-solid fa-circle-question"></i> Soru {{ question_no }}</div>
+                        <h2 class="mt-2">Aktif kitapçık: {{ selected_group }}</h2>
+                        <small>{% if question.selected_option %}Seçiminiz: {{ question.selected_option }}{% else %}Oy vermek için bir seçenek seçin.{% endif %}</small>
                     </div>
                     <div class="exam-question-meta">
-                        <span class="exam-question-chip"><i class="fa-solid fa-vote-yea"></i> <span data-question-total>{{ question.total }}</span> votes</span>
-                        <span class="exam-question-chip"><i class="fa-solid fa-comments"></i> {{ comment_counts[question_no] }} comments</span>
+                        <span class="exam-question-chip"><i class="fa-solid fa-vote-yea"></i> <span data-question-total>{{ question.total }}</span> oy</span>
+                        <span class="exam-question-chip"><i class="fa-solid fa-comments"></i> {{ comment_counts[question_no] }} yorum</span>
                     </div>
                 </div>
 
                 <div class="exam-selection-banner {% if not question.selected_option %}is-muted{% endif %}" data-selection-banner {% if not question.selected_option %}hidden{% endif %}>
-                    Your Selection: <strong data-selected-option>{{ question.selected_option }}</strong>
+                    Seçiminiz: <strong data-selected-option>{{ question.selected_option }}</strong>
                 </div>
 
                 <div class="exam-options" data-question-card="{{ question_no }}">
@@ -839,8 +839,8 @@
                                 <span class="exam-option-percent" data-option-percent="{{ option }}">{{ option_data.percentage }}%</span>
                             </div>
                             <div class="exam-option-bottom">
-                                <strong data-option-count="{{ option }}">{{ option_data.count }} votes</strong>
-                                <small>{% if question.selected_option == option %}Selected option{% else %}Tap to vote{% endif %}</small>
+                                <strong data-option-count="{{ option }}">{{ option_data.count }} oy</strong>
+                                <small>{% if question.selected_option == option %}Seçili seçenek{% else %}Oy vermek için dokun{% endif %}</small>
                             </div>
                         </div>
                     </button>
@@ -848,9 +848,9 @@
                 </div>
 
                 <div class="exam-vote-footer">
-                    <p class="exam-footer-note">Community data updates instantly after each vote. The detailed discussion opens on a dedicated page.</p>
+                    <p class="exam-footer-note">Topluluk verisi her oy sonrası anında güncellenir. Ayrıntılı tartışma ayrı sayfada açılır.</p>
                     <a class="exam-discussion-link" id="examDiscussionLink" href="{{ url_for('main.exam_question_detail', exam_code=exam.code, question_no=question_no, group=selected_group) }}">
-                        Join Question Discussion <i class="fa-solid fa-arrow-right"></i>
+                        Soru Tartışmasına Katıl <i class="fa-solid fa-arrow-right"></i>
                     </a>
                 </div>
             </article>
@@ -967,7 +967,7 @@
                 if (optionPayload && fill) {
                     fill.style.width = optionPayload.percentage + '%';
                     if (percentLabel) percentLabel.textContent = optionPayload.percentage + '%';
-                    if (countText) countText.textContent = optionPayload.count + ' votes';
+                    if (countText) countText.textContent = optionPayload.count + ' oy';
                 }
 
                 button.classList.toggle('is-selected', snapshot.selected_option === optionLetter);

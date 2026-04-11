@@ -10,168 +10,87 @@
         }
     </script>
     <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .exam-list-page {
-            --exam-display-font: 'Space Grotesk', 'Inter', sans-serif;
+        body.exam-list-page {
             background:
-                radial-gradient(circle at top left, rgba(27, 58, 107, 0.12), transparent 28%),
-                radial-gradient(circle at top right, rgba(255, 204, 0, 0.16), transparent 24%),
-                linear-gradient(180deg, #f8fbff 0%, #f5f6f8 36%, var(--bg-color) 100%);
+                radial-gradient(circle at top left, rgba(18, 61, 117, 0.10), transparent 30%),
+                radial-gradient(circle at top right, rgba(255, 204, 0, 0.10), transparent 26%),
+                linear-gradient(180deg, #f8fbff 0%, #f5f6f8 38%, var(--bg-color) 100%);
             color: var(--text-color);
             overflow-x: hidden;
         }
 
-        .exam-list-layout .left-sidebar {
-            margin-left: 8px;
-        }
-
-        html.dark-mode .exam-list-page {
-            background:
-                radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
-                radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 22%),
-                linear-gradient(180deg, #0d1220 0%, #0a0f18 100%);
-            color: #e8eef9;
-        }
-
-        html.dark-mode .exam-list-page .exam-list-hero,
-        html.dark-mode .exam-list-page .exam-toolbar,
-        html.dark-mode .exam-list-page .exam-card,
-        html.dark-mode .exam-list-page .right-widget,
-        html.dark-mode .exam-list-page .exam-list-metric,
-        html.dark-mode .exam-list-page .exam-list-panel-note,
-        html.dark-mode .exam-list-page .exam-side-step,
-        html.dark-mode .exam-list-page .exam-side-stat,
-        html.dark-mode .exam-list-page .exam-filter-pill,
-        html.dark-mode .exam-list-page .exam-card-status,
-        html.dark-mode .exam-list-page .exam-stat {
-            background: rgba(17, 24, 39, 0.88);
-            border-color: rgba(148, 163, 184, 0.16);
-            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.32);
-        }
-
-        html.dark-mode .exam-list-page .exam-list-hero,
-        html.dark-mode .exam-list-page .exam-toolbar,
-        html.dark-mode .exam-list-page .exam-card {
-            color: #e8eef9;
-        }
-
-        html.dark-mode .exam-list-page .exam-list-kicker,
-        html.dark-mode .exam-list-page .exam-list-chip,
-        html.dark-mode .exam-list-page .exam-list-summary span,
-        html.dark-mode .exam-list-page .exam-card-code,
-        html.dark-mode .exam-list-page .widget-title,
-        html.dark-mode .exam-list-page .exam-list-metric strong,
-        html.dark-mode .exam-list-page .exam-card h2,
-        html.dark-mode .exam-list-page .exam-card-status,
-        html.dark-mode .exam-list-page .exam-card-action,
-        html.dark-mode .exam-list-page .exam-side-stat strong,
-        html.dark-mode .exam-list-page .exam-side-step-no {
-            color: #f8fbff;
-        }
-
-        html.dark-mode .exam-list-page .exam-list-hero p,
-        html.dark-mode .exam-list-page .exam-list-panel-note,
-        html.dark-mode .exam-list-page .exam-card p,
-        html.dark-mode .exam-list-page .exam-side-step p,
-        html.dark-mode .exam-list-page .exam-side-note-list p,
-        html.dark-mode .exam-list-page .exam-card-footer small,
-        html.dark-mode .exam-list-page .exam-toolbar-count,
-        html.dark-mode .exam-list-page .exam-side-stat span,
-        html.dark-mode .exam-list-page .exam-list-metric span {
-            color: rgba(226, 232, 240, 0.72);
-        }
-
-        html.dark-mode .exam-list-page .exam-card.is-featured {
-            background: linear-gradient(145deg, #17386d, #0f274b);
-            color: #fff;
-        }
-
-        html.dark-mode .exam-list-page .exam-card.is-featured .exam-card-main,
-        html.dark-mode .exam-list-page .exam-card.is-featured .exam-card-main * {
-            color: #fff;
-        }
-
-        html.dark-mode .exam-list-page .exam-card.is-featured .exam-card-footer small,
-        html.dark-mode .exam-list-page .exam-card.is-featured .exam-list-panel-note {
-            color: rgba(255, 255, 255, 0.82);
-        }
-
-        html.dark-mode .exam-list-page .exam-card.is-featured .exam-card-action {
-            background: rgba(255, 255, 255, 0.96);
-            color: var(--ytu-lacivert);
-        }
-
-        body.exam-list-page {
-            color: var(--text-color);
-        }
-
-        .exam-list-layout {
+        .exam-layout {
             align-items: start;
-            max-width: 1480px;
-            grid-template-columns: 280px minmax(0, 1fr) 300px;
+            max-width: 1320px;
+            grid-template-columns: 280px minmax(0, 1fr);
             gap: 22px;
         }
 
-        .exam-list-main {
+        .exam-main {
             min-width: 0;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 16px;
         }
 
-        .exam-list-hero {
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
-            color: var(--text-color);
-            border-radius: 30px;
-            padding: 22px;
-            box-shadow: 0 18px 42px rgba(16, 36, 72, 0.08);
-            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.09);
+        .exam-hero,
+        .exam-toolbar-card,
+        .exam-card,
+        .exam-empty {
             position: relative;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            box-shadow: 0 18px 36px rgba(16, 36, 72, 0.08);
             overflow: hidden;
         }
 
-        .exam-list-hero::before {
+        .exam-hero,
+        .exam-toolbar-card,
+        .exam-empty {
+            padding: 20px;
+        }
+
+        .exam-hero::before,
+        .exam-card::before {
             content: '';
             position: absolute;
             inset: 0 auto 0 0;
-            width: 10px;
+            width: 8px;
             background: linear-gradient(180deg, var(--ytu-lacivert), #2f6fd8);
         }
 
-        .exam-list-hero::after {
+        .exam-hero::after {
             content: '';
             position: absolute;
-            inset: auto -45px -55px auto;
-            width: 220px;
-            height: 220px;
+            inset: auto -60px -70px auto;
+            width: 240px;
+            height: 240px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(var(--ytu-lacivert-rgb), 0.09), transparent 68%);
+            background: radial-gradient(circle, rgba(var(--ytu-lacivert-rgb), 0.08), transparent 68%);
             pointer-events: none;
         }
 
-        .exam-list-hero-top {
+        .exam-hero-head {
             display: grid;
-            grid-template-columns: minmax(0, 1.15fr) minmax(320px, 420px);
-            gap: 18px;
+            grid-template-columns: minmax(0, 1.2fr) minmax(280px, 360px);
+            gap: 16px;
             align-items: stretch;
             position: relative;
             z-index: 1;
         }
 
-        .exam-list-hero-top > div:first-child {
-            display: grid;
-            gap: 14px;
-        }
-
-        .exam-list-kicker {
+        .exam-kicker {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 5px 10px;
+            width: fit-content;
+            padding: 6px 10px;
             border-radius: 999px;
             background: rgba(var(--ytu-lacivert-rgb), 0.08);
             color: var(--ytu-lacivert);
@@ -180,135 +99,110 @@
             letter-spacing: 0.02em;
         }
 
-        .exam-list-hero h1 {
-            margin: 0;
-            font-family: var(--exam-display-font);
-            font-size: clamp(2rem, 3vw, 3.1rem);
+        .exam-title h1 {
+            margin: 10px 0 0;
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            font-size: clamp(1.9rem, 3vw, 3.15rem);
             font-weight: 900;
-            line-height: 1.02;
-            letter-spacing: -0.04em;
+            line-height: 1.04;
+            letter-spacing: -0.05em;
             color: var(--text-color);
         }
 
-        .exam-list-hero p {
+        .exam-title p {
             margin: 0;
-            max-width: 720px;
+            max-width: 760px;
             line-height: 1.6;
             color: var(--text-muted);
         }
 
-        .exam-list-summary {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 10px;
-            margin-top: 4px;
-            position: relative;
-            z-index: 1;
-            font-size: 0.78rem;
-            font-weight: 700;
+        .exam-title-stack {
+            display: grid;
+            gap: 14px;
         }
 
-        .exam-list-summary span {
+        .exam-title-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .exam-code-badge,
+        .exam-meta-pill {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 10px;
+            padding: 8px 12px;
             border-radius: 999px;
-            background: rgba(var(--ytu-lacivert-rgb), 0.06);
-            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.08);
-            color: var(--text-color);
-        }
-
-        .exam-list-summary i {
-            font-size: 0.8rem;
-            color: var(--ytu-lacivert);
-        }
-
-        .exam-list-meta {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .exam-list-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 9px 13px;
-            border-radius: 999px;
-            background: rgba(var(--ytu-lacivert-rgb), 0.06);
-            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.09);
-            color: var(--text-color);
-            font-size: 0.84rem;
+            font-size: 0.82rem;
             font-weight: 800;
         }
 
-        .exam-list-hero-panel {
-            display: grid;
-            gap: 12px;
-            padding: 14px;
-            border-radius: 24px;
-            background: linear-gradient(180deg, rgba(var(--ytu-lacivert-rgb), 0.04), rgba(var(--ytu-lacivert-rgb), 0.015));
-            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.08);
-            position: relative;
-            z-index: 1;
+        .exam-code-badge {
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.12);
+            color: var(--ytu-lacivert);
         }
 
-        .exam-list-hero-panel-grid {
+        .exam-meta-pill {
+            background: rgba(var(--ytu-lacivert-rgb), 0.05);
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.09);
+            color: var(--text-color);
+        }
+
+        .exam-code-badge i,
+        .exam-meta-pill i {
+            color: var(--ytu-lacivert);
+        }
+
+        .exam-hero-summary {
+            display: grid;
+            gap: 10px;
+        }
+
+        .exam-summary-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
         }
 
-        .exam-list-metric {
-            background: var(--card-bg);
+        .exam-mini-stat {
+            background: linear-gradient(180deg, rgba(var(--ytu-lacivert-rgb), 0.06), rgba(var(--ytu-lacivert-rgb), 0.03));
             border: 1px solid var(--border-color);
             border-radius: 18px;
             padding: 14px 12px;
-            box-shadow: 0 10px 22px rgba(11, 33, 67, 0.06);
+            text-align: center;
         }
 
-        .exam-list-metric strong {
+        .exam-mini-stat strong {
             display: block;
-            font-family: var(--exam-display-font);
-            font-size: 1.8rem;
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            font-size: 1.25rem;
             font-weight: 800;
             line-height: 1;
             color: var(--ytu-lacivert);
             letter-spacing: -0.03em;
         }
 
-        .exam-list-metric span {
+        .exam-mini-stat span {
             display: block;
             margin-top: 6px;
             color: var(--text-muted);
-            font-size: 0.76rem;
+            font-size: 0.72rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }
 
-        .exam-list-panel-note {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 18px;
-            padding: 14px 14px 13px;
-            color: var(--text-muted);
-            line-height: 1.5;
-            font-size: 0.9rem;
-        }
-
-        .exam-toolbar {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            box-shadow: var(--shadow);
+        .exam-hero-note {
             padding: 14px;
-            display: grid;
-            gap: 14px;
+            border-radius: 18px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.04);
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.08);
+            color: var(--text-muted);
+            line-height: 1.55;
+            font-size: 0.92rem;
         }
 
         .exam-toolbar-top {
@@ -317,13 +211,6 @@
             gap: 12px;
             align-items: center;
             justify-content: space-between;
-        }
-
-        .exam-toolbar-count {
-            font-size: 0.88rem;
-            font-weight: 800;
-            color: var(--text-muted);
-            white-space: nowrap;
         }
 
         .exam-search {
@@ -356,10 +243,18 @@
             box-shadow: 0 0 0 4px rgba(var(--ytu-lacivert-rgb), 0.08);
         }
 
+        .exam-toolbar-count {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
         .exam-filter-pills {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
+            margin-top: 14px;
         }
 
         .exam-filter-pill {
@@ -392,42 +287,18 @@
 
         .exam-card {
             position: relative;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 26px;
-            box-shadow: 0 18px 36px rgba(16, 36, 72, 0.08);
             padding: 20px;
             display: grid;
-            grid-template-columns: 1fr;
             gap: 16px;
-            align-items: stretch;
             min-height: 220px;
-            overflow: hidden;
-        }
-
-        .exam-card::before {
-            content: '';
-            position: absolute;
-            inset: 0 auto 0 0;
-            width: 8px;
-            background: linear-gradient(180deg, var(--ytu-lacivert), #2f6fd8);
-        }
-
-        .exam-card.is-draft::before {
-            background: linear-gradient(180deg, #d97706, #f6b73c);
         }
 
         .exam-card.is-featured {
             grid-column: 1 / -1;
-            background: linear-gradient(145deg, rgba(27, 58, 107, 0.98), rgba(18, 61, 117, 0.92));
+            background: linear-gradient(145deg, rgba(18, 61, 117, 0.98), rgba(27, 58, 107, 0.92));
             border-color: rgba(255, 255, 255, 0.10);
             color: #fff;
             padding: 24px;
-        }
-
-        .exam-card.is-featured::before {
-            width: 10px;
-            background: linear-gradient(180deg, #ffffff, rgba(255, 255, 255, 0.55));
         }
 
         .exam-card-main {
@@ -435,17 +306,6 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
-        }
-
-        .exam-card-side {
-            margin-top: 2px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .exam-card-top {
@@ -465,7 +325,7 @@
 
         .exam-card h2 {
             margin: 8px 0 0;
-            font-family: var(--exam-display-font);
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
             font-size: 1.32rem;
             font-weight: 900;
             color: var(--text-color);
@@ -498,38 +358,22 @@
             font-weight: 800;
         }
 
-        .exam-card.is-featured .exam-stat,
         .exam-card.is-featured .exam-card-code,
-        .exam-card.is-featured .exam-card p {
-            color: rgba(255, 255, 255, 0.9);
+        .exam-card.is-featured .exam-card h2,
+        .exam-card.is-featured .exam-card p,
+        .exam-card.is-featured .exam-card-footer small,
+        .exam-card.is-featured .exam-stat,
+        .exam-card.is-featured .exam-card-status,
+        .exam-card.is-featured .exam-card-action {
+            color: #fff;
         }
 
-        .exam-card.is-featured .exam-card-main,
-        .exam-card.is-featured .exam-card-main * {
-            color: #fff;
+        .exam-card.is-featured .exam-card-code {
+            opacity: 0.88;
         }
 
         .exam-card.is-featured .exam-stat {
             background: rgba(255, 255, 255, 0.12);
-            color: #fff;
-        }
-
-        .exam-card.is-featured .exam-card h2 {
-            color: #fff;
-        }
-
-        .exam-card.is-featured .exam-card-side {
-            border-top-color: rgba(255, 255, 255, 0.16);
-        }
-
-        .exam-card.is-featured .exam-card-footer small {
-            color: rgba(255, 255, 255, 0.82);
-        }
-
-        .exam-card.is-featured .exam-card-action {
-            background: rgba(255, 255, 255, 0.96);
-            color: var(--ytu-lacivert);
-            box-shadow: 0 14px 28px rgba(8, 27, 55, 0.18);
         }
 
         .exam-card-status {
@@ -566,10 +410,12 @@
             justify-content: space-between;
             gap: 10px;
             flex-wrap: wrap;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-color);
         }
 
-        .exam-card-footer small {
-            color: var(--text-muted);
+        .exam-card.is-featured .exam-card-footer {
+            border-top-color: rgba(255, 255, 255, 0.16);
         }
 
         .exam-card-action {
@@ -588,14 +434,16 @@
             box-shadow: 0 14px 24px rgba(27, 58, 107, 0.16);
         }
 
+        .exam-card.is-featured .exam-card-action {
+            background: rgba(255, 255, 255, 0.96);
+            color: var(--ytu-lacivert);
+            box-shadow: 0 14px 28px rgba(8, 27, 55, 0.18);
+        }
+
         .exam-empty {
-            background: var(--card-bg);
             border: 1px dashed var(--border-color);
-            border-radius: 22px;
-            padding: 28px;
             text-align: center;
             color: var(--text-muted);
-            box-shadow: var(--shadow);
         }
 
         .exam-empty i {
@@ -605,172 +453,97 @@
             color: var(--ytu-lacivert);
         }
 
-        .right-widget {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
-            border-radius: 24px;
-            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.08);
-            box-shadow: 0 18px 36px rgba(16, 36, 72, 0.08);
-            overflow: hidden;
-            margin-bottom: 18px;
+        .exam-reveal {
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
         }
 
-        .widget-header {
-            padding: 18px 18px 14px;
-            border-bottom: 1px solid rgba(var(--ytu-lacivert-rgb), 0.08);
+        .exam-reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .widget-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 0;
-            font-family: var(--exam-display-font);
-            font-size: 1.1rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
+        html.dark-mode .exam-list-page {
+            background:
+                radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
+                radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 22%),
+                linear-gradient(180deg, #0d1220 0%, #0a0f18 100%);
+            color: #e8eef9;
+        }
+
+        html.dark-mode .exam-hero,
+        html.dark-mode .exam-toolbar-card,
+        html.dark-mode .exam-card,
+        html.dark-mode .exam-empty,
+        html.dark-mode .exam-mini-stat,
+        html.dark-mode .exam-search input,
+        html.dark-mode .exam-filter-pill {
+            background: rgba(17, 24, 39, 0.88);
+            border-color: rgba(148, 163, 184, 0.16);
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.32);
+        }
+
+        html.dark-mode .exam-title p,
+        html.dark-mode .exam-hero-note,
+        html.dark-mode .exam-card p,
+        html.dark-mode .exam-toolbar-count,
+        html.dark-mode .exam-filter-pill,
+        html.dark-mode .exam-card-footer small,
+        html.dark-mode .exam-mini-stat span {
+            color: rgba(226, 232, 240, 0.72);
+        }
+
+        html.dark-mode .exam-title h1,
+        html.dark-mode .exam-card h2,
+        html.dark-mode .exam-mini-stat strong,
+        html.dark-mode .exam-card-action,
+        html.dark-mode .exam-card-code,
+        html.dark-mode .exam-card-status,
+        html.dark-mode .exam-stat,
+        html.dark-mode .exam-code-badge,
+        html.dark-mode .exam-meta-pill {
+            color: #f8fbff;
+        }
+
+        html.dark-mode .exam-kicker,
+        html.dark-mode .exam-code-badge,
+        html.dark-mode .exam-meta-pill,
+        html.dark-mode .exam-hero-note,
+        html.dark-mode .exam-stat {
+            background: rgba(15, 23, 42, 0.92);
+            border-color: rgba(148, 163, 184, 0.16);
+        }
+
+        html.dark-mode .exam-filter-pill.is-active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        html.dark-mode .exam-card.is-featured {
+            background: linear-gradient(145deg, rgba(17, 24, 39, 0.98), rgba(15, 23, 42, 0.92));
+        }
+
+        html.dark-mode .exam-card.is-featured .exam-card-action {
+            background: rgba(255, 255, 255, 0.96);
             color: var(--ytu-lacivert);
         }
 
-        .exam-side-body,
-        .exam-side-note-list,
-        .exam-side-stats {
-            padding: 16px;
+        html.dark-mode .exam-card.is-featured .exam-card-footer {
+            border-top-color: rgba(148, 163, 184, 0.16);
         }
 
-        .exam-side-step {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 12px;
-            align-items: start;
-            padding: 12px 14px;
-            border-radius: 18px;
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-        }
-
-        .exam-side-step-no {
-            width: 32px;
-            height: 32px;
-            border-radius: 999px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            background: linear-gradient(135deg, var(--ytu-lacivert), #123d75);
-            color: #fff;
-            font-weight: 900;
-            font-size: 0.82rem;
-        }
-
-        .exam-side-step strong,
-        .exam-side-note-list strong {
-            display: block;
-            font-size: 0.93rem;
-            margin-bottom: 4px;
-            color: var(--text-color);
-        }
-
-        .exam-side-step p,
-        .exam-side-note-list p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 0.84rem;
-            line-height: 1.55;
-        }
-
-        .exam-side-note-list {
-            display: grid;
-            gap: 12px;
-        }
-
-        .exam-side-note {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 10px;
-            align-items: start;
-        }
-
-        .exam-side-note i {
-            color: var(--ytu-lacivert);
-            margin-top: 2px;
-            flex-shrink: 0;
-        }
-
-        .exam-side-stats {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 10px;
-        }
-
-        .exam-side-stat {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 18px;
-            padding: 14px 10px;
-            text-align: center;
-        }
-
-        .exam-side-stat strong {
-            display: block;
-            font-family: var(--exam-display-font);
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--ytu-lacivert);
-            line-height: 1;
-        }
-
-        .exam-side-stat span {
-            display: block;
-            margin-top: 6px;
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        @media (max-width: 980px) {
-            .exam-list-layout {
-                grid-template-columns: 280px minmax(0, 1fr);
-            }
-
-            .right-sidebar {
-                display: none;
-            }
-
-            .exam-list-grid {
+        @media (max-width: 991.98px) {
+            .exam-hero-head {
                 grid-template-columns: 1fr;
-            }
-
-            .exam-list-hero-top {
-                grid-template-columns: 1fr;
-            }
-
-            .exam-list-hero-panel-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-            .exam-card.is-featured {
-                grid-column: auto;
             }
 
             .exam-list-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-            .exam-card {
-                grid-template-columns: 1fr;
-            }
-
-            .exam-card-side {
-                border-top: 1px solid var(--border-color);
-                padding-top: 14px;
-                justify-content: flex-start;
             }
         }
 
         @media (max-width: 768px) {
-            .exam-list-layout {
+            .exam-layout {
                 grid-template-columns: 1fr !important;
                 margin: 78px 0 70px !important;
                 padding: 0 12px !important;
@@ -778,22 +551,24 @@
                 max-width: 100% !important;
             }
 
-            .exam-list-layout .left-sidebar,
-            .exam-list-layout .right-sidebar {
+            .exam-layout .left-sidebar {
                 display: none !important;
             }
 
-            .exam-list-hero {
+            .exam-hero,
+            .exam-toolbar-card,
+            .exam-card,
+            .exam-empty {
                 border-radius: 22px;
                 padding: 16px;
             }
 
-            .exam-list-hero h1 {
-                font-size: clamp(1.7rem, 10vw, 2.4rem);
+            .exam-title h1 {
+                font-size: clamp(1.7rem, 10vw, 2.5rem);
             }
 
-            .exam-toolbar {
-                padding: 12px;
+            .exam-summary-grid {
+                grid-template-columns: 1fr 1fr;
             }
 
             .exam-toolbar-top {
@@ -820,13 +595,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .exam-card {
-                padding: 16px;
-                border-radius: 22px;
-            }
-
             .exam-card.is-featured {
-                padding: 18px;
+                grid-column: auto;
             }
 
             .exam-card-action {
@@ -834,97 +604,91 @@
                 min-width: 0;
             }
 
-            .exam-list-hero-panel-grid,
-            .exam-side-stats {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .exam-side-body,
-            .exam-side-note-list,
-            .exam-side-stats {
-                padding: 14px;
-            }
-
-            .exam-side-step {
-                padding: 12px;
+            .exam-card-footer {
+                align-items: stretch;
             }
         }
     </style>
 </head>
-<body class="exam-list-page">
+<body class="exam-page exam-list-page">
     {% include 'navbar_partial.html' ignore missing %}
     {% include 'exam_mobile_shell.html' %}
 
     {% set published_count = analyses | selectattr('is_published') | list | length %}
     {% set draft_count = total_count - published_count %}
+    {% set total_question_count = analyses | map(attribute='question_count') | sum %}
 
-    <div class="main-layout exam-list-layout">
+    <div class="main-layout exam-layout">
         {% include 'sidebar_partial.html' %}
 
-        <main class="exam-list-main">
-            <section class="exam-list-hero">
-                <div class="exam-list-hero-top">
-                    <div>
-                        <div class="exam-list-kicker"><i class="fa-solid fa-square-poll-vertical"></i> Canlı veri</div>
-                        <h1>Sınav Analizleri</h1>
-                        <p>Kitapçığını seç, sorulara oy ver ve yüzdeleri anında gör. Tartışma alanları soru bazlıdır; resmi cevap anahtarı değil, topluluk verisi gösterilir.</p>
-                        <div class="exam-list-summary">
-                            <span><i class="fa-solid fa-check"></i> {{ total_count }} erişilebilir</span>
-                            <span><i class="fa-solid fa-circle-play"></i> {{ published_count }} yayında</span>
-                            <span><i class="fa-solid fa-layer-group"></i> {{ total_count - published_count }} taslak</span>
+        <main class="exam-main">
+            <section class="exam-hero exam-reveal" data-reveal>
+                <div class="exam-hero-head">
+                    <div class="exam-title-stack">
+                        <div class="exam-kicker"><i class="fa-solid fa-square-poll-vertical"></i> Sınav Analizi</div>
+                        <div class="exam-title">
+                            <h1>Analizleri temiz kartlarda gez, filtrele ve aç.</h1>
+                        </div>
+                        <p>Bir analize dokun, ardından booklet ve soru akışında oy ver. Bu ekran sadece giriş noktasıdır; tartışma ve soru bazlı detay ayrı sayfada kalır.</p>
+                        <div class="exam-title-row">
+                            <span class="exam-code-badge"><i class="fa-solid fa-layer-group"></i> {{ total_count }} analiz</span>
+                            <span class="exam-meta-pill"><i class="fa-solid fa-circle-play"></i> {{ published_count }} yayında</span>
+                            <span class="exam-meta-pill"><i class="fa-solid fa-pencil"></i> {{ draft_count }} taslak</span>
+                            <span class="exam-meta-pill"><i class="fa-solid fa-graduation-cap"></i> {{ total_question_count }} soru</span>
                         </div>
                     </div>
-                    <div class="exam-list-hero-panel">
-                        <div class="exam-list-hero-panel-grid">
-                            <div class="exam-list-metric">
+
+                    <div class="exam-hero-summary">
+                        <div class="exam-summary-grid">
+                            <div class="exam-mini-stat">
                                 <strong>{{ total_count }}</strong>
                                 <span>Analiz</span>
                             </div>
-                            <div class="exam-list-metric">
+                            <div class="exam-mini-stat">
                                 <strong>{{ published_count }}</strong>
                                 <span>Yayında</span>
                             </div>
-                            <div class="exam-list-metric">
+                            <div class="exam-mini-stat">
                                 <strong>{{ draft_count }}</strong>
                                 <span>Taslak</span>
                             </div>
-                            <div class="exam-list-metric">
-                                <strong>{{ analyses | map(attribute='question_count') | sum }}</strong>
+                            <div class="exam-mini-stat">
+                                <strong>{{ total_question_count }}</strong>
                                 <span>Soru</span>
                             </div>
                         </div>
-                        <div class="exam-list-panel-note">
-                            Yeni tasarımda üst alan bir kontrol paneli gibi davranır; arama, filtre ve hızlı özet tek ekranda toplanır.
+                        <div class="exam-hero-note">
+                            Görünüm sade tutuldu. Sol menü sabit, mobilde üst ve alt gezinme aktif. Topluluk verisi resmi cevap anahtarı değildir.
                         </div>
                     </div>
                 </div>
-
-                <div class="exam-list-meta">
-                    <span class="exam-list-chip"><i class="fa-solid fa-shield-halved"></i> Tek kullanıcı - tek soru - tek oy</span>
-                    <span class="exam-list-chip"><i class="fa-solid fa-comments"></i> Soru bazlı tartışma</span>
-                    <span class="exam-list-chip"><i class="fa-solid fa-triangle-exclamation"></i> Resmi cevap anahtarı değildir</span>
-                </div>
             </section>
 
-            <div class="exam-toolbar">
+            <section class="exam-toolbar-card exam-reveal" data-reveal>
                 <div class="exam-toolbar-top">
                     <div class="exam-search">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input id="examSearchInput" type="search" placeholder="Kod, başlık veya açıklama ara" autocomplete="off">
+                        <input id="examSearchInput" type="search" placeholder="Kod, başlık, açıklama veya oluşturan ara" autocomplete="off" aria-label="Sınav analizi ara">
                     </div>
-                    <div class="exam-toolbar-count">{{ total_count }} analiz görünüyor</div>
+                    <div class="exam-toolbar-count" id="examVisibleCountLabel">{{ total_count }} analiz görünüyor</div>
                 </div>
                 <div class="exam-filter-pills" role="tablist" aria-label="Sınav filtreleri">
                     <button type="button" class="exam-filter-pill is-active" data-filter-status="all">Tümü</button>
                     <button type="button" class="exam-filter-pill" data-filter-status="published">Yayında</button>
                     <button type="button" class="exam-filter-pill" data-filter-status="draft">Taslak</button>
                 </div>
-            </div>
+            </section>
 
             {% if analyses %}
             <section class="exam-list-grid">
                 {% for analysis in analyses %}
-                <article class="exam-card {% if loop.first %}is-featured{% endif %} {% if analysis.is_published %}is-published{% else %}is-draft{% endif %}" data-exam-card data-status="{% if analysis.is_published %}published{% else %}draft{% endif %}" data-search="{{ (analysis.code ~ ' ' ~ analysis.title ~ ' ' ~ (analysis.disclaimer or '') ~ ' ' ~ (analysis.created_by.display_name if analysis.created_by else '')) | e }}">
+                <article
+                    class="exam-card exam-reveal {% if loop.first %}is-featured{% endif %} {% if analysis.is_published %}is-published{% else %}is-draft{% endif %}"
+                    data-reveal
+                    data-exam-card
+                    data-status="{% if analysis.is_published %}published{% else %}draft{% endif %}"
+                    data-search="{{ (analysis.code ~ ' ' ~ analysis.title ~ ' ' ~ (analysis.disclaimer or '') ~ ' ' ~ (analysis.created_by.display_name if analysis.created_by else '')) | lower | e }}"
+                >
                     <div class="exam-card-main">
                         <div class="exam-card-top">
                             <div>
@@ -934,7 +698,7 @@
                             <span class="exam-card-status {% if analysis.is_published %}is-live{% else %}is-draft{% endif %}">{% if analysis.is_published %}Yayında{% else %}Taslak{% endif %}</span>
                         </div>
 
-                        <p>{{ analysis.disclaimer[:130] if analysis.disclaimer else 'Bu analiz kullanıcı oylarına dayanır.' }}{% if analysis.disclaimer and analysis.disclaimer|length > 130 %}...{% endif %}</p>
+                        <p>{{ analysis.disclaimer[:140] if analysis.disclaimer else 'Bu analiz kullanıcı oylarına dayanır.' }}{% if analysis.disclaimer and analysis.disclaimer|length > 140 %}...{% endif %}</p>
 
                         <div class="exam-card-stats">
                             <span class="exam-stat"><i class="fa-solid fa-list-ol"></i> {{ analysis.question_count }} soru</span>
@@ -943,12 +707,10 @@
                         </div>
                     </div>
 
-                    <div class="exam-card-side">
-                        <div class="exam-card-footer">
-                            <div>
-                                <small>Oluşturan: <b>{{ analysis.created_by.display_name if analysis.created_by else '—' }}</b></small><br>
-                                <small>{{ analysis.created_at.strftime('%d %b %H:%M') }}</small>
-                            </div>
+                    <div class="exam-card-footer">
+                        <div>
+                            <small>Oluşturan: <b>{{ analysis.created_by.display_name if analysis.created_by else '—' }}</b></small><br>
+                            <small>{{ analysis.created_at.strftime('%d %b %H:%M') }}</small>
                         </div>
                         <a class="exam-card-action" href="{{ url_for('main.exam_analysis_page', exam_code=analysis.code) }}">
                             Analizi Aç <i class="fa-solid fa-arrow-right"></i>
@@ -962,83 +724,12 @@
                 Aradığın filtreye uygun analiz yok.
             </div>
             {% else %}
-            <div class="exam-empty">
+            <div class="exam-empty exam-reveal" data-reveal>
                 <i class="fa-regular fa-folder-open"></i>
                 Şu anda erişebileceğin sınav analizi yok.
             </div>
             {% endif %}
         </main>
-
-        <aside class="right-sidebar sticky-sidebar">
-            <div class="right-widget">
-                <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-circle-info"></i> Kısa akış</h3>
-                </div>
-                <div class="exam-side-body">
-                    <div class="exam-side-step">
-                        <span class="exam-side-step-no">1</span>
-                        <div>
-                            <strong>Kitapçığı kilitle</strong>
-                            <p>A, B, C veya D seçimi ilk oyla sabitlenir.</p>
-                        </div>
-                    </div>
-                    <div class="exam-side-step">
-                        <span class="exam-side-step-no">2</span>
-                        <div>
-                            <strong>Oy ver</strong>
-                            <p>Her soru için tek oy kaydedilir; yüzdeler anında değişir.</p>
-                        </div>
-                    </div>
-                    <div class="exam-side-step">
-                        <span class="exam-side-step-no">3</span>
-                        <div>
-                            <strong>Detaya geç</strong>
-                            <p>Uzun tartışma soru detay sayfasında açılır.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="right-widget">
-                <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-shield-heart"></i> Kilit notlar</h3>
-                </div>
-                <div class="exam-side-note-list">
-                    <div class="exam-side-note">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <p>Tek soru için tek oy verilir.</p>
-                    </div>
-                    <div class="exam-side-note">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <p>Kitapçık seçimi ilk oyla sabitlenir.</p>
-                    </div>
-                    <div class="exam-side-note">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <p>Görünen sonuçlar resmi değil, topluluk verisidir.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="right-widget">
-                <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-chart-simple"></i> Canlı özet</h3>
-                </div>
-                <div class="exam-side-stats">
-                    <div class="exam-side-stat">
-                        <strong>{{ total_count }}</strong>
-                        <span>Analiz</span>
-                    </div>
-                    <div class="exam-side-stat">
-                        <strong>{{ published_count }}</strong>
-                        <span>Yayında</span>
-                    </div>
-                    <div class="exam-side-stat">
-                        <strong>{{ total_count - published_count }}</strong>
-                        <span>Taslak</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
     </div>
 
     <script>
@@ -1046,6 +737,7 @@
         const filterButtons = Array.from(document.querySelectorAll('.exam-filter-pill'));
         const examCards = Array.from(document.querySelectorAll('[data-exam-card]'));
         const filteredEmpty = document.getElementById('examFilteredEmpty');
+        const visibleCountLabel = document.getElementById('examVisibleCountLabel');
         let activeFilter = 'all';
 
         function applyExamFilters() {
@@ -1065,6 +757,10 @@
                 }
             });
 
+            if (visibleCountLabel) {
+                visibleCountLabel.textContent = `${visibleCount} analiz görünüyor`;
+            }
+
             if (filteredEmpty) {
                 filteredEmpty.hidden = visibleCount > 0 || examCards.length === 0;
             }
@@ -1080,6 +776,22 @@
 
         if (searchInput) {
             searchInput.addEventListener('input', applyExamFilters);
+        }
+
+        const revealTargets = document.querySelectorAll('[data-reveal]');
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.14 });
+
+            revealTargets.forEach((target) => observer.observe(target));
+        } else {
+            revealTargets.forEach((target) => target.classList.add('is-visible'));
         }
 
         applyExamFilters();
