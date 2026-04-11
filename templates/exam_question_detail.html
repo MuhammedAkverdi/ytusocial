@@ -23,6 +23,9 @@
 
         .exam-layout {
             align-items: start;
+            max-width: 1140px;
+            grid-template-columns: 280px minmax(0, 1fr);
+            gap: 24px;
         }
 
         .exam-main {
@@ -212,7 +215,7 @@
             box-shadow: var(--shadow);
             padding: 20px;
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+            grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
             gap: 18px;
             align-items: stretch;
         }
@@ -655,6 +658,18 @@
         }
 
         @media (max-width: 768px) {
+            .exam-layout {
+                grid-template-columns: 1fr !important;
+                margin: 78px 0 70px !important;
+                padding: 0 12px !important;
+                gap: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .exam-layout .left-sidebar {
+                display: none !important;
+            }
+
             .exam-detail-hero {
                 padding: 16px;
                 border-radius: 22px;
