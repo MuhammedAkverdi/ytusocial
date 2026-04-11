@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, current_app, send_from_directory, abort
 from flask_login import login_required, current_user
 from extensions import db, socketio
-from models import User, Post, Story, Club, ClubVote, ClubPost, Poll, PollOption, PollVote, SavedPost, Comment, Message, Notification, Feedback, Note, NoteVote, Advert, StoryView, likes, ExamAnalysis, ExamAttempt, ExamResponse, ExamComment
+from models import User, Post, Story, Club, ClubVote, ClubPost, Poll, PollOption, PollVote, SavedPost, Comment, Message, Notification, Feedback, Note, NoteVote, Advert, StoryView, likes, followers as followers_table, blocked_users as blocked_users_table, story_views as story_views_table, club_followers as club_followers_table, ExamAnalysis, ExamAttempt, ExamResponse, ExamComment
 from utils import optimize_and_save_image, allowed_file, create_notification, get_trending_hashtags, get_file_size_str, icerik_temiz_mi, scan_file_safety, ALLOWED_NOTE_EXTENSIONS, allowed_image_file, upload_club_logo_to_spaces
 from flask_wtf.csrf import validate_csrf
 from sqlalchemy.exc import IntegrityError
@@ -41,6 +41,44 @@ def _purge_post_tree(post):
         db.session.delete(post)
 
     return deleted_count
+
+
+def _cleanup_user_related_data(user_id, story_ids=None):
+    db.session.execute(
+        followers_table.delete().where(
+            (followers_table.c.follower_id == user_id) | (followers_table.c.followed_id == user_id)
+        )
+    )
+    db.session.execute(
+        blocked_users_table.delete().where(
+            (blocked_users_table.c.blocker_id == user_id) | (blocked_users_table.c.blocked_id == user_id)
+        )
+    )
+    db.session.execute(story_views_table.delete().where(story_views_table.c.user_id == user_id))
+    if story_ids:
+        db.session.execute(story_views_table.delete().where(story_views_table.c.story_id.in_(story_ids)))
+    db.session.execute(club_followers_table.delete().where(club_followers_table.c.user_id == user_id))
+    db.session.execute(likes.delete().where(likes.c.user_id == user_id))
+
+    SavedPost.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    StoryView.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    Comment.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    Notification.query.filter(
+        (Notification.user_id == user_id) | (Notification.actor_id == user_id)
+    ).delete(synchronize_session=False)
+    Message.query.filter(
+        (Message.sender_id == user_id) | (Message.recipient_id == user_id)
+    ).delete(synchronize_session=False)
+    Feedback.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    ClubVote.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    PollVote.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    NoteVote.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    Advert.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    Note.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    ExamComment.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    ExamResponse.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    ExamAttempt.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    ExamAnalysis.query.filter_by(created_by_id=user_id).delete(synchronize_session=False)
 
 
 def _soft_shuffle_reels(posts, user_id):
@@ -270,15 +308,34 @@ def like_post(post_id):
     post = Post.query.get_or_404(post_id)
     target_post = post.repost_of if post.repost_of else post
 
-    if current_user in target_post.liked_by:
-        target_post.liked_by.remove(current_user)
+    like_exists = db.session.query(likes.c.user_id).filter(
+        likes.c.user_id == current_user.id,
+        likes.c.post_id == target_post.id
+    ).first() is not None
+
+    if like_exists:
+        db.session.execute(likes.delete().where(
+            likes.c.user_id == current_user.id,
+            likes.c.post_id == target_post.id
+        ))
         action = 'unliked'
     else:
-        target_post.liked_by.append(current_user)
-        action = 'liked'
-        create_notification(target_post.author, current_user, 'liked', target_post)
+        try:
+            db.session.execute(likes.insert().values(
+                user_id=current_user.id,
+                post_id=target_post.id
+            ))
+            action = 'liked'
+            create_notification(target_post.author, current_user, 'liked', target_post)
+        except IntegrityError:
+            db.session.rollback()
+            action = 'liked'
+
     db.session.commit()
-    return jsonify({"likes_count": len(target_post.liked_by), "action": action})
+    likes_count = db.session.query(func.count()).select_from(likes).filter(
+        likes.c.post_id == target_post.id
+    ).scalar() or 0
+    return jsonify({"likes_count": likes_count, "action": action})
 
 @main.route('/save/<int:post_id>', methods=['POST'])
 @login_required
@@ -1570,27 +1627,15 @@ def delete_account():
             return jsonify({'success': False, 'message': 'Şifre hatalı!'})
         
         user_id = current_user.id
-        
-        # Tüm post'ları sil
-        posts = Post.query.filter_by(author_id=user_id).all()
-        for post in posts:
+
+        story_ids = [story.id for story in list(current_user.stories)]
+        _cleanup_user_related_data(user_id, story_ids=story_ids)
+
+        for post in list(current_user.posts):
             _purge_post_tree(post)
-        
-        # Tüm story'leri sil
-        Story.query.filter_by(author_id=user_id).delete()
-        
-        # Tüm takip ilişkilerini sil
-        current_user.followers.clear()
-        current_user.following.clear()
-        
-        # Tüm mesajları sil
-        Message.query.filter(
-            (Message.sender_id == user_id) | (Message.recipient_id == user_id)
-        ).delete()
-        
-        # Tüm yorum/beğenleri sil
-        Comment.query.filter_by(author_id=user_id).delete()
-        likes.delete().where(likes.c.user_id == user_id)
+
+        for story in list(current_user.stories):
+            db.session.delete(story)
         
         # Hesabı kapat (silme yerine is_active = False yapabilirsin)
         db.session.delete(current_user)

@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from extensions import db
 from models import User, Post, Feedback, Club, Note, ClubVote, NoteVote, Notification, Advert, ExamAnalysis, ExamAttempt, ExamResponse, ExamComment
 from utils import allowed_image_file, upload_club_logo_to_spaces, get_online_user_count
-from routes.main import _purge_post_tree
+from routes.main import _purge_post_tree, _cleanup_user_related_data
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
 from sqlalchemy.exc import IntegrityError
@@ -472,26 +472,15 @@ def admin_delete_user(user_id):
         return redirect(url_for('admin.admin_panel'))
     username = user.username
     try:
-        from models import Comment, Story
-        Notification.query.filter(
-            (Notification.user_id == user.id) | (Notification.actor_id == user.id)
-        ).delete(synchronize_session=False)
-        Feedback.query.filter_by(user_id=user.id).delete()
-        ClubVote.query.filter_by(user_id=user.id).delete()
-        NoteVote.query.filter_by(user_id=user.id).delete()
-        Advert.query.filter_by(user_id=user.id).delete()
-        Note.query.filter_by(user_id=user.id).delete()
-        for exam in list(ExamAnalysis.query.filter_by(created_by_id=user.id)):
-            db.session.delete(exam)
-        ExamComment.query.filter_by(user_id=user.id).delete(synchronize_session=False)
-        ExamResponse.query.filter_by(user_id=user.id).delete(synchronize_session=False)
-        ExamAttempt.query.filter_by(user_id=user.id).delete(synchronize_session=False)
-        user.messages_sent.delete()
-        user.messages_received.delete()
-        Comment.query.filter_by(user_id=user.id).delete(synchronize_session=False)
-        Story.query.filter_by(user_id=user.id).delete()
+        story_ids = [story.id for story in list(user.stories)]
+        _cleanup_user_related_data(user.id, story_ids=story_ids)
+
+        for story in list(user.stories):
+            db.session.delete(story)
+
         for post in list(user.posts):
-            db.session.delete(post)
+            _purge_post_tree(post)
+
         db.session.flush()
         db.session.delete(user)
         db.session.commit()

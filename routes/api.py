@@ -38,7 +38,7 @@ def get_story_api(story_id):
     story_data = {
         'id': story.id,
         'file': story.image_file,
-        'timestamp': story.date_posted.strftime('%H:%M'),
+        'timestamp': story.timestamp.strftime('%H:%M'),
         'seen': False,
         'viewers': []
     }
@@ -206,7 +206,7 @@ def my_votes():
 @login_required
 def api_random_posts():
     import random
-    posts = Post.query.filter(Post.image_file != None).all()
+    posts = Post.query.filter(Post.image_file.isnot(None)).all()
     random.shuffle(posts)
     posts = posts[:20]
     results = []

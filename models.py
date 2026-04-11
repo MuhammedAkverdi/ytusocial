@@ -21,7 +21,8 @@ story_views = db.Table('story_views',
 
 likes = db.Table('likes',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('post_id', db.Integer, db.ForeignKey('post.id'))
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
+    db.UniqueConstraint('user_id', 'post_id', name='uq_likes_user_post')
 )
 
 club_followers = db.Table('club_followers',
