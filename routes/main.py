@@ -79,6 +79,7 @@ def _soft_shuffle_reels(posts, user_id):
 EXAM_GROUPS = ('A', 'B', 'C', 'D')
 EXAM_OPTIONS = ('A', 'B', 'C', 'D', 'E')
 EXAM_DISCLAIMER = 'Bu sonuçlar kullanıcı oylarıyla oluşmaktadır, resmi cevap anahtarı değildir.'
+EXAM_COMING_SOON_MESSAGE = 'Sınav analizi şu anda yalnızca yöneticilere açık. Çok yakında açılıyor.'
 
 
 def _exam_csrf_valid():
@@ -95,7 +96,15 @@ def _exam_csrf_valid():
 
 
 def _exam_access_allowed(exam):
-    return exam.is_published or current_user.is_admin or exam.created_by_id == current_user.id
+    return current_user.is_admin
+
+
+def _exam_coming_soon_page():
+    return render_template('exam_coming_soon.html', message=EXAM_COMING_SOON_MESSAGE)
+
+
+def _exam_coming_soon_json():
+    return jsonify({'success': False, 'message': EXAM_COMING_SOON_MESSAGE}), 403
 
 
 def _exam_snapshot(exam, question_no):
@@ -1057,8 +1066,8 @@ def vote_poll(poll_id, option_id):
 @main.route('/exam/<string:exam_code>')
 @login_required
 def exam_analysis_page(exam_code):
-    if not current_user.is_verified:
-        return redirect(url_for('auth.verify', email=current_user.email))
+    if not current_user.is_admin:
+        return _exam_coming_soon_page(), 200
 
     exam = ExamAnalysis.query.filter_by(code=exam_code).first_or_404()
     if not _exam_access_allowed(exam):
@@ -1101,8 +1110,8 @@ def exam_analysis_page(exam_code):
 @main.route('/api/exams/<string:exam_code>/group', methods=['POST'])
 @login_required
 def exam_group_api(exam_code):
-    if not current_user.is_verified:
-        return jsonify({'success': False, 'message': 'Önce hesabını doğrulamalısın.'}), 403
+    if not current_user.is_admin:
+        return _exam_coming_soon_json()
     if not _exam_csrf_valid():
         return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
 
@@ -1148,8 +1157,8 @@ def exam_group_api(exam_code):
 @main.route('/exam/<string:exam_code>/question/<int:question_no>')
 @login_required
 def exam_question_detail(exam_code, question_no):
-    if not current_user.is_verified:
-        return redirect(url_for('auth.verify', email=current_user.email))
+    if not current_user.is_admin:
+        return _exam_coming_soon_page(), 200
 
     exam = ExamAnalysis.query.filter_by(code=exam_code).first_or_404()
     if not _exam_access_allowed(exam):
@@ -1190,8 +1199,8 @@ def exam_question_detail(exam_code, question_no):
 @main.route('/exam-analyses')
 @login_required
 def exam_analyses():
-    if not current_user.is_verified:
-        return redirect(url_for('auth.verify', email=current_user.email))
+    if not current_user.is_admin:
+        return _exam_coming_soon_page(), 200
 
     analyses = ExamAnalysis.query.order_by(ExamAnalysis.created_at.desc()).all()
     visible_analyses = [analysis for analysis in analyses if _exam_access_allowed(analysis)]
@@ -1205,8 +1214,8 @@ def exam_analyses():
 @main.route('/api/exams/<string:exam_code>/vote', methods=['POST'])
 @login_required
 def exam_vote_api(exam_code):
-    if not current_user.is_verified:
-        return jsonify({'success': False, 'message': 'Önce hesabını doğrulamalısın.'}), 403
+    if not current_user.is_admin:
+        return _exam_coming_soon_json()
     if not _exam_csrf_valid():
         return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
 
@@ -1296,8 +1305,8 @@ def exam_vote_api(exam_code):
 @main.route('/api/exams/<string:exam_code>/comment', methods=['POST'])
 @login_required
 def exam_comment_api(exam_code):
-    if not current_user.is_verified:
-        return jsonify({'success': False, 'message': 'Önce hesabını doğrulamalısın.'}), 403
+    if not current_user.is_admin:
+        return _exam_coming_soon_json()
     if not _exam_csrf_valid():
         return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
 
@@ -1365,8 +1374,8 @@ def exam_comment_api(exam_code):
 @main.route('/api/exams/<string:exam_code>/comments/<int:comment_id>/report', methods=['POST'])
 @login_required
 def report_exam_comment_api(exam_code, comment_id):
-    if not current_user.is_verified:
-        return jsonify({'success': False, 'message': 'Önce hesabını doğrulamalısın.'}), 403
+    if not current_user.is_admin:
+        return _exam_coming_soon_json()
     if not _exam_csrf_valid():
         return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
 
