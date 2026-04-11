@@ -23,6 +23,9 @@
 
         .exam-layout {
             align-items: start;
+            max-width: 1500px;
+            grid-template-columns: 280px minmax(0, 1.35fr) 340px;
+            gap: 24px;
         }
 
         .exam-main {
@@ -146,19 +149,6 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.04em;
-        }
-
-        .exam-hero-note {
-            margin-top: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 14px;
-            border-radius: 16px;
-            background: rgba(var(--ytu-lacivert-rgb), 0.05);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            font-weight: 700;
         }
 
         .exam-toolbar {
@@ -617,10 +607,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="exam-hero-note">
-                    <i class="fa-solid fa-circle-info"></i>
-                    Tartışma uzun uzadıya bu sayfada durmuyor. Her soru için detay ve yorumlar ayrı sayfada açılıyor.
-                </div>
             </section>
 
             <div class="exam-toolbar">
@@ -633,7 +619,6 @@
                 </div>
                 <div class="exam-stats">
                     <span class="exam-stat-chip"><i class="fa-solid fa-lock"></i> {% if attempt %}Kitapçık kilitli{% else %}Kitapçık serbest{% endif %}</span>
-                    <span class="exam-stat-chip"><i class="fa-solid fa-rocket"></i> Sayfa yenilenmeden oylar güncellenir</span>
                 </div>
             </div>
 

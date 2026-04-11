@@ -147,21 +147,6 @@
             letter-spacing: 0.04em;
         }
 
-        .exam-detail-note {
-            margin-top: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 14px;
-            border-radius: 16px;
-            background: rgba(var(--ytu-lacivert-rgb), 0.05);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            font-weight: 700;
-            position: relative;
-            z-index: 1;
-        }
-
         .exam-toolbar {
             display: flex;
             flex-wrap: wrap;
@@ -225,10 +210,10 @@
             border: 1px solid var(--border-color);
             border-radius: 24px;
             box-shadow: var(--shadow);
-            padding: 18px;
+            padding: 20px;
             display: grid;
-            grid-template-columns: minmax(0, 1fr) 220px;
-            gap: 16px;
+            grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+            gap: 18px;
             align-items: stretch;
         }
 
@@ -360,13 +345,20 @@
             flex-direction: column;
             justify-content: space-between;
             gap: 12px;
-            padding-left: 16px;
-            border-left: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(var(--ytu-lacivert-rgb), 0.04), rgba(var(--ytu-lacivert-rgb), 0.015));
+            border: 1px solid var(--border-color);
+            min-width: 0;
         }
 
         .exam-side-panel {
             display: grid;
             gap: 10px;
+            padding: 14px;
+            border-radius: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
         }
 
         .exam-side-panel strong {
@@ -653,10 +645,8 @@
             }
 
             .exam-question-side {
-                padding-left: 0;
-                border-left: none;
+                padding: 14px;
                 border-top: 1px solid var(--border-color);
-                padding-top: 14px;
             }
 
             .exam-options {
@@ -714,10 +704,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="exam-detail-note">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    Bu soru için yorumlar burada; ana listeyi şişirmeden ayrılmış durumda.
-                </div>
             </section>
 
             <div class="exam-toolbar">
@@ -729,7 +715,6 @@
                     {% endfor %}
                 </div>
                 <div class="exam-stats">
-                    <span class="exam-stat-chip"><i class="fa-solid fa-rocket"></i> Canlı oylar güncellenir</span>
                     <span class="exam-stat-chip"><i class="fa-solid fa-lock"></i> İlk seçim kitapçığı kilitler</span>
                 </div>
             </div>
