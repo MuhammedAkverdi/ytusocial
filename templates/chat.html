@@ -286,9 +286,7 @@
 
                     {% elif msg.msg_type == "video" %}
                     <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %} media">
-                        <video controls controlsList="nodownload" class="ig-video-msg">
-                            <source src="/static/message_files/{{ msg.file_path }}">
-                        </video>
+                        <video controls controlsList="nodownload" class="ig-video-msg" preload="none" data-src="/static/message_files/{{ msg.file_path }}" playsinline webkit-playsinline>Tarayıcınız videoyu desteklemiyor.</video>
                         <span class="ig-msg-time" style="padding:0 4px;">{{ msg.timestamp.strftime("%H:%M") }}</span>
                     </div>
 
@@ -503,7 +501,11 @@
                 thumbEl.innerHTML='<img src="'+url+'" alt="preview">';
             }else if(file.type.startsWith("video/")){
                 var url=URL.createObjectURL(file);
-                thumbEl.innerHTML='<video src="'+url+'" controls></video>';
+                thumbEl.innerHTML='<video data-src="'+url+'" controls preload="metadata" playsinline webkit-playsinline></video>';
+                var previewVideo = thumbEl.querySelector('video');
+                if (previewVideo && typeof prepareLazyVideo === 'function') {
+                    prepareLazyVideo(previewVideo, { preload: 'metadata' });
+                }
             }else if(file.type.startsWith("audio/")){
                 var url=URL.createObjectURL(file);
                 thumbEl.innerHTML='<div class="x-preview-audio"><i class="fa-solid fa-music"></i><audio controls controlsList="nodownload" src="'+url+'"></audio><span>'+file.name+'</span></div>';

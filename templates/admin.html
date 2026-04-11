@@ -547,7 +547,7 @@
                                 <div style="display: flex; gap: 10px; align-items: center;">
                                     {% if post.image_file %}
                                         {% if post.is_video() %}
-                                            <video src="/static/post_images/{{ post.image_file }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);"></video>
+                                            <video data-src="/static/post_images/{{ post.image_file }}" preload="none" playsinline webkit-playsinline style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);"></video>
                                         {% else %}
                                             <img src="/static/post_images/{{ post.image_file }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);">
                                         {% endif %}

@@ -637,7 +637,7 @@
                     {% if display_post.image_file %}
                     <div class="t-media">
                         {% if display_post.is_video() %}
-                            <video src="/static/post_images/{{ display_post.image_file }}" controls onclick="event.stopPropagation()"></video>
+                            <video data-src="/static/post_images/{{ display_post.image_file }}" controls playsinline webkit-playsinline preload="none" onclick="event.stopPropagation()"></video>
                         {% else %}
                             <img src="/static/post_images/{{ display_post.image_file }}">
                         {% endif %}

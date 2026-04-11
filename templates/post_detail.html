@@ -961,8 +961,8 @@
                 <section class="post-detail-story">
                     {% if post.image_file %}
                         {% if post.is_video() %}
-                            <video controls class="pd-media pd-media-video" playsinline>
-                                <source src="/static/post_images/{{ post.image_file }}">
+                            <video controls class="pd-media pd-media-video" playsinline webkit-playsinline preload="none" data-src="/static/post_images/{{ post.image_file }}">
+                                Tarayıcınız video oynatmayı desteklemiyor.
                             </video>
                         {% else %}
                             <img src="/static/post_images/{{ post.image_file }}" class="pd-media pd-media-image" alt="Post" loading="lazy">

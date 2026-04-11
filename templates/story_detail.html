@@ -321,7 +321,7 @@
         <!-- Media -->
         <div class="story-media-box">
             {% if story.image_file.lower().endswith(('.mp4', '.mov', '.avi', '.webm', '.mkv')) %}
-                <video src="/static/story_images/{{ story.image_file }}" class="story-media" autoplay playsinline controls></video>
+                <video data-src="/static/story_images/{{ story.image_file }}" class="story-media" autoplay playsinline webkit-playsinline controls preload="metadata"></video>
             {% else %}
                 <img src="/static/story_images/{{ story.image_file }}" class="story-media" alt="Story">
             {% endif %}

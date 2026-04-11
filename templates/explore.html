@@ -506,7 +506,7 @@
                 <div class="insta-item" onclick="window.location.href='{{ url_for('main.post_detail', post_id=post.id) }}'">
                     {% if post.image_file %}
                         {% if post.is_video() %}
-                            <video src="/static/post_images/{{ post.image_file }}" class="insta-media"></video>
+                            <video data-src="/static/post_images/{{ post.image_file }}" class="insta-media" preload="none" playsinline webkit-playsinline></video>
                             <i class="fa-solid fa-video video-icon"></i>
                         {% else %}
                             <img src="/static/post_images/{{ post.image_file }}" class="insta-media">
@@ -695,7 +695,7 @@
                     }
                     grid.innerHTML = data.posts.map(function(p) {
                         var media = p.is_video
-                            ? '<video src="/static/post_images/' + p.image_file + '" class="mob-insta-media"></video><i class="fa-solid fa-video mob-video-icon"></i>'
+                            ? '<video data-src="/static/post_images/' + p.image_file + '" class="mob-insta-media" preload="none" playsinline webkit-playsinline></video><i class="fa-solid fa-video mob-video-icon"></i>'
                             : '<img src="/static/post_images/' + p.image_file + '" class="mob-insta-media" loading="lazy">';
                         return '<div class="mob-insta-item" onclick="location.href=\'/p/' + p.id + '\'">' +
                             media +

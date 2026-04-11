@@ -341,7 +341,7 @@
                         <div style="color:var(--text-muted);line-height:1.55;font-size:.9rem;">{{ post.content | format_tags }}</div>
                         {% if post.image_file %}
                             {% if post.is_video() %}
-                                <video controls class="event-media"><source src="/static/post_images/{{ post.image_file }}" type="video/mp4"></video>
+                                <video controls class="event-media" playsinline webkit-playsinline preload="none" data-src="/static/post_images/{{ post.image_file }}">Tarayıcınız video oynatmayı desteklemiyor.</video>
                             {% else %}
                                 <img src="/static/post_images/{{ post.image_file }}" class="event-media" onclick="openLightbox(this.src)" alt="Etkinlik görseli">
                             {% endif %}

@@ -119,10 +119,9 @@
                 {% if display_post.image_file %}
                 <div class="post-image-container">
                     {% if display_post.is_video() %}
-                        <video controls class="post-image" style="background: black;">
-                            <source src="/static/post_images/{{ display_post.image_file }}" type="video/mp4">
-                            Tarayıcınız video oynatmayı desteklemiyor.
-                        </video>
+                            <video controls class="post-image" style="background: black;" playsinline webkit-playsinline preload="none" data-src="/static/post_images/{{ display_post.image_file }}">
+                                Tarayıcınız video oynatmayı desteklemiyor.
+                            </video>
                     {% else %}
                         <img src="/static/post_images/{{ display_post.image_file }}" class="post-image" onclick="openLightbox(this.src)">
                     {% endif %}

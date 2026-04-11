@@ -1924,6 +1924,82 @@ window.addEventListener('click', function (event) {
     if (event.target == document.getElementById('feedbackModal')) closeFeedbackModal();
 });
 
+function captureVideoPoster(video) {
+    if (!video || video.dataset.posterCaptured === '1' || video.dataset.posterGenerating === '1') return;
+    if (video.getAttribute('poster')) {
+        video.dataset.posterCaptured = '1';
+        return;
+    }
+
+    const finish = function () {
+        video.dataset.posterGenerating = '0';
+    };
+
+    const paintPoster = function () {
+        if (!video.videoWidth || !video.videoHeight) {
+            finish();
+            return;
+        }
+
+        try {
+            const canvas = document.createElement('canvas');
+            const maxWidth = 720;
+            const scale = Math.min(1, maxWidth / video.videoWidth);
+            canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+            canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+
+            const context = canvas.getContext('2d');
+            if (!context) {
+                finish();
+                return;
+            }
+
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            video.poster = canvas.toDataURL('image/jpeg', 0.82);
+            video.dataset.posterCaptured = '1';
+        } catch (error) {
+            console.log('Video poster oluşturulamadı:', error);
+        } finally {
+            finish();
+        }
+    };
+
+    video.dataset.posterGenerating = '1';
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        window.requestAnimationFrame(paintPoster);
+        return;
+    }
+
+    video.addEventListener('loadeddata', function onLoadedData() {
+        window.requestAnimationFrame(paintPoster);
+    }, { once: true });
+
+    video.addEventListener('error', finish, { once: true });
+}
+
+function prepareLazyVideo(video, options = {}) {
+    if (!video) return false;
+
+    const source = video.dataset.src;
+    if (!source) return false;
+
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.preload = options.preload || video.getAttribute('preload') || 'metadata';
+
+    if (!video.src) {
+        video.src = source;
+        video.load();
+    }
+
+    if (options.capturePoster !== false) {
+        captureVideoPoster(video);
+    }
+
+    return true;
+}
+
 // REELS SAYFASI ETKİLEŞİMLERİ
 document.addEventListener('DOMContentLoaded', function () {
     if (!document.body.classList.contains('reels-mode')) return;
@@ -2004,7 +2080,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!video) return;
 
             if (entry.isIntersecting) {
-                video.play().catch(e => console.log("Otomatik oynatma engellendi:", e));
+                prepareLazyVideo(video, { preload: 'metadata' });
+
+                if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+                    video.play().catch(e => console.log("Otomatik oynatma engellendi:", e));
+                } else {
+                    video.addEventListener('canplay', function onCanPlay() {
+                        video.play().catch(e => console.log("Otomatik oynatma engellendi:", e));
+                    }, { once: true });
+                }
             } else {
                 video.pause();
             }
@@ -2045,6 +2129,33 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+document.addEventListener('DOMContentLoaded', function () {
+    const lazyVideos = document.querySelectorAll('video[data-src]');
+    if (!lazyVideos.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+        lazyVideos.forEach(function (video) {
+            prepareLazyVideo(video, { preload: 'metadata' });
+        });
+        return;
+    }
+
+    const lazyVideoObserver = new IntersectionObserver(function (entries, observer) {
+        entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+
+            prepareLazyVideo(entry.target, { preload: 'metadata' });
+            observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.25, rootMargin: '200px 0px' });
+
+    lazyVideos.forEach(function (video) {
+        if (video.dataset.lazyObserved === '1') return;
+        video.dataset.lazyObserved = '1';
+        lazyVideoObserver.observe(video);
+    });
+});
+
 // Anasayfa video kartları görünüm dışına çıkınca otomatik durur.
 document.addEventListener('DOMContentLoaded', function () {
     const feedContainer = document.getElementById('feedContainer');
@@ -2052,18 +2163,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function prepareFeedVideo(video) {
         if (!video) return;
-        video.playsInline = true;
-        video.setAttribute('playsinline', '');
-        video.setAttribute('webkit-playsinline', '');
-        video.preload = 'metadata';
         video.muted = false;
-        if (!video.src) {
-            const source = video.dataset.src;
-            if (source) {
-                video.src = source;
-                video.load();
-            }
-        }
+        prepareLazyVideo(video, { preload: 'metadata' });
     }
 
     function pauseFeedCardVideo(card) {
@@ -2080,9 +2181,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const video = card.querySelector('video.post-image');
             if (!video) return;
 
-            prepareFeedVideo(video);
-
-            if (!entry.isIntersecting) {
+            if (entry.isIntersecting) {
+                prepareFeedVideo(video);
+            } else {
                 pauseFeedCardVideo(card);
             }
         });
