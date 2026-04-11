@@ -11,6 +11,7 @@
     </script>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body.exam-detail-page {
@@ -685,6 +686,729 @@
                 border-radius: 18px;
             }
         }
+
+        .exam-detail-page {
+            --exam-display-font: 'Space Grotesk', 'Inter', sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(27, 58, 107, 0.10), transparent 28%),
+                radial-gradient(circle at top right, rgba(255, 204, 0, 0.10), transparent 24%),
+                linear-gradient(180deg, #f8fbff 0%, #f5f6f8 38%, var(--bg-color) 100%);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        .exam-layout {
+            align-items: start;
+            max-width: 1480px;
+            grid-template-columns: 280px minmax(0, 1fr) 300px;
+            gap: 22px;
+        }
+
+        .exam-main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .exam-detail-hero,
+        .exam-toolbar,
+        .exam-question-card,
+        .exam-discussion-card {
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 26px;
+            box-shadow: 0 18px 36px rgba(16, 36, 72, 0.08);
+            overflow: hidden;
+        }
+
+        .exam-detail-hero {
+            padding: 22px;
+            border-radius: 30px;
+        }
+
+        .exam-detail-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 10px;
+            background: linear-gradient(180deg, var(--ytu-lacivert), #2f6fd8);
+        }
+
+        .exam-detail-hero::after {
+            content: '';
+            position: absolute;
+            inset: auto -40px -50px auto;
+            width: 210px;
+            height: 210px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(var(--ytu-lacivert-rgb), 0.09), transparent 68%);
+            pointer-events: none;
+        }
+
+        .exam-detail-top {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(320px, 380px);
+            gap: 18px;
+            align-items: stretch;
+            position: relative;
+            z-index: 1;
+        }
+
+        .exam-detail-title {
+            display: grid;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .exam-detail-title h1 {
+            margin: 0;
+            font-family: var(--exam-display-font);
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: 800;
+            line-height: 1.03;
+            letter-spacing: -0.04em;
+            color: var(--text-color);
+        }
+
+        .exam-detail-title p {
+            margin: 0;
+            max-width: 780px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        .exam-detail-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            color: var(--ytu-lacivert);
+            font-size: 0.76rem;
+            font-weight: 800;
+        }
+
+        .exam-detail-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .exam-detail-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.06);
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.09);
+            color: var(--text-color);
+            font-size: 0.83rem;
+            font-weight: 800;
+        }
+
+        .exam-detail-hero-panel {
+            display: grid;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(var(--ytu-lacivert-rgb), 0.04), rgba(var(--ytu-lacivert-rgb), 0.015));
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.08);
+            position: relative;
+            z-index: 1;
+        }
+
+        .exam-detail-hero-panel-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .exam-detail-metric {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 14px 12px;
+            text-align: center;
+            box-shadow: 0 10px 22px rgba(11, 33, 67, 0.06);
+        }
+
+        .exam-detail-metric strong {
+            display: block;
+            font-family: var(--exam-display-font);
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--ytu-lacivert);
+            letter-spacing: -0.03em;
+        }
+
+        .exam-detail-metric span {
+            display: block;
+            margin-top: 6px;
+            color: var(--text-muted);
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .exam-detail-panel-note {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 14px;
+            color: var(--text-muted);
+            line-height: 1.55;
+            font-size: 0.9rem;
+        }
+
+        .exam-toolbar {
+            padding: 14px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .exam-toolbar-top {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .exam-group-switch {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .exam-group-btn {
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 999px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 800;
+            transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+        }
+
+        .exam-group-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .exam-group-btn.is-active {
+            background: linear-gradient(135deg, var(--ytu-lacivert), #123d75);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 14px 24px rgba(27, 58, 107, 0.20);
+        }
+
+        .exam-group-btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .exam-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .exam-stat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 22px rgba(11, 33, 67, 0.06);
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .exam-question-card {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .exam-question-card::before {
+            content: '';
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 8px;
+            background: linear-gradient(180deg, var(--ytu-lacivert), #2f6fd8);
+        }
+
+        .exam-question-main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .exam-question-head h2 {
+            margin: 0;
+            font-family: var(--exam-display-font);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-color);
+            letter-spacing: -0.03em;
+        }
+
+        .exam-question-meta {
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .exam-question-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            color: var(--ytu-lacivert);
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .exam-options {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .exam-option-btn {
+            position: relative;
+            overflow: hidden;
+            min-height: 100px;
+            padding: 12px;
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            background: linear-gradient(180deg, var(--card-bg), var(--bg-color));
+            color: var(--text-color);
+            cursor: pointer;
+            text-align: left;
+            transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .exam-option-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .exam-option-btn.is-selected {
+            border-color: rgba(27, 58, 107, 0.7);
+            box-shadow: 0 14px 24px rgba(27, 58, 107, 0.16);
+        }
+
+        .exam-option-btn.is-selected .exam-option-letter {
+            background: var(--ytu-lacivert);
+            color: #fff;
+        }
+
+        .exam-option-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 11px;
+            background: rgba(27, 58, 107, 0.08);
+            color: var(--ytu-lacivert);
+            font-size: 0.95rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .exam-option-fill {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(180deg, rgba(27, 58, 107, 0.16), rgba(27, 58, 107, 0.06));
+            z-index: 0;
+            transition: width 0.22s ease;
+        }
+
+        .exam-option-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .exam-option-percent {
+            display: block;
+            font-size: 1.02rem;
+            font-weight: 900;
+            margin-bottom: 2px;
+        }
+
+        .exam-option-count {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .exam-question-side {
+            display: grid;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(var(--ytu-lacivert-rgb), 0.04), rgba(var(--ytu-lacivert-rgb), 0.015));
+            border: 1px solid var(--border-color);
+            min-width: 0;
+            align-content: start;
+        }
+
+        .exam-side-panel {
+            display: grid;
+            gap: 10px;
+            padding: 14px;
+            border-radius: 18px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .exam-side-panel strong {
+            display: block;
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        .exam-side-panel p {
+            margin: 0;
+            color: var(--text-muted);
+            line-height: 1.55;
+            font-size: 0.85rem;
+        }
+
+        .exam-question-detail-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #123d75);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .exam-discussion-card {
+            padding: 20px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .exam-discussion-head h3 {
+            margin: 0;
+            font-family: var(--exam-display-font);
+            font-size: 1.08rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .exam-comments {
+            display: grid;
+            gap: 12px;
+            max-height: 460px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .exam-comment-item {
+            border: 1px solid var(--border-color);
+            background: rgba(var(--ytu-lacivert-rgb), 0.04);
+            border-radius: 18px;
+            padding: 14px 16px;
+        }
+
+        .exam-comment-form {
+            display: grid;
+            gap: 10px;
+            padding: 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+        }
+
+        .exam-comment-form textarea {
+            width: 100%;
+            min-height: 92px;
+            resize: vertical;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: 12px 14px;
+            font: inherit;
+        }
+
+        .exam-comment-actions button {
+            border: none;
+            cursor: pointer;
+            border-radius: 12px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, var(--ytu-lacivert), #123d75);
+            color: #fff;
+            font-weight: 800;
+        }
+
+        .right-widget {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 252, 0.96));
+            border-radius: 24px;
+            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.08);
+            box-shadow: 0 18px 36px rgba(16, 36, 72, 0.08);
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        .widget-header {
+            padding: 18px 18px 14px;
+            border-bottom: 1px solid rgba(var(--ytu-lacivert-rgb), 0.08);
+        }
+
+        .widget-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            font-family: var(--exam-display-font);
+            font-size: 1.08rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--ytu-lacivert);
+        }
+
+        .exam-side-body,
+        .exam-side-note-list,
+        .exam-side-stats {
+            padding: 16px;
+        }
+
+        .exam-question-nav {
+            display: grid;
+            gap: 10px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .exam-jump-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 800;
+            transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+        }
+
+        .exam-jump-item i {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .exam-jump-item:hover {
+            transform: translateY(-1px);
+        }
+
+        .exam-jump-item.is-active {
+            background: rgba(var(--ytu-lacivert-rgb), 0.08);
+            border-color: rgba(var(--ytu-lacivert-rgb), 0.14);
+            color: var(--ytu-lacivert);
+        }
+
+        .exam-side-note-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .exam-side-note {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            align-items: start;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            background: var(--card-bg);
+        }
+
+        .exam-side-note i {
+            color: var(--ytu-lacivert);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .exam-side-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .exam-side-stat {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 14px 10px;
+            text-align: center;
+            box-shadow: 0 10px 22px rgba(11, 33, 67, 0.06);
+        }
+
+        .exam-side-stat strong {
+            display: block;
+            font-family: var(--exam-display-font);
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--ytu-lacivert);
+            line-height: 1;
+        }
+
+        .exam-side-stat span {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        @media (max-width: 980px) {
+            .exam-layout {
+                grid-template-columns: 280px minmax(0, 1fr);
+            }
+
+            .right-sidebar {
+                display: none;
+            }
+
+            .exam-detail-top {
+                grid-template-columns: 1fr;
+            }
+
+            .exam-detail-hero-panel-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .exam-question-card {
+                grid-template-columns: 1fr;
+            }
+
+            .exam-question-side {
+                padding: 14px;
+            }
+
+            .exam-options {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .exam-layout {
+                grid-template-columns: 1fr !important;
+                margin: 78px 0 70px !important;
+                padding: 0 12px !important;
+                gap: 0 !important;
+                max-width: 100% !important;
+            }
+
+            .exam-layout .left-sidebar,
+            .exam-layout .right-sidebar {
+                display: none !important;
+            }
+
+            .exam-detail-hero,
+            .exam-toolbar,
+            .exam-question-card,
+            .exam-discussion-card {
+                border-radius: 22px;
+            }
+
+            .exam-detail-hero {
+                padding: 16px;
+            }
+
+            .exam-detail-title h1 {
+                font-size: clamp(1.7rem, 9vw, 2.4rem);
+            }
+
+            .exam-detail-hero-panel-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .exam-toolbar {
+                padding: 12px;
+            }
+
+            .exam-toolbar-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .exam-group-switch {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 2px;
+                scrollbar-width: thin;
+            }
+
+            .exam-group-btn {
+                flex: 0 0 auto;
+            }
+
+            .exam-question-card {
+                padding: 16px;
+            }
+
+            .exam-options {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .exam-question-detail-btn {
+                width: 100%;
+            }
+
+            .exam-comments {
+                max-height: 360px;
+            }
+
+            .exam-side-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .exam-side-body,
+            .exam-side-note-list,
+            .exam-side-stats {
+                padding: 14px;
+            }
+        }
     </style>
 </head>
 <body class="exam-page exam-detail-page">
@@ -698,7 +1422,7 @@
             <section class="exam-detail-hero">
                 <div class="exam-detail-top">
                     <div class="exam-detail-title">
-                        <div class="exam-detail-kicker"><i class="fa-solid fa-circle-info"></i> Soru detay sayfası</div>
+                        <div class="exam-detail-kicker"><i class="fa-solid fa-circle-info"></i> Canlı soru verisi</div>
                         <h1>{{ exam.title }} - Soru {{ question_no }}</h1>
                         <p>{{ disclaimer }}</p>
                         <div class="exam-detail-summary">
@@ -708,14 +1432,27 @@
                             <span class="exam-detail-pill"><i class="fa-solid fa-shield-halved"></i> {% if exam.comments_enabled %}Yorum açık{% else %}Yorum kapalı{% endif %}</span>
                         </div>
                     </div>
-                    <div class="exam-detail-quick">
-                        <div class="exam-detail-mini">
-                            <strong>{{ selected_group }}</strong>
-                            <span>Aktif kitapçık</span>
+                    <div class="exam-detail-hero-panel">
+                        <div class="exam-detail-hero-panel-grid">
+                            <div class="exam-detail-metric">
+                                <strong id="detailActiveGroupLabel">{{ selected_group }}</strong>
+                                <span>Aktif kitapçık</span>
+                            </div>
+                            <div class="exam-detail-metric">
+                                <strong id="detailLockLabel">{% if attempt %}Kilitli{% else %}Serbest{% endif %}</strong>
+                                <span>Kitapçık durumu</span>
+                            </div>
+                            <div class="exam-detail-metric">
+                                <strong id="detailTotalVotesLabel">{{ question.total }}</strong>
+                                <span>Toplam oy</span>
+                            </div>
+                            <div class="exam-detail-metric">
+                                <strong id="detailCommentCountLabel">{{ comment_count }}</strong>
+                                <span>Yorum</span>
+                            </div>
                         </div>
-                        <div class="exam-detail-mini">
-                            <strong>{% if attempt %}Kilitli{% else %}Serbest{% endif %}</strong>
-                            <span>Kitapçık durumu</span>
+                        <div class="exam-detail-panel-note">
+                            Bu soru başlığı kullanıcı oylarını ve tartışmayı tek yerde toplar; uzun yorumlar ana akışı bozmaz.
                         </div>
                     </div>
                 </div>
@@ -819,11 +1556,11 @@
                 <div class="widget-header">
                     <h3 class="widget-title"><i class="fa-solid fa-list"></i> Soru Gezgini</h3>
                 </div>
-                <div class="exam-side-body">
+                <div class="exam-side-body exam-question-nav">
                     {% for item in question_numbers %}
-                    <a href="{{ url_for('main.exam_question_detail', exam_code=exam.code, question_no=item) }}" class="exam-jump-item" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border-color);border-radius:14px;text-decoration:none;color:var(--text-color);background:{{ 'rgba(var(--ytu-lacivert-rgb),0.08)' if item == question_no else 'var(--bg-color)' }};font-weight:700;">
+                    <a href="{{ url_for('main.exam_question_detail', exam_code=exam.code, question_no=item) }}" class="exam-jump-item {% if item == question_no %}is-active{% endif %}">
                         <span>Soru {{ item }}</span>
-                        <i class="fa-solid fa-arrow-right" style="font-size:0.8rem;color:var(--text-muted);"></i>
+                        <i class="fa-solid fa-arrow-right"></i>
                     </a>
                     {% endfor %}
                 </div>
@@ -831,7 +1568,7 @@
 
             <div class="right-widget">
                 <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-shield-heart"></i> Kurallar</h3>
+                    <h3 class="widget-title"><i class="fa-solid fa-shield-heart"></i> Kilit notlar</h3>
                 </div>
                 <div class="exam-side-note-list">
                     <div class="exam-side-note">
@@ -851,7 +1588,7 @@
 
             <div class="right-widget">
                 <div class="widget-header">
-                    <h3 class="widget-title"><i class="fa-solid fa-chart-simple"></i> İstatistik</h3>
+                    <h3 class="widget-title"><i class="fa-solid fa-chart-simple"></i> Canlı özet</h3>
                 </div>
                 <div class="exam-side-stats">
                     <div class="exam-side-stat">
@@ -897,6 +1634,16 @@
             const groupLabel = document.querySelector('[data-question-group]');
             if (groupLabel) {
                 groupLabel.textContent = group;
+            }
+
+            const heroGroupLabel = document.getElementById('detailActiveGroupLabel');
+            if (heroGroupLabel) {
+                heroGroupLabel.textContent = group;
+            }
+
+            const heroLockLabel = document.getElementById('detailLockLabel');
+            if (heroLockLabel) {
+                heroLockLabel.textContent = groupLocked ? 'Kilitli' : 'Serbest';
             }
 
             document.querySelectorAll('.exam-group-btn').forEach((button) => {
@@ -958,6 +1705,11 @@
             const countLabel = card.querySelector('[data-question-count]');
             if (countLabel) {
                 countLabel.textContent = snapshot.total + ' oy';
+            }
+
+            const heroVoteLabel = document.getElementById('detailTotalVotesLabel');
+            if (heroVoteLabel) {
+                heroVoteLabel.textContent = snapshot.total;
             }
 
             if (snapshot.group) {
@@ -1115,6 +1867,12 @@
                 if (countLabel) {
                     const currentCount = parseInt(countLabel.textContent, 10) || 0;
                     countLabel.textContent = (currentCount + 1) + ' yorum';
+                }
+
+                const heroCommentLabel = document.getElementById('detailCommentCountLabel');
+                if (heroCommentLabel) {
+                    const currentHeroCount = parseInt(heroCommentLabel.textContent, 10) || 0;
+                    heroCommentLabel.textContent = currentHeroCount + 1;
                 }
 
                 textarea.value = '';
