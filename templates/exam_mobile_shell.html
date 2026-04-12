@@ -182,18 +182,141 @@
         color: var(--ytu-lacivert);
     }
 
+    .mob-drawer-sep {
+        height: 1px;
+        background: var(--border-color);
+        margin: 8px 0;
+    }
+
+    .mob-drawer-section-title {
+        padding: 12px 22px 4px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    .mob-drawer-trend {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 22px;
+        text-decoration: none;
+        color: var(--text-color);
+        transition: background 0.15s;
+    }
+
+    .mob-drawer-trend:active {
+        background: var(--bg-light);
+    }
+
+    .mob-drawer-trend-tag {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--ytu-lacivert);
+    }
+
+    .mob-drawer-trend-count {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+    }
+
+    .mob-drawer-club {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 22px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mob-drawer-club-rank {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--bg-light);
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .mob-drawer-club-rank.gold { background: linear-gradient(135deg, #FFD700, #FDB931); color: #fff; }
+    .mob-drawer-club-rank.silver { background: linear-gradient(135deg, #E0E0E0, #BDBDBD); color: #fff; }
+    .mob-drawer-club-rank.bronze { background: linear-gradient(135deg, #CD7F32, #A0522D); color: #fff; }
+
+    .mob-drawer-club-logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        object-fit: contain;
+        background: white;
+        border: 1px solid var(--border-color);
+        padding: 2px;
+        flex-shrink: 0;
+    }
+
+    .mob-drawer-club-name {
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: var(--text-color);
+    }
+
+    .mob-drawer-club-votes {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+    }
+
+    .mob-drawer-club-see-btn {
+        display: inline-block;
+        margin-top: 4px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--ytu-lacivert);
+        text-decoration: none;
+        background: rgba(var(--ytu-lacivert-rgb), 0.1);
+        padding: 2px 9px;
+        border-radius: 8px;
+        transition: background 0.15s;
+    }
+
+    .mob-drawer-club-see-btn:active {
+        background: rgba(var(--ytu-lacivert-rgb), 0.2);
+    }
+
+    .mob-drawer-logout {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 14px 22px;
+        text-decoration: none;
+        color: #e74c3c;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .mob-drawer-logout i {
+        width: 26px;
+        text-align: center;
+        font-size: 1.2rem;
+    }
+
     .mobile-bottom-nav {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        height: 60px;
+        height: 56px;
         background: var(--card-bg);
         border-top: 1px solid var(--border-color);
         align-items: center;
         justify-content: space-around;
         z-index: 5000;
         box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.07);
+        padding: 0 4px;
         padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
@@ -205,11 +328,11 @@
         justify-content: center;
         gap: 3px;
         text-decoration: none;
-        color: var(--text-muted);
-        font-size: 0.62rem;
-        font-weight: 600;
-        padding: 6px 0;
+        color: var(--text-color);
+        font-size: 1.3rem;
+        padding: 8px 0;
         transition: color 0.15s;
+        position: relative;
     }
 
     .mobile-bottom-nav a i {
@@ -218,6 +341,20 @@
 
     .mobile-bottom-nav a.active {
         color: var(--ytu-lacivert);
+    }
+
+    .mob-nav-badge {
+        position: absolute;
+        top: 4px;
+        right: calc(50% - 18px);
+        background: #ff4757;
+        color: #fff;
+        font-size: 0.55rem;
+        padding: 1px 5px;
+        border-radius: 10px;
+        font-weight: 700;
+        min-width: 16px;
+        text-align: center;
     }
 
     @media (max-width: 768px) {
@@ -246,7 +383,7 @@
 </style>
 
 <div class="mob-header" id="mobHeader">
-    <img src="/static/{{ current_user.profile_pic }}" class="mob-header-avatar" onclick="openMobileDrawer()" alt="Profil">
+    <img src="/static/{{ current_user.profile_pic }}" class="mob-header-avatar" onclick="openMobileDrawer()" alt="{{ current_user.username }}">
     <a href="/" class="mob-header-logo">YTU<span>SOCIAL</span></a>
     <div class="mob-header-right">
         <button class="mob-header-icon" onclick="toggleDarkMode()" title="Tema">🌙</button>
@@ -257,21 +394,96 @@
 
 <div class="mob-left-drawer" id="mobDrawer">
     <div class="mob-drawer-profile">
-        <img src="/static/{{ current_user.profile_pic }}" class="mob-drawer-avatar" alt="Profil">
-        <h3 class="mob-drawer-name">{{ current_user.username }}</h3>
+        <img src="/static/{{ current_user.profile_pic }}" class="mob-drawer-avatar" alt="{{ current_user.username }}">
+        <div class="mob-drawer-name">{{ current_user.username }}</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);">@{{ current_user.handle }}</div>
         <span class="mob-drawer-score">⭐ {{ current_user.score }} Puan</span>
     </div>
 
     <nav class="mob-drawer-nav">
-        <a href="{{ url_for('main.index') }}" class="mob-drawer-link {% if request.endpoint == 'main.index' %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
-        <a href="{{ url_for('main.explore') }}" class="mob-drawer-link {% if request.endpoint in ['main.explore', 'main.trending_full_list'] %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-regular fa-compass"></i> Keşfet</a>
-        <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link {% if request.endpoint == 'main.notes_pool' %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-solid fa-book-open"></i> Not Havuzu</a>
-        <a href="{{ url_for('main.exam_analyses') }}" class="mob-drawer-link {% if request.endpoint in ['main.exam_analyses', 'main.exam_analysis_page', 'main.exam_question_detail'] %}active{% endif %}" data-nav="exam-analysis" onclick="closeMobileDrawer()"><i class="fa-solid fa-square-poll-vertical"></i> Sınav Analizi</a>
-        <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link {% if request.endpoint == 'main.saved_posts_list' %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-regular fa-bookmark"></i> Kaydedilenler</a>
-        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link {% if request.endpoint == 'main.user_profile' %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-regular fa-user"></i> Profilim</a>
-        <a href="{{ url_for('main.settings') }}" class="mob-drawer-link {% if request.endpoint == 'main.settings' %}active{% endif %}" onclick="closeMobileDrawer()"><i class="fa-solid fa-gear"></i> Ayarlar</a>
-        <a href="{{ url_for('auth.logout') }}" class="mob-drawer-link" style="color:#e74c3c;" onclick="closeMobileDrawer()"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</a>
+        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+            <i class="fa-regular fa-user"></i> Profil
+        </a>
+        <a href="{{ url_for('main.messages_inbox') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+            <i class="fa-regular fa-envelope"></i>
+            <span>Mesajlar{% if unread_msg_count > 0 %} <span style="background:#ff4757;color:#fff;border-radius:10px;font-size:0.7rem;padding:2px 7px;margin-left:6px;">{{ unread_msg_count }}</span>{% endif %}</span>
+        </a>
+        <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+            <i class="fa-solid fa-book-open"></i> Not Havuzu
+        </a>
+        <a href="{{ url_for('main.exam_analyses') }}" class="mob-drawer-link" data-nav="exam-analysis" onclick="closeMobileDrawer()">
+            <i class="fa-solid fa-square-poll-vertical"></i> Sınav Analizi
+        </a>
+        <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+            <i class="fa-regular fa-bookmark"></i> Kaydedilenler
+        </a>
+        <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+            <i class="fa-solid fa-trophy"></i> Kulüpler Ligi
+        </a>
+        <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+            <i class="fa-solid fa-bullhorn"></i> İlanlar
+        </a>
+        <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+            <i class="fa-solid fa-bus"></i> Ulaşım
+        </a>
+        <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+            <i class="fa-solid fa-gear"></i> Profili Düzenle
+        </a>
     </nav>
+
+    <div class="mob-drawer-sep"></div>
+
+    <div class="mob-drawer-section-title">💡 Fikir ve Destek</div>
+    <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Öneri')">
+        <i class="fa-solid fa-lightbulb"></i> Fikir Öner
+    </a>
+    <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Diğer')">
+        <i class="fa-solid fa-comments"></i> Geri Bildirim
+    </a>
+    <a href="{{ url_for('main.settings') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
+        <i class="fa-solid fa-gear"></i> Ayarlar
+    </a>
+
+    <div class="mob-drawer-sep"></div>
+
+    <div class="mob-drawer-section-title">🔥 Gündem</div>
+    {% for tag, count in trending_tags|default([])[:5] %}
+    <a href="{{ url_for('main.explore', q='#' + tag) }}" class="mob-drawer-trend" onclick="closeMobileDrawer()">
+        <div>
+            <div class="mob-drawer-trend-tag">#{{ tag }}</div>
+            <div class="mob-drawer-trend-count">{{ count }} gönderi</div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);"></i>
+    </a>
+    {% endfor %}
+
+    {% if (top_clubs|default([]))|length > 0 %}
+    <div class="mob-drawer-sep"></div>
+
+    <div class="mob-drawer-section-title" style="display:flex;justify-content:space-between;align-items:center;">🏆 Kulüpler Ligi <a href="{{ url_for('main.clubs_full_list') }}" style="font-size:0.78rem;color:var(--ytu-lacivert);text-transform:none;letter-spacing:0;font-weight:700;text-decoration:none;">Tümü →</a></div>
+    {% for club in top_clubs|default([])[:3] %}
+    <div class="mob-drawer-club">
+        <span class="mob-drawer-club-rank {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">{{ loop.index }}</span>
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+            <img src="{{ club_logo_src(club.logo_file) }}" class="mob-drawer-club-logo" onerror="this.src='/static/img/default_club.png'">
+            <div style="min-width:0;">
+                <div class="mob-drawer-club-name">{{ club.name }}</div>
+                <div class="mob-drawer-club-votes" id="vote-count-mob-{{ club.id }}">{{ club.votes }} oy</div>
+                <a href="{{ url_for('main.club_detail', slug=club.slug) }}" onclick="closeMobileDrawer()" class="mob-drawer-club-see-btn">Kulübü Gör →</a>
+            </div>
+        </div>
+        {% if current_user.is_authenticated %}
+        <a href="javascript:void(0)" onclick="oyVer('{{ club.id }}', this);" class="btn-vote-sm" data-club-id="{{ club.id }}">OY</a>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="mob-drawer-sep"></div>
+
+    <a href="{{ url_for('auth.logout') }}" class="mob-drawer-logout">
+        <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+    </a>
 </div>
 
 <nav class="mobile-bottom-nav">
