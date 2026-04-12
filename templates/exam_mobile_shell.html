@@ -17,7 +17,7 @@
         }
 
         .mob-left-overlay {
-            display: block;
+            display: none;
         }
 
         .mob-left-drawer {
@@ -88,6 +88,13 @@
         inset: 0;
         background: rgba(0, 0, 0, 0.5);
         z-index: 10000;
+        display: none;
+        pointer-events: none;
+    }
+
+    .mob-left-overlay.open {
+        display: block;
+        pointer-events: auto;
     }
 
     .mob-left-drawer {
@@ -223,7 +230,7 @@
         .exam-layout,
         .exam-list-layout {
             grid-template-columns: 1fr !important;
-            margin: 58px 0 70px !important;
+            margin: 58px 0 18px !important;
             padding: 0 12px !important;
             gap: 0 !important;
             max-width: 100% !important;
