@@ -2040,7 +2040,7 @@
                     {% for comment in comments %}
                     <div class="exam-comment-item" data-comment-id="{{ comment.id }}">
                         <div class="exam-comment-top">
-                            <strong>{{ comment.user.display_name }}</strong>
+                            <strong>{{ comment.user.display_name if comment.user else 'Silinmiş Kullanıcı' }}</strong>
                             <span>{{ comment.created_at.strftime('%d %b %H:%M') }} • {{ comment.group }} kitapçığı</span>
                             <button type="button" class="exam-report-btn" onclick="reportExamComment({{ question_no }}, {{ comment.id }}, this)">Bildir</button>
                         </div>

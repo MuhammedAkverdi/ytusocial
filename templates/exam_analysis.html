@@ -36,7 +36,6 @@
                 radial-gradient(circle at 12% 8%, rgba(17, 58, 116, 0.12), transparent 42%),
                 radial-gradient(circle at 86% 16%, rgba(242, 188, 58, 0.16), transparent 38%),
                 linear-gradient(180deg, #f8fbff 0%, #f4f6fb 54%, var(--bg-color) 100%);
-            color: var(--exam-ink);
             overflow-x: hidden;
         }
 
@@ -142,7 +141,6 @@
             display: grid;
             grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.7fr);
             gap: 16px;
-            align-items: center;
             position: relative;
             z-index: 1;
         }
@@ -609,19 +607,20 @@
 
                     <div class="exam-comments-list" id="examCommentsList">
                         {% for comment in comments_by_question[question_no] %}
+                        {% set comment_user = comment.user if comment.user else none %}
                         <div class="tw-comment">
-                            <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="tw-comment-avatar-link">
-                                <img src="{{ url_for('static', filename=comment.author.profile_pic) }}" class="tw-comment-avatar">
+                            <a href="{{ url_for('main.user_profile', handle=comment_user.handle) if comment_user and comment_user.handle else '#' }}" class="tw-comment-avatar-link">
+                                <img src="{{ url_for('static', filename=comment_user.profile_pic if comment_user else 'img/default_avatar.png') }}" class="tw-comment-avatar">
                             </a>
                             <div class="tw-comment-body">
                                 <div class="tw-comment-meta">
-                                    <a href="{{ url_for('main.user_profile', handle=comment.author.handle) }}" class="tw-comment-name">{{ comment.author.username }}</a>
-                                    <span class="tw-comment-handle">@{{ comment.author.handle }}</span>
+                                    <a href="{{ url_for('main.user_profile', handle=comment_user.handle) if comment_user and comment_user.handle else '#' }}" class="tw-comment-name">{{ comment_user.username if comment_user else 'Silinmiş Kullanıcı' }}</a>
+                                    <span class="tw-comment-handle">@{{ comment_user.handle if comment_user and comment_user.handle else 'silinmis' }}</span>
                                     <span class="tw-comment-dot">·</span>
                                     <span class="tw-comment-time">{{ comment.created_at.strftime('%d %b %H:%M') }}</span>
                                     <span class="exam-comment-group-badge">Kitapçık {{ comment.group }}</span>
 
-                                    {% if not current_user.is_admin and current_user.id != comment.author.id %}
+                                    {% if not current_user.is_admin and (not comment_user or current_user.id != comment_user.id) %}
                                     <div class="tw-comment-menu-wrap">
                                         <button class="tw-comment-menu-btn" onclick="reportExamComment({{ comment.id }})" title="Bildir">
                                             <i class="fa-solid fa-flag"></i>
