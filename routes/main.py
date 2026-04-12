@@ -43,6 +43,20 @@ def _purge_post_tree(post):
     return deleted_count
 
 
+def _delete_advert_image_file(image_file):
+    safe_filename = os.path.basename((image_file or '').strip())
+    if not safe_filename:
+        return
+
+    upload_folder = current_app.config.get('POST_UPLOAD_FOLDER', os.path.join('static', 'post_images'))
+    file_path = os.path.join(current_app.root_path, upload_folder, safe_filename)
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except OSError:
+            pass
+
+
 def _cleanup_user_related_data(user_id, story_ids=None):
     db.session.execute(
         followers_table.delete().where(
@@ -73,6 +87,8 @@ def _cleanup_user_related_data(user_id, story_ids=None):
     ClubVote.query.filter_by(user_id=user_id).delete(synchronize_session=False)
     PollVote.query.filter_by(user_id=user_id).delete(synchronize_session=False)
     NoteVote.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    for advert in Advert.query.filter_by(user_id=user_id).all():
+        _delete_advert_image_file(advert.image_file)
     Advert.query.filter_by(user_id=user_id).delete(synchronize_session=False)
     Note.query.filter_by(user_id=user_id).delete(synchronize_session=False)
     ExamComment.query.filter_by(user_id=user_id).delete(synchronize_session=False)
@@ -1480,19 +1496,39 @@ def reels():
     return render_template('reels.html', posts=mixed_posts)
 
 @main.route('/adverts', methods=['GET', 'POST'])
-@login_required
 def adverts():
     if request.method == 'POST':
+        if not current_user.is_authenticated:
+            flash('İlan eklemek için önce giriş yapmalısın.', 'info')
+            return redirect(url_for('auth.login', next=request.full_path.rstrip('?')))
+
         title = request.form.get('title')
         category = request.form.get('category')
         description = request.form.get('description')
-        contact = request.form.get('contact') 
+        contact = request.form.get('contact')
+        image_file = request.files.get('image')
+
         if title and description and category:
-            new_adv = Advert(title=title, category=category, description=description, contact_info=contact, author=current_user)
+            image_filename = None
+            if image_file and image_file.filename:
+                if not allowed_image_file(image_file.filename):
+                    flash('İlan fotoğrafı yalnızca PNG, JPG, JPEG veya WEBP olabilir.', 'danger')
+                    return redirect(url_for('main.adverts'))
+                image_filename = optimize_and_save_image(image_file, current_app.config['POST_UPLOAD_FOLDER'])
+
+            new_adv = Advert(
+                title=title,
+                category=category,
+                description=description,
+                contact_info=contact,
+                image_file=image_filename,
+                author=current_user,
+            )
             db.session.add(new_adv)
             db.session.commit()
             flash("İlanın başarıyla yayınlandı!", "success")
             return redirect(url_for('main.adverts'))
+        flash('Lütfen ilan başlığı, kategori ve açıklama alanlarını doldur.', 'danger')
     cat_filter = request.args.get('category')
     if cat_filter:
         ads = Advert.query.filter_by(category=cat_filter).order_by(Advert.date_posted.desc()).all()
@@ -1507,8 +1543,10 @@ def delete_advert(adv_id):
     if adv.author != current_user and not current_user.is_admin:
         flash("Bu ilanı silme yetkiniz yok!", "danger")
         return redirect(url_for('main.adverts'))
+    image_file = adv.image_file
     db.session.delete(adv)
     db.session.commit()
+    _delete_advert_image_file(image_file)
     flash("İlan kaldırıldı.", "info")
     return redirect(url_for('main.adverts'))
 
@@ -1519,11 +1557,43 @@ def edit_advert(adv_id):
     if adv.author != current_user and not current_user.is_admin:
         flash("Bu ilanı düzenleme yetkiniz yok!", "danger")
         return redirect(url_for('main.adverts'))
-    adv.title = request.form.get('title')
-    adv.category = request.form.get('category')
-    adv.description = request.form.get('description')
-    adv.contact_info = request.form.get('contact')
-    db.session.commit()
+    title = (request.form.get('title') or '').strip()
+    category = (request.form.get('category') or '').strip()
+    description = (request.form.get('description') or '').strip()
+    contact = (request.form.get('contact') or '').strip() or None
+
+    if not (title and category and description):
+        flash('Lütfen ilan başlığı, kategori ve açıklama alanlarını doldur.', 'danger')
+        return redirect(url_for('main.adverts'))
+
+    old_image_file = adv.image_file
+    new_image_file = request.files.get('image')
+    saved_image_file = None
+
+    if new_image_file and new_image_file.filename:
+        if not allowed_image_file(new_image_file.filename):
+            flash('İlan fotoğrafı yalnızca PNG, JPG, JPEG veya WEBP olabilir.', 'danger')
+            return redirect(url_for('main.adverts'))
+        saved_image_file = optimize_and_save_image(new_image_file, current_app.config['POST_UPLOAD_FOLDER'])
+        adv.image_file = saved_image_file
+
+    adv.title = title
+    adv.category = category
+    adv.description = description
+    adv.contact_info = contact
+
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        if saved_image_file:
+            _delete_advert_image_file(saved_image_file)
+        flash('İlan güncellenirken bir hata oluştu.', 'danger')
+        return redirect(url_for('main.adverts'))
+
+    if saved_image_file and old_image_file and old_image_file != saved_image_file:
+        _delete_advert_image_file(old_image_file)
+
     flash("İlan başarıyla güncellendi.", "success")
     return redirect(url_for('main.adverts'))
 
