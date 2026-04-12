@@ -40,7 +40,7 @@
         }
 
         body.exam-analysis-page .main-layout {
-            margin: 66px auto 30px;
+            margin: 90px auto 30px;
         }
 
         html.dark-mode body.exam-analysis-page {
@@ -108,7 +108,7 @@
         .exam-layout {
             align-items: start;
             grid-template-columns: 280px minmax(0, 1fr);
-            gap: 24px;
+            gap: 30px;
             max-width: 1250px;
         }
 
@@ -534,7 +534,7 @@
             </div>
         </header>
 
-        <section class="exam-analysis-layout">
+        <section class="exam-analysis-layout" data-current-question-no="{{ question_no }}">
             <aside>
                 <section class="exam-panel">
                     <h3 class="panel-title"><i class="fa-solid fa-layer-group"></i> Kitapçık Seçimi</h3>
@@ -581,8 +581,8 @@
                         {% for opt in exam_options %}
                             {% set stat = active_question.options[opt] %}
                             {% set is_selected = active_question.selected_option == opt %}
-                            <div class="exam-opt {% if is_selected %}selected{% endif %}" onclick="submitExamVote({{ question_no }}, '{{ opt }}')">
-                                <div class="exam-opt-fill" style="width: {{ stat.percentage }}%;"></div>
+                            <div class="exam-opt {% if is_selected %}selected{% endif %}" data-vote-option="{{ opt }}">
+                                <div class="exam-opt-fill" data-fill-width="{{ stat.percentage }}"></div>
                                 <div class="exam-opt-content">
                                     <span class="exam-opt-letter">{{ opt }}</span>
                                     <div style="display:flex; align-items:center; gap: 8px;">
@@ -605,7 +605,7 @@
                         <img src="{{ url_for('static', filename=current_user.profile_pic) }}" class="comment-avatar-sm" alt="Avatar">
                         <div class="exam-comment-input-wrapper">
                             <input type="text" id="examCommentInput" class="modern-input" placeholder="Bu soru hakkında ne düşünüyorsun? (Maks 500 Karakter)" maxlength="500">
-                            <button onclick="submitExamComment({{ question_no }})" class="exam-send-btn" title="Gönder"><i class="fa-solid fa-paper-plane"></i></button>
+                            <button type="button" class="exam-send-btn" title="Gönder" data-submit-exam-comment><i class="fa-solid fa-paper-plane"></i></button>
                         </div>
                     </div>
 
@@ -626,7 +626,7 @@
 
                                     {% if not current_user.is_admin and (not comment_user or current_user.id != comment_user.id) %}
                                     <div class="tw-comment-menu-wrap">
-                                        <button class="tw-comment-menu-btn" onclick="reportExamComment({{ comment.id }})" title="Bildir">
+                                        <button type="button" class="tw-comment-menu-btn" data-report-comment="{{ comment.id }}" title="Bildir">
                                             <i class="fa-solid fa-flag"></i>
                                         </button>
                                     </div>
@@ -653,6 +653,7 @@
     <script>
 const examCode = '{{ exam.code }}';
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const currentQuestionNo = Number(document.querySelector('.exam-analysis-layout')?.dataset.currentQuestionNo || 0);
 
 function getSelectedGroup() {
     return '{{ selected_group }}';
@@ -752,6 +753,29 @@ function reportExamComment(commentId) {
         }
     }).catch(err => console.error(err));
 }
+
+function bindExamAnalysisControls() {
+    document.querySelectorAll('[data-fill-width]').forEach((bar) => {
+        bar.style.width = `${bar.dataset.fillWidth}%`;
+    });
+
+    document.querySelectorAll('[data-vote-option]').forEach((optionCard) => {
+        optionCard.addEventListener('click', () => {
+            submitExamVote(currentQuestionNo, optionCard.dataset.voteOption);
+        });
+    });
+
+    const commentButton = document.querySelector('[data-submit-exam-comment]');
+    if (commentButton) {
+        commentButton.addEventListener('click', () => submitExamComment(currentQuestionNo));
+    }
+
+    document.querySelectorAll('[data-report-comment]').forEach((button) => {
+        button.addEventListener('click', () => reportExamComment(Number(button.dataset.reportComment)));
+    });
+}
+
+bindExamAnalysisControls();
     </script>
 </body>
 </html>

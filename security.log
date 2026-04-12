@@ -1536,3 +1536,6 @@ FROM exam_analysis ORDER BY exam_analysis.created_at DESC]
 2026-04-12 16:11:41,994 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
 2026-04-12 16:12:48,399 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
 2026-04-12 16:17:16,879 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-12 16:22:56,561 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-12 16:24:15,187 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-12 16:24:33,778 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
