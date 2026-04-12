@@ -5786,3 +5786,278 @@ html.dark-mode .hashtag-title { color: var(--ytu-sari); }
 .event-delete-btn {
     display: inline-block; margin-top: 10px; color: #dc3545; font-size: 0.85rem; text-decoration: none;
 }
+
+/* =========================================
+   40. SINAV ANALİZİ SAYFASI (YENİ TASARIM)
+   ========================================= */
+.exam-container {
+    max-width: 1150px;
+    margin: 90px auto 40px;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 25px;
+}
+
+.exam-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+}
+
+.exam-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--ytu-lacivert);
+    margin-bottom: 10px;
+    line-height: 1.3;
+}
+
+.exam-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.exam-section-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-color);
+    margin-bottom: 15px;
+    border-bottom: 2px solid rgba(var(--ytu-lacivert-rgb), 0.1);
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.exam-groups {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.group-btn {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-light);
+    color: var(--text-color);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.group-btn:hover:not(.locked) {
+    background: var(--link-hover);
+    border-color: var(--ytu-lacivert);
+}
+
+.group-btn.active {
+    background: var(--ytu-lacivert);
+    color: white;
+    border-color: var(--ytu-lacivert);
+    box-shadow: 0 4px 12px rgba(var(--ytu-lacivert-rgb), 0.2);
+}
+
+.group-btn.locked {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.q-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.q-grid::-webkit-scrollbar { width: 5px; }
+.q-grid::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 5px; }
+
+.q-grid-btn {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.q-grid-btn:hover {
+    background: var(--link-hover);
+    transform: translateY(-2px);
+}
+
+.q-grid-btn.answered {
+    background: rgba(46, 204, 113, 0.1);
+    border-color: #2ecc71;
+    color: #27ae60;
+}
+
+.q-grid-btn.active {
+    background: var(--ytu-lacivert);
+    color: white;
+    border-color: var(--ytu-lacivert);
+    box-shadow: 0 4px 10px rgba(var(--ytu-lacivert-rgb), 0.3);
+    transform: scale(1.05);
+}
+
+.active-q-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.active-q-header h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--text-color);
+}
+
+.q-total-votes {
+    background: rgba(var(--ytu-lacivert-rgb), 0.1);
+    color: var(--ytu-lacivert);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.exam-opt {
+    position: relative;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    overflow: hidden;
+    background: var(--input-bg);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.exam-opt:hover {
+    border-color: var(--ytu-lacivert);
+    transform: translateX(4px);
+}
+
+.exam-opt.selected {
+    border-color: var(--ytu-lacivert);
+    background: rgba(var(--ytu-lacivert-rgb), 0.05);
+}
+
+.exam-opt-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: rgba(var(--ytu-lacivert-rgb), 0.15);
+    z-index: 1;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.exam-opt-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+.exam-opt-letter {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--text-color);
+    width: 30px;
+    display: inline-block;
+}
+
+.exam-opt.selected .exam-opt-letter {
+    color: var(--ytu-lacivert);
+}
+
+.exam-opt-stat {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.exam-comment-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.exam-comment-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.exam-comment-input-wrapper input {
+    width: 100%;
+    padding-right: 50px;
+    border-radius: 20px;
+}
+
+.exam-send-btn {
+    position: absolute;
+    right: 10px;
+    background: var(--ytu-lacivert);
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.exam-send-btn:hover {
+    transform: scale(1.1);
+    background: #002244;
+}
+
+.exam-comment-group-badge {
+    font-size: 0.7rem;
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    .exam-container { grid-template-columns: 1fr; }
+    .exam-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .exam-sidebar > .exam-card:first-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+    .exam-sidebar { grid-template-columns: 1fr; }
+}
+
+/* Gece Modu Özelleştirmeleri */
+html.dark-mode .exam-opt.selected { background: rgba(255,204,0, 0.05); border-color: var(--ytu-sari); }
+html.dark-mode .exam-opt-fill { background: rgba(255,204,0, 0.15); }
+html.dark-mode .exam-opt.selected .exam-opt-letter { color: var(--ytu-sari); }
+html.dark-mode .q-grid-btn.active { background: var(--ytu-sari); color: #000; border-color: var(--ytu-sari); }
