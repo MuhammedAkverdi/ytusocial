@@ -20,6 +20,7 @@
     </script>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -39,8 +40,62 @@
             overflow-x: hidden;
         }
 
+        body.exam-analysis-page .navbar,
+        body.exam-analysis-page .mob-header,
+        body.exam-analysis-page .mob-left-drawer,
+        body.exam-analysis-page .mobile-bottom-nav {
+            font-family: 'Inter', 'Manrope', sans-serif;
+        }
+
+        body.exam-analysis-page .navbar {
+            height: 65px;
+            padding: 0 6%;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        body.exam-analysis-page .nav-logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-decoration: none;
+            border-bottom: none;
+        }
+
+        body.exam-analysis-page .navbar a,
+        body.exam-analysis-page .nav-logo span {
+            text-decoration: none;
+        }
+
+        body.exam-analysis-page .nav-right {
+            gap: 12px;
+        }
+
+        body.exam-analysis-page .nav-avatar {
+            width: 38px;
+            height: 38px;
+        }
+
         body.exam-analysis-page .main-layout {
-            margin: 90px auto 30px;
+            margin: 72px auto 24px;
+        }
+
+        body.exam-analysis-page .profile-menu .dropdown-content {
+            top: 50px;
+            min-width: 230px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+            overflow: hidden;
+        }
+
+        body.exam-analysis-page .profile-menu .dropdown-item {
+            padding: 12px 16px;
+        }
+
+        body.exam-analysis-page .profile-menu .dropdown-item:hover {
+            padding-left: 20px;
         }
 
         html.dark-mode body.exam-analysis-page {
@@ -108,7 +163,7 @@
         .exam-layout {
             align-items: start;
             grid-template-columns: 280px minmax(0, 1fr);
-            gap: 30px;
+            gap: 22px;
             max-width: 1250px;
         }
 
@@ -483,6 +538,15 @@
         }
 
         @media (max-width: 640px) {
+            body.exam-analysis-page .mob-header {
+                height: 54px;
+                padding: 0 14px;
+            }
+
+            body.exam-analysis-page .mob-header-logo {
+                font-size: 1.1rem;
+            }
+
             .exam-shell {
                 padding: 18px 12px 36px;
             }
