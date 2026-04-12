@@ -438,6 +438,7 @@
                 {% endif %}
 
                 <div class="ad-footer">
+                    {% if ad.author %}
                     <a href="{{ url_for('main.user_profile', handle=ad.author.handle) }}" class="ad-author">
                         <img src="/static/{{ ad.author.profile_pic }}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
                         <span>{{ ad.author.username }}</span>
@@ -447,6 +448,12 @@
                     <a href="/chat/{{ ad.author.handle }}" class="btn-vote" style="padding: 8px 18px; font-size: 0.85rem; border-radius: 20px; text-decoration:none;">
                         <i class="far fa-paper-plane"></i> Mesaj
                     </a>
+                    {% endif %}
+                    {% else %}
+                    <div class="ad-author" style="opacity: 0.8;">
+                        <img src="/static/img/default_avatar.png" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
+                        <span>Silinmiş kullanıcı</span>
+                    </div>
                     {% endif %}
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 12px; text-align: right; font-style: italic;">

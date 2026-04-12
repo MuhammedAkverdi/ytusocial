@@ -8,6 +8,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_, func
 from datetime import datetime, timedelta
 import random
+from sqlalchemy.exc import SQLAlchemyError
+from types import SimpleNamespace
 import os
 import re
 import secrets
@@ -50,6 +52,26 @@ def _remove_uploaded_file(upload_folder, filename):
     file_path = os.path.join(current_app.root_path, upload_folder, filename)
     if os.path.exists(file_path):
         os.remove(file_path)
+
+
+class _EmptyRelation(list):
+    def count(self):
+        return len(self)
+
+
+def _build_profile_fallback_user(handle):
+    return SimpleNamespace(
+        display_name=handle,
+        username=handle,
+        handle=handle,
+        profile_pic='img/default_avatar.png',
+        department=None,
+        bio='',
+        posts=[],
+        adverts=[],
+        followers=_EmptyRelation(),
+        followed=_EmptyRelation(),
+    )
 
 
 def _cleanup_user_related_data(user_id, story_ids=None):
@@ -376,10 +398,8 @@ def like_post(post_id):
             create_notification(target_post.author, current_user, 'liked', target_post)
         except IntegrityError:
             db.session.rollback()
-            action = 'liked'
-
     db.session.commit()
-    likes_count = db.session.query(func.count()).select_from(likes).filter(
+    likes_count = db.session.query(func.count(likes.c.user_id)).filter(
         likes.c.post_id == target_post.id
     ).scalar() or 0
     return jsonify({"likes_count": likes_count, "action": action})
@@ -750,10 +770,22 @@ def explore():
 @main.route('/u/<handle>')
 @login_required
 def user_profile(handle):
-    user = User.query.filter_by(handle=handle).first_or_404()
-    posts = Post.query.filter_by(author=user).order_by(Post.date_posted.desc()).all()
-    media_posts = [p for p in posts if p.image_file]
-    return render_template('user_profile.html', user=user, posts=posts, media_posts=media_posts)
+    try:
+        user = User.query.filter_by(handle=handle).first_or_404()
+        posts = Post.query.filter_by(author=user).order_by(Post.date_posted.desc()).all()
+        media_posts = [p for p in posts if p.image_file]
+        is_following_user = False
+        if user != current_user:
+            try:
+                is_following_user = current_user.is_following(user)
+            except SQLAlchemyError as exc:
+                current_app.logger.warning('Profile follow-state unavailable for handle=%s: %s', handle, exc, exc_info=True)
+        return render_template('user_profile.html', user=user, posts=posts, media_posts=media_posts, profile_actions_enabled=True, is_following_user=is_following_user)
+    except SQLAlchemyError as exc:
+        current_app.logger.warning('Profile page unavailable for handle=%s: %s', handle, exc, exc_info=True)
+        flash('Profil verileri şu anda yüklenemiyor. Sınırlı görünüm açıldı.', 'warning')
+        fallback_user = _build_profile_fallback_user(handle)
+        return render_template('user_profile.html', user=fallback_user, posts=[], media_posts=[], profile_actions_enabled=False, is_following_user=False)
 
 @main.route('/trending')
 @login_required
@@ -1128,10 +1160,17 @@ def submit_feedback():
                 return redirect(request.referrer or url_for('main.index'))
             image_filename = optimize_and_save_image(image, current_app.config['POST_UPLOAD_FOLDER'])
 
-        fb = Feedback(user_id=current_user.id, type=type, message=message, image_file=image_filename)
-        db.session.add(fb)
-        db.session.commit()
-        flash("Geri bildiriminiz alındı, teşekkürler!", "success")
+        try:
+            fb = Feedback(user_id=current_user.id, type=type, message=message, image_file=image_filename)
+            db.session.add(fb)
+            db.session.commit()
+            flash("Geri bildiriminiz alındı, teşekkürler!", "success")
+        except SQLAlchemyError as exc:
+            db.session.rollback()
+            if image_filename:
+                _remove_uploaded_file(current_app.config['POST_UPLOAD_FOLDER'], image_filename)
+            current_app.logger.warning('Feedback submission unavailable: %s', exc, exc_info=True)
+            flash("Geri bildirim şu anda kaydedilemiyor. Biraz sonra tekrar dene.", "warning")
     return redirect(request.referrer or url_for('main.index'))
 
 @main.route('/mark_story_seen/<int:story_id>', methods=['POST'])
@@ -1558,31 +1597,44 @@ def reels():
 @main.route('/adverts', methods=['GET', 'POST'])
 @login_required
 def adverts():
-    if request.method == 'POST':
-        title = request.form.get('title')
-        category = request.form.get('category')
-        description = request.form.get('description')
-        contact = request.form.get('contact') 
-        if title and description and category:
-            image = request.files.get('image')
-            image_filename = None
-            if image and image.filename:
-                if not allowed_image_file(image.filename):
-                    flash("Sadece resim dosyası yükleyebilirsin.", "danger")
-                    return redirect(request.referrer or url_for('main.adverts'))
-                image_filename = optimize_and_save_image(image, current_app.config['POST_UPLOAD_FOLDER'])
-
-            new_adv = Advert(title=title, category=category, description=description, contact_info=contact, image_file=image_filename, author=current_user)
-            db.session.add(new_adv)
-            db.session.commit()
-            flash("İlanın başarıyla yayınlandı!", "success")
-            return redirect(url_for('main.adverts'))
     cat_filter = request.args.get('category')
-    if cat_filter:
-        ads = Advert.query.filter_by(category=cat_filter).order_by(Advert.date_posted.desc()).all()
-    else:
-        ads = Advert.query.order_by(Advert.date_posted.desc()).all()
-    return render_template('adverts.html', adverts=ads, selected_cat=cat_filter)
+    try:
+        if request.method == 'POST':
+            title = request.form.get('title')
+            category = request.form.get('category')
+            description = request.form.get('description')
+            contact = request.form.get('contact') 
+            if title and description and category:
+                image = request.files.get('image')
+                image_filename = None
+                if image and image.filename:
+                    if not allowed_image_file(image.filename):
+                        flash("Sadece resim dosyası yükleyebilirsin.", "danger")
+                        return redirect(request.referrer or url_for('main.adverts'))
+                    image_filename = optimize_and_save_image(image, current_app.config['POST_UPLOAD_FOLDER'])
+
+                try:
+                    new_adv = Advert(title=title, category=category, description=description, contact_info=contact, image_file=image_filename, author=current_user)
+                    db.session.add(new_adv)
+                    db.session.commit()
+                    flash("İlanın başarıyla yayınlandı!", "success")
+                    return redirect(url_for('main.adverts'))
+                except SQLAlchemyError as exc:
+                    db.session.rollback()
+                    if image_filename:
+                        _remove_uploaded_file(current_app.config['POST_UPLOAD_FOLDER'], image_filename)
+                    current_app.logger.warning('Advert create unavailable: %s', exc, exc_info=True)
+                    flash('İlan şu anda kaydedilemiyor. Biraz sonra tekrar dene.', 'warning')
+
+        if cat_filter:
+            ads = Advert.query.filter_by(category=cat_filter).order_by(Advert.date_posted.desc()).all()
+        else:
+            ads = Advert.query.order_by(Advert.date_posted.desc()).all()
+        return render_template('adverts.html', adverts=ads, selected_cat=cat_filter)
+    except SQLAlchemyError as exc:
+        current_app.logger.warning('Adverts page unavailable: %s', exc, exc_info=True)
+        flash('İlanlar şu anda yüklenemiyor. Boş görünüm açıldı.', 'warning')
+        return render_template('adverts.html', adverts=[], selected_cat=cat_filter)
 
 @main.route('/delete_advert/<int:adv_id>')
 @login_required
