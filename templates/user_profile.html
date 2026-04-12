@@ -557,20 +557,16 @@
                 </div>
 
                 <div class="profile-actions">
-                    {% if profile_actions_enabled %}
-                        {% if user == current_user %}
-                            <a href="{{ url_for('main.edit_profile') }}" class="btn-modern"><i class="fas fa-pen"></i> Profili Düzenle</a>
-                            <a href="{{ url_for('auth.logout') }}" class="btn-modern btn-logout"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
-                        {% else %}
-                            {% if is_following_user %}
-                                <a href="{{ url_for('main.unfollow', handle=user.handle) }}" class="btn-modern">Takibi Bırak</a>
-                            {% else %}
-                                <a href="{{ url_for('main.follow', handle=user.handle) }}" class="btn-modern" style="background: var(--ytu-lacivert); color: white; border: none;">Takip Et</a>
-                            {% endif %}
-                            <a href="/chat/{{ user.handle }}" class="btn-modern"><i class="far fa-envelope"></i> Mesaj</a>
-                        {% endif %}
+                    {% if user == current_user %}
+                        <a href="{{ url_for('main.edit_profile') }}" class="btn-modern"><i class="fas fa-pen"></i> Profili Düzenle</a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn-modern btn-logout"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
                     {% else %}
-                        <span class="btn-modern" style="cursor: default; opacity: 0.75;">Profil verileri yüklenemiyor</span>
+                        {% if current_user.is_following(user) %}
+                            <a href="{{ url_for('main.unfollow', handle=user.handle) }}" class="btn-modern">Takibi Bırak</a>
+                        {% else %}
+                            <a href="{{ url_for('main.follow', handle=user.handle) }}" class="btn-modern" style="background: var(--ytu-lacivert); color: white; border: none;">Takip Et</a>
+                        {% endif %}
+                        <a href="/chat/{{ user.handle }}" class="btn-modern"><i class="far fa-envelope"></i> Mesaj</a>
                     {% endif %}
                 </div>
 
@@ -588,14 +584,14 @@
                         <span class="stat-val">{{ user.posts|length }}</span>
                         <span class="stat-lbl">GÖNDERİ</span>
                     </div>
-                    <a class="stat-item" href="{{ url_for('main.followers_list', handle=user.handle) }}" style="text-decoration: none; color: inherit;">
+                    <div class="stat-item" onclick="location.href='{{ url_for('main.followers_list', handle=user.handle) }}'">
                         <span class="stat-val">{{ user.followers.count() }}</span>
                         <span class="stat-lbl">TAKİPÇİ</span>
-                    </a>
-                    <a class="stat-item" href="{{ url_for('main.following_list', handle=user.handle) }}" style="text-decoration: none; color: inherit;">
+                    </div>
+                    <div class="stat-item" onclick="location.href='{{ url_for('main.following_list', handle=user.handle) }}'">
                         <span class="stat-val">{{ user.followed.count() }}</span>
                         <span class="stat-lbl">TAKİP</span>
-                    </a>
+                    </div>
                     <div class="stat-item" onclick="switchTab('adverts', document.querySelectorAll('.tab-btn')[1])">
                         <span class="stat-val">{{ user.adverts|length }}</span>
                         <span class="stat-lbl">İLAN</span>
@@ -649,7 +645,7 @@
                     {% endif %}
 
                     <div class="t-actions">
-                        <button class="act-btn" data-post-id="{{ display_post.id }}" onclick="event.stopPropagation(); likePost(this.dataset.postId, this)">
+                        <button class="act-btn" onclick="event.stopPropagation(); likePost({{ display_post.id }}, this)">
                             {% if current_user in display_post.liked_by %}
                             <i class="fa-solid fa-heart" style="color: #ff4757;"></i>
                             {% else %}

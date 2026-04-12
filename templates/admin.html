@@ -635,7 +635,6 @@
                             <th>Kullanıcı</th>
                             <th>Tür</th>
                             <th>Mesaj</th>
-                            <th>Fotoğraf</th>
                             <th>Tarih</th>
                             <th>İşlem</th>
                         </tr>
@@ -643,7 +642,7 @@
                     <tbody>
                         {% for fb in feedbacks %}
                         <tr>
-                            <td><b>{{ fb.user.username if fb.user else 'Silinmiş kullanıcı' }}</b></td>
+                            <td><b>{{ fb.user.username }}</b></td>
                             <td>
                                 {% if fb.type == 'Öneri' %}
                                 <span class="badge" style="background: #f1c40f; color: black; padding: 5px 10px; border-radius: 10px;">💡 Öneri</span>
@@ -654,22 +653,13 @@
                                 {% endif %}
                             </td>
                             <td>{{ fb.message }}</td>
-                            <td>
-                                {% if fb.image_file %}
-                                <a href="/static/post_images/{{ fb.image_file }}" target="_blank" rel="noopener">
-                                    <img src="/static/post_images/{{ fb.image_file }}" alt="Geri bildirim fotoğrafı" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);">
-                                </a>
-                                {% else %}
-                                <span style="color: var(--text-muted); font-size: 0.9rem;">-</span>
-                                {% endif %}
-                            </td>
                             <td>{{ fb.date_sent.strftime('%d %b %H:%M') }}</td>
                             <td>
                                 <a href="{{ url_for('admin.admin_delete_content', type='feedback', id=fb.id) }}" class="btn-action btn-ban" onclick="return confirm('Bu geri bildirimi silmek istediğine emin misin?')">🗑️</a>
                             </td>
                         </tr>
                         {% else %}
-                        <tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">Henüz geri bildirim yok.</td></tr>
+                        <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">Henüz geri bildirim yok.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>

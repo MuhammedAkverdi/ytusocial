@@ -78,28 +78,23 @@ def create_app():
         except Exception as exc:
             app.logger.warning('Trending hashtags unavailable: %s', exc, exc_info=True)
 
-        if getattr(current_user, 'is_authenticated', False):
+        if current_user.is_authenticated:
             try:
-                followed_ids = [u.id for u in getattr(current_user, 'followed', [])]
-                user_id = getattr(current_user, 'id', None)
-                if user_id is not None:
-                    followed_ids.append(user_id)
+                followed_ids = [u.id for u in current_user.followed]
+                followed_ids.append(current_user.id)
                 suggested = User.query.filter(~User.id.in_(followed_ids)).order_by(func.random()).limit(5).all()
-            except Exception as exc:
+            except SQLAlchemyError as exc:
                 app.logger.warning('Suggested users unavailable: %s', exc, exc_info=True)
         return dict(trending_tags=trending, suggested_users=suggested, club_logo_src=club_logo_src)
 
     @app.context_processor
     def inject_notifications():
-        if getattr(current_user, 'is_authenticated', False):
+        if current_user.is_authenticated:
             try:
-                user_id = getattr(current_user, 'id', None)
-                if user_id is None:
-                    raise AttributeError('current_user.id is unavailable')
-                notif_count = Notification.query.filter_by(user_id=user_id, is_read=False).count()
-                msg_count = Message.query.filter_by(recipient_id=user_id, is_read=False).count()
+                notif_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+                msg_count = Message.query.filter_by(recipient_id=current_user.id, is_read=False).count()
                 return dict(unread_count=notif_count, unread_msg_count=msg_count, online_users=list(ONLINE_USERS))
-            except Exception as exc:
+            except SQLAlchemyError as exc:
                 app.logger.warning('Notification counters unavailable: %s', exc, exc_info=True)
                 return dict(unread_count=0, unread_msg_count=0, online_users=[])
         return dict(unread_count=0, unread_msg_count=0, online_users=[])
@@ -116,10 +111,10 @@ def create_app():
     @app.before_request
     def fill_missing_username():
         try:
-            if getattr(current_user, 'is_authenticated', False):
-                current_username = (getattr(current_user, 'username', '') or '').strip()
+            if current_user.is_authenticated:
+                current_username = (current_user.username or '').strip()
                 if not current_username or current_username.lower() in {'none', 'null'}:
-                    fallback_name = getattr(current_user, 'display_name', '')
+                    fallback_name = current_user.display_name
                     if fallback_name:
                         current_user.username = fallback_name
                         db.session.commit()
@@ -132,10 +127,8 @@ def create_app():
     @app.before_request
     def check_ban():
         try:
-            if getattr(current_user, 'is_authenticated', False):
-                is_banned = getattr(current_user, 'is_banned', False)
-                ban_expiration = getattr(current_user, 'ban_expiration', None)
-                if is_banned or (ban_expiration and ban_expiration > datetime.now()):
+            if current_user.is_authenticated:
+                if current_user.is_banned or (current_user.ban_expiration and current_user.ban_expiration > datetime.now()):
                     if request.endpoint not in ['auth.logout', 'static', 'auth.login']:
                         logout_user()
                         flash("🚫 Hesabınız yasaklandı veya uzaklaştırıldı.", "danger")
