@@ -128,7 +128,8 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.6); 
             display: none; align-items: center; justify-content: center; 
-            z-index: 10020; backdrop-filter: blur(5px);
+            z-index: 2147483647; backdrop-filter: blur(5px);
+            pointer-events: auto;
         }
         
         .modal-box { 
@@ -182,7 +183,10 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 28px;
             box-shadow: 0 8px 20px rgba(var(--ytu-lacivert-rgb), 0.5);
-            cursor: pointer; z-index: 10010; border: none;
+            cursor: pointer; z-index: 2147483646; border: none;
+            pointer-events: auto;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
             transition: transform 0.3s, box-shadow 0.3s;
         }
         .fab-btn:hover { transform: scale(1.1) rotate(90deg); box-shadow: 0 12px 25px rgba(0,0,0,0.4); }
@@ -341,7 +345,7 @@
             .filter-btn { font-size: 0.82rem !important; padding: 7px 14px !important; white-space: nowrap; }
 
             /* FAB butonu alt nav'la örtüşmesin */
-            .fab-btn { bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important; right: 16px !important; width: 54px !important; height: 54px !important; font-size: 22px !important; z-index: 10010 !important; }
+            .fab-btn { bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important; right: 16px !important; width: 54px !important; height: 54px !important; font-size: 22px !important; z-index: 2147483646 !important; }
 
             /* Başlık alanı */
             .adv-page-header h1 { font-size: 1.3rem !important; }
@@ -446,7 +450,7 @@
         <aside class="right-sidebar"></aside>
     </div>
 
-    <button type="button" class="fab-btn" onclick="openCreateModal()" title="Yeni İlan Ekle">
+    <button type="button" class="fab-btn" id="createAdvertBtn" title="Yeni İlan Ekle">
         <i class="fas fa-plus"></i>
     </button>
 
@@ -577,6 +581,11 @@
             document.querySelectorAll('.ad-dropdown').forEach(m => m.style.display = 'none');
             document.getElementById('adModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
+        }
+
+        const createAdvertBtn = document.getElementById('createAdvertBtn');
+        if (createAdvertBtn) {
+            createAdvertBtn.addEventListener('click', openCreateModal);
         }
     </script>
 
