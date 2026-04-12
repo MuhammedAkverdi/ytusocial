@@ -43,6 +43,10 @@ def _normalize_email(raw_email):
     return (raw_email or '').strip().lower()
 
 
+def _parse_bool_flag(raw_value):
+    return str(raw_value or '').strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
 def _now():
     return datetime.utcnow()
 
@@ -58,8 +62,8 @@ def _otp_is_active(user):
     return bool(user and user.otp_code and user.otp_expires_at and user.otp_expires_at > _now())
 
 
-def _render_verify(email, next_url=None):
-    return render_template('verify.html', email=email, next_url=next_url)
+def _render_verify(email, next_url=None, remember=False):
+    return render_template('verify.html', email=email, next_url=next_url, remember=remember)
 
 
 def _sendgrid_api_key():
@@ -242,10 +246,14 @@ def _queue_otp_email(subject, email, intro_text, otp):
     return _queue_sendgrid_email(subject, email, text_body, html_body)
 
 
-def _verify_redirect(email, next_url=None):
+def _verify_redirect(email, next_url=None, remember=False):
     safe_next = _safe_next_url(next_url)
     if safe_next:
+        if remember:
+            return redirect(url_for('auth.verify', email=email, next=safe_next, remember=1))
         return redirect(url_for('auth.verify', email=email, next=safe_next))
+    if remember:
+        return redirect(url_for('auth.verify', email=email, remember=1))
     return redirect(url_for('auth.verify', email=email))
 
 
@@ -253,18 +261,18 @@ def _render_register(next_url=None):
     return render_template('register.html', next_url=next_url)
 
 
-def _render_login(next_url=None):
-    return render_template('login.html', next_url=next_url)
+def _render_login(next_url=None, remember=False):
+    return render_template('login.html', next_url=next_url, remember=remember)
 
 
-def _render_database_unavailable(template_name, next_url=None, email=None):
+def _render_database_unavailable(template_name, next_url=None, email=None, remember=False):
     flash('Veritabanına şu an ulaşılamıyor. Biraz sonra tekrar dene.', 'danger')
     if template_name == 'register':
         return _render_register(next_url)
     if template_name == 'verify':
-        return _render_verify(email, next_url)
+        return _render_verify(email, next_url, remember=remember)
     if template_name == 'login':
-        return _render_login(next_url)
+        return _render_login(next_url, remember=remember)
     if template_name == 'forgot_password':
         return render_template('forgot_password.html')
     if template_name == 'reset_password':
@@ -378,12 +386,13 @@ def register():
 def verify(email):
     email = _normalize_email(email)
     next_url = _safe_next_url(request.args.get('next') or request.form.get('next'))
+    remember = _parse_bool_flag(request.args.get('remember') or request.form.get('remember'))
     try:
         user = User.query.filter_by(email=email).first()
     except SQLAlchemyError as exc:
         db.session.rollback()
         _mail_log(f"Doğrulama sırasında veritabanı erişilemedi ({email}): {exc}", 'exception')
-        return _render_database_unavailable('verify', next_url=next_url, email=email)
+        return _render_database_unavailable('verify', next_url=next_url, email=email, remember=remember)
 
     if not user:
         flash("Bu e-posta ile eşleşen bir hesap bulunamadı.", "danger")
@@ -395,7 +404,13 @@ def verify(email):
             if next_url:
                 return redirect(next_url)
             return redirect(url_for('main.index'))
-        return redirect(url_for('auth.login', next=next_url) if next_url else url_for('auth.login'))
+        if next_url:
+            if remember:
+                return redirect(url_for('auth.login', next=next_url, remember=1))
+            return redirect(url_for('auth.login', next=next_url))
+        if remember:
+            return redirect(url_for('auth.login', remember=1))
+        return redirect(url_for('auth.login'))
 
     if request.method == 'POST':
         girilen_kod = (request.form.get('kod') or '').strip()
@@ -413,22 +428,22 @@ def verify(email):
             except SQLAlchemyError as exc:
                 db.session.rollback()
                 _mail_log(f"Doğrulama kodu onaylanırken veritabanı erişilemedi ({email}): {exc}", 'exception')
-                return _render_database_unavailable('verify', next_url=next_url, email=email)
+                return _render_database_unavailable('verify', next_url=next_url, email=email, remember=remember)
             except Exception as e:
                 db.session.rollback()
                 print(f"Doğrulama Hatası: {e}")
                 flash("Kod onaylanırken bir teknik sorun oluştu!", "danger")
-                return _render_verify(email, next_url)
-            login_user(user)
+                return _render_verify(email, next_url, remember=remember)
+            login_user(user, remember=remember)
             flash("Kod onaylandı! YTU Social'a hoş geldin.", "success")
             if next_url:
                 return redirect(next_url)
             return redirect(url_for('main.index'))
 
         flash("Hata: Girdiğin kod hatalı, lütfen tekrar dene!", "danger")
-        return _render_verify(email, next_url)
+        return _render_verify(email, next_url, remember=remember)
 
-    return _render_verify(email, next_url)
+    return _render_verify(email, next_url, remember=remember)
 
 
 @auth.route('/forgot_password', methods=['GET', 'POST'])
@@ -513,6 +528,7 @@ def reset_password(email):
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     next_url = _safe_next_url(request.args.get('next') or request.form.get('next'))
+    remember = _parse_bool_flag(request.args.get('remember') or request.form.get('remember'))
     if request.method == 'POST':
         email = _normalize_email(request.form.get('email'))
         password = request.form.get('password') or ''
@@ -521,7 +537,7 @@ def login():
         except SQLAlchemyError as exc:
             db.session.rollback()
             _mail_log(f"Giriş sırasında veritabanı erişilemedi ({email}): {exc}", 'exception')
-            return _render_database_unavailable('login', next_url=next_url)
+            return _render_database_unavailable('login', next_url=next_url, remember=remember)
 
         if user and check_password_hash(user.password, password):
             if not user.is_verified:
@@ -538,29 +554,29 @@ def login():
                         otp,
                     ):
                         flash("Doğrulama kodu yeniden gönderilemedi.", "danger")
-                        return _render_login(next_url)
+                        return _render_login(next_url, remember=remember)
                 except SQLAlchemyError as exc:
                     db.session.rollback()
                     _mail_log(f"Giriş sırasında veritabanı erişilemedi ({email}): {exc}", 'exception')
-                    return _render_database_unavailable('login', next_url=next_url)
+                    return _render_database_unavailable('login', next_url=next_url, remember=remember)
                 except Exception as e:
                     db.session.rollback()
                     print(f"Giriş Hatası: {e}")
                     flash("Doğrulama kodu yeniden gönderilirken sorun oluştu.", "danger")
-                    return _render_login(next_url)
+                    return _render_login(next_url, remember=remember)
 
                 flash("Hesabın henüz doğrulanmamış. Doğrulama kodu yeniden gönderiliyor.", "info")
-                return _verify_redirect(email, next_url)
+                return _verify_redirect(email, next_url, remember=remember)
 
-            login_user(user)
+            login_user(user, remember=remember)
             if next_url:
                 return redirect(next_url)
             return redirect(url_for('main.index'))
 
         flash("Giriş başarısız! Lütfen bilgilerinizi kontrol edin.", "danger")
-        return _render_login(next_url)
+        return _render_login(next_url, remember=remember)
 
-    return _render_login(next_url)
+    return _render_login(next_url, remember=remember)
 
 
 @auth.route('/logout')

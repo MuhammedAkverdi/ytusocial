@@ -94,6 +94,25 @@
             }
 
             .auth-footer-link { text-align: center; margin-top: 22px; }
+
+            .remember-row { margin: 10px 0 4px; }
+            .remember-label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+                font-size: 0.84rem;
+                line-height: 1.4;
+                color: var(--text-color);
+                user-select: none;
+            }
+            .remember-label input {
+                width: 18px;
+                height: 18px;
+                margin: 0;
+                flex-shrink: 0;
+                accent-color: var(--ytu-lacivert);
+            }
         }
     </style>
 </head>
@@ -165,6 +184,13 @@
                 <label class="form-label">Şifre</label>
                 <input type="password" name="password" placeholder="••••••••" required 
                        class="auth-input" autocomplete="current-password">
+            </div>
+
+            <div class="remember-row">
+                <label class="remember-label">
+                    <input type="checkbox" name="remember" value="1" {% if remember %}checked{% endif %}>
+                    <span>Beni hatırla</span>
+                </label>
             </div>
 
             <button type="submit" class="btn-vote" style="width: 100%; margin-top: 20px;">

@@ -53,6 +53,7 @@
             {% if next_url %}
             <input type="hidden" name="next" value="{{ next_url }}">
             {% endif %}
+            <input type="hidden" name="remember" value="{{ 1 if remember else 0 }}">
             <div class="form-group">
                 <input type="text" name="kod" placeholder="______" required 
                        maxlength="6" inputmode="numeric" autocomplete="one-time-code" autofocus 
@@ -70,9 +71,17 @@
             <p style="margin-top: 12px;">
                 Yeni kod almak için
                 {% if next_url %}
+                {% if remember %}
+                <a href="{{ url_for('auth.login', next=next_url, remember=1) }}" style="color: var(--ytu-lacivert); font-weight: bold;">tekrar giriş yap</a>.
+                {% else %}
                 <a href="{{ url_for('auth.login', next=next_url) }}" style="color: var(--ytu-lacivert); font-weight: bold;">tekrar giriş yap</a>.
+                {% endif %}
+                {% else %}
+                {% if remember %}
+                <a href="{{ url_for('auth.login', remember=1) }}" style="color: var(--ytu-lacivert); font-weight: bold;">tekrar giriş yap</a>.
                 {% else %}
                 <a href="{{ url_for('auth.login') }}" style="color: var(--ytu-lacivert); font-weight: bold;">tekrar giriş yap</a>.
+                {% endif %}
                 {% endif %}
             </p>
             <p style="margin-top: 15px;">

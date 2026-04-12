@@ -1090,31 +1090,6 @@ sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) connection to serve
 	Is the server running on that host and accepting TCP/IP connections?
 
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
-2026-04-10 15:14:47,252 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
-2026-04-10 15:16:08,428 WARNING app: Trending hashtag query unavailable: (psycopg2.OperationalError) connection to server at "ytusocial-db-do-user-33023628-0.j.db.ondigitalocean.com" (138.197.189.187), port 25060 failed: Connection timed out (0x0000274C/10060)
-	Is the server running on that host and accepting TCP/IP connections?
-
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-Traceback (most recent call last):
-  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
-    self._dbapi_connection = engine.raw_connection()
-                             ~~~~~~~~~~~~~~~~~~~~~^^
-  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\engine\base.py", line 3309, in raw_connection
-    return self.pool.connect()
-           ~~~~~~~~~~~~~~~~~^^
-  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 447, in connect
-    return _ConnectionFairy._checkout(self)
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
-  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
-    fairy = _ConnectionRecord.checkout(pool)
-  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
-    rec = pool._do_get()
-  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 177, in _do_get
-    with util.safe_reraise():
-         ~~~~~~~~~~~~~~~~~^^
-  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
-    raise exc_value.with_traceback(exc_tb)
-  File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\impl.py", line 175, in _do_get
     return self._create_connection()
            ~~~~~~~~~~~~~~~~~~~~~~~^^
   File "C:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
@@ -1539,3 +1514,29 @@ FROM exam_analysis ORDER BY exam_analysis.created_at DESC]
 2026-04-12 16:22:56,561 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
 2026-04-12 16:24:15,187 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
 2026-04-12 16:24:33,778 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-12 16:38:07,300 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-12 16:38:07,408 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-12 16:38:16,637 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-12 16:38:16,720 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-12 16:38:16,846 WARNING app: Missing username fallback failed: 'DummyUser' object has no attribute 'username'
+Traceback (most recent call last):
+  File "d:\Projelerim\ytusocial\app.py", line 115, in fill_missing_username
+    current_username = (current_user.username or '').strip()
+                        ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DummyUser' object has no attribute 'username'
+2026-04-12 16:38:16,852 ERROR app: Exception on /verify/test@std.yildiz.edu.tr [POST]
+Traceback (most recent call last):
+  File "c:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "c:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "c:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 915, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "c:\Users\Ebu Ubeyde\AppData\Local\Programs\Python\Python314\Lib\site-packages\flask\app.py", line 1291, in preprocess_request
+    rv = self.ensure_sync(before_func)()
+  File "d:\Projelerim\ytusocial\app.py", line 131, in check_ban
+    if current_user.is_banned or (current_user.ban_expiration and current_user.ban_expiration > datetime.now()):
+       ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'DummyUser' object has no attribute 'is_banned'
+2026-04-12 16:38:27,993 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
+2026-04-12 16:38:28,070 INFO app: App started. SendGrid loaded=True sender=portalytu@gmail.com
