@@ -261,7 +261,6 @@ class Advert(db.Model):
     title = db.Column(db.String(100), nullable=False)
     category = db.Column(db.String(50), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    image_file = db.Column(db.String(255), nullable=True)
     contact_info = db.Column(db.String(100), nullable=True)
     
     date_posted = db.Column(db.DateTime, nullable=False, default=get_turkey_time)

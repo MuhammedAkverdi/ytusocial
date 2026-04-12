@@ -20,19 +20,6 @@
             gap: 20px; 
             align-items: stretch;
         }
-
-        .adverts-public-layout {
-            grid-template-columns: minmax(0, 1fr) !important;
-            max-width: 1080px !important;
-        }
-
-        .adverts-public-layout .right-sidebar {
-            display: none !important;
-        }
-
-        .adverts-public-layout main {
-            grid-column: 1 / -1;
-        }
         
         .ad-card { 
             background: var(--card-bg); 
@@ -83,21 +70,6 @@
             margin-bottom: 20px; 
             line-height: 1.5; 
             flex-grow: 1; 
-        }
-
-        .ad-media {
-            margin: 18px 0 16px;
-            border-radius: 14px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            background: rgba(var(--ytu-lacivert-rgb), 0.04);
-        }
-
-        .ad-media img {
-            display: block;
-            width: 100%;
-            max-height: 280px;
-            object-fit: cover;
         }
 
         /* Alt Bilgi Alanı */
@@ -156,8 +128,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.6); 
             display: none; align-items: center; justify-content: center; 
-            z-index: 2147483647; backdrop-filter: blur(5px);
-            pointer-events: auto;
+            z-index: 10020; backdrop-filter: blur(5px);
         }
         
         .modal-box { 
@@ -194,63 +165,6 @@
             background-color: #333 !important;
         }
 
-        .modern-file-input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px dashed var(--border-color);
-            background: rgba(var(--ytu-lacivert-rgb), 0.03);
-            color: var(--text-color);
-            border-radius: 10px;
-            outline: none;
-            font-size: 0.95rem;
-        }
-
-        .modern-file-input::file-selector-button {
-            margin-right: 12px;
-            border: none;
-            border-radius: 8px;
-            background: var(--ytu-lacivert);
-            color: #fff;
-            padding: 9px 14px;
-            cursor: pointer;
-        }
-
-        body.dark-mode .modern-file-input {
-            background-color: #2b2b2b !important;
-            color: #e0e0e0 !important;
-            border-color: #444 !important;
-        }
-
-        body.dark-mode .modern-file-input::file-selector-button {
-            background: var(--ytu-sari);
-            color: #1f1f1f;
-        }
-
-        .advert-image-preview-wrap {
-            display: none;
-            margin-top: 12px;
-        }
-
-        .advert-image-preview {
-            width: 100%;
-            max-height: 220px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            background: rgba(0, 0, 0, 0.03);
-        }
-
-        .ad-public-note {
-            margin: 12px 0 22px;
-            padding: 12px 14px;
-            border-radius: 14px;
-            background: rgba(var(--ytu-lacivert-rgb), 0.08);
-            border: 1px solid rgba(var(--ytu-lacivert-rgb), 0.14);
-            color: var(--text-color);
-            font-size: 0.92rem;
-            font-weight: 600;
-        }
-
         body.dark-mode .ad-cat-badge {
             background: rgba(255, 255, 255, 0.1);
             color: var(--ytu-sari);
@@ -268,10 +182,7 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 28px;
             box-shadow: 0 8px 20px rgba(var(--ytu-lacivert-rgb), 0.5);
-            cursor: pointer; z-index: 2147483646; border: none;
-            pointer-events: auto;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            cursor: pointer; z-index: 10010; border: none;
             transition: transform 0.3s, box-shadow 0.3s;
         }
         .fab-btn:hover { transform: scale(1.1) rotate(90deg); box-shadow: 0 12px 25px rgba(0,0,0,0.4); }
@@ -430,7 +341,7 @@
             .filter-btn { font-size: 0.82rem !important; padding: 7px 14px !important; white-space: nowrap; }
 
             /* FAB butonu alt nav'la örtüşmesin */
-            .fab-btn { bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important; right: 16px !important; width: 54px !important; height: 54px !important; font-size: 22px !important; z-index: 2147483646 !important; }
+            .fab-btn { bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important; right: 16px !important; width: 54px !important; height: 54px !important; font-size: 22px !important; z-index: 10010 !important; }
 
             /* Başlık alanı */
             .adv-page-header h1 { font-size: 1.3rem !important; }
@@ -449,7 +360,7 @@
         <div class="adv-top-bar-spacer"></div>
     </div>
 
-    <div class="main-layout {% if not current_user.is_authenticated %}adverts-public-layout{% endif %}">
+    <div class="main-layout">
         {% include 'sidebar_partial.html' %}
 
         <main style="min-width: 0;">
@@ -460,12 +371,6 @@
             </h1>
             <p style="color: var(--text-muted); margin-top: 5px;">Ekip arkadaşı bul, notlarını paylaş veya ikinci el eşya sat.</p>
         </div>
-
-        {% if not current_user.is_authenticated %}
-        <div class="ad-public-note">
-            İlanları herkes görebilir. İlan vermek için giriş yapman gerekir.
-        </div>
-        {% endif %}
 
         <div class="filter-container">
             <a href="{{ url_for('main.adverts') }}" class="filter-btn {{ 'active' if not selected_cat else '' }}">Tümü</a>
@@ -481,9 +386,8 @@
             {% for ad in adverts %}
             <div class="ad-card">
                 <span class="ad-cat-badge">{{ ad.category }}</span>
-                {% set can_manage_ad = current_user.is_authenticated and (current_user.is_admin or (ad.author and ad.author.id == current_user.id)) %}
                 
-                {% if can_manage_ad %}
+                {% if ad.author == current_user or current_user.is_admin %}
                 <button type="button" class="ad-menu-btn" onclick="toggleAdMenu('menu-{{ ad.id }}')">
                     <i class="fas fa-ellipsis-h"></i>
                 </button>
@@ -494,7 +398,6 @@
                         data-cat="{{ ad.category }}"
                         data-desc="{{ ad.description }}"
                         data-contact="{{ ad.contact_info or '' }}"
-                        data-image="{{ ad.image_file or '' }}"
                         onclick="openEditModal(this)">
                         <i class="fas fa-edit"></i> Düzenle
                     </button>
@@ -505,11 +408,6 @@
                 {% endif %}
 
                 <div class="ad-title">{{ ad.title }}</div>
-                {% if ad.image_file %}
-                <div class="ad-media">
-                    <img src="{{ url_for('static', filename='post_images/' ~ ad.image_file) }}" alt="{{ ad.title }}" loading="lazy">
-                </div>
-                {% endif %}
                 <div class="ad-desc" style="white-space: pre-line;">{{ ad.description }}</div>
                 
                 {% if ad.contact_info %}
@@ -520,19 +418,12 @@
                 {% endif %}
 
                 <div class="ad-footer">
-                    {% if ad.author %}
                     <a href="{{ url_for('main.user_profile', handle=ad.author.handle) }}" class="ad-author">
                         <img src="/static/{{ ad.author.profile_pic }}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
                         <span>{{ ad.author.username }}</span>
                     </a>
-                    {% else %}
-                    <div class="ad-author" style="opacity: 0.8;">
-                        <img src="/static/img/default_avatar.png" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
-                        <span>Silinmiş Kullanıcı</span>
-                    </div>
-                    {% endif %}
                     
-                    {% if ad.author and current_user.is_authenticated and ad.author.id != current_user.id %}
+                    {% if ad.author != current_user %}
                     <a href="/chat/{{ ad.author.handle }}" class="btn-vote" style="padding: 8px 18px; font-size: 0.85rem; border-radius: 20px; text-decoration:none;">
                         <i class="far fa-paper-plane"></i> Mesaj
                     </a>
@@ -546,11 +437,7 @@
             <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--text-muted);">
                 <i class="fas fa-bullhorn" style="font-size: 4rem; margin-bottom: 25px; opacity: 0.3;"></i>
                 <h3>Henüz hiç ilan yok.</h3>
-                {% if current_user.is_authenticated %}
                 <p>Sağ alttaki <b>+</b> butonuna tıklayarak ilk ilanı sen ver!</p>
-                {% else %}
-                <p>İlan vermek için giriş yap, sonra ilk ilanı sen ver!</p>
-                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -559,7 +446,7 @@
         <aside class="right-sidebar"></aside>
     </div>
 
-    <button type="button" class="fab-btn" id="createAdvertBtn" data-authenticated="{{ '1' if current_user.is_authenticated else '0' }}" data-login-url="{{ url_for('auth.login', next=request.full_path.rstrip('?')) }}" title="{% if current_user.is_authenticated %}Yeni İlan Ekle{% else %}İlan vermek için giriş yap{% endif %}">
+    <button type="button" class="fab-btn" onclick="openCreateModal()" title="Yeni İlan Ekle">
         <i class="fas fa-plus"></i>
     </button>
 
@@ -569,7 +456,7 @@
             
             <h3 id="modalTitle" style="margin-bottom: 30px; color: var(--text-color); text-align: center; font-size: 1.5rem;">📝 Yeni İlan Oluştur</h3>
             
-            <form id="adForm" action="{{ url_for('main.adverts') }}" method="POST" enctype="multipart/form-data">
+            <form id="adForm" action="{{ url_for('main.adverts') }}" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div style="margin-bottom: 18px;">
                     <label>İlan Başlığı</label>
@@ -591,14 +478,6 @@
                 <div style="margin-bottom: 18px;">
                     <label>Açıklama / Detaylar</label>
                     <textarea name="description" id="inpDesc" rows="5" required class="modern-input" placeholder="Projenizden veya ilanınızdan bahsedin..."></textarea>
-                </div>
-
-                <div style="margin-bottom: 18px;">
-                    <label>İlan Fotoğrafı (İsteğe Bağlı)</label>
-                    <input type="file" name="image" id="inpImage" accept="image/*" class="modern-file-input">
-                    <div id="imagePreviewWrap" class="advert-image-preview-wrap">
-                        <img id="imagePreview" class="advert-image-preview" alt="İlan fotoğrafı önizleme">
-                    </div>
                 </div>
 
                 <div style="margin-bottom: 30px;">
@@ -663,7 +542,6 @@
             document.getElementById('adForm').reset(); // Kutuları temizle
             document.getElementById('modalTitle').innerText = "📝 Yeni İlan Oluştur";
             document.getElementById('btnSubmit').innerHTML = 'Yayınla <i class="fas fa-check-circle" style="margin-left: 8px;"></i>';
-            clearAdvertImagePreview();
             document.getElementById('adModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
@@ -681,7 +559,6 @@
             const cat = btn.getAttribute('data-cat');
             const desc = btn.getAttribute('data-desc');
             const contact = btn.getAttribute('data-contact');
-            const imageFile = btn.getAttribute('data-image') || '';
 
             // Form action URL'sini güncelle
             document.getElementById('adForm').action = "/edit_advert/" + id;
@@ -691,12 +568,6 @@
             document.getElementById('inpCat').value = cat;
             document.getElementById('inpDesc').value = desc;
             document.getElementById('inpContact').value = contact;
-            document.getElementById('inpImage').value = '';
-            if (imageFile) {
-                setAdvertImagePreview("/static/post_images/" + imageFile);
-            } else {
-                clearAdvertImagePreview();
-            }
 
             // Başlıkları güncelle
             document.getElementById('modalTitle').innerText = "✏️ İlanı Düzenle";
@@ -706,49 +577,6 @@
             document.querySelectorAll('.ad-dropdown').forEach(m => m.style.display = 'none');
             document.getElementById('adModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
-        }
-
-        const createAdvertBtn = document.getElementById('createAdvertBtn');
-        if (createAdvertBtn) {
-            createAdvertBtn.addEventListener('click', function () {
-                if (this.dataset.authenticated === '1') {
-                    openCreateModal();
-                    return;
-                }
-                window.location.href = this.dataset.loginUrl || "{{ url_for('auth.login', next=request.full_path.rstrip('?')) }}";
-            });
-        }
-
-        const advertImageInput = document.getElementById('inpImage');
-        if (advertImageInput) {
-            advertImageInput.addEventListener('change', function () {
-                const file = this.files && this.files[0];
-                if (!file) {
-                    clearAdvertImagePreview();
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    setAdvertImagePreview(event.target.result);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function setAdvertImagePreview(src) {
-            const previewWrap = document.getElementById('imagePreviewWrap');
-            const preview = document.getElementById('imagePreview');
-            if (!previewWrap || !preview) return;
-            preview.src = src;
-            previewWrap.style.display = 'block';
-        }
-
-        function clearAdvertImagePreview() {
-            const previewWrap = document.getElementById('imagePreviewWrap');
-            const preview = document.getElementById('imagePreview');
-            if (preview) preview.removeAttribute('src');
-            if (previewWrap) previewWrap.style.display = 'none';
         }
     </script>
 
