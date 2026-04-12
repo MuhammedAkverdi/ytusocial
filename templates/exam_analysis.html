@@ -81,6 +81,12 @@
             margin: 72px auto 24px;
         }
 
+        body.exam-analysis-page .exam-shell {
+            display: grid;
+            gap: 18px;
+            min-width: 0;
+        }
+
         body.exam-analysis-page .profile-menu .dropdown-content {
             top: 50px;
             min-width: 230px;
@@ -538,6 +544,32 @@
         }
 
         @media (max-width: 640px) {
+            body.exam-analysis-page .main-layout {
+                margin: 58px auto 18px;
+            }
+
+            body.exam-analysis-page .exam-shell {
+                gap: 14px;
+                padding: 0 12px 26px;
+            }
+
+            body.exam-analysis-page .exam-hero {
+                padding: 16px;
+            }
+
+            body.exam-analysis-page .exam-panel {
+                padding: 14px;
+                border-radius: 20px;
+            }
+
+            body.exam-analysis-page .question-header h2 {
+                font-size: 1.2rem;
+            }
+
+            body.exam-analysis-page .question-header span {
+                padding: 5px 9px;
+            }
+
             body.exam-analysis-page .mob-header {
                 height: 54px;
                 padding: 0 14px;
@@ -572,7 +604,7 @@
     <div class="main-layout exam-layout">
         {% include 'sidebar_partial.html' %}
 
-        <main class="exam-shell">
+        <main class="exam-shell" id="examShell">
         <header class="exam-hero">
             <div class="exam-hero-grid">
                 <div>
@@ -626,8 +658,9 @@
                         {% for q_num in range(1, exam.question_count + 1) %}
                             {% set q_stat = question_stats[q_num] %}
                             {% set is_answered = q_stat.selected_option != None %}
-                            <a href="{{ url_for('main.exam_analysis_page', exam_code=exam.code, question_no=q_num, group=selected_group) }}"
-                               class="q-grid-btn {% if q_num == question_no %}active{% elif is_answered %}answered{% endif %}">
+                                     <a href="{{ url_for('main.exam_analysis_page', exam_code=exam.code, question_no=q_num, group=selected_group) }}"
+                                         class="q-grid-btn {% if q_num == question_no %}active{% elif is_answered %}answered{% endif %}"
+                                         data-question-link>
                                 {{ q_num }}
                             </a>
                         {% endfor %}
@@ -635,7 +668,7 @@
                 </section>
             </aside>
 
-            <section>
+            <section id="examQuestionPane">
                 <div class="exam-panel">
                     <div class="question-header">
                         <h2>Soru {{ question_no }}</h2>
@@ -717,10 +750,64 @@
     <script>
 const examCode = '{{ exam.code }}';
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const currentQuestionNo = Number(document.querySelector('.exam-analysis-layout')?.dataset.currentQuestionNo || 0);
+
+function getCurrentQuestionNo() {
+    return Number(document.querySelector('.exam-analysis-layout')?.dataset.currentQuestionNo || 0);
+}
 
 function getSelectedGroup() {
     return '{{ selected_group }}';
+}
+
+function syncQuestionLinks(root) {
+    const scope = root || document;
+    scope.querySelectorAll('[data-question-link]').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            loadQuestionPage(link.href);
+        });
+    });
+}
+
+function wirePopState() {
+    window.addEventListener('popstate', () => {
+        loadQuestionPage(window.location.href, false);
+    });
+}
+
+function loadQuestionPage(url, pushHistory = true) {
+    const shell = document.getElementById('examShell');
+    if (!shell) return;
+
+    shell.classList.add('is-loading');
+
+    fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then((response) => response.text())
+    .then((html) => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const incomingShell = doc.querySelector('#examShell');
+        if (!incomingShell) {
+            window.location.href = url;
+            return;
+        }
+
+        shell.outerHTML = incomingShell.outerHTML;
+        if (pushHistory) {
+            history.pushState({}, '', url);
+        }
+
+        const newShell = document.getElementById('examShell');
+        if (newShell) {
+            newShell.classList.remove('is-loading');
+        }
+        syncQuestionLinks(document);
+        bindExamAnalysisControls();
+    })
+    .catch(() => {
+        window.location.href = url;
+    });
 }
 
 function selectGroup(group) {
@@ -736,11 +823,11 @@ function selectGroup(group) {
     .then(data => {
         if(data.success) {
             // URL yapısını güncelleyerek sayfayı yenile
-            window.location.href = `?group=${data.group}&question_no={{ question_no }}`;
+            loadQuestionPage(`?group=${data.group}&question_no={{ question_no }}`);
         } else {
             alert(data.message || 'Kitapçık seçimi başarısız.');
             if(data.locked_group) {
-                window.location.href = `?group=${data.locked_group}&question_no={{ question_no }}`;
+                loadQuestionPage(`?group=${data.locked_group}&question_no={{ question_no }}`);
             }
         }
     }).catch(err => console.error(err));
@@ -825,19 +912,22 @@ function bindExamAnalysisControls() {
 
     document.querySelectorAll('[data-vote-option]').forEach((optionCard) => {
         optionCard.addEventListener('click', () => {
-            submitExamVote(currentQuestionNo, optionCard.dataset.voteOption);
+            submitExamVote(getCurrentQuestionNo(), optionCard.dataset.voteOption);
         });
     });
 
     const commentButton = document.querySelector('[data-submit-exam-comment]');
     if (commentButton) {
-        commentButton.addEventListener('click', () => submitExamComment(currentQuestionNo));
+        commentButton.addEventListener('click', () => submitExamComment(getCurrentQuestionNo()));
     }
 
     document.querySelectorAll('[data-report-comment]').forEach((button) => {
         button.addEventListener('click', () => reportExamComment(Number(button.dataset.reportComment)));
     });
 }
+
+syncQuestionLinks(document);
+wirePopState();
 
 bindExamAnalysisControls();
     </script>

@@ -359,12 +359,14 @@
 
     @media (max-width: 768px) {
         body.exam-page,
+        body.exam-analysis-page,
         body.exam-list-page {
             padding-top: 54px;
             padding-bottom: 70px;
         }
 
         .exam-layout,
+        .exam-analysis-page .exam-layout,
         .exam-list-layout {
             grid-template-columns: 1fr !important;
             margin: 58px 0 18px !important;
@@ -375,6 +377,8 @@
 
         .exam-layout .left-sidebar,
         .exam-layout .right-sidebar,
+        .exam-analysis-page .exam-layout .left-sidebar,
+        .exam-analysis-page .exam-layout .right-sidebar,
         .exam-list-layout .left-sidebar,
         .exam-list-layout .right-sidebar {
             display: none !important;
