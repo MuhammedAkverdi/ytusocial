@@ -93,12 +93,17 @@
             color: rgba(226, 232, 240, 0.72);
         }
 
+        .exam-layout {
+            align-items: start;
+            grid-template-columns: 280px minmax(0, 1fr);
+            gap: 24px;
+            max-width: 1250px;
+        }
+
         .exam-shell {
-            max-width: 1180px;
-            margin: 0 auto;
-            padding: 28px 16px 48px;
             display: grid;
             gap: 18px;
+            min-width: 0;
         }
 
         .exam-hero {
@@ -212,7 +217,7 @@
             letter-spacing: 0.05em;
         }
 
-        .exam-layout {
+        .exam-analysis-layout {
             display: grid;
             grid-template-columns: minmax(0, 270px) minmax(0, 1fr);
             gap: 18px;
@@ -457,7 +462,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .exam-layout {
+            .exam-analysis-layout {
                 grid-template-columns: 1fr;
             }
 
@@ -485,8 +490,14 @@
         }
     </style>
 </head>
-<body class="exam-analysis-page">
-    <div class="exam-shell">
+<body class="exam-page exam-analysis-page">
+    {% include 'navbar_partial.html' ignore missing %}
+    {% include 'exam_mobile_shell.html' %}
+
+    <div class="main-layout exam-layout">
+        {% include 'sidebar_partial.html' %}
+
+        <main class="exam-shell">
         <header class="exam-hero">
             <div class="exam-hero-grid">
                 <div>
@@ -512,7 +523,7 @@
             </div>
         </header>
 
-        <main class="exam-layout">
+        <section class="exam-analysis-layout">
             <aside>
                 <section class="exam-panel">
                     <h3 class="panel-title"><i class="fa-solid fa-layer-group"></i> Kitapçık Seçimi</h3>
@@ -622,6 +633,7 @@
                 </div>
                 {% endif %}
             </section>
+        </section>
         </main>
     </div>
 
