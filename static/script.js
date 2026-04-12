@@ -4,10 +4,18 @@
 
 // Sayfa yüklenmeden hemen çalışarak beyaz ekran (FOUC) sorununu önler
 (function() {
-    const theme = localStorage.getItem('theme');
+    const cookieMatch = document.cookie.match(/(?:^|; )theme=([^;]+)/);
+    const cookieTheme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+    const theme = cookieTheme || localStorage.getItem('theme');
     const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (theme === 'dark' || (!theme && systemDark)) {
+    const shouldUseDark = theme === 'dark' || (!theme && systemDark);
+
+    if (shouldUseDark) {
         document.documentElement.classList.add('dark-mode');
+        if (document.body) document.body.classList.add('dark-mode');
+        document.documentElement.style.colorScheme = 'dark';
+    } else {
+        document.documentElement.style.colorScheme = 'light';
     }
 })();
 
@@ -143,9 +151,11 @@ function toggleDarkMode() {
 
     if (html.classList.contains('dark-mode')) {
         localStorage.setItem('theme', 'dark');
+        document.cookie = 'theme=dark; path=/; max-age=31536000; SameSite=Lax';
         if (btn) btn.innerText = '☀️';
     } else {
         localStorage.setItem('theme', 'light');
+        document.cookie = 'theme=light; path=/; max-age=31536000; SameSite=Lax';
         if (btn) btn.innerText = '🌙';
     }
 }

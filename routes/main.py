@@ -134,7 +134,7 @@ def _exam_csrf_valid():
 
 
 def _exam_access_allowed(exam):
-    return current_user.is_admin
+    return bool(getattr(exam, 'is_published', False))
 
 
 def _exam_coming_soon_page():

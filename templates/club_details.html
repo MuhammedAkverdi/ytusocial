@@ -213,7 +213,20 @@
     </style>
 </head>
 <body>
-    <script>if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');</script>
+    <script>
+        (function() {
+            const cookieMatch = document.cookie.match(/(?:^|; )theme=([^;]+)/);
+            const cookieTheme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+            const theme = cookieTheme || localStorage.getItem('theme');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark-mode');
+                document.documentElement.style.colorScheme = 'dark';
+                document.body.classList.add('dark-mode');
+            } else if (theme === 'light') {
+                document.documentElement.style.colorScheme = 'light';
+            }
+        })();
+    </script>
     {% include 'navbar_partial.html' ignore missing %}
 
     <!-- MOBİL HEADER -->

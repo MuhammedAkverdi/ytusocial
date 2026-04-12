@@ -456,10 +456,18 @@
 
 <body>
     <script>
-        // Sayfa yüklenmeden karanlık modu uygula
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-        }
+        (function() {
+            const cookieMatch = document.cookie.match(/(?:^|; )theme=([^;]+)/);
+            const cookieTheme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+            const theme = cookieTheme || localStorage.getItem('theme');
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark-mode');
+                document.documentElement.style.colorScheme = 'dark';
+                document.body.classList.add('dark-mode');
+            } else if (theme === 'light') {
+                document.documentElement.style.colorScheme = 'light';
+            }
+        })();
     </script>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
