@@ -43,6 +43,15 @@ def _purge_post_tree(post):
     return deleted_count
 
 
+def _remove_uploaded_file(upload_folder, filename):
+    if not filename:
+        return
+
+    file_path = os.path.join(current_app.root_path, upload_folder, filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+
 def _cleanup_user_related_data(user_id, story_ids=None):
     db.session.execute(
         followers_table.delete().where(
@@ -69,11 +78,15 @@ def _cleanup_user_related_data(user_id, story_ids=None):
     Message.query.filter(
         (Message.sender_id == user_id) | (Message.recipient_id == user_id)
     ).delete(synchronize_session=False)
-    Feedback.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    for feedback in Feedback.query.filter_by(user_id=user_id).all():
+        _remove_uploaded_file(current_app.config['POST_UPLOAD_FOLDER'], feedback.image_file)
+        db.session.delete(feedback)
     ClubVote.query.filter_by(user_id=user_id).delete(synchronize_session=False)
     PollVote.query.filter_by(user_id=user_id).delete(synchronize_session=False)
     NoteVote.query.filter_by(user_id=user_id).delete(synchronize_session=False)
-    Advert.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+    for advert in Advert.query.filter_by(user_id=user_id).all():
+        _remove_uploaded_file(current_app.config['POST_UPLOAD_FOLDER'], advert.image_file)
+        db.session.delete(advert)
     Note.query.filter_by(user_id=user_id).delete(synchronize_session=False)
     ExamComment.query.filter_by(user_id=user_id).delete(synchronize_session=False)
     ExamResponse.query.filter_by(user_id=user_id).delete(synchronize_session=False)
@@ -117,7 +130,23 @@ def _soft_shuffle_reels(posts, user_id):
 EXAM_GROUPS = ('A', 'B', 'C', 'D')
 EXAM_OPTIONS = ('A', 'B', 'C', 'D', 'E')
 EXAM_DISCLAIMER = 'Bu sonuçlar kullanıcı oylarıyla oluşmaktadır, resmi cevap anahtarı değildir.'
-EXAM_COMING_SOON_MESSAGE = 'Sınav analizi şu anda yalnızca yöneticilere açık. Çok yakında açılıyor.'
+EXAM_COMING_SOON_MESSAGE = 'Sınav analizi şu anda bakımda. İçerik kısa süre içinde tekrar açılacak.'
+EXAM_ANALYSIS_MAINTENANCE = True
+EXAM_MAINTENANCE_ENDPOINTS = {
+    'main.exam_analysis_page',
+    'main.exam_analyses',
+    'main.exam_question_detail',
+    'main.exam_group_api',
+    'main.exam_vote_api',
+    'main.exam_comment_api',
+    'main.report_exam_comment_api',
+}
+EXAM_MAINTENANCE_API_ENDPOINTS = {
+    'main.exam_group_api',
+    'main.exam_vote_api',
+    'main.exam_comment_api',
+    'main.report_exam_comment_api',
+}
 
 
 def _exam_csrf_valid():
@@ -137,12 +166,30 @@ def _exam_access_allowed(exam):
     return bool(getattr(exam, 'is_published', False))
 
 
+def _exam_maintenance_active():
+    return EXAM_ANALYSIS_MAINTENANCE
+
+
+@main.before_request
+def _exam_maintenance_gate():
+    if not _exam_maintenance_active():
+        return None
+
+    endpoint = request.endpoint or ''
+    if endpoint not in EXAM_MAINTENANCE_ENDPOINTS:
+        return None
+
+    if endpoint in EXAM_MAINTENANCE_API_ENDPOINTS:
+        return _exam_coming_soon_json()
+    return _exam_coming_soon_page()
+
+
 def _exam_coming_soon_page():
-    return render_template('exam_coming_soon.html', message=EXAM_COMING_SOON_MESSAGE)
+    return render_template('exam_coming_soon.html', message=EXAM_COMING_SOON_MESSAGE), 503
 
 
 def _exam_coming_soon_json():
-    return jsonify({'success': False, 'message': EXAM_COMING_SOON_MESSAGE}), 403
+    return jsonify({'success': False, 'message': EXAM_COMING_SOON_MESSAGE}), 503
 
 
 def _exam_snapshot(exam, question_no):
@@ -1072,8 +1119,16 @@ def block_user(user_id):
 def submit_feedback():
     type = request.form.get('type')
     message = request.form.get('message')
+    image = request.files.get('image')
     if type and message:
-        fb = Feedback(user_id=current_user.id, type=type, message=message)
+        image_filename = None
+        if image and image.filename:
+            if not allowed_image_file(image.filename):
+                flash("Sadece resim dosyası yükleyebilirsin.", "danger")
+                return redirect(request.referrer or url_for('main.index'))
+            image_filename = optimize_and_save_image(image, current_app.config['POST_UPLOAD_FOLDER'])
+
+        fb = Feedback(user_id=current_user.id, type=type, message=message, image_file=image_filename)
         db.session.add(fb)
         db.session.commit()
         flash("Geri bildiriminiz alındı, teşekkürler!", "success")
@@ -1123,6 +1178,9 @@ def vote_poll(poll_id, option_id):
 @main.route('/exam/<string:exam_code>')
 @login_required
 def exam_analysis_page(exam_code):
+    if _exam_maintenance_active():
+        return _exam_coming_soon_page()
+
     exam = ExamAnalysis.query.filter_by(code=exam_code).first_or_404()
     if not _exam_access_allowed(exam):
         abort(404)
@@ -1164,6 +1222,9 @@ def exam_analysis_page(exam_code):
 @main.route('/api/exams/<string:exam_code>/group', methods=['POST'])
 @login_required
 def exam_group_api(exam_code):
+    if _exam_maintenance_active():
+        return _exam_coming_soon_json()
+
     if not _exam_csrf_valid():
         return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
 
@@ -1209,6 +1270,9 @@ def exam_group_api(exam_code):
 @main.route('/exam/<string:exam_code>/question/<int:question_no>')
 @login_required
 def exam_question_detail(exam_code, question_no):
+    if _exam_maintenance_active():
+        return _exam_coming_soon_page()
+
     exam = ExamAnalysis.query.filter_by(code=exam_code).first_or_404()
     if not _exam_access_allowed(exam):
         abort(404)
@@ -1248,6 +1312,9 @@ def exam_question_detail(exam_code, question_no):
 @main.route('/exam-analyses')
 @login_required
 def exam_analyses():
+    if _exam_maintenance_active():
+        return _exam_coming_soon_page()
+
     analyses = ExamAnalysis.query.order_by(ExamAnalysis.created_at.desc()).all()
     visible_analyses = [analysis for analysis in analyses if _exam_access_allowed(analysis)]
     return render_template(
@@ -1260,6 +1327,9 @@ def exam_analyses():
 @main.route('/api/exams/<string:exam_code>/vote', methods=['POST'])
 @login_required
 def exam_vote_api(exam_code):
+    if _exam_maintenance_active():
+        return _exam_coming_soon_json()
+
     if not _exam_csrf_valid():
         return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
 
@@ -1349,6 +1419,9 @@ def exam_vote_api(exam_code):
 @main.route('/api/exams/<string:exam_code>/comment', methods=['POST'])
 @login_required
 def exam_comment_api(exam_code):
+    if _exam_maintenance_active():
+        return _exam_coming_soon_json()
+
     if not _exam_csrf_valid():
         return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
 
@@ -1416,6 +1489,9 @@ def exam_comment_api(exam_code):
 @main.route('/api/exams/<string:exam_code>/comments/<int:comment_id>/report', methods=['POST'])
 @login_required
 def report_exam_comment_api(exam_code, comment_id):
+    if _exam_maintenance_active():
+        return _exam_coming_soon_json()
+
     if not _exam_csrf_valid():
         return jsonify({'success': False, 'message': 'Güvenlik doğrulaması başarısız.'}), 400
 
@@ -1488,7 +1564,15 @@ def adverts():
         description = request.form.get('description')
         contact = request.form.get('contact') 
         if title and description and category:
-            new_adv = Advert(title=title, category=category, description=description, contact_info=contact, author=current_user)
+            image = request.files.get('image')
+            image_filename = None
+            if image and image.filename:
+                if not allowed_image_file(image.filename):
+                    flash("Sadece resim dosyası yükleyebilirsin.", "danger")
+                    return redirect(request.referrer or url_for('main.adverts'))
+                image_filename = optimize_and_save_image(image, current_app.config['POST_UPLOAD_FOLDER'])
+
+            new_adv = Advert(title=title, category=category, description=description, contact_info=contact, image_file=image_filename, author=current_user)
             db.session.add(new_adv)
             db.session.commit()
             flash("İlanın başarıyla yayınlandı!", "success")
@@ -1507,6 +1591,7 @@ def delete_advert(adv_id):
     if adv.author != current_user and not current_user.is_admin:
         flash("Bu ilanı silme yetkiniz yok!", "danger")
         return redirect(url_for('main.adverts'))
+    _remove_uploaded_file(current_app.config['POST_UPLOAD_FOLDER'], adv.image_file)
     db.session.delete(adv)
     db.session.commit()
     flash("İlan kaldırıldı.", "info")
@@ -1519,11 +1604,20 @@ def edit_advert(adv_id):
     if adv.author != current_user and not current_user.is_admin:
         flash("Bu ilanı düzenleme yetkiniz yok!", "danger")
         return redirect(url_for('main.adverts'))
+    old_image_file = adv.image_file
+    image = request.files.get('image')
+    if image and image.filename:
+        if not allowed_image_file(image.filename):
+            flash("Sadece resim dosyası yükleyebilirsin.", "danger")
+            return redirect(url_for('main.adverts'))
+        adv.image_file = optimize_and_save_image(image, current_app.config['POST_UPLOAD_FOLDER'])
     adv.title = request.form.get('title')
     adv.category = request.form.get('category')
     adv.description = request.form.get('description')
     adv.contact_info = request.form.get('contact')
     db.session.commit()
+    if adv.image_file != old_image_file:
+        _remove_uploaded_file(current_app.config['POST_UPLOAD_FOLDER'], old_image_file)
     flash("İlan başarıyla güncellendi.", "success")
     return redirect(url_for('main.adverts'))
 

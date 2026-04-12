@@ -30,11 +30,17 @@
             background: linear-gradient(135deg, var(--ytu-lacivert) 0%, #1a4f8c 60%, #2a6cbd 100%);
             border-radius: 18px; padding: 28px 30px; margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
-            gap: 20px; position: relative; overflow: hidden;
+            gap: 20px; position: relative; overflow: hidden; isolation: isolate;
         }
         .np-hero::before {
             content:''; position:absolute; top:-40px; right:-40px;
             width:200px; height:200px; background:rgba(255,255,255,.05); border-radius:50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .np-hero > * {
+            position: relative;
+            z-index: 1;
         }
         .np-hero-title { font-size: 1.6rem; font-weight: 900; color: #fff; margin: 0 0 6px; }
         .np-hero-sub   { color: rgba(255,255,255,.75); font-size: 0.88rem; margin: 0; }
@@ -47,6 +53,8 @@
             background: #fff; color: var(--ytu-lacivert); border: none;
             padding: 12px 22px; border-radius: 12px; font-weight: 800; font-size: 0.9rem;
             cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+            position: relative;
+            z-index: 1;
             box-shadow: 0 4px 14px rgba(0,0,0,.15);
         }
         .btn-upload-hero:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.2); }

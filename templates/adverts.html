@@ -57,13 +57,27 @@
         .ad-title { 
             font-size: 1.25rem; 
             font-weight: 800; 
-            margin-top: 35px; 
+            margin-top: 20px; 
             margin-bottom: 12px; 
             color: var(--text-color); 
             line-height: 1.3;
             padding-right: 30px; 
         }
-        
+
+        .ad-media {
+            margin: 18px 0 16px;
+        }
+
+        .ad-media img {
+            width: 100%;
+            display: block;
+            max-height: 240px;
+            object-fit: cover;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+        }
+
         .ad-desc { 
             font-size: 0.95rem; 
             color: var(--text-muted); 
@@ -394,16 +408,22 @@
                 <div id="menu-{{ ad.id }}" class="ad-dropdown">
                     <button type="button" class="edit-btn"
                         data-id="{{ ad.id }}"
-                        data-title="{{ ad.title }}"
-                        data-cat="{{ ad.category }}"
-                        data-desc="{{ ad.description }}"
-                        data-contact="{{ ad.contact_info or '' }}"
+                        data-title="{{ ad.title|e }}"
+                        data-cat="{{ ad.category|e }}"
+                        data-desc="{{ ad.description|e }}"
+                        data-contact="{{ (ad.contact_info or '')|e }}"
                         onclick="openEditModal(this)">
                         <i class="fas fa-edit"></i> Düzenle
                     </button>
                     <a href="{{ url_for('main.delete_advert', adv_id=ad.id) }}" class="delete-btn" onclick="return confirm('Bu ilanı silmek istediğine emin misin?')">
                         <i class="fas fa-trash-alt"></i> Sil
                     </a>
+                </div>
+                {% endif %}
+
+                {% if ad.image_file %}
+                <div class="ad-media">
+                    <img src="/static/post_images/{{ ad.image_file }}" alt="{{ ad.title }}">
                 </div>
                 {% endif %}
 
@@ -456,7 +476,7 @@
             
             <h3 id="modalTitle" style="margin-bottom: 30px; color: var(--text-color); text-align: center; font-size: 1.5rem;">📝 Yeni İlan Oluştur</h3>
             
-            <form id="adForm" action="{{ url_for('main.adverts') }}" method="POST">
+            <form id="adForm" action="{{ url_for('main.adverts') }}" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div style="margin-bottom: 18px;">
                     <label>İlan Başlığı</label>
@@ -483,6 +503,12 @@
                 <div style="margin-bottom: 30px;">
                     <label>İletişim (İsteğe Bağlı)</label>
                     <input type="text" name="contact" id="inpContact" placeholder="Örn: 05xx... veya Instagram: @kullanici" class="modern-input">
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <label>Fotoğraf (İsteğe Bağlı)</label>
+                    <input type="file" name="image" accept="image/*" class="modern-input" style="padding: 10px 12px;">
+                    <small style="display: block; margin-top: 8px; color: var(--text-muted);">JPG, PNG veya WEBP yükleyebilirsin. Düzenlemede yeni foto seçersen eskisi değişir.</small>
                 </div>
 
                 <button type="submit" id="btnSubmit" class="btn-vote" style="width: 100%; padding: 15px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; background: var(--ytu-lacivert); border: none;">
@@ -559,6 +585,8 @@
             const cat = btn.getAttribute('data-cat');
             const desc = btn.getAttribute('data-desc');
             const contact = btn.getAttribute('data-contact');
+
+            document.getElementById('adForm').reset();
 
             // Form action URL'sini güncelle
             document.getElementById('adForm').action = "/edit_advert/" + id;

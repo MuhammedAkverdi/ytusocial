@@ -262,6 +262,7 @@ class Advert(db.Model):
     category = db.Column(db.String(50), nullable=False)
     description = db.Column(db.Text, nullable=False)
     contact_info = db.Column(db.String(100), nullable=True)
+    image_file = db.Column(db.String(255), nullable=True)
     
     date_posted = db.Column(db.DateTime, nullable=False, default=get_turkey_time)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -300,6 +301,7 @@ class Feedback(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     type = db.Column(db.String(20), nullable=False) # Öneri, Şikayet, Diğer
     message = db.Column(db.Text, nullable=False)
+    image_file = db.Column(db.String(255), nullable=True)
     date_sent = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     user = db.relationship('User', backref='feedbacks', lazy=True)
 

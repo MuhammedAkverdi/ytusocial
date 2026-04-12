@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from extensions import db
 from models import User, Post, Feedback, Club, Note, ClubVote, NoteVote, Notification, Advert, ExamAnalysis, ExamAttempt, ExamResponse, ExamComment
 from utils import allowed_image_file, upload_club_logo_to_spaces, get_online_user_count
-from routes.main import _purge_post_tree, _cleanup_user_related_data
+from routes.main import _purge_post_tree, _cleanup_user_related_data, _remove_uploaded_file
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
 from sqlalchemy.exc import IntegrityError
@@ -216,6 +216,7 @@ def admin_delete_content(type, id):
             flash("Not kalıcı olarak silindi.", "success")
         elif type == 'feedback':
             item = Feedback.query.get_or_404(id)
+            _remove_uploaded_file(current_app.config['POST_UPLOAD_FOLDER'], item.image_file)
             db.session.delete(item)
             flash("Geri bildirim silindi.", "success")
 
