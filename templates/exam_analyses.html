@@ -20,6 +20,7 @@
     </script>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -40,6 +41,35 @@
             overflow-x: hidden;
         }
 
+        body.exam-list-page .navbar,
+        body.exam-list-page .mob-header,
+        body.exam-list-page .mob-left-drawer,
+        body.exam-list-page .mobile-bottom-nav {
+            font-family: 'Inter', 'Manrope', sans-serif;
+        }
+
+        body.exam-list-page .navbar {
+            height: 65px;
+            padding: 0 6%;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        body.exam-list-page .nav-logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        body.exam-list-page .nav-right {
+            gap: 12px;
+        }
+
+        body.exam-list-page .nav-avatar {
+            width: 38px;
+            height: 38px;
+        }
         body.exam-list-page .main-layout {
             margin: 90px auto 30px;
         }
@@ -483,6 +513,15 @@
         }
 
         @media (max-width: 768px) {
+            body.exam-list-page .mob-header {
+                height: 54px;
+                padding: 0 14px;
+            }
+
+            body.exam-list-page .mob-header-logo {
+                font-size: 1.1rem;
+            }
+
             .exam-hero,
             .exam-toolbar,
             .exam-card,
