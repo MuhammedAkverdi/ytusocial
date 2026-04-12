@@ -6,7 +6,7 @@ from utils import allowed_image_file, upload_club_logo_to_spaces, get_online_use
 from routes.main import _purge_post_tree, _cleanup_user_related_data, _remove_uploaded_file
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy import func
 from flask_wtf.csrf import validate_csrf
 import os
@@ -62,35 +62,48 @@ def _build_exam_overviews():
 @admin.route('/admin')
 @login_required
 def admin_panel():
-    if not current_user.is_admin: return redirect(url_for('main.index'))
-    
-    reported_posts = Post.query.filter(Post.report_count > 0).order_by(Post.report_count.desc()).all()
-    reported_notes = Note.query.filter(Note.report_count > 0, Note.is_approved == True).order_by(Note.report_count.desc()).all()
-    feedbacks = Feedback.query.order_by(Feedback.date_sent.desc()).all()
-    pending_notes = Note.query.filter_by(is_approved=False).order_by(Note.date_posted.desc()).all()
-    moderators = User.query.filter_by(is_moderator=True).all()
-    exam_analyses = _build_exam_overviews()
-    
-    return render_template('admin.html',
-                           total_users=User.query.count(),
-                           total_posts=Post.query.count(),
-                           reported_posts=reported_posts,
-                           reported_notes=reported_notes,
-                           feedbacks=feedbacks,
-                           cpu=psutil.cpu_percent(),
-                           ram=psutil.virtual_memory().percent,
-                           active_count=get_online_user_count(),
-                           users=User.query.limit(50).all(),
-                           clubs=Club.query.order_by(Club.name).all(),
-                           pending_notes=pending_notes,
-                           moderators=moderators,
-                           exam_analyses=exam_analyses)
+    if not getattr(current_user, 'is_admin', False): return redirect(url_for('main.index'))
+
+    dashboard_context = {
+        'total_users': 0,
+        'total_posts': 0,
+        'reported_posts': [],
+        'reported_notes': [],
+        'feedbacks': [],
+        'cpu': psutil.cpu_percent(),
+        'ram': psutil.virtual_memory().percent,
+        'active_count': get_online_user_count(),
+        'users': [],
+        'clubs': [],
+        'pending_notes': [],
+        'moderators': [],
+        'exam_analyses': [],
+    }
+
+    try:
+        dashboard_context.update({
+            'total_users': User.query.count(),
+            'total_posts': Post.query.count(),
+            'reported_posts': Post.query.filter(Post.report_count > 0).order_by(Post.report_count.desc()).all(),
+            'reported_notes': Note.query.filter(Note.report_count > 0, Note.is_approved == True).order_by(Note.report_count.desc()).all(),
+            'feedbacks': Feedback.query.order_by(Feedback.date_sent.desc()).all(),
+            'pending_notes': Note.query.filter_by(is_approved=False).order_by(Note.date_posted.desc()).all(),
+            'moderators': User.query.filter_by(is_moderator=True).all(),
+            'users': User.query.limit(50).all(),
+            'clubs': Club.query.order_by(Club.name).all(),
+            'exam_analyses': _build_exam_overviews(),
+        })
+    except SQLAlchemyError as exc:
+        current_app.logger.warning('Admin dashboard data unavailable: %s', exc, exc_info=True)
+        flash('Yönetim verileri şu anda yüklenemiyor. Sayfa sınırlı veriyle açıldı.', 'warning')
+
+    return render_template('admin.html', **dashboard_context)
 
 
 @admin.route('/moderator')
 @login_required
 def moderator_panel():
-    if not (current_user.is_admin or current_user.is_moderator):
+    if not (getattr(current_user, 'is_admin', False) or getattr(current_user, 'is_moderator', False)):
         return redirect(url_for('main.index'))
     pending_notes = Note.query.filter_by(is_approved=False).order_by(Note.date_posted.desc()).all()
     reported_notes = Note.query.filter(Note.report_count > 0, Note.is_approved == True).order_by(Note.report_count.desc()).all()

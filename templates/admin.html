@@ -643,7 +643,7 @@
                     <tbody>
                         {% for fb in feedbacks %}
                         <tr>
-                            <td><b>{{ fb.user.username }}</b></td>
+                            <td><b>{{ fb.user.username if fb.user else 'Silinmiş kullanıcı' }}</b></td>
                             <td>
                                 {% if fb.type == 'Öneri' %}
                                 <span class="badge" style="background: #f1c40f; color: black; padding: 5px 10px; border-radius: 10px;">💡 Öneri</span>
