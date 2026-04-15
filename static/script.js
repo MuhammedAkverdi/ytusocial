@@ -34,54 +34,16 @@ function linkifyHashtags(text) {
 }
 
 function stripIconLabels(root = document) {
-    const iconOnlySelectors = [
-        '.sidebar-link',
-        '.mob-drawer-link',
-        '.nav-item',
-        '.btn-icon',
-        '.admin-chip',
-        '.cp-hero-kicker',
-        '.file-upload-label',
-        '.mob-header-icon',
-        '.ig-delete-btn',
-        '.x-preview-close',
-        '.x-attach-plus',
-        '.x-plus-menu-item',
-        '.x-plus-menu-item-wide',
-        '.ig-send-btn',
-        '.ig-mic-btn',
-        '.story-share-btn',
-        '.adv-top-bar-back',
-        '.x-sheet-back',
-        '.x-sheet-share',
-        '.x-set-back',
-        '.ig-file-msg',
-        '.file-msg-link',
-        '.save-icon',
-        '.action-item',
-        '.btn-action',
-        '.btn-vote',
-        '.btn-submit'
-    ].join(',');
+    // Keep labels by default. Only index feed repost/save actions are icon-only.
+    const feedRoot = document.getElementById('feedContainer');
+    if (!feedRoot) return;
 
-    const keepClasses = ['mob-nav-badge', 'notification-badge', 'msg-badge', 'like-count'];
-
-    root.querySelectorAll(iconOnlySelectors).forEach((element) => {
-        if (element.dataset.iconLabelsProcessed === '1') return;
-        const icon = element.querySelector('.icon-slot');
-        if (!icon) return;
-
-        element.dataset.iconLabelsProcessed = '1';
-        let seenIcon = false;
+    root.querySelectorAll('.action-item').forEach((element) => {
+        const hasRepost = element.className.includes('js-repost-');
+        const hasSave = element.className.includes('js-save-');
+        if (!hasRepost && !hasSave) return;
 
         Array.from(element.childNodes).forEach((node) => {
-            if (node === icon) {
-                seenIcon = true;
-                return;
-            }
-
-            if (!seenIcon) return;
-
             if (node.nodeType === Node.TEXT_NODE) {
                 if (node.textContent.trim()) node.remove();
                 return;
@@ -89,13 +51,15 @@ function stripIconLabels(root = document) {
 
             if (node.nodeType === Node.ELEMENT_NODE) {
                 const child = node;
-                if (keepClasses.some((className) => child.classList.contains(className))) {
+                if (child.classList.contains('icon-slot')) return;
+                if (child.classList.contains('save-icon')) {
+                    const saveIcon = child.querySelector('.icon-slot');
+                    if (saveIcon) {
+                        child.innerHTML = saveIcon.outerHTML;
+                    }
                     return;
                 }
-
-                if (!child.querySelector('.icon-slot')) {
-                    child.remove();
-                }
+                if (!child.querySelector('.icon-slot')) child.remove();
             }
         });
     });
@@ -409,8 +373,9 @@ function toggleComments(elementId) {
 
 async function repostPost(postId, element) {
     // Butonun içindeki ikona bakarak durumu anla (Basit kontrol)
-    const icon = element.querySelector('i');
-    const isReposted = icon.style.color === 'rgb(46, 204, 113)' || icon.style.color === '#2ecc71';
+    const icon = element.querySelector('.icon-slot');
+    const isReposted = icon && (icon.style.color === 'rgb(46, 204, 113)' || icon.style.color === '#2ecc71');
+    const iconOnly = Boolean(document.getElementById('feedContainer'));
     
     // Kullanıcı onayı
     const confirmMsg = isReposted ? "Yeniden gönderimi geri almak istiyor musun?" : "Bu gönderiyi yeniden paylaşmak istiyor musun?";
@@ -426,7 +391,9 @@ async function repostPost(postId, element) {
             
             if (result.action === 'reposted') {
                 allRepostBtns.forEach(btn => {
-                    btn.innerHTML = '<span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span> <span style="color: #2ecc71;">Yeniden Gönderildi</span>';
+                    btn.innerHTML = iconOnly
+                        ? '<span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span>'
+                        : '<span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span> <span style="color: #2ecc71;">Yeniden Gönderildi</span>';
                 });
                 
                 // Sayfayı yenilemeden akışa ekle
@@ -442,7 +409,9 @@ async function repostPost(postId, element) {
                 }
             } else {
                 allRepostBtns.forEach(btn => {
-                    btn.innerHTML = '<span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span> Yeniden Gönder';
+                    btn.innerHTML = iconOnly
+                        ? '<span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span>'
+                        : '<span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span> Yeniden Gönder';
                 });
                 
                 // REPOST GERİ ALINDIĞINDA KARTI SAYFADAN SİL
@@ -522,11 +491,20 @@ async function savePost(postId, element) {
             const data = await response.json();
             // Sayfadaki AYNI ID'ye sahip tüm kaydet butonlarını güncelle
             const allSaveBtns = document.querySelectorAll(`.js-save-${postId}`);
+            const iconOnly = Boolean(document.getElementById('feedContainer'));
             
             if (data.action === 'saved') {
-                allSaveBtns.forEach(btn => btn.innerHTML = '<span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><span class="icon-slot fa-solid fa-bookmark" data-icon="fa-solid fa-bookmark"></span> Kaydedildi</span>');
+                allSaveBtns.forEach(btn => {
+                    btn.innerHTML = iconOnly
+                        ? '<span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><span class="icon-slot fa-solid fa-bookmark" data-icon="fa-solid fa-bookmark"></span></span>'
+                        : '<span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><span class="icon-slot fa-solid fa-bookmark" data-icon="fa-solid fa-bookmark"></span> Kaydedildi</span>';
+                });
             } else {
-                allSaveBtns.forEach(btn => btn.innerHTML = '<span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydet</span>');
+                allSaveBtns.forEach(btn => {
+                    btn.innerHTML = iconOnly
+                        ? '<span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span></span>'
+                        : '<span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydet</span>';
+                });
             }
         }
     } catch (error) {
@@ -1395,10 +1373,16 @@ function createPostHTML(data) {
     }
 
     // Repost butonu durumu (Eğer kullanıcı zaten repostladıysa yeşil gelsin)
-    let repostBtnHTML = `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span> Yeniden Gönder</span>`;
+    const iconOnlyActions = Boolean(document.getElementById('feedContainer'));
+
+    let repostBtnHTML = iconOnlyActions
+        ? `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span></span>`
+        : `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span> Yeniden Gönder</span>`;
     
     if (data.user_has_reposted) {
-        repostBtnHTML = `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span> <span style="color: #2ecc71;">Yeniden Gönderildi</span></span>`;
+        repostBtnHTML = iconOnlyActions
+            ? `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span></span>`
+            : `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span> <span style="color: #2ecc71;">Yeniden Gönderildi</span></span>`;
     }
 
     return `
@@ -1433,7 +1417,9 @@ function createPostHTML(data) {
             </span>
             ${repostBtnHTML}
             <span class="action-item js-save-${targetId}" onclick="savePost('${targetId}', this)">
-                <span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydet</span>
+                ${iconOnlyActions
+                    ? '<span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span></span>'
+                    : '<span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydet</span>'}
             </span>
             
             <div class="action-menu-wrapper">

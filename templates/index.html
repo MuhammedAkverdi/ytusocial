@@ -746,16 +746,16 @@
                         </span>
                         <span class="action-item" onclick="repostPost('{{ display_post.id }}', this)" data-reposted="{{ 'true' if display_post.has_reposted(current_user) else 'false' }}">
                             {% if display_post.has_reposted(current_user) %}
-                            <span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span> <span style="color: #2ecc71;">Yeniden Gönderildi</span>
+                            <span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span>
                             {% else %}
-                            <span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span> Yeniden Gönder
+                            <span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span>
                             {% endif %}
                         </span>
                         <span class="action-item" onclick="savePost('{{ display_post.id }}', this)">
                             {% if current_user.has_saved(display_post) %}
-                            <span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><span class="icon-slot fa-solid fa-bookmark" data-icon="fa-solid fa-bookmark"></span> Kaydedildi</span>
+                            <span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><span class="icon-slot fa-solid fa-bookmark" data-icon="fa-solid fa-bookmark"></span></span>
                             {% else %}
-                            <span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydet</span>
+                            <span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span></span>
                             {% endif %}
                         </span>
                         <span class="action-item" onclick="openShareModal('post', '{{ post.id }}')">

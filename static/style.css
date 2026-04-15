@@ -43,16 +43,16 @@ a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1em;
-    height: 1em;
-    min-width: 1em;
+    width: 1.25em;
+    height: 1.25em;
+    min-width: 1.25em;
     vertical-align: -0.125em;
     opacity: 1;
 }
 
 .icon-slot svg {
-    width: 1em;
-    height: 1em;
+    width: 1.2em;
+    height: 1.2em;
     display: block;
     fill: none;
     stroke: currentColor;
