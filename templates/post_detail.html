@@ -927,6 +927,123 @@
                 grid-column: 1 / -1;
             }
         }
+
+        /* Final middle-section layout fix (profile -> post detail) */
+        .post-detail-container {
+            align-items: start;
+            grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+            border-radius: 24px;
+        }
+
+        .post-detail-story {
+            background: transparent;
+            padding-bottom: 16px;
+        }
+
+        .post-detail-discussion {
+            align-self: start;
+            height: auto;
+            min-height: 0;
+            background: var(--card-bg);
+        }
+
+        .pd-media {
+            min-height: 280px;
+            max-height: 62vh;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .pd-media-image {
+            object-fit: cover;
+        }
+
+        .pd-media-video {
+            object-fit: contain;
+            max-height: 62vh;
+        }
+
+        .pd-media-placeholder {
+            min-height: 280px;
+            max-height: 62vh;
+            font-size: 1.05rem;
+            line-height: 1.45;
+            padding: 20px;
+            gap: 8px;
+        }
+
+        .pd-media-placeholder i {
+            font-size: 2rem;
+        }
+
+        .pd-caption {
+            padding: 18px 20px 0;
+            line-height: 1.7;
+        }
+
+        .pd-comments-header {
+            margin: 14px 16px 0;
+        }
+
+        .post-detail-comments {
+            margin: 0 16px;
+            max-height: 360px;
+            min-height: 0;
+            flex: none;
+        }
+
+        .pd-comment-input-section {
+            margin: 14px 16px 16px;
+            box-shadow: none;
+        }
+
+        @media (max-width: 1100px) {
+            .post-detail-container {
+                grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+            }
+        }
+
+        @media (max-width: 920px) {
+            .post-detail-container {
+                grid-template-columns: 1fr;
+                border-radius: 20px;
+            }
+
+            .post-detail-discussion {
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .pd-media,
+            .pd-media-placeholder,
+            .pd-media-video {
+                min-height: 220px;
+                max-height: 52vh;
+            }
+
+            .pd-comments-header,
+            .post-detail-comments,
+            .pd-comment-input-section {
+                margin-left: 14px;
+                margin-right: 14px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .pd-caption {
+                padding: 14px 14px 0;
+                font-size: 0.95rem;
+            }
+
+            .pd-stats,
+            .pd-actions {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .post-detail-comments {
+                max-height: none;
+            }
+        }
     </style>
 </head>
 <body>
