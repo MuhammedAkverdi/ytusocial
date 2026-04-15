@@ -702,6 +702,10 @@
                             '<div class="mob-insta-overlay"><span><i class="fa-solid fa-heart"></i> ' + p.like_count + '</span><span><i class="fa-solid fa-comment"></i> ' + p.comment_count + '</span></div>' +
                             '</div>';
                     }).join('');
+
+                    if (typeof window.initializeLazyVideos === 'function') {
+                        window.initializeLazyVideos(grid);
+                    }
                 })
                 .catch(function() {
                     grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px 20px;">Bir hata oluştu.</p>';

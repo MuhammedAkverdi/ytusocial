@@ -1974,15 +1974,54 @@ function captureVideoPoster(video) {
         }
     };
 
+    const captureFromMetadata = function () {
+        if (video.dataset.posterCaptured === '1') {
+            finish();
+            return;
+        }
+
+        const duration = Number(video.duration);
+        if (!Number.isFinite(duration) || duration <= 0) {
+            window.requestAnimationFrame(paintPoster);
+            return;
+        }
+
+        const originalTime = Number(video.currentTime) || 0;
+        const targetTime = Math.min(0.12, Math.max(0.01, duration * 0.02));
+
+        const onSeeked = function () {
+            window.requestAnimationFrame(() => {
+                paintPoster();
+                try {
+                    video.currentTime = 0;
+                } catch (error) {
+                    // Bazı tarayıcılar seek geri sarma sırasında hata verebilir.
+                }
+            });
+        };
+
+        try {
+            if (Math.abs(originalTime - targetTime) < 0.005) {
+                window.requestAnimationFrame(paintPoster);
+                return;
+            }
+
+            video.addEventListener('seeked', onSeeked, { once: true });
+            video.currentTime = targetTime;
+        } catch (error) {
+            window.requestAnimationFrame(paintPoster);
+        }
+    };
+
     video.dataset.posterGenerating = '1';
 
-    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-        window.requestAnimationFrame(paintPoster);
+    if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        captureFromMetadata();
         return;
     }
 
-    video.addEventListener('loadeddata', function onLoadedData() {
-        window.requestAnimationFrame(paintPoster);
+    video.addEventListener('loadedmetadata', function onLoadedMetadata() {
+        captureFromMetadata();
     }, { once: true });
 
     video.addEventListener('error', finish, { once: true });
@@ -2139,8 +2178,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-    const lazyVideos = document.querySelectorAll('video[data-src]');
+function initializeLazyVideos(root = document) {
+    const lazyVideos = root.querySelectorAll('video[data-src]');
     if (!lazyVideos.length) return;
 
     if (!('IntersectionObserver' in window)) {
@@ -2150,20 +2189,28 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    const lazyVideoObserver = new IntersectionObserver(function (entries, observer) {
-        entries.forEach(function (entry) {
-            if (!entry.isIntersecting) return;
+    if (!window.__lazyVideoObserver) {
+        window.__lazyVideoObserver = new IntersectionObserver(function (entries, observer) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
 
-            prepareLazyVideo(entry.target, { preload: 'metadata' });
-            observer.unobserve(entry.target);
-        });
-    }, { threshold: 0.25, rootMargin: '200px 0px' });
+                prepareLazyVideo(entry.target, { preload: 'metadata' });
+                observer.unobserve(entry.target);
+            });
+        }, { threshold: 0.25, rootMargin: '200px 0px' });
+    }
 
     lazyVideos.forEach(function (video) {
         if (video.dataset.lazyObserved === '1') return;
         video.dataset.lazyObserved = '1';
-        lazyVideoObserver.observe(video);
+        window.__lazyVideoObserver.observe(video);
     });
+}
+
+window.initializeLazyVideos = initializeLazyVideos;
+
+document.addEventListener('DOMContentLoaded', function () {
+    initializeLazyVideos(document);
 });
 
 // Anasayfa video kartları görünüm dışına çıkınca otomatik durur.
