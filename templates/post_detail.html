@@ -1044,6 +1044,276 @@
                 max-height: none;
             }
         }
+
+        /* Compact Instagram/X variant */
+        .post-detail-container {
+            border-radius: 18px;
+            grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .pd-header {
+            padding: 14px 16px;
+            background: var(--card-bg);
+        }
+
+        .pd-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+
+        .pd-username {
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .pd-handle {
+            font-size: 0.84rem;
+            font-weight: 600;
+        }
+
+        .pd-dept {
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+        }
+
+        .pd-date {
+            font-size: 0.78rem;
+        }
+
+        .pd-menu {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+        }
+
+        .pd-media {
+            min-height: 240px;
+            max-height: 56vh;
+        }
+
+        .pd-media-placeholder {
+            min-height: 240px;
+            font-size: 0.98rem;
+        }
+
+        .pd-caption {
+            padding: 14px 16px 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .pd-stats {
+            padding: 14px 14px 0;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .pd-stat {
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: none;
+            background: var(--bg-light);
+        }
+
+        .pd-stat-label {
+            font-size: 0.74rem;
+        }
+
+        .pd-stat-value {
+            font-size: 1.25rem;
+        }
+
+        .pd-actions {
+            padding: 12px 14px 0;
+            gap: 8px;
+        }
+
+        .pd-action-chip {
+            border-radius: 12px;
+            padding: 10px 10px;
+            font-size: 0.88rem;
+            box-shadow: none;
+            background: var(--bg-light);
+            min-height: 44px;
+        }
+
+        .pd-action-chip i {
+            font-size: 1rem;
+        }
+
+        .pd-comments-header {
+            margin: 12px 14px 0;
+            padding: 12px 14px;
+            border-radius: 14px 14px 0 0;
+        }
+
+        .pd-comments-header h3 {
+            font-size: 0.92rem;
+        }
+
+        .post-detail-comments {
+            margin: 0 14px;
+            padding: 6px 14px 12px;
+            border-radius: 0 0 14px 14px;
+            max-height: 330px;
+        }
+
+        .post-detail-comments .tw-comment {
+            padding: 10px 0;
+        }
+
+        .pd-comment-input-section {
+            margin: 12px 14px 14px;
+            padding: 12px;
+            border-radius: 14px;
+        }
+
+        .pd-comment-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+
+        .comment-input {
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.9rem;
+        }
+
+        .comment-submit {
+            border-radius: 12px;
+            height: 42px;
+            min-width: 88px;
+            font-size: 0.92rem;
+            box-shadow: none;
+        }
+
+        @media (max-width: 920px) {
+            .post-detail-container {
+                grid-template-columns: 1fr;
+                border-radius: 14px;
+            }
+
+            .pd-header,
+            .pd-caption,
+            .pd-stats,
+            .pd-actions {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .pd-stats {
+                padding-top: 12px;
+            }
+
+            .pd-actions {
+                padding-top: 10px;
+            }
+
+            .pd-comments-header,
+            .post-detail-comments,
+            .pd-comment-input-section {
+                margin-left: 12px;
+                margin-right: 12px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .pd-name-row {
+                gap: 6px;
+            }
+
+            .pd-actions {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .pd-action-chip span {
+                font-size: 0.82rem;
+            }
+
+            .post-detail-comments {
+                max-height: none;
+            }
+
+            .pd-comment-input-section form {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            .comment-submit {
+                min-width: 80px;
+                height: 40px;
+            }
+        }
+
+        /* Single-column Instagram mode */
+        .main-layout {
+            display: block;
+            max-width: 760px;
+            margin: 84px auto 28px;
+            padding: 0 12px;
+        }
+
+        .main-layout > .left-sidebar,
+        .main-layout > .right-sidebar {
+            display: none !important;
+        }
+
+        .post-detail-main {
+            grid-column: auto;
+            max-width: 100%;
+            width: 100%;
+            margin: 0;
+        }
+
+        .post-detail-container {
+            grid-template-columns: 1fr;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .post-detail-story,
+        .post-detail-discussion {
+            grid-column: 1 / -1;
+        }
+
+        .post-detail-discussion {
+            border-left: none;
+            border-top: 1px solid var(--border-color);
+            background: var(--card-bg);
+        }
+
+        .pd-media,
+        .pd-media-video,
+        .pd-media-placeholder {
+            max-height: 64vh;
+        }
+
+        .pd-actions {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .post-detail-comments {
+            max-height: 360px;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                margin-top: 74px;
+                padding: 0 8px;
+            }
+
+            .post-detail-container {
+                border-radius: 12px;
+            }
+
+            .post-detail-comments {
+                max-height: none;
+            }
+        }
     </style>
 </head>
 <body>
