@@ -1238,6 +1238,22 @@ video.post-image {
     gap: 5px;
 }
 
+.post-actions .action-item {
+    gap: 8px;
+}
+
+.post-actions .action-item .icon-slot {
+    width: 1.6em;
+    height: 1.6em;
+    min-width: 1.6em;
+}
+
+.post-actions .action-item .icon-slot svg {
+    width: 1.45em;
+    height: 1.45em;
+    stroke-width: 1.9;
+}
+
 .action-item[class*="js-like-"].liked .icon-slot,
 .action-item[class*="js-like-"].is-liked .icon-slot {
     color: #ff4757;

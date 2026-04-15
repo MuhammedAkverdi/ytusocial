@@ -433,6 +433,29 @@ async function repostPost(postId, element) {
     }
 }
 
+function syncFeedLikeIconState(btn, isLiked) {
+    if (!btn) return;
+    renderIconSlots(btn);
+
+    const slot = btn.querySelector('.icon-slot');
+    const svg = slot ? slot.querySelector('svg') : null;
+    if (!slot || !svg) return;
+
+    if (isLiked) {
+        slot.style.color = '#ff4757';
+        svg.style.fill = '#ff4757';
+        svg.style.stroke = '#ff4757';
+        svg.style.animation = 'none';
+        void svg.offsetWidth;
+        svg.style.animation = 'likeHeartPop 260ms ease-out';
+    } else {
+        slot.style.color = '';
+        svg.style.fill = 'none';
+        svg.style.stroke = 'currentColor';
+        svg.style.animation = '';
+    }
+}
+
 async function likePost(postId, element) {
     try {
         const response = await fetch(`/like/${postId}`, { method: 'POST' });
@@ -451,21 +474,24 @@ async function likePost(postId, element) {
                 });
             } else {
                 const iconClass = data.action === 'liked' ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+                const isLikedNow = data.action === 'liked';
 
                 allLikeBtns.forEach(btn => {
-                    btn.classList.toggle('liked', data.action === 'liked');
-                    btn.classList.toggle('is-liked', data.action === 'liked');
+                    btn.classList.toggle('liked', isLikedNow);
+                    btn.classList.toggle('is-liked', isLikedNow);
 
                     const iconEl = btn.querySelector('i');
                     const countEl = btn.querySelector('.like-count');
 
                     if (iconEl && countEl) {
                         iconEl.className = iconClass;
-                        iconEl.style.color = data.action === 'liked' ? '#ff4757' : '';
+                        iconEl.style.color = isLikedNow ? '#ff4757' : '';
                         countEl.textContent = data.likes_count;
                     } else {
-                        btn.innerHTML = `<span class="icon-slot ${iconClass}"${data.action === 'liked' ? ' style="color: #ff4757;"' : ''} data-icon="${iconClass}"></span> <span class="like-count">${data.likes_count}</span>`;
+                        btn.innerHTML = `<span class="icon-slot ${iconClass}"${isLikedNow ? ' style="color: #ff4757;"' : ''} data-icon="${iconClass}"></span> <span class="like-count">${data.likes_count}</span>`;
                     }
+
+                    syncFeedLikeIconState(btn, isLikedNow);
                 });
 
                 document.querySelectorAll(`.js-like-stat-${postId}`).forEach(span => {
