@@ -38,30 +38,6 @@ a {
     color: inherit;
 }
 
-/* SVG icon placeholder slots (replace each slot with your final inline SVG). */
-.icon-slot {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.4em;
-    height: 1.4em;
-    min-width: 1.4em;
-    vertical-align: -0.125em;
-    opacity: 1;
-}
-
-.icon-slot svg {
-    width: 1.3em;
-    height: 1.3em;
-    display: block;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    transition: transform 0.2s ease, fill 0.2s ease, stroke 0.2s ease;
-}
-
 /* =========================================
    2. NAVBAR (ÜST MENÜ)
    ========================================= */
@@ -1236,46 +1212,6 @@ video.post-image {
     display: flex;
     align-items: center;
     gap: 5px;
-}
-
-.post-actions .action-item {
-    gap: 8px;
-}
-
-.post-actions .action-item .icon-slot {
-    width: 1.6em;
-    height: 1.6em;
-    min-width: 1.6em;
-}
-
-.post-actions .action-item .icon-slot svg {
-    width: 1.45em;
-    height: 1.45em;
-    stroke-width: 1.9;
-}
-
-.action-item[class*="js-like-"].liked .icon-slot,
-.action-item[class*="js-like-"].is-liked .icon-slot {
-    color: #ff4757;
-}
-
-.action-item[class*="js-like-"].liked .icon-slot svg,
-.action-item[class*="js-like-"].is-liked .icon-slot svg {
-    fill: #ff4757;
-    stroke: #ff4757;
-    animation: likeHeartPop 260ms ease-out;
-}
-
-@keyframes likeHeartPop {
-    0% {
-        transform: scale(0.88);
-    }
-    55% {
-        transform: scale(1.22);
-    }
-    100% {
-        transform: scale(1);
-    }
 }
 
 /* Menü butonunu en sağa itmek için */

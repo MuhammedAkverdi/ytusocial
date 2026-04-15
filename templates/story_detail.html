@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hikaye • YTU Social</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -313,7 +314,7 @@
                 </div>
             </div>
             <button class="story-close" onclick="window.location.href='/'">
-                <span class="icon-slot fas fa-times" data-icon="fas fa-times"></span>
+                <i class="fas fa-times"></i>
             </button>
         </div>
 
@@ -330,7 +331,7 @@
         <div class="story-bottom">
             {% if viewers %}
             <button class="story-viewers" onclick="openViewersModal()">
-                <span class="icon-slot fas fa-eye viewers-icon" data-icon="fas fa-eye viewers-icon"></span>
+                <i class="fas fa-eye viewers-icon"></i>
                 <span class="viewers-text">{{ viewers|length }} kişi gördü</span>
             </button>
             {% endif %}

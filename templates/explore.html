@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keşfet | YTU Social</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Explore Page Specific Styles */
         .explore-layout {
@@ -413,7 +414,7 @@
         <!-- Arama -->
         <div class="mob-explore-search-wrap">
             <div style="position:relative;">
-                <span class="icon-slot fa-solid fa-magnifying-glass mob-explore-search-icon" data-icon="fa-solid fa-magnifying-glass mob-explore-search-icon"></span>
+                <i class="fa-solid fa-magnifying-glass mob-explore-search-icon"></i>
                 <input type="text" id="mobExploreSearch" placeholder="Kullanıcı ara..." class="mob-explore-search-input" autocomplete="off">
                 <div id="mobSearchResults" class="mob-search-results"></div>
             </div>
@@ -435,7 +436,7 @@
                     <div class="mob-trend-name">#{{ tag }}</div>
                     <div class="mob-trend-count">{{ count }} gönderi</div>
                 </div>
-                <span class="icon-slot fa-solid fa-ellipsis mob-trend-more" data-icon="fa-solid fa-ellipsis mob-trend-more"></span>
+                <i class="fa-solid fa-ellipsis mob-trend-more"></i>
             </a>
             {% else %}
             <p style="text-align:center;color:var(--text-muted);padding:40px 20px;">Henüz gündem yok.</p>
@@ -474,7 +475,7 @@
             <div class="search-hero" style="padding: 0; background: transparent; border: none; box-shadow: none; margin-bottom: 10px;">
                 <form action="{{ url_for('main.explore') }}" method="GET">
                     <div style="position: relative;">
-                        <span class="icon-slot fa-solid fa-magnifying-glass" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-muted);" data-icon="fa-solid fa-magnifying-glass"></span>
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
                         <input type="text" name="q" id="exploreSearchInput" class="search-input-lg" placeholder="Kullanıcı ara..." value="{{ request.args.get('q', '') }}" style="padding-left: 50px; width: 100%; max-width: 100%; background: var(--input-bg); border: 1px solid var(--border-color);" autocomplete="off">
                         <div id="searchResults" class="search-dropdown"></div>
                     </div>
@@ -506,7 +507,7 @@
                     {% if post.image_file %}
                         {% if post.is_video() %}
                             <video data-src="/static/post_images/{{ post.image_file }}" class="insta-media" preload="none" playsinline webkit-playsinline></video>
-                            <span class="icon-slot fa-solid fa-video video-icon" data-icon="fa-solid fa-video video-icon"></span>
+                            <i class="fa-solid fa-video video-icon"></i>
                         {% else %}
                             <img src="/static/post_images/{{ post.image_file }}" class="insta-media">
                         {% endif %}
@@ -517,15 +518,15 @@
                     {% endif %}
                     
                     <div class="insta-overlay">
-                        <span><span class="icon-slot fa-solid fa-heart" data-icon="fa-solid fa-heart"></span> {{ post.liked_by|length }}</span>
-                        <span><span class="icon-slot fa-solid fa-comment" data-icon="fa-solid fa-comment"></span> {{ post.comments|length }}</span>
+                        <span><i class="fa-solid fa-heart"></i> {{ post.liked_by|length }}</span>
+                        <span><i class="fa-solid fa-comment"></i> {{ post.comments|length }}</span>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% elif search_query %}
             <div style="text-align: center; padding: 50px; color: var(--text-muted);">
-                <span class="icon-slot fa-solid fa-magnifying-glass" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;" data-icon="fa-solid fa-magnifying-glass"></span>
+                <i class="fa-solid fa-magnifying-glass" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
                 <p>Aradığın kriterde içerik bulunamadı.</p>
             </div>
             {% endif %}
@@ -558,7 +559,7 @@
                             <small style="color: var(--text-muted); font-size: 0.8rem;">{{ user.department or 'Öğrenci' }}</small>
                         </div>
                     </div>
-                    <a href="{{ url_for('main.follow', handle=user.handle) }}" style="color: var(--ytu-lacivert); font-size: 1.2rem;" title="Takip Et"><span class="icon-slot fa-solid fa-user-plus" data-icon="fa-solid fa-user-plus"></span></a>
+                    <a href="{{ url_for('main.follow', handle=user.handle) }}" style="color: var(--ytu-lacivert); font-size: 1.2rem;" title="Takip Et"><i class="fa-solid fa-user-plus"></i></a>
                 </div>
                 {% else %}
                 <p style="color: var(--text-muted); font-size: 0.9rem;">Şimdilik öneri yok.</p>
@@ -573,20 +574,20 @@
     <!-- Mobil Alt Nav -->
     <div class="mobile-bottom-nav">
         <a href="{{ url_for('main.index') }}" class="nav-item">
-            <span class="icon-slot fa-solid fa-house" data-icon="fa-solid fa-house"></span>
+            <i class="fa-solid fa-house"></i>
         </a>
         <a href="{{ url_for('main.explore') }}" class="nav-item active">
-            <span class="icon-slot fa-regular fa-compass" data-icon="fa-regular fa-compass"></span>
+            <i class="fa-regular fa-compass"></i>
         </a>
         <a href="{{ url_for('main.reels') }}" class="nav-item">
-            <span class="icon-slot fa-solid fa-clapperboard" data-icon="fa-solid fa-clapperboard"></span>
+            <i class="fa-solid fa-clapperboard"></i>
         </a>
         <a href="{{ url_for('main.notifications') }}" class="nav-item">
-            <span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span>
+            <i class="fa-regular fa-bell"></i>
             {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
         </a>
         <a href="{{ url_for('main.messages_inbox') }}" class="nav-item">
-            <span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span>
+            <i class="fa-regular fa-envelope"></i>
             {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
         </a>
     </div>
@@ -603,23 +604,23 @@
             <span class="mob-drawer-score">⭐ {{ current_user.score }} Puan</span>
         </div>
         <nav class="mob-drawer-nav">
-            <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-regular fa-user" data-icon="fa-regular fa-user"></span> Profil</a>
+            <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-regular fa-user"></i> Profil</a>
             <a href="{{ url_for('main.messages_inbox') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span>
+                <i class="fa-regular fa-envelope"></i>
                 <span>Mesajlar{% if unread_msg_count > 0 %} <span style="background:#ff4757;color:#fff;border-radius:10px;font-size:0.7rem;padding:2px 7px;margin-left:6px;">{{ unread_msg_count }}</span>{% endif %}</span>
             </a>
-            <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-book-open" data-icon="fa-solid fa-book-open"></span> Not Havuzu</a>
-            <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydedilenler</a>
-            <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-trophy" data-icon="fa-solid fa-trophy"></span> Kulüpler Ligi</a>
-            <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-bullhorn" data-icon="fa-solid fa-bullhorn"></span> İlanlar</a>
-            <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-bus" data-icon="fa-solid fa-bus"></span> Ulaşım</a>
-            <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-gear" data-icon="fa-solid fa-gear"></span> Profili Düzenle</a>
+            <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-book-open"></i> Not Havuzu</a>
+            <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-regular fa-bookmark"></i> Kaydedilenler</a>
+            <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-trophy"></i> Kulüpler Ligi</a>
+            <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-bullhorn"></i> İlanlar</a>
+            <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-bus"></i> Ulaşım</a>
+            <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-gear"></i> Profili Düzenle</a>
         </nav>
         <div class="mob-drawer-sep"></div>
         <div class="mob-drawer-section-title">💡 Fikir ve Destek</div>
-        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Öneri')"><span class="icon-slot fa-solid fa-lightbulb" data-icon="fa-solid fa-lightbulb"></span> Fikir Öner</a>
-        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Diğer')"><span class="icon-slot fa-solid fa-comments" data-icon="fa-solid fa-comments"></span> Geri Bildirim</a>
-        <a href="{{ url_for('main.settings') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-gear" data-icon="fa-solid fa-gear"></span> Ayarlar</a>
+        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Öneri')"><i class="fa-solid fa-lightbulb"></i> Fikir Öner</a>
+        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Diğer')"><i class="fa-solid fa-comments"></i> Geri Bildirim</a>
+        <a href="{{ url_for('main.settings') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-gear"></i> Ayarlar</a>
         <div class="mob-drawer-sep"></div>
         <div class="mob-drawer-section-title">
             🔥 Gündem
@@ -631,7 +632,7 @@
                 <div class="mob-drawer-trend-tag">#{{ tag }}</div>
                 <div class="mob-drawer-trend-count">{{ count }} gönderi</div>
             </div>
-            <span class="icon-slot fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);" data-icon="fa-solid fa-chevron-right"></span>
+            <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);"></i>
         </a>
         {% endfor %}
         <div class="mob-drawer-sep"></div>
@@ -651,7 +652,7 @@
         {% endfor %}
         <div class="mob-drawer-sep"></div>
         <a href="{{ url_for('auth.logout') }}" class="mob-drawer-logout">
-            <span class="icon-slot fa-solid fa-right-from-bracket" data-icon="fa-solid fa-right-from-bracket"></span> Çıkış Yap
+            <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
         </a>
     </div>
 
@@ -694,11 +695,11 @@
                     }
                     grid.innerHTML = data.posts.map(function(p) {
                         var media = p.is_video
-                            ? '<video data-src="/static/post_images/' + p.image_file + '" class="mob-insta-media" preload="none" playsinline webkit-playsinline></video><span class="icon-slot fa-solid fa-video mob-video-icon" data-icon="fa-solid fa-video mob-video-icon"></span>'
+                            ? '<video data-src="/static/post_images/' + p.image_file + '" class="mob-insta-media" preload="none" playsinline webkit-playsinline></video><i class="fa-solid fa-video mob-video-icon"></i>'
                             : '<img src="/static/post_images/' + p.image_file + '" class="mob-insta-media" loading="lazy">';
                         return '<div class="mob-insta-item" onclick="location.href=\'/p/' + p.id + '\'">' +
                             media +
-                            '<div class="mob-insta-overlay"><span><span class="icon-slot fa-solid fa-heart" data-icon="fa-solid fa-heart"></span> ' + p.like_count + '</span><span><span class="icon-slot fa-solid fa-comment" data-icon="fa-solid fa-comment"></span> ' + p.comment_count + '</span></div>' +
+                            '<div class="mob-insta-overlay"><span><i class="fa-solid fa-heart"></i> ' + p.like_count + '</span><span><i class="fa-solid fa-comment"></i> ' + p.comment_count + '</span></div>' +
                             '</div>';
                     }).join('');
                 })

@@ -6,6 +6,7 @@
     <title>Kulüpler Ligi | YTU Social</title>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* --- SAYFA ÖZEL STİLLERİ --- */
         body { background-color: var(--bg-color); color: var(--text-color); margin: 0; font-family: 'Inter', sans-serif; }
@@ -354,7 +355,7 @@
 
     <!-- MOBİL ÜST BAR -->
     <div class="cl-top-bar" style="display:none;">
-        <a href="{{ url_for('main.index') }}" class="cl-top-back"><span class="icon-slot fas fa-arrow-left" data-icon="fas fa-arrow-left"></span></a>
+        <a href="{{ url_for('main.index') }}" class="cl-top-back"><i class="fas fa-arrow-left"></i></a>
         <span class="cl-top-title">🏆 Kulüpler Ligi</span>
         <span class="cl-top-trophy"></span>
     </div>
@@ -391,7 +392,7 @@
                     <div class="cl-mob-actions">
                         {% if current_user.is_authenticated %}
                         <a href="{{ url_for('vote_club', club_id=club.id) }}" class="cl-mob-vote {% if current_user in club.voted_by %}voted{% endif %}">
-                            <span class="icon-slot fas fa-trophy" data-icon="fas fa-trophy"></span> Oy
+                            <i class="fas fa-trophy"></i> Oy
                         </a>
                         {% endif %}
                         <a href="{{ url_for('club_detail', slug=club.slug) }}" class="cl-mob-view">Gör</a>
@@ -415,12 +416,12 @@
                         
                         {% if current_user.is_authenticated %}
                             {% if current_user in club.followers %}
-                            <a href="{{ url_for('follow_club', club_id=club.id) }}" class="btn-icon active" title="Takipten Çık"><span class="icon-slot fas fa-check" data-icon="fas fa-check"></span></a>
+                            <a href="{{ url_for('follow_club', club_id=club.id) }}" class="btn-icon active" title="Takipten Çık"><i class="fas fa-check"></i></a>
                             {% else %}
-                            <a href="{{ url_for('follow_club', club_id=club.id) }}" class="btn-icon" title="Takip Et"><span class="icon-slot fas fa-plus" data-icon="fas fa-plus"></span></a>
+                            <a href="{{ url_for('follow_club', club_id=club.id) }}" class="btn-icon" title="Takip Et"><i class="fas fa-plus"></i></a>
                             {% endif %}
                             
-                            <a href="{{ url_for('vote_club', club_id=club.id) }}" class="btn-icon vote" title="Oy Ver"><span class="icon-slot fas fa-heart" data-icon="fas fa-heart"></span></a>
+                            <a href="{{ url_for('vote_club', club_id=club.id) }}" class="btn-icon vote" title="Oy Ver"><i class="fas fa-heart"></i></a>
                         {% endif %}
                     </div>
                 </div>
@@ -433,19 +434,19 @@
     <!-- MOBİL ALT NAVBAR -->
     <nav class="cl-bottom-nav" style="display:none;">
         <a href="{{ url_for('main.index') }}" class="cl-nav-item">
-            <span class="icon-slot fas fa-house" data-icon="fas fa-house"></span> Ana Sayfa
+            <i class="fas fa-house"></i> Ana Sayfa
         </a>
         <a href="{{ url_for('main.explore') }}" class="cl-nav-item">
-            <span class="icon-slot fas fa-compass" data-icon="fas fa-compass"></span> Keşfet
+            <i class="fas fa-compass"></i> Keşfet
         </a>
         <a href="{{ url_for('main.clubs') }}" class="cl-nav-item active">
-            <span class="icon-slot fas fa-trophy" data-icon="fas fa-trophy"></span> Kulüpler
+            <i class="fas fa-trophy"></i> Kulüpler
         </a>
         <a href="{{ url_for('main.notifications') }}" class="cl-nav-item">
-            <span class="icon-slot fas fa-bell" data-icon="fas fa-bell"></span> Bildirim
+            <i class="fas fa-bell"></i> Bildirim
         </a>
         <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="cl-nav-item">
-            <span class="icon-slot fas fa-user" data-icon="fas fa-user"></span> Profil
+            <i class="fas fa-user"></i> Profil
         </a>
     </nav>
 </body>

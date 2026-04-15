@@ -718,19 +718,6 @@
                 <small class="admin-admin-form-note">* Bu panelden oluşturulan kullanıcılar otomatik olarak <b>Onaylı (Verified)</b> sayılır.</small>
             </div>
 
-            <h2 class="admin-section-title" style="margin-top: 30px;">📊 Sınav Analizi Oluştur</h2>
-            <div class="admin-card" style="display:block;">
-                <div class="admin-action-copy" style="margin-bottom:16px;">
-                    <h3>Soru bazlı oy toplama paneli</h3>
-                    <p>Sınav kodu, adı ve soru sayısı girildiğinde sistem soru bloklarını otomatik oluşturur. Kullanıcılar A/B/C/D kitapçığını seçip her soru için tek oy bırakır.</p>
-                    <div class="admin-action-meta">
-                        <span class="admin-chip"><span class="icon-slot fa-solid fa-shield-halved" data-icon="fa-solid fa-shield-halved"></span> Tek kullanıcı - tek soru - tek oy</span>
-                        <span class="admin-chip"><span class="icon-slot fa-solid fa-comments" data-icon="fa-solid fa-comments"></span> Tartışma alanı aktif</span>
-                        <span class="admin-chip"><span class="icon-slot fa-solid fa-triangle-exclamation" data-icon="fa-solid fa-triangle-exclamation"></span> Resmî cevap anahtarı değildir</span>
-                    </div>
-                </div>
-            </div>
-            
             <h2 class="admin-section-title" style="margin-top: 30px;">🏆 Yeni Kulüp Oluştur</h2>
             <div class="admin-card" style="display:block;">
                 <form action="{{ url_for('admin.admin_create_club') }}" method="POST" enctype="multipart/form-data" class="admin-create-club-form">

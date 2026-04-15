@@ -33,40 +33,6 @@ function linkifyHashtags(text) {
     return out;
 }
 
-function stripIconLabels(root = document) {
-    // Keep labels by default. Only index feed repost/save actions are icon-only.
-    const feedRoot = document.getElementById('feedContainer');
-    if (!feedRoot) return;
-
-    root.querySelectorAll('.action-item').forEach((element) => {
-        const hasRepost = element.className.includes('js-repost-');
-        const hasSave = element.className.includes('js-save-');
-        if (!hasRepost && !hasSave) return;
-
-        Array.from(element.childNodes).forEach((node) => {
-            if (node.nodeType === Node.TEXT_NODE) {
-                if (node.textContent.trim()) node.remove();
-                return;
-            }
-
-            if (node.nodeType === Node.ELEMENT_NODE) {
-                const child = node;
-                if (child.classList.contains('icon-slot')) return;
-                if (child.classList.contains('save-icon')) {
-                    const saveIcon = child.querySelector('.icon-slot');
-                    if (saveIcon) {
-                        child.innerHTML = saveIcon.outerHTML;
-                    }
-                    return;
-                }
-                if (!child.querySelector('.icon-slot')) child.remove();
-            }
-        });
-    });
-}
-
-window.stripIconLabels = stripIconLabels;
-
 document.addEventListener('DOMContentLoaded', (event) => {
     // 1. Tema Kontrolü
     const btn = document.getElementById('theme-btn');
@@ -174,26 +140,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
             if (match) form.classList.add(`js-comment-form-${match[1]}`);
         }
     });
-
-    stripIconLabels();
-    renderIconSlots();
-
-    if (!window.__iconLabelObserver) {
-        window.__iconLabelObserver = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-                mutation.addedNodes.forEach((node) => {
-                    if (node && node.nodeType === Node.ELEMENT_NODE) {
-                        stripIconLabels(node);
-                        renderIconSlots(node);
-                    }
-                });
-            }
-        });
-
-        if (document.body) {
-            window.__iconLabelObserver.observe(document.body, { childList: true, subtree: true });
-        }
-    }
 });
 
 // Temayı Değiştir
@@ -299,7 +245,7 @@ async function oyVer(kulupKey, buton) {
 
     try {
         buton.disabled = true;
-        buton.innerHTML = '<span class="icon-slot fas fa-spinner fa-spin" data-icon="fas fa-spinner fa-spin"></span>';
+        buton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
         const response = await fetch('/vote_club/' + kulupKey);
 
@@ -348,10 +294,10 @@ function oyVerildiGorseli(btn) {
     btn.classList.add('voted');
     if (btn.classList.contains('btn-vote-sm')) {
         // Sidebar / mobile küçük buton
-        btn.innerHTML = '<span class="icon-slot fas fa-check" data-icon="fas fa-check"></span> OY VERİLDİ';
+        btn.innerHTML = '<i class="fas fa-check"></i> OY VERİLDİ';
     } else {
         // Tam boyut "OY VER" butonu (clubs_full.html)
-        btn.innerHTML = '<span class="icon-slot fas fa-check" data-icon="fas fa-check"></span> OY VERİLDİ';
+        btn.innerHTML = '<i class="fas fa-check"></i> OY VERİLDİ';
         btn.style.background = '#27ae60';
         btn.style.borderColor = '#27ae60';
         btn.style.boxShadow = '0 4px 15px rgba(39,174,96,0.25)';
@@ -373,9 +319,8 @@ function toggleComments(elementId) {
 
 async function repostPost(postId, element) {
     // Butonun içindeki ikona bakarak durumu anla (Basit kontrol)
-    const icon = element.querySelector('.icon-slot');
-    const isReposted = icon && (icon.style.color === 'rgb(46, 204, 113)' || icon.style.color === '#2ecc71');
-    const iconOnly = Boolean(document.getElementById('feedContainer'));
+    const icon = element.querySelector('i');
+    const isReposted = icon.style.color === 'rgb(46, 204, 113)' || icon.style.color === '#2ecc71';
     
     // Kullanıcı onayı
     const confirmMsg = isReposted ? "Yeniden gönderimi geri almak istiyor musun?" : "Bu gönderiyi yeniden paylaşmak istiyor musun?";
@@ -391,9 +336,7 @@ async function repostPost(postId, element) {
             
             if (result.action === 'reposted') {
                 allRepostBtns.forEach(btn => {
-                    btn.innerHTML = iconOnly
-                        ? '<span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span>'
-                        : '<span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span> <span style="color: #2ecc71;">Yeniden Gönderildi</span>';
+                    btn.innerHTML = '<i class="fa-solid fa-retweet" style="color: #2ecc71;"></i> <span style="color: #2ecc71;">Yeniden Gönderildi</span>';
                 });
                 
                 // Sayfayı yenilemeden akışa ekle
@@ -409,9 +352,7 @@ async function repostPost(postId, element) {
                 }
             } else {
                 allRepostBtns.forEach(btn => {
-                    btn.innerHTML = iconOnly
-                        ? '<span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span>'
-                        : '<span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span> Yeniden Gönder';
+                    btn.innerHTML = '<i class="fa-solid fa-retweet"></i> Yeniden Gönder';
                 });
                 
                 // REPOST GERİ ALINDIĞINDA KARTI SAYFADAN SİL
@@ -433,29 +374,6 @@ async function repostPost(postId, element) {
     }
 }
 
-function syncFeedLikeIconState(btn, isLiked) {
-    if (!btn) return;
-    renderIconSlots(btn);
-
-    const slot = btn.querySelector('.icon-slot');
-    const svg = slot ? slot.querySelector('svg') : null;
-    if (!slot || !svg) return;
-
-    if (isLiked) {
-        slot.style.color = '#ff4757';
-        svg.style.fill = '#ff4757';
-        svg.style.stroke = '#ff4757';
-        svg.style.animation = 'none';
-        void svg.offsetWidth;
-        svg.style.animation = 'likeHeartPop 260ms ease-out';
-    } else {
-        slot.style.color = '';
-        svg.style.fill = 'none';
-        svg.style.stroke = 'currentColor';
-        svg.style.animation = '';
-    }
-}
-
 async function likePost(postId, element) {
     try {
         const response = await fetch(`/like/${postId}`, { method: 'POST' });
@@ -474,24 +392,21 @@ async function likePost(postId, element) {
                 });
             } else {
                 const iconClass = data.action === 'liked' ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
-                const isLikedNow = data.action === 'liked';
 
                 allLikeBtns.forEach(btn => {
-                    btn.classList.toggle('liked', isLikedNow);
-                    btn.classList.toggle('is-liked', isLikedNow);
+                    btn.classList.toggle('liked', data.action === 'liked');
+                    btn.classList.toggle('is-liked', data.action === 'liked');
 
                     const iconEl = btn.querySelector('i');
                     const countEl = btn.querySelector('.like-count');
 
                     if (iconEl && countEl) {
                         iconEl.className = iconClass;
-                        iconEl.style.color = isLikedNow ? '#ff4757' : '';
+                        iconEl.style.color = data.action === 'liked' ? '#ff4757' : '';
                         countEl.textContent = data.likes_count;
                     } else {
-                        btn.innerHTML = `<span class="icon-slot ${iconClass}"${isLikedNow ? ' style="color: #ff4757;"' : ''} data-icon="${iconClass}"></span> <span class="like-count">${data.likes_count}</span>`;
+                        btn.innerHTML = `<i class="${iconClass}"${data.action === 'liked' ? ' style="color: #ff4757;"' : ''}></i> <span class="like-count">${data.likes_count}</span>`;
                     }
-
-                    syncFeedLikeIconState(btn, isLikedNow);
                 });
 
                 document.querySelectorAll(`.js-like-stat-${postId}`).forEach(span => {
@@ -517,20 +432,11 @@ async function savePost(postId, element) {
             const data = await response.json();
             // Sayfadaki AYNI ID'ye sahip tüm kaydet butonlarını güncelle
             const allSaveBtns = document.querySelectorAll(`.js-save-${postId}`);
-            const iconOnly = Boolean(document.getElementById('feedContainer'));
             
             if (data.action === 'saved') {
-                allSaveBtns.forEach(btn => {
-                    btn.innerHTML = iconOnly
-                        ? '<span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><span class="icon-slot fa-solid fa-bookmark" data-icon="fa-solid fa-bookmark"></span></span>'
-                        : '<span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><span class="icon-slot fa-solid fa-bookmark" data-icon="fa-solid fa-bookmark"></span> Kaydedildi</span>';
-                });
+                allSaveBtns.forEach(btn => btn.innerHTML = '<span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><i class="fa-solid fa-bookmark"></i> Kaydedildi</span>');
             } else {
-                allSaveBtns.forEach(btn => {
-                    btn.innerHTML = iconOnly
-                        ? '<span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span></span>'
-                        : '<span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydet</span>';
-                });
+                allSaveBtns.forEach(btn => btn.innerHTML = '<span class="save-icon"><i class="fa-regular fa-bookmark"></i> Kaydet</span>');
             }
         }
     } catch (error) {
@@ -1379,12 +1285,12 @@ function createPostHTML(data) {
             mediaHTML = `
             <div class="post-file-container" style="margin: 10px 0;">
                 <a href="/static/post_images/${data.image_file}" download class="post-file-link" style="display: flex; align-items: center; gap: 10px; padding: 15px; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 12px; text-decoration: none; color: var(--text-color); transition: 0.2s;">
-                    <span class="icon-slot fas fa-file-alt" style="font-size: 2rem; color: var(--ytu-lacivert);" data-icon="fas fa-file-alt"></span>
+                    <i class="fas fa-file-alt" style="font-size: 2rem; color: var(--ytu-lacivert);"></i>
                     <div style="flex: 1;">
                         <div style="font-weight: 600;">Dosya Eki</div>
                         <div style="font-size: 0.8rem; color: var(--text-muted);">${data.image_file.split('_').slice(1).join('_') || data.image_file}</div>
                     </div>
-                    <span class="icon-slot fas fa-download" style="color: var(--text-muted);" data-icon="fas fa-download"></span>
+                    <i class="fas fa-download" style="color: var(--text-muted);"></i>
                 </a>
             </div>`;
         }
@@ -1399,16 +1305,10 @@ function createPostHTML(data) {
     }
 
     // Repost butonu durumu (Eğer kullanıcı zaten repostladıysa yeşil gelsin)
-    const iconOnlyActions = Boolean(document.getElementById('feedContainer'));
-
-    let repostBtnHTML = iconOnlyActions
-        ? `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span></span>`
-        : `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span> Yeniden Gönder</span>`;
+    let repostBtnHTML = `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><i class="fa-solid fa-retweet"></i> Yeniden Gönder</span>`;
     
     if (data.user_has_reposted) {
-        repostBtnHTML = iconOnlyActions
-            ? `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span></span>`
-            : `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span> <span style="color: #2ecc71;">Yeniden Gönderildi</span></span>`;
+        repostBtnHTML = `<span class="action-item js-repost-${targetId}" onclick="repostPost('${targetId}', this)"><i class="fa-solid fa-retweet" style="color: #2ecc71;"></i> <span style="color: #2ecc71;">Yeniden Gönderildi</span></span>`;
     }
 
     return `
@@ -1436,16 +1336,14 @@ function createPostHTML(data) {
 
         <div class="post-actions">
             <span class="action-item js-like-${targetId}" onclick="likePost('${targetId}', this)">
-                <span class="icon-slot fa-regular fa-heart" data-icon="fa-regular fa-heart"></span> <span class="like-count">${data.likes_count || 0}</span>
+                <i class="fa-regular fa-heart"></i> <span class="like-count">${data.likes_count || 0}</span>
             </span>
             <span class="action-item js-comment-count-${targetId}" onclick="toggleComments('comment-box-${data.id}')">
-                <span class="icon-slot fa-regular fa-comment" data-icon="fa-regular fa-comment"></span> 0
+                <i class="fa-regular fa-comment"></i> 0
             </span>
             ${repostBtnHTML}
             <span class="action-item js-save-${targetId}" onclick="savePost('${targetId}', this)">
-                ${iconOnlyActions
-                    ? '<span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span></span>'
-                    : '<span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydet</span>'}
+                <span class="save-icon"><i class="fa-regular fa-bookmark"></i> Kaydet</span>
             </span>
             
             <div class="action-menu-wrapper">
@@ -1525,7 +1423,7 @@ async function submitComment(e, postId) {
                 : null;
 
             countSpans.forEach(span => {
-                span.innerHTML = `<span class="icon-slot fa-regular fa-comment" data-icon="fa-regular fa-comment"></span> ${nextCommentCount}`;
+                span.innerHTML = `<i class="fa-regular fa-comment"></i> ${nextCommentCount}`;
             });
 
             document.querySelectorAll(`.js-comment-stat-${postId}`).forEach(span => {
@@ -1597,7 +1495,7 @@ async function deleteCommentJS(commentId, postId, element) {
             countSpans.forEach(span => {
                 const currentText = span.innerText.trim();
                 const currentCount = parseInt(currentText) || 0;
-                span.innerHTML = `<span class="icon-slot fa-regular fa-comment" data-icon="fa-regular fa-comment"></span> ${Math.max(0, currentCount - 1)}`;
+                span.innerHTML = `<i class="fa-regular fa-comment"></i> ${Math.max(0, currentCount - 1)}`;
             });
         } else {
             alert(result.error || "Silinemedi.");
@@ -1779,7 +1677,7 @@ function updateInboxRow(msg) {
             </div>
         </a>
         <a href="/delete_conversation/${msg.sender_id}" class="delete-conv-btn" onclick="return confirm('Bu kişiyle olan tüm mesajlaşmalar silinecek. Emin misin?');" title="Sohbeti Sil">
-            <span class="icon-slot fas fa-trash-alt" data-icon="fas fa-trash-alt"></span>
+            <i class="fas fa-trash-alt"></i>
         </a>
         </div>`;
         list.insertAdjacentHTML('afterbegin', newRowHTML);
@@ -1839,15 +1737,15 @@ function appendMessageToChat(msg) {
             (document.querySelector('.ig-header-avatar')?.src || '') : '';
         const avatarHtml = !isMe ? `<img src="${recipientPic}" class="ig-msg-avatar" alt="">` : '';
         const deleteBtnHtml = isMe
-            ? `<button class="ig-delete-btn" onclick="confirmDeleteMsg(event,'${deleteSafeUrl}')" title="Sil"><span class="icon-slot fas fa-trash-can" data-icon="fas fa-trash-can"></span></button>`
+            ? `<button class="ig-delete-btn" onclick="confirmDeleteMsg(event,'${deleteSafeUrl}')" title="Sil"><i class="fas fa-trash-can"></i></button>`
             : '';
         const timeHtml = msg.msg_type !== 'story'
-            ? `<span class="ig-msg-time">${msg.timestamp}${isMe ? ' <span class="icon-slot fas fa-check" style="opacity:.8;font-size:.6rem;" data-icon="fas fa-check"></span>' : ''}</span>`
+            ? `<span class="ig-msg-time">${msg.timestamp}${isMe ? ' <i class="fas fa-check" style="opacity:.8;font-size:.6rem;"></i>' : ''}</span>`
             : '';
 
         if (msg.msg_type === 'story') {
             const imgPath = msg.story_img ? `/static/story_images/${msg.story_img}` : '/static/img/story_placeholder.jpg';
-            contentHtml = `<div class="ig-bubble ${sideClass} media"><div class="ig-story-card" onclick="viewSharedStory(event,'${msg.body}')"><div class="ig-story-overlay"><span class="icon-slot fas fa-play" style="font-size:1.8rem;margin-bottom:6px;" data-icon="fas fa-play"></span><span style="font-size:.8rem;font-weight:700;">Hikayeyi İzle</span></div><img src="${imgPath}" class="ig-story-img" onerror="this.onerror=null;this.src='/static/img/story_placeholder.jpg'"></div></div>`;
+            contentHtml = `<div class="ig-bubble ${sideClass} media"><div class="ig-story-card" onclick="viewSharedStory(event,'${msg.body}')"><div class="ig-story-overlay"><i class="fas fa-play" style="font-size:1.8rem;margin-bottom:6px;"></i><span style="font-size:.8rem;font-weight:700;">Hikayeyi İzle</span></div><img src="${imgPath}" class="ig-story-img" onerror="this.src='/static/img/story_placeholder.jpg'"></div></div>`;
         } else if (msg.msg_type === 'audio') {
             const audioSrc = (msg.is_local && msg.file_path) ? msg.file_path : `/static/audio_files/${msg.file_path}`;
             contentHtml = `<div class="ig-bubble ${sideClass}"><audio controls controlsList="nodownload" class="ig-audio-msg" src="${audioSrc}"></audio>${timeHtml}</div>`;
@@ -1859,7 +1757,7 @@ function appendMessageToChat(msg) {
             contentHtml = `<div class="ig-bubble ${sideClass} media"><video controls controlsList="nodownload" class="ig-video-msg"><source src="${vidPath}"></video>${timeHtml}</div>`;
         } else if (msg.msg_type === 'file') {
             const dlLink = msg.is_local ? (msg.file_path || '#') : (msg.file_path ? `/static/message_files/${msg.file_path}` : '#');
-            contentHtml = `<div class="ig-bubble ${sideClass}" style="padding:0;background:transparent;border:none;"><a href="${dlLink}" target="_blank" class="ig-file-msg" download><span class="icon-slot fas fa-file-alt ig-file-icon" data-icon="fas fa-file-alt ig-file-icon"></span><span class="ig-file-name">${msg.body}</span><span class="icon-slot fas fa-download ig-file-dl" data-icon="fas fa-download ig-file-dl"></span></a>${timeHtml}</div>`;
+            contentHtml = `<div class="ig-bubble ${sideClass}" style="padding:0;background:transparent;border:none;"><a href="${dlLink}" target="_blank" class="ig-file-msg" download><i class="fas fa-file-alt ig-file-icon"></i><span class="ig-file-name">${msg.body}</span><i class="fas fa-download ig-file-dl"></i></a>${timeHtml}</div>`;
         } else {
             contentHtml = `<div class="ig-bubble ${sideClass}">${msg.body}${timeHtml}</div>`;
         }
@@ -1881,7 +1779,7 @@ function appendMessageToChat(msg) {
 
         if (msg.msg_type === 'story') {
             const imgPath = msg.story_img ? `/static/story_images/${msg.story_img}` : '/static/img/story_placeholder.jpg';
-            contentHtml = `<div class="story-share-card" onclick="viewSharedStory(event,'${msg.body}')" style="cursor:pointer;max-width:200px;position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.2);"><div style="background:rgba(0,0,0,0.4);position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;color:white;z-index:2;"><span class="icon-slot fas fa-play-circle" style="font-size:3rem;margin-bottom:10px;" data-icon="fas fa-play-circle"></span><span>Hikayeyi İzle</span></div><img src="${imgPath}" style="width:100%;height:280px;object-fit:cover;display:block;" onerror="this.onerror=null;this.src='/static/img/default_avatar.png'"></div>`;
+            contentHtml = `<div class="story-share-card" onclick="viewSharedStory(event,'${msg.body}')" style="cursor:pointer;max-width:200px;position:relative;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.2);"><div style="background:rgba(0,0,0,0.4);position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;color:white;z-index:2;"><i class="fas fa-play-circle" style="font-size:3rem;margin-bottom:10px;"></i><span>Hikayeyi İzle</span></div><img src="${imgPath}" style="width:100%;height:280px;object-fit:cover;display:block;" onerror="this.onerror=null;this.src='/static/img/default_avatar.png'"></div>`;
         } else if (msg.msg_type === 'audio') {
             const audioSrc = (msg.is_local && msg.file_path) ? msg.file_path : `/static/audio_files/${msg.file_path}`;
             contentHtml = `<audio controls controlsList="nodownload" class="audio-msg" src="${audioSrc}"></audio>`;
@@ -1893,7 +1791,7 @@ function appendMessageToChat(msg) {
             contentHtml = `<video controls controlsList="nodownload" class="chat-video-msg" style="max-width:280px;max-height:200px;border-radius:10px;display:block;"><source src="${vidPath}">Tarayıcınız videoyu desteklemiyor.</video>`;
         } else if (msg.msg_type === 'file') {
             const dlLink = msg.is_local ? (msg.file_path || '#') : (msg.file_path ? `/static/message_files/${msg.file_path}` : '#');
-            contentHtml = `<a href="${dlLink}" target="_blank" class="file-msg-link" download><span class="icon-slot fas fa-file-alt file-msg-icon" data-icon="fas fa-file-alt file-msg-icon"></span><span class="file-msg-name">${msg.body}</span><span class="icon-slot fas fa-download file-msg-download" data-icon="fas fa-download file-msg-download"></span></a>`;
+            contentHtml = `<a href="${dlLink}" target="_blank" class="file-msg-link" download><i class="fas fa-file-alt file-msg-icon"></i><span class="file-msg-name">${msg.body}</span><i class="fas fa-download file-msg-download"></i></a>`;
         } else {
             contentHtml = msg.body;
         }
@@ -1901,7 +1799,7 @@ function appendMessageToChat(msg) {
         const avatarHtml = !isMe ? `<img src="/static/${msg.sender_pic || 'img/default_avatar.png'}" class="chat-avatar-sm" style="width:35px;border-radius:50%;margin-right:10px;">` : '';
         const deleteHtml = `<a href="#" class="msg-delete" onclick="confirmDeleteMsg(event,'${deleteSafeUrl}')" style="margin:0 10px;opacity:0.5;text-decoration:none;">✕</a>`;
         const bubbleStyle = msg.msg_type === 'story' ? 'padding:0;background:none;border:none;box-shadow:none;' : '';
-        const timeHtml = msg.msg_type !== 'story' ? `<span class="msg-time" style="display:flex;align-items:center;gap:3px;justify-content:flex-end;">${msg.timestamp}${isMe ? ' <span class="icon-slot fas fa-check" data-icon="fas fa-check"></span>' : ''}</span>` : '';
+        const timeHtml = msg.msg_type !== 'story' ? `<span class="msg-time" style="display:flex;align-items:center;gap:3px;justify-content:flex-end;">${msg.timestamp}${isMe ? ' <i class="fas fa-check"></i>' : ''}</span>` : '';
 
         const html = `<div class="${rowClass}">${!isMe ? avatarHtml : ''}${isMe ? deleteHtml : ''}<div class="${bubbleClass}" style="${bubbleStyle}">${contentHtml}${timeHtml}</div></div>`;
         const typingDiv = document.getElementById('typingIndicator');
@@ -1947,7 +1845,7 @@ function showCustomConfirm(message, onConfirm) {
     overlay.innerHTML = `
         <div style="background:var(--card-bg,#fff);border-radius:16px;padding:28px 32px;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;">
             <div style="width:52px;height:52px;background:rgba(231,76,60,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-                <span class="icon-slot fas fa-trash-can" style="color:#e74c3c;font-size:1.4rem;" data-icon="fas fa-trash-can"></span>
+                <i class="fas fa-trash-can" style="color:#e74c3c;font-size:1.4rem;"></i>
             </div>
             <h3 style="margin:0 0 8px;font-size:1.1rem;color:var(--text-color,#222);">Emin misin?</h3>
             <p style="margin:0 0 24px;font-size:0.9rem;color:var(--text-muted,#666);">${message}</p>
@@ -2890,12 +2788,12 @@ async function toggleClubFollow(clubId, btn) {
             const countSpan = document.querySelector('.c-meta span:first-child');
             if (data.action === 'followed') {
                 btn.classList.add('active');
-                btn.innerHTML = '<span class="icon-slot fas fa-check" data-icon="fas fa-check"></span> Takip Ediliyor';
+                btn.innerHTML = '<i class="fas fa-check"></i> Takip Ediliyor';
             } else {
                 btn.classList.remove('active');
-                btn.innerHTML = '<span class="icon-slot fas fa-plus" data-icon="fas fa-plus"></span> Takip Et';
+                btn.innerHTML = '<i class="fas fa-plus"></i> Takip Et';
             }
-            if(countSpan) countSpan.innerHTML = `<span class="icon-slot fas fa-users" data-icon="fas fa-users"></span> ${data.count} Takipçi`;
+            if(countSpan) countSpan.innerHTML = `<i class="fas fa-users"></i> ${data.count} Takipçi`;
         }
     } catch (error) {
         console.error('Takip hatası:', error);
@@ -2906,14 +2804,14 @@ async function voteClub(clubId, btn) {
     if (btn.disabled) return;
     
     const originalContent = btn.innerHTML;
-    btn.innerHTML = '<span class="icon-slot fas fa-circle-notch fa-spin" data-icon="fas fa-circle-notch fa-spin"></span>';
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
     
     try {
         const response = await fetch(`/vote_club/${clubId}`);
         const data = await response.json();
         
         if (data.success) {
-            btn.innerHTML = '<span class="icon-slot fas fa-check" data-icon="fas fa-check"></span> Oy Verildi';
+            btn.innerHTML = '<i class="fas fa-check"></i> Oy Verildi';
             btn.style.backgroundColor = '#28a745';
             btn.style.transform = 'scale(1.1)';
             setTimeout(() => btn.style.transform = 'scale(1)', 200);
@@ -2921,7 +2819,7 @@ async function voteClub(clubId, btn) {
             btn.style.cursor = 'default';
             
             const countSpan = document.querySelector('.c-meta span:last-child');
-            if(countSpan) countSpan.innerHTML = `<span class="icon-slot fas fa-trophy" data-icon="fas fa-trophy"></span> ${data.new_total} Lig Puanı`;
+            if(countSpan) countSpan.innerHTML = `<i class="fas fa-trophy"></i> ${data.new_total} Lig Puanı`;
             
             // Uçuşan kalp animasyonu
             if (typeof createFloatingHeart === 'function') {
@@ -2936,95 +2834,3 @@ async function voteClub(clubId, btn) {
         btn.innerHTML = originalContent;
     }
 }
-
-// ==========================================
-// 29. MERKEZI SVG ICON SISTEMI
-// ==========================================
-const SVG_ICONS = {
-        house: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5L12 4l9 7.5"/><path d="M6 10.5V20h12v-9.5"/></svg>',
-        home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5L12 4l9 7.5"/><path d="M6 10.5V20h12v-9.5"/></svg>',
-        compass: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m9 15 2-6 6-2-2 6-6 2z"/></svg>',
-        envelope: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="m4 8 8 6 8-6"/></svg>',
-        bell: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16h12l-1.2-1.6a6 6 0 0 1-1.2-3.6V9a3.6 3.6 0 1 0-7.2 0v1.8a6 6 0 0 1-1.2 3.6L6 16z"/><path d="M10 18a2 2 0 0 0 4 0"/></svg>',
-        clapperboard: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 8 6 3h4l-3 5"/><path d="m10 8 3-5h4l-3 5"/><path d="m17 8 3-5"/></svg>',
-        bookmark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"/></svg>',
-        'book-open': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6c-2-1.5-4-2-7-2v14c3 0 5 .5 7 2"/><path d="M12 6c2-1.5 4-2 7-2v14c-3 0-5 .5-7 2"/></svg>',
-        trophy: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v3a4 4 0 0 1-8 0z"/><path d="M6 5H4a3 3 0 0 0 3 3"/><path d="M18 5h2a3 3 0 0 1-3 3"/><path d="M12 10v4"/><path d="M9 20h6"/><path d="M10 14h4"/></svg>',
-        bullhorn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11v2h3l7 4V7l-7 4z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M8 13v4a2 2 0 0 0 2 2"/></svg>',
-        bus: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="13" rx="2"/><path d="M4 10h16"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg>',
-        gear: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.5-2.4.7a7 7 0 0 0-1.7-1l-.3-2.5h-4l-.3 2.5a7 7 0 0 0-1.7 1L5.1 6l-2 3.5 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.5 2.4-.7a7 7 0 0 0 1.7 1l.3 2.5h4l.3-2.5a7 7 0 0 0 1.7-1l2.4.7 2-3.5-2-1.5c.1-.3.1-.7.1-1z"/></svg>',
-        lightbulb: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0-3.8 10.6c.9.7 1.4 1.8 1.4 2.9h4.8c0-1.1.5-2.2 1.4-2.9A6 6 0 0 0 12 3z"/><path d="M9.5 19h5"/><path d="M10 21h4"/></svg>',
-        comments: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="13" height="10" rx="2"/><path d="m8 14-3 3v-3"/><rect x="11" y="10" width="10" height="8" rx="2"/></svg>',
-        comment: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="m8 16-3 3v-3"/></svg>',
-        'comment-dots': '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><circle cx="9" cy="10" r="1"/><circle cx="12" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>',
-        heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.8-4.5-9.2-8.6C.8 8.7 2.7 5.5 6 5.5c1.9 0 3.2 1 4 2.1.8-1.1 2.1-2.1 4-2.1 3.3 0 5.2 3.2 3.2 6.9C18.7 16.5 12 21 12 21z"/></svg>',
-        retweet: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h11l-2-2"/><path d="m15 5 2 2-2 2"/><path d="M20 17H9l2 2"/><path d="m9 19-2-2 2-2"/></svg>',
-        'paper-plane': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 21 3l-7.5 18-2.5-7-8-2.5z"/><path d="M21 3 11 14"/></svg>',
-        'chart-line': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17h18"/><path d="m5 15 4-4 3 3 6-7"/></svg>',
-        'trash-can': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="m7 7 1 13h8l1-13"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>',
-        trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="m7 7 1 13h8l1-13"/></svg>',
-        'file-alt': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 13h6"/><path d="M10 17h6"/></svg>',
-        download: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11"/><path d="m8 11 4 4 4-4"/><path d="M4 20h16"/></svg>',
-        image: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="10" r="1.5"/><path d="m21 16-5-4-4 3-3-2-6 5"/></svg>',
-        paperclip: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12.5 15.5 6a3 3 0 1 1 4.2 4.2L10.4 19.5a5 5 0 1 1-7.1-7.1L13 2.7"/></svg>',
-        'square-poll-vertical': '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16V13"/></svg>',
-        'magnifying-glass': '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>',
-        video: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="m17 10 4-2v8l-4-2z"/></svg>',
-        plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
-        check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7.5"/></svg>',
-        times: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12"/><path d="m18 6-12 12"/></svg>',
-        play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6 10 6-10 6z"/></svg>',
-        'play-circle': '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/></svg>',
-        link: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 1 0-7l1.5-1.5a5 5 0 1 1 7 7L17 13"/><path d="M14 11a5 5 0 0 1 0 7L12.5 19.5a5 5 0 1 1-7-7L7 11"/></svg>',
-        whatsapp: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3z"/><path d="M9 8.8c.4 2 2 3.7 4 4.2"/></svg>',
-        twitter: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 6.2c-.7.3-1.4.5-2.2.6.8-.5 1.4-1.2 1.7-2.1-.8.5-1.6.8-2.5 1A3.6 3.6 0 0 0 12.8 9c0 .3 0 .6.1.9-3-.1-5.7-1.6-7.5-3.8-.3.5-.5 1.1-.5 1.8 0 1.3.7 2.4 1.7 3-.6 0-1.2-.2-1.7-.4v.1c0 1.8 1.3 3.3 3 3.7-.3.1-.7.1-1 .1-.2 0-.5 0-.7-.1.5 1.5 1.9 2.6 3.6 2.6A7.3 7.3 0 0 1 4 18.5a10.3 10.3 0 0 0 5.6 1.6c6.7 0 10.4-5.6 10.4-10.4v-.5c.7-.5 1.4-1.2 2-2z"/></svg>',
-        'telegram-plane': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 3 11l6.5 2.5L18 7l-6.5 7L10 21l3-5 4 3z"/></svg>',
-        lock: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3"/></svg>',
-        ban: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></svg>',
-        'triangle-exclamation': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 3 20h18L12 4z"/><path d="M12 10v5"/><path d="M12 18h.01"/></svg>',
-        'arrow-left': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="m11 6-6 6 6 6"/></svg>',
-        'arrow-right': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>',
-        'arrow-up': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5"/><path d="m6 11 6-6 6 6"/></svg>',
-        'pen-to-square': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="m13 6 4 4"/><path d="M4 20h16"/></svg>',
-        'envelope-open': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10 12 4l9 6"/><path d="M3 10v10h18V10"/><path d="m3 10 9 6 9-6"/></svg>',
-        users: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19a6 6 0 0 1 12 0"/><path d="M14 19a4.5 4.5 0 0 1 7 0"/></svg>',
-        crown: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 4 4 5-7 5 7 4-4-2 11H5z"/></svg>',
-        'calendar-alt': '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M4 10h16"/></svg>',
-        'calendar-times': '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M9 13l6 6"/><path d="m15 13-6 6"/></svg>',
-        'circle-notch': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/></svg>',
-        'check-circle': '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M7.5 12.5 11 16l5.5-5.5"/></svg>',
-        'external-link-alt': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M12 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
-        spinner: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 1-6.4 2.6"/></svg>'
-};
-
-function normalizeIconKey(raw) {
-        if (!raw) return null;
-        const classes = raw.trim().toLowerCase().split(/\s+/).filter(Boolean);
-        if (classes.includes('fa-home')) return 'home';
-
-        const iconClass = classes.find((className) =>
-                className.startsWith('fa-') &&
-                className !== 'fa-solid' &&
-                className !== 'fa-regular' &&
-                className !== 'fa-brands' &&
-                className !== 'fas' &&
-                className !== 'far' &&
-                className !== 'fab'
-        );
-
-        if (!iconClass) return null;
-        return iconClass.replace(/^fa-/, '');
-}
-
-function renderIconSlots(root = document) {
-        root.querySelectorAll('.icon-slot').forEach((slot) => {
-                const rawKey = slot.dataset.icon || slot.className || '';
-                const key = normalizeIconKey(rawKey);
-                const svg = key ? SVG_ICONS[key] : null;
-                if (!svg) return;
-                slot.innerHTML = svg;
-                slot.dataset.iconRendered = '1';
-        });
-}
-
-window.renderIconSlots = renderIconSlots;

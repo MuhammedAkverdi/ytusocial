@@ -7,6 +7,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Bu sayfaya özel stiller */
         .league-container {
@@ -331,7 +332,7 @@
 
     <!-- MOBİL ÜST BAR -->
     <div class="cf-top-bar">
-        <a href="{{ url_for('main.index') }}" class="cf-top-back"><span class="icon-slot fas fa-arrow-left" data-icon="fas fa-arrow-left"></span></a>
+        <a href="{{ url_for('main.index') }}" class="cf-top-back"><i class="fas fa-arrow-left"></i></a>
         <span class="cf-top-title">🏆 Kulüpler Ligi</span>
     </div>
 
@@ -358,10 +359,10 @@
                     <div class="club-details">
                         <a href="{{ url_for('main.club_detail', slug=club.slug) }}" class="club-name">{{ club.name }}</a>
                         <div class="club-meta">
-                            <span><span class="icon-slot fas fa-users" data-icon="fas fa-users"></span> {{ club.followers|length }} Takipçi</span>
+                            <span><i class="fas fa-users"></i> {{ club.followers|length }} Takipçi</span>
                         </div>
                         <a href="{{ url_for('main.club_detail', slug=club.slug) }}" class="club-page-link">
-                            <span class="icon-slot fas fa-external-link-alt" style="font-size:.68rem;" data-icon="fas fa-external-link-alt"></span> Kulübü Gör
+                            <i class="fas fa-external-link-alt" style="font-size:.68rem;"></i> Kulübü Gör
                         </a>
                     </div>
 
@@ -370,7 +371,7 @@
                         <span class="vote-label">OY</span>
                         {% if club.id in voted_ids %}
                         <button class="vote-btn voted" data-club-id="{{ club.id }}" disabled>
-                            <span class="icon-slot fas fa-check" data-icon="fas fa-check"></span> OY VERİLDİ
+                            <i class="fas fa-check"></i> OY VERİLDİ
                         </button>
                         {% else %}
                         <button class="vote-btn" data-club-id="{{ club.id }}" onclick="oyVer('{{ club.id }}', this)">
@@ -395,19 +396,19 @@
     <!-- MOBİL ALT NAVBAR -->
     <nav class="cf-bottom-nav">
         <a href="{{ url_for('main.index') }}" class="cf-nav-item">
-            <span class="icon-slot fas fa-house" data-icon="fas fa-house"></span><span>Ana Sayfa</span>
+            <i class="fas fa-house"></i><span>Ana Sayfa</span>
         </a>
         <a href="{{ url_for('main.explore') }}" class="cf-nav-item">
-            <span class="icon-slot fas fa-compass" data-icon="fas fa-compass"></span><span>Keşfet</span>
+            <i class="fas fa-compass"></i><span>Keşfet</span>
         </a>
         <a href="{{ url_for('main.clubs_full_list') }}" class="cf-nav-item active">
-            <span class="icon-slot fas fa-trophy" data-icon="fas fa-trophy"></span><span>Kulüpler</span>
+            <i class="fas fa-trophy"></i><span>Kulüpler</span>
         </a>
         <a href="{{ url_for('main.notifications') }}" class="cf-nav-item">
-            <span class="icon-slot fas fa-bell" data-icon="fas fa-bell"></span><span>Bildirim</span>
+            <i class="fas fa-bell"></i><span>Bildirim</span>
         </a>
         <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="cf-nav-item">
-            <span class="icon-slot fas fa-user" data-icon="fas fa-user"></span><span>Profil</span>
+            <i class="fas fa-user"></i><span>Profil</span>
         </a>
     </nav>
 </body>

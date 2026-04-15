@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Not Havuzu — YTU Social</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
@@ -567,9 +568,9 @@
 
 <!-- MOBİL ÜST BAR -->
 <div class="nm-top-bar">
-    <button class="nm-top-bar-back" onclick="history.back()"><span class="icon-slot fas fa-arrow-left" data-icon="fas fa-arrow-left"></span></button>
+    <button class="nm-top-bar-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
     <span class="nm-top-bar-title">Not Havuzu</span>
-    <button class="nm-top-bar-upload" onclick="openUploadModal()"><span class="icon-slot fas fa-plus" data-icon="fas fa-plus"></span> Yükle</button>
+    <button class="nm-top-bar-upload" onclick="openUploadModal()"><i class="fas fa-plus"></i> Yükle</button>
 </div>
 
 <div class="np-layout">
@@ -582,7 +583,7 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}{% for category, msg in messages %}
     <div class="np-flash {{ category }}">
-        <span class="icon-slot fas {% if category=='success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}" data-icon="fas {% if category=='success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></span>
+        <i class="fas {% if category=='success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
         {{ msg }}
     </div>
     {% endfor %}{% endif %}
@@ -591,7 +592,7 @@
     <div class="np-hero">
         <div>
             <h2 class="np-hero-title">
-                <span class="icon-slot fas fa-graduation-cap" style="opacity:.8;margin-right:8px;" data-icon="fas fa-graduation-cap"></span>Akademik Arşiv
+                <i class="fas fa-graduation-cap" style="opacity:.8;margin-right:8px;"></i>Akademik Arşiv
             </h2>
             <p class="np-hero-sub">Ders notlarını paylaş &middot; Puan kazan &middot; Topluluğa katkı sağla</p>
             <div class="np-stats-row">
@@ -612,7 +613,7 @@
             </div>
         </div>
         <button class="btn-upload-hero" onclick="openUploadModal()">
-            <span class="icon-slot fas fa-plus" data-icon="fas fa-plus"></span> Not Yükle
+            <i class="fas fa-plus"></i> Not Yükle
         </button>
     </div>
 
@@ -621,7 +622,7 @@
             <input type="hidden" name="dept" value="{{ selected_dept or '' }}">
             <input type="hidden" name="sort" value="{{ current_sort }}">
             <div class="np-search-input-wrap">
-                <span class="icon-slot fas fa-search np-search-icon" data-icon="fas fa-search np-search-icon"></span>
+                <i class="fas fa-search np-search-icon"></i>
                 <input type="text" name="q" class="np-search-input" placeholder="Ders kodu veya ders adı ile ara" value="{{ search_query or '' }}">
             </div>
             <button type="submit" class="np-search-submit">Ara</button>
@@ -652,10 +653,10 @@
         {% set ft = note.file_type | lower %}
         <div class="np-item">
             <div class="np-file-icon ft-{{ ft }}">
-                {% if ft == 'pdf' %}<span class="icon-slot fas fa-file-pdf" data-icon="fas fa-file-pdf"></span>
-                {% elif ft in ['doc','docx'] %}<span class="icon-slot fas fa-file-word" data-icon="fas fa-file-word"></span>
-                {% elif ft in ['ppt','pptx'] %}<span class="icon-slot fas fa-file-powerpoint" data-icon="fas fa-file-powerpoint"></span>
-                {% else %}<span class="icon-slot fas fa-file-alt" data-icon="fas fa-file-alt"></span>{% endif %}
+                {% if ft == 'pdf' %}<i class="fas fa-file-pdf"></i>
+                {% elif ft in ['doc','docx'] %}<i class="fas fa-file-word"></i>
+                {% elif ft in ['ppt','pptx'] %}<i class="fas fa-file-powerpoint"></i>
+                {% else %}<i class="fas fa-file-alt"></i>{% endif %}
                 <span class="ext-badge">{{ ft }}</span>
             </div>
             <div class="np-item-body">
@@ -670,17 +671,17 @@
                         <img src="/static/{{ note.author.profile_pic }}">
                         <span>{{ note.author.username }}</span>
                     </div>
-                    <div class="np-footer-stat"><span class="icon-slot fas fa-download" data-icon="fas fa-download"></span>&nbsp;{{ note.downloads }}</div>
+                    <div class="np-footer-stat"><i class="fas fa-download"></i>&nbsp;{{ note.downloads }}</div>
                     <div class="np-footer-stat">
                         <div class="np-stars">
                             {% for i in range(1,6) %}
-                            <span class="icon-slot fas fa-star {% if i <= note.average_rating %}filled{% else %}empty{% endif %}" data-icon="fas fa-star {% if i <= note.average_rating %}filled{% else %}empty{% endif %}"></span>
+                            <i class="fas fa-star {% if i <= note.average_rating %}filled{% else %}empty{% endif %}"></i>
                             {% endfor %}
                         </div>
                         <span style="margin-left:4px;">{{ note.average_rating }} ({{ note.rating_count }})</span>
                     </div>
                     <div class="np-footer-stat" style="margin-left:auto;">
-                        <span class="icon-slot fas fa-clock" data-icon="fas fa-clock"></span>&nbsp;{{ note.date_posted.strftime('%d.%m.%Y') }}
+                        <i class="fas fa-clock"></i>&nbsp;{{ note.date_posted.strftime('%d.%m.%Y') }}
                     </div>
                 </div>
             </div>
@@ -715,14 +716,14 @@
                 {% endif %}
                 <a href="{{ url_for('main.download_note', note_id=note.id) }}"
                    class="np-btn-dl">
-                    <span class="icon-slot fas fa-download" data-icon="fas fa-download"></span> İndir
+                    <i class="fas fa-download"></i> İndir
                 </a>
                 <div style="display:flex;gap:4px;">
                     <button class="np-btn-icon" onclick="rateNote('{{ note.id }}')" title="Oyla">
-                        <span class="icon-slot fas fa-star" style="color:#f0b429;" data-icon="fas fa-star"></span>
+                        <i class="fas fa-star" style="color:#f0b429;"></i>
                     </button>
                     <button class="np-btn-icon danger" onclick="reportNote('{{ note.id }}')" title="Şikayet">
-                        <span class="icon-slot fas fa-flag" data-icon="fas fa-flag"></span>
+                        <i class="fas fa-flag"></i>
                     </button>
                 </div>
             </div>
@@ -730,7 +731,7 @@
         {% endfor %}
         {% else %}
         <div class="np-empty">
-            <span class="icon-slot fas fa-folder-open" data-icon="fas fa-folder-open"></span>
+            <i class="fas fa-folder-open"></i>
             {% if search_query %}
             <h3>Sonuç bulunamadı.</h3>
             <p>"{{ search_query }}" için ders kodu veya ders adı eşleşmedi.</p>
@@ -761,7 +762,7 @@
 <!-- Oyla micro-modal -->
 <div class="np-micro-overlay" id="rateModal" onclick="if(event.target===this) closeRateModal()">
     <div class="np-micro-box">
-        <h3><span class="icon-slot fas fa-star" style="color:#f0b429;" data-icon="fas fa-star"></span> Not Oyla</h3>
+        <h3><i class="fas fa-star" style="color:#f0b429;"></i> Not Oyla</h3>
         <p>Bu nota kaç yıldız veriyorsun?</p>
         <div class="np-star-row" id="starRow">
             <button class="np-star-btn" data-val="1" onclick="selectStar(1)">★</button>
@@ -780,7 +781,7 @@
 <!-- Bildir micro-modal -->
 <div class="np-micro-overlay" id="reportModal" onclick="if(event.target===this) closeReportModal()">
     <div class="np-micro-box">
-        <h3><span class="icon-slot fas fa-flag" style="color:#e74c3c;" data-icon="fas fa-flag"></span> İçeriği Bildir</h3>
+        <h3><i class="fas fa-flag" style="color:#e74c3c;"></i> İçeriği Bildir</h3>
         <p>Bu notu uygunsuz içerik olarak bildirmek istediğine emin misin? Yönetim ekibimiz inceleyecek.</p>
         <div class="np-micro-actions">
             <button class="np-micro-btn danger" onclick="submitReport()">Bildir</button>
@@ -867,7 +868,7 @@
         </div>
 
         <div class="np-drawer-section">
-            <p class="np-drawer-section-title"><span class="icon-slot fas fa-chart-bar" data-icon="fas fa-chart-bar"></span> İstatistikler</p>
+            <p class="np-drawer-section-title"><i class="fas fa-chart-bar"></i> İstatistikler</p>
             <div class="np-dinfo-row">
                 <span class="np-dinfo-lbl">Toplam Not</span>
                 <span class="np-dinfo-val">{{ notes|length }}</span>
@@ -883,17 +884,17 @@
         </div>
 
         <div class="np-drawer-section">
-            <p class="np-drawer-section-title"><span class="icon-slot fas fa-shield-alt" data-icon="fas fa-shield-alt"></span> İzin Verilen Formatlar</p>
+            <p class="np-drawer-section-title"><i class="fas fa-shield-alt"></i> İzin Verilen Formatlar</p>
             <ul class="np-dfmt-list">
-                <li><span class="dfi ft-pdf"><span class="icon-slot fas fa-file-pdf" data-icon="fas fa-file-pdf"></span></span> PDF</li>
-                <li><span class="dfi ft-docx"><span class="icon-slot fas fa-file-word" data-icon="fas fa-file-word"></span></span> DOC / DOCX</li>
-                <li><span class="dfi ft-pptx"><span class="icon-slot fas fa-file-powerpoint" data-icon="fas fa-file-powerpoint"></span></span> PPT / PPTX</li>
-                <li><span class="dfi ft-txt"><span class="icon-slot fas fa-file-alt" data-icon="fas fa-file-alt"></span></span> TXT</li>
+                <li><span class="dfi ft-pdf"><i class="fas fa-file-pdf"></i></span> PDF</li>
+                <li><span class="dfi ft-docx"><i class="fas fa-file-word"></i></span> DOC / DOCX</li>
+                <li><span class="dfi ft-pptx"><i class="fas fa-file-powerpoint"></i></span> PPT / PPTX</li>
+                <li><span class="dfi ft-txt"><i class="fas fa-file-alt"></i></span> TXT</li>
             </ul>
         </div>
 
         <div class="np-drawer-section">
-            <p class="np-drawer-section-title"><span class="icon-slot fas fa-shield-virus" data-icon="fas fa-shield-virus"></span> Güvenlik Taraması</p>
+            <p class="np-drawer-section-title"><i class="fas fa-shield-virus"></i> Güvenlik Taraması</p>
             <div class="np-dtip-box">
                 Yüklenen her dosya <strong>magic-bytes doğrulamasından</strong> geçirilir.
                 Sahte uzantılı, binary içerikli veya 15 MB üstü dosyalar <strong>otomatik reddedilir</strong>.
@@ -901,12 +902,12 @@
         </div>
 
         <div class="np-drawer-section">
-            <p class="np-drawer-section-title"><span class="icon-slot fas fa-lightbulb" data-icon="fas fa-lightbulb"></span> Nasıl Çalışır?</p>
+            <p class="np-drawer-section-title"><i class="fas fa-lightbulb"></i> Nasıl Çalışır?</p>
             <ul class="np-dfmt-list" style="color: var(--text-color);">
-                <li><span class="dfi" style="background:rgba(var(--ytu-lacivert-rgb),.1);color:var(--ytu-lacivert);"><span class="icon-slot fas fa-upload" data-icon="fas fa-upload"></span></span> Not yükle, puan kazan</li>
-                <li><span class="dfi" style="background:rgba(240,180,41,.15);color:#f0b429;"><span class="icon-slot fas fa-star" data-icon="fas fa-star"></span></span> Yıldız oyu ver</li>
-                <li><span class="dfi" style="background:rgba(40,167,69,.1);color:#28a745;"><span class="icon-slot fas fa-download" data-icon="fas fa-download"></span></span> İndirildikçe sıran yükselir</li>
-                <li><span class="dfi" style="background:rgba(231,76,60,.1);color:#e74c3c;"><span class="icon-slot fas fa-flag" data-icon="fas fa-flag"></span></span> Zararlı içeriği bildir</li>
+                <li><span class="dfi" style="background:rgba(var(--ytu-lacivert-rgb),.1);color:var(--ytu-lacivert);"><i class="fas fa-upload"></i></span> Not yükle, puan kazan</li>
+                <li><span class="dfi" style="background:rgba(240,180,41,.15);color:#f0b429;"><i class="fas fa-star"></i></span> Yıldız oyu ver</li>
+                <li><span class="dfi" style="background:rgba(40,167,69,.1);color:#28a745;"><i class="fas fa-download"></i></span> İndirildikçe sıran yükselir</li>
+                <li><span class="dfi" style="background:rgba(231,76,60,.1);color:#e74c3c;"><i class="fas fa-flag"></i></span> Zararlı içeriği bildir</li>
             </ul>
         </div>
 
@@ -919,7 +920,7 @@
 <div id="uploadModal" class="np-modal-overlay" onclick="if(event.target===this) closeUploadModal()">
     <div class="np-modal">
         <div class="np-modal-head">
-            <h3><span class="icon-slot fas fa-cloud-upload-alt" style="opacity:.85;margin-right:8px;" data-icon="fas fa-cloud-upload-alt"></span>Not Yükle</h3>
+            <h3><i class="fas fa-cloud-upload-alt" style="opacity:.85;margin-right:8px;"></i>Not Yükle</h3>
             <button class="np-modal-close" onclick="closeUploadModal()">&times;</button>
         </div>
         <div class="np-modal-body">
@@ -956,7 +957,7 @@
                               placeholder="İçerik hakkında kısa bilgi..."></textarea>
                 </div>
                 <label class="np-drop-zone" id="dropZone">
-                    <span class="icon-slot fas fa-cloud-upload-alt dz-icon" id="dzIcon" data-icon="fas fa-cloud-upload-alt dz-icon"></span>
+                    <i class="fas fa-cloud-upload-alt dz-icon" id="dzIcon"></i>
                     <span class="dz-title" id="dzTitle">Dosyayı buraya sürükle ya da tıkla</span>
                     <span class="dz-sub"   id="dzSub">Maks. 15 MB</span>
                     <input type="file" name="note_file" id="noteFileInput"
@@ -974,11 +975,11 @@
                     <span class="np-format-chip fc-ppt">PPTX</span>
                 </div>
                 <div class="np-scan-info">
-                    <span class="icon-slot fas fa-shield-alt" data-icon="fas fa-shield-alt"></span>
+                    <i class="fas fa-shield-alt"></i>
                     Yüklenen tüm dosyalar güvenlik taramasından geçirilir. Virüs ve sahte uzantılı dosyalar reddedilir.
                 </div>
                 <button type="submit" class="np-btn-submit" id="submitBtn">
-                    <span class="icon-slot fas fa-paper-plane" data-icon="fas fa-paper-plane"></span> Yükle &nbsp;(+10 Puan)
+                    <i class="fas fa-paper-plane"></i> Yükle &nbsp;(+10 Puan)
                 </button>
             </form>
         </div>
@@ -1074,7 +1075,7 @@
         if (!inp.files || !inp.files[0]) { e.preventDefault(); npToast('Lütfen bir dosya seçin.', 'danger'); return; }
         var btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.innerHTML = '<span class="icon-slot fas fa-spinner fa-spin" data-icon="fas fa-spinner fa-spin"></span> Yükleniyor ve taranıyor...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Yükleniyor ve taranıyor...';
     }
 
     /* ---------- 3-nokta menü ---------- */
@@ -1214,11 +1215,11 @@
 
 <!-- MOBİL ALT NAV -->
 <nav class="nm-bottom-nav">
-    <a href="/"><span class="icon-slot fas fa-home" data-icon="fas fa-home"></span><span>Ana Sayfa</span></a>
-    <a href="{{ url_for('main.explore') }}"><span class="icon-slot fas fa-compass" data-icon="fas fa-compass"></span><span>Keşfet</span></a>
-    <a href="{{ url_for('main.notes_pool') }}" class="active"><span class="icon-slot fas fa-book-open" data-icon="fas fa-book-open"></span><span>Notlar</span></a>
-    <a href="{{ url_for('main.notifications') }}"><span class="icon-slot fas fa-bell" data-icon="fas fa-bell"></span><span>Bildirim</span></a>
-    <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}"><span class="icon-slot fas fa-user" data-icon="fas fa-user"></span><span>Profil</span></a>
+    <a href="/"><i class="fas fa-home"></i><span>Ana Sayfa</span></a>
+    <a href="{{ url_for('main.explore') }}"><i class="fas fa-compass"></i><span>Keşfet</span></a>
+    <a href="{{ url_for('main.notes_pool') }}" class="active"><i class="fas fa-book-open"></i><span>Notlar</span></a>
+    <a href="{{ url_for('main.notifications') }}"><i class="fas fa-bell"></i><span>Bildirim</span></a>
+    <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}"><i class="fas fa-user"></i><span>Profil</span></a>
 </nav>
 
 </body>
