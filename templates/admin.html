@@ -13,7 +13,6 @@
 
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body.admin-mode.admin-modal-open {
             overflow: hidden;
@@ -397,7 +396,7 @@
 <body class="admin-mode">
 
     <a href="/" class="admin-back-btn">
-        <i class="fa-solid fa-arrow-left"></i> Ana Sayfaya Dön
+        <span class="icon-slot fa-solid fa-arrow-left" data-icon="fa-solid fa-arrow-left"></span> Ana Sayfaya Dön
     </a>
 
     <button onclick="toggleAdminTheme()" id="adminThemeBtn" class="admin-theme-btn" title="Temayı Değiştir">
@@ -418,28 +417,28 @@
 
         <div class="admin-stats-grid">
             <div class="admin-card">
-                <i class="fa-solid fa-users stat-icon"></i>
+                <span class="icon-slot fa-solid fa-users stat-icon" data-icon="fa-solid fa-users stat-icon"></span>
                 <div class="stat-info">
                     <h3>{{ total_users }}</h3>
                     <p>Toplam Üye</p>
                 </div>
             </div>
             <div class="admin-card">
-                <i class="fa-solid fa-file-lines stat-icon" style="color: var(--ytu-sari);"></i>
+                <span class="icon-slot fa-solid fa-file-lines stat-icon" style="color: var(--ytu-sari);" data-icon="fa-solid fa-file-lines stat-icon"></span>
                 <div class="stat-info">
                     <h3>{{ total_posts }}</h3>
                     <p>Toplam İçerik</p>
                 </div>
             </div>
             <div class="admin-card">
-                <i class="fa-solid fa-flag stat-icon" style="color: #e74c3c;"></i>
+                <span class="icon-slot fa-solid fa-flag stat-icon" style="color: #e74c3c;" data-icon="fa-solid fa-flag stat-icon"></span>
                 <div class="stat-info">
                     <h3>{{ reported_posts|length }}</h3>
                     <p>Bekleyen Şikayet</p>
                 </div>
             </div>
             <div class="admin-card">
-                <i class="fa-solid fa-bolt stat-icon" style="color: #2ecc71;"></i>
+                <span class="icon-slot fa-solid fa-bolt stat-icon" style="color: #2ecc71;" data-icon="fa-solid fa-bolt stat-icon"></span>
                 <div class="stat-info">
                     <h3 id="liveUserCount">{{ active_count }}</h3>
                     <p>Canlı Kullanıcı</p>
@@ -496,25 +495,25 @@
                             </td>
                             <td style="display:flex; gap:6px; flex-wrap:wrap;">
                                 <a href="/static/note_files/{{ note.file_path }}" target="_blank" class="btn-action btn-view">
-                                    <i class="fas fa-eye"></i> İncele
+                                    <span class="icon-slot fas fa-eye" data-icon="fas fa-eye"></span> İncele
                                 </a>
                                 <a href="{{ url_for('admin.approve_note', note_id=note.id) }}"
                                    class="btn-action"
                                    style="background:#27ae60;color:white;padding:5px 10px;border-radius:5px;text-decoration:none;"
                                    onclick="return confirm('Bu notu onayla? Kullanıcı +10 puan kazanacak.')">
-                                    <i class="fas fa-check"></i> Onayla
+                                    <span class="icon-slot fas fa-check" data-icon="fas fa-check"></span> Onayla
                                 </a>
                                 <a href="{{ url_for('admin.reject_note', note_id=note.id) }}"
                                    class="btn-action btn-ban"
                                    onclick="return confirm('Bu notu reddet ve sil?')">
-                                    <i class="fas fa-times"></i> Reddet
+                                    <span class="icon-slot fas fa-times" data-icon="fas fa-times"></span> Reddet
                                 </a>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="5" style="text-align:center; padding:40px; color:var(--text-muted);">
-                                <i class="fas fa-check-circle" style="font-size:2.5rem; color:#27ae60; display:block; margin-bottom:10px;"></i>
+                                <span class="icon-slot fas fa-check-circle" style="font-size:2.5rem; color:#27ae60; display:block; margin-bottom:10px;" data-icon="fas fa-check-circle"></span>
                                 Bekleyen not yok! 🎉
                             </td>
                         </tr>
@@ -571,7 +570,7 @@
                         {% else %}
                         <tr>
                             <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">
-                                <i class="fa-solid fa-circle-check" style="font-size: 3rem; color: #2ecc71; margin-bottom: 10px;"></i><br>
+                                <span class="icon-slot fa-solid fa-circle-check" style="font-size: 3rem; color: #2ecc71; margin-bottom: 10px;" data-icon="fa-solid fa-circle-check"></span><br>
                                 Tertemiz! Hiç şikayet yok. 🦅
                             </td>
                         </tr>
@@ -619,7 +618,7 @@
                         {% else %}
                         <tr>
                             <td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted);">
-                                <i class="fa-solid fa-circle-check" style="font-size:3rem;color:#2ecc71;margin-bottom:10px;"></i><br>
+                                <span class="icon-slot fa-solid fa-circle-check" style="font-size:3rem;color:#2ecc71;margin-bottom:10px;" data-icon="fa-solid fa-circle-check"></span><br>
                                 Bildirilen not yok.
                             </td>
                         </tr>
@@ -671,8 +670,8 @@
                     <h3>Modal içinde kaydırmalı kullanıcı listesi</h3>
                     <p>{{ users|length }} kullanıcı için ban, bio sıfırlama, post silme ve hesap silme işlemleri tek panelde toplanır.</p>
                     <div class="admin-action-meta">
-                        <span class="admin-chip"><i class="fa-solid fa-arrows-up-down"></i> İçeride kaydır</span>
-                        <span class="admin-chip"><i class="fa-solid fa-users"></i> {{ users|length }} kayıt</span>
+                        <span class="admin-chip"><span class="icon-slot fa-solid fa-arrows-up-down" data-icon="fa-solid fa-arrows-up-down"></span> İçeride kaydır</span>
+                        <span class="admin-chip"><span class="icon-slot fa-solid fa-users" data-icon="fa-solid fa-users"></span> {{ users|length }} kayıt</span>
                     </div>
                 </div>
                 <button type="button" class="admin-open-sheet-btn" onclick="openAdminModal('userManagementModal')">Kullanıcıları Aç</button>
@@ -725,103 +724,10 @@
                     <h3>Soru bazlı oy toplama paneli</h3>
                     <p>Sınav kodu, adı ve soru sayısı girildiğinde sistem soru bloklarını otomatik oluşturur. Kullanıcılar A/B/C/D kitapçığını seçip her soru için tek oy bırakır.</p>
                     <div class="admin-action-meta">
-                        <span class="admin-chip"><i class="fa-solid fa-shield-halved"></i> Tek kullanıcı - tek soru - tek oy</span>
-                        <span class="admin-chip"><i class="fa-solid fa-comments"></i> Tartışma alanı aktif</span>
-                        <span class="admin-chip"><i class="fa-solid fa-triangle-exclamation"></i> Resmî cevap anahtarı değildir</span>
+                        <span class="admin-chip"><span class="icon-slot fa-solid fa-shield-halved" data-icon="fa-solid fa-shield-halved"></span> Tek kullanıcı - tek soru - tek oy</span>
+                        <span class="admin-chip"><span class="icon-slot fa-solid fa-comments" data-icon="fa-solid fa-comments"></span> Tartışma alanı aktif</span>
+                        <span class="admin-chip"><span class="icon-slot fa-solid fa-triangle-exclamation" data-icon="fa-solid fa-triangle-exclamation"></span> Resmî cevap anahtarı değildir</span>
                     </div>
-                </div>
-                <form action="{{ url_for('admin.create_exam_analysis') }}" method="POST" class="admin-create-exam-form" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div style="grid-column:1 / -1;">
-                        <label style="font-weight:bold;font-size:0.8rem;color:var(--text-muted);">Sınav Adı</label>
-                        <input type="text" name="title" placeholder="Matematik II Vize 1" required
-                               style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color);">
-                    </div>
-                    <div>
-                        <label style="font-weight:bold;font-size:0.8rem;color:var(--text-muted);">Sınav Kodu</label>
-                        <input type="text" name="code" placeholder="MAT2_Vize1" required
-                               style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color);">
-                    </div>
-                    <div>
-                        <label style="font-weight:bold;font-size:0.8rem;color:var(--text-muted);">Soru Sayısı</label>
-                        <input type="number" name="question_count" min="1" max="200" placeholder="30" required
-                               style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color);">
-                    </div>
-                    <div style="grid-column:1 / -1;">
-                        <label style="font-weight:bold;font-size:0.8rem;color:var(--text-muted);">Üst Uyarı Metni</label>
-                        <textarea name="disclaimer" rows="3" placeholder="Bu sonuçlar kullanıcı oylarıyla oluşmaktadır, resmi cevap anahtarı değildir."
-                                  style="width:100%;padding:10px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color);resize:vertical;"></textarea>
-                    </div>
-                    <div style="grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:14px;align-items:center;">
-                        <label style="display:inline-flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--text-color);font-weight:700;">
-                            <input type="checkbox" name="comments_enabled" checked>
-                            Yorumları aç
-                        </label>
-                        <label style="display:inline-flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--text-color);font-weight:700;">
-                            <input type="checkbox" name="is_published" checked>
-                            Hemen yayınla
-                        </label>
-                    </div>
-                    <button type="submit" style="grid-column:1 / -1;background:linear-gradient(135deg,var(--ytu-lacivert),#123d75);color:#fff;padding:12px 18px;border:none;border-radius:10px;font-weight:800;cursor:pointer;">
-                        + Sınav Analizi Oluştur
-                    </button>
-                </form>
-
-                <div class="admin-table-wrapper" style="margin-top:18px;">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Sınav</th>
-                                <th>Soru</th>
-                                <th>Durum</th>
-                                <th>İstatistik</th>
-                                <th>Oluşturan</th>
-                                <th>İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for exam in exam_analyses %}
-                            <tr>
-                                <td>
-                                    <b>{{ exam.code }}</b><br>
-                                    <small style="color:var(--text-muted);">{{ exam.title }}</small>
-                                </td>
-                                <td>{{ exam.question_count }}</td>
-                                <td>
-                                    {% if exam.is_published %}
-                                    <span class="badge" style="background:#2ecc71;color:#fff;padding:4px 10px;border-radius:8px;">Yayında</span><br>
-                                    {% else %}
-                                    <span class="badge" style="background:#f39c12;color:#fff;padding:4px 10px;border-radius:8px;">Taslak</span><br>
-                                    {% endif %}
-                                    <small style="color:var(--text-muted);">{{ 'Yorum açık' if exam.comments_enabled else 'Yorum kapalı' }}</small>
-                                </td>
-                                <td>
-                                    <span class="badge" style="background:#1B3A6B;color:#fff;padding:4px 10px;border-radius:8px;">{{ exam.response_count }} oy</span><br>
-                                    <small style="color:var(--text-muted);">{{ exam.comment_count }} yorum • {{ exam.attempt_count }} katılım</small>
-                                </td>
-                                <td>
-                                    <b>{{ exam.created_by.display_name if exam.created_by else '—' }}</b><br>
-                                    <small style="color:var(--text-muted);">{{ exam.created_at.strftime('%d %b %H:%M') }}</small>
-                                </td>
-                                <td style="display:flex;gap:6px;flex-wrap:wrap;">
-                                    <a href="{{ url_for('main.exam_analysis_page', exam_code=exam.code) }}" target="_blank" class="btn-action btn-view" style="text-decoration:none;">Aç</a>
-                                    <form action="{{ url_for('admin.toggle_exam_publish', exam_code=exam.code) }}" method="POST" style="display:inline-flex;">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" class="btn-action" style="background:#34495e;color:#fff;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;">{% if exam.is_published %}Yayından Kaldır{% else %}Yayınla{% endif %}</button>
-                                    </form>
-                                    <form action="{{ url_for('admin.delete_exam_analysis', exam_code=exam.code) }}" method="POST" style="display:inline-flex;">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" class="btn-action btn-ban" style="background:#7b0000;color:#fff;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;" onclick="return confirm('{{ exam.code | e }} sınav analizi ve tüm oylar/yorumlar silinsin mi?')">Sil</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted);">Henüz sınav analizi oluşturulmadı.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
                 </div>
             </div>
             
@@ -896,7 +802,7 @@
             <input type="text" name="username" placeholder="Kullanıcı adı ile moderatör ekle..."
                    style="flex:1;padding:9px 14px;border-radius:10px;border:1px solid var(--border-color);background:var(--bg-color);color:var(--text-color);font-size:.9rem;" required>
             <button type="submit" style="padding:9px 20px;background:#1B3A6B;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;">
-                <i class="fas fa-plus"></i> Ekle
+                <span class="icon-slot fas fa-plus" data-icon="fas fa-plus"></span> Ekle
             </button>
         </form>
 
@@ -906,8 +812,8 @@
                 <h3>Modal içinde kaydırmalı kulüp listesi</h3>
                 <p>{{ clubs|length }} kulüp için düzenleme ve silme işlemleri tek bir panelde toplanır. Uzun liste sayfayı uzatmaz.</p>
                 <div class="admin-action-meta">
-                    <span class="admin-chip"><i class="fa-solid fa-arrows-up-down"></i> İçeride kaydır</span>
-                    <span class="admin-chip"><i class="fa-solid fa-flag"></i> {{ clubs|length }} kayıt</span>
+                    <span class="admin-chip"><span class="icon-slot fa-solid fa-arrows-up-down" data-icon="fa-solid fa-arrows-up-down"></span> İçeride kaydır</span>
+                    <span class="admin-chip"><span class="icon-slot fa-solid fa-flag" data-icon="fa-solid fa-flag"></span> {{ clubs|length }} kayıt</span>
                 </div>
             </div>
             <button type="button" class="admin-open-sheet-btn" onclick="openAdminModal('clubManagementModal')">Kulüpleri Aç</button>

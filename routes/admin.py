@@ -1,17 +1,15 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, abort, current_app
 from flask_login import login_required, current_user
 from extensions import db
-from models import User, Post, Feedback, Club, Note, ClubVote, NoteVote, Notification, Advert, ExamAnalysis, ExamAttempt, ExamResponse, ExamComment
+from models import User, Post, Feedback, Club, Note, ClubVote, NoteVote, Notification, Advert
 from utils import allowed_image_file, upload_club_logo_to_spaces, get_online_user_count
 from routes.main import _purge_post_tree, _cleanup_user_related_data
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func
 from flask_wtf.csrf import validate_csrf
 import os
 import psutil
-import re
 
 admin = Blueprint('admin', __name__)
 
@@ -23,42 +21,6 @@ def _admin_csrf_valid():
     except Exception:
         return False
 
-
-def _build_exam_overviews():
-    exams = ExamAnalysis.query.order_by(ExamAnalysis.created_at.desc()).all()
-    response_counts = dict(
-        db.session.query(ExamResponse.exam_id, func.count(ExamResponse.id))
-        .group_by(ExamResponse.exam_id)
-        .all()
-    )
-    attempt_counts = dict(
-        db.session.query(ExamAttempt.exam_id, func.count(ExamAttempt.id))
-        .group_by(ExamAttempt.exam_id)
-        .all()
-    )
-    comment_counts = dict(
-        db.session.query(ExamComment.exam_id, func.count(ExamComment.id))
-        .group_by(ExamComment.exam_id)
-        .all()
-    )
-
-    overviews = []
-    for exam in exams:
-        overviews.append({
-            'code': exam.code,
-            'title': exam.title,
-            'question_count': exam.question_count,
-            'disclaimer': exam.disclaimer,
-            'comments_enabled': exam.comments_enabled,
-            'is_published': exam.is_published,
-            'created_at': exam.created_at,
-            'created_by': exam.created_by,
-            'response_count': response_counts.get(exam.code, 0),
-            'attempt_count': attempt_counts.get(exam.code, 0),
-            'comment_count': comment_counts.get(exam.code, 0),
-        })
-    return overviews
-
 @admin.route('/admin')
 @login_required
 def admin_panel():
@@ -69,7 +31,6 @@ def admin_panel():
     feedbacks = Feedback.query.order_by(Feedback.date_sent.desc()).all()
     pending_notes = Note.query.filter_by(is_approved=False).order_by(Note.date_posted.desc()).all()
     moderators = User.query.filter_by(is_moderator=True).all()
-    exam_analyses = _build_exam_overviews()
     
     return render_template('admin.html',
                            total_users=User.query.count(),
@@ -83,8 +44,7 @@ def admin_panel():
                            users=User.query.limit(50).all(),
                            clubs=Club.query.order_by(Club.name).all(),
                            pending_notes=pending_notes,
-                           moderators=moderators,
-                           exam_analyses=exam_analyses)
+                           moderators=moderators)
 
 
 @admin.route('/moderator')
@@ -95,7 +55,6 @@ def moderator_panel():
     pending_notes = Note.query.filter_by(is_approved=False).order_by(Note.date_posted.desc()).all()
     reported_notes = Note.query.filter(Note.report_count > 0, Note.is_approved == True).order_by(Note.report_count.desc()).all()
     reported_posts = Post.query.filter(Post.report_count > 0).order_by(Post.report_count.desc()).all()
-    reported_exam_comments = ExamComment.query.filter(ExamComment.report_count > 0, ExamComment.is_hidden == False).order_by(ExamComment.report_count.desc(), ExamComment.created_at.desc()).all()
     moderator_tasks = [
         {
             'anchor': 'pending-notes',
@@ -118,19 +77,11 @@ def moderator_panel():
             'count': len(reported_posts),
             'icon': 'fa-bullhorn',
         },
-        {
-            'anchor': 'reported-exam-comments',
-            'title': 'Sınav yorumlarını denetle',
-            'description': 'Şikayet edilen soru yorumlarını gizle, tartışmayı temiz tut ve gerekirse içeriği kaldır.',
-            'count': len(reported_exam_comments),
-            'icon': 'fa-comments',
-        },
     ]
     return render_template('moderator.html',
                            pending_notes=pending_notes,
                            reported_notes=reported_notes,
                            reported_posts=reported_posts,
-                           reported_exam_comments=reported_exam_comments,
                            moderator_tasks=moderator_tasks)
 
 
@@ -341,88 +292,6 @@ def admin_create_club():
         flash(f"Bu isimde başka bir kulüp var: {name}", "danger")
     return redirect(url_for('admin.admin_panel'))
 
-
-@admin.route('/admin/create_exam_analysis', methods=['POST'])
-@login_required
-def create_exam_analysis():
-    if not (current_user.is_admin or current_user.is_moderator):
-        abort(403)
-    if not _admin_csrf_valid():
-        flash('Güvenlik doğrulaması başarısız.', 'danger')
-        return redirect(url_for('admin.admin_panel') if current_user.is_admin else url_for('admin.moderator_panel'))
-
-    redirect_target = url_for('admin.admin_panel') if current_user.is_admin else url_for('admin.moderator_panel')
-
-    code = (request.form.get('code') or '').strip()
-    title = (request.form.get('title') or '').strip()
-    disclaimer = (request.form.get('disclaimer') or '').strip() or 'Bu sonuçlar kullanıcı oylarıyla oluşmaktadır, resmi cevap anahtarı değildir.'
-    comments_enabled = request.form.get('comments_enabled') == 'on'
-    is_published = request.form.get('is_published') == 'on' if current_user.is_admin else False
-
-    try:
-        question_count = int((request.form.get('question_count') or '0').strip())
-    except ValueError:
-        question_count = 0
-
-    if not code or not title:
-        flash('Sınav kodu ve adı zorunlu.', 'danger')
-        return redirect(redirect_target)
-    if not re.fullmatch(r'[A-Za-z0-9_-]+', code):
-        flash('Sınav kodu sadece harf, rakam, alt çizgi ve tire içerebilir.', 'danger')
-        return redirect(redirect_target)
-    if question_count < 1 or question_count > 200:
-        flash('Soru sayısı 1 ile 200 arasında olmalı.', 'danger')
-        return redirect(redirect_target)
-    if ExamAnalysis.query.filter_by(code=code).first():
-        flash(f'"{code}" kodlu sınav zaten mevcut.', 'warning')
-        return redirect(redirect_target)
-
-    exam = ExamAnalysis(
-        code=code,
-        title=title,
-        question_count=question_count,
-        disclaimer=disclaimer,
-        comments_enabled=comments_enabled,
-        is_published=is_published,
-        created_by_id=current_user.id,
-    )
-    db.session.add(exam)
-    db.session.commit()
-    flash(f'Sınav analizi oluşturuldu: {code}', 'success')
-    return redirect(redirect_target)
-
-
-@admin.route('/admin/exam/<string:exam_code>/toggle_publish', methods=['POST'])
-@login_required
-def toggle_exam_publish(exam_code):
-    if not current_user.is_admin:
-        abort(403)
-    if not _admin_csrf_valid():
-        flash('Güvenlik doğrulaması başarısız.', 'danger')
-        return redirect(url_for('admin.admin_panel'))
-
-    exam = ExamAnalysis.query.get_or_404(exam_code)
-    exam.is_published = not exam.is_published
-    db.session.commit()
-    flash(f'"{exam.code}" yayın durumu güncellendi.', 'success')
-    return redirect(url_for('admin.admin_panel'))
-
-
-@admin.route('/admin/exam/<string:exam_code>/delete', methods=['POST'])
-@login_required
-def delete_exam_analysis(exam_code):
-    if not current_user.is_admin:
-        abort(403)
-    if not _admin_csrf_valid():
-        flash('Güvenlik doğrulaması başarısız.', 'danger')
-        return redirect(url_for('admin.admin_panel'))
-
-    exam = ExamAnalysis.query.get_or_404(exam_code)
-    db.session.delete(exam)
-    db.session.commit()
-    flash(f'"{exam.code}" sınav analizi silindi.', 'success')
-    return redirect(url_for('admin.admin_panel'))
-
 @admin.route('/beni_admin_yap')
 @login_required
 def make_me_admin():
@@ -564,38 +433,6 @@ def admin_edit_note(note_id):
     db.session.commit()
     flash('Not güncellendi.', 'success')
     return redirect(url_for('admin.admin_panel'))
-
-
-@admin.route('/admin/exam_comment/<int:comment_id>/hide', methods=['POST'])
-@login_required
-def hide_exam_comment(comment_id):
-    if not (current_user.is_admin or current_user.is_moderator):
-        abort(403)
-    if not _admin_csrf_valid():
-        flash('Güvenlik doğrulaması başarısız.', 'danger')
-        return redirect(request.referrer or url_for('admin.moderator_panel'))
-
-    comment = ExamComment.query.get_or_404(comment_id)
-    comment.is_hidden = True
-    db.session.commit()
-    flash('Sınav yorumu gizlendi.', 'success')
-    return redirect(request.referrer or url_for('admin.moderator_panel'))
-
-
-@admin.route('/admin/exam_comment/<int:comment_id>/delete', methods=['POST'])
-@login_required
-def delete_exam_comment(comment_id):
-    if not current_user.is_admin:
-        abort(403)
-    if not _admin_csrf_valid():
-        flash('Güvenlik doğrulaması başarısız.', 'danger')
-        return redirect(request.referrer or url_for('admin.admin_panel'))
-
-    comment = ExamComment.query.get_or_404(comment_id)
-    db.session.delete(comment)
-    db.session.commit()
-    flash('Sınav yorumu silindi.', 'success')
-    return redirect(request.referrer or url_for('admin.admin_panel'))
 
 @admin.route('/fix_db')
 @login_required

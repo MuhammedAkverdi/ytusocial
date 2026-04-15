@@ -10,7 +10,6 @@
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
     /* Drawer + overlay masaüstünde tamamen gizli */
@@ -517,44 +516,34 @@
 
                 <nav style="display: flex; flex-direction: column; gap: 8px;">
                     <a href="/" class="sidebar-link"
-                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert);"><i
-                            class="fa-solid fa-house" style="width: 20px; text-align: center;"></i> Ana Sayfa</a>
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; background-color: rgba(var(--ytu-lacivert-rgb), 0.12); color: var(--ytu-lacivert);"><span class="icon-slot fa-solid fa-house" style="width: 20px; text-align: center;" data-icon="fa-solid fa-house"></span> Ana Sayfa</a>
                     <a href="{{ url_for('main.explore') }}" class="sidebar-link"
-                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
-                            class="fa-regular fa-compass" style="width: 20px; text-align: center;"></i> Keşfet</a>
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><span class="icon-slot fa-regular fa-compass" style="width: 20px; text-align: center;" data-icon="fa-regular fa-compass"></span> Keşfet</a>
                     <a href="{{ url_for('main.reels') }}" class="sidebar-link"
-                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
-                            class="fa-solid fa-clapperboard" style="width: 20px; text-align: center;"></i> Reels</a>
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><span class="icon-slot fa-solid fa-clapperboard" style="width: 20px; text-align: center;" data-icon="fa-solid fa-clapperboard"></span> Reels</a>
                     <a href="{{ url_for('main.saved_posts_list') }}" class="sidebar-link"
-                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
-                            class="fa-regular fa-bookmark" style="width: 20px; text-align: center;"></i> Kaydedilenler</a>
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><span class="icon-slot fa-regular fa-bookmark" style="width: 20px; text-align: center;" data-icon="fa-regular fa-bookmark"></span> Kaydedilenler</a>
                     <a href="{{ url_for('main.notes_pool') }}" class="sidebar-link"
-                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
-                            class="fa-solid fa-book-open" style="width: 20px; text-align: center;"></i> Not Havuzu</a>
-                    <a href="{{ url_for('main.exam_analyses') }}" class="sidebar-link" data-nav="exam-analysis"
-                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
-                            class="fa-solid fa-square-poll-vertical" style="width: 20px; text-align: center;"></i> Sınav Analizi</a>
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><span class="icon-slot fa-solid fa-book-open" style="width: 20px; text-align: center;" data-icon="fa-solid fa-book-open"></span> Not Havuzu</a>
                     <a href="{{ url_for('main.clubs_full_list') }}" class="nav-item"
-                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
-                            class="fa-solid fa-trophy" style="width: 20px; text-align: center;"></i> Kulüpler Ligi
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><span class="icon-slot fa-solid fa-trophy" style="width: 20px; text-align: center;" data-icon="fa-solid fa-trophy"></span> Kulüpler Ligi
                     </a>
                     <a href="{{ url_for('main.adverts') }}" class="sidebar-link"
-                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i
-                            class="fa-solid fa-bullhorn" style="width: 20px; text-align: center;"></i> İlanlar</a>
+                        style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><span class="icon-slot fa-solid fa-bullhorn" style="width: 20px; text-align: center;" data-icon="fa-solid fa-bullhorn"></span> İlanlar</a>
                     <a href="{{ url_for('main.notifications') }}" class="sidebar-link"
                         style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
-                        <i class="fa-regular fa-bell" style="width: 20px; text-align: center;"></i> Bildirimler
+                        <span class="icon-slot fa-regular fa-bell" style="width: 20px; text-align: center;" data-icon="fa-regular fa-bell"></span> Bildirimler
                         {% if unread_count > 0 %}
                         <span class="notification-badge">{{ unread_count }}</span>
                         {% endif %}
                     </a>
                     <a href="{{ url_for('main.messages_inbox') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;">
-                        <i class="fa-regular fa-envelope" style="width: 20px; text-align: center;"></i> Mesajlar
+                        <span class="icon-slot fa-regular fa-envelope" style="width: 20px; text-align: center;" data-icon="fa-regular fa-envelope"></span> Mesajlar
                         {% if unread_msg_count > 0 %}
                         <span class="msg-badge">{{ unread_msg_count }}</span>
                         {% endif %}
                     </a>
-                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><i class="fa-solid fa-bus" style="width: 20px; text-align: center;"></i> Ulaşım</a>
+                    <a href="{{ url_for('main.ulasim') }}" class="sidebar-link" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.2s;"><span class="icon-slot fa-solid fa-bus" style="width: 20px; text-align: center;" data-icon="fa-solid fa-bus"></span> Ulaşım</a>
                 </nav>
             </div>
         </aside>
@@ -613,7 +602,7 @@
 
                     <div id="file-preview" class="image-preview-container" style="display: none;">
                         <div class="file-preview-box">
-                            <i class="fas fa-file-alt"></i> <span id="preview-filename">dosya.pdf</span>
+                            <span class="icon-slot fas fa-file-alt" data-icon="fas fa-file-alt"></span> <span id="preview-filename">dosya.pdf</span>
                             <span onclick="clearFile()" class="preview-close-btn" style="position:static; margin-left:10px;">✕</span>
                         </div>
                     </div>
@@ -625,12 +614,12 @@
 
                     <div class="create-post-footer">
                         <div style="display: flex; gap: 15px;">
-                            <label for="file-upload" class="file-upload-label" title="Medya Ekle"><i class="fa-regular fa-image" style="color: #2ecc71;"></i></label>
+                            <label for="file-upload" class="file-upload-label" title="Medya Ekle"><span class="icon-slot fa-regular fa-image" style="color: #2ecc71;" data-icon="fa-regular fa-image"></span></label>
                             <input id="file-upload" type="file" name="image" accept="image/*,video/*"
                                 style="display: none;" onchange="previewImage(this)">
-                            <label for="doc-upload" class="file-upload-label" title="Dosya Ekle"><i class="fa-solid fa-paperclip" style="color: #3498db;"></i></label>
+                            <label for="doc-upload" class="file-upload-label" title="Dosya Ekle"><span class="icon-slot fa-solid fa-paperclip" style="color: #3498db;" data-icon="fa-solid fa-paperclip"></span></label>
                             <input id="doc-upload" type="file" name="doc" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" style="display: none;" onchange="previewFile(this)">
-                            <span class="file-upload-label" title="Anket Ekle" onclick="togglePollCreator()"><i class="fa-solid fa-square-poll-vertical" style="color: #f1c40f;"></i></span>
+                            <span class="file-upload-label" title="Anket Ekle" onclick="togglePollCreator()"><span class="icon-slot fa-solid fa-square-poll-vertical" style="color: #f1c40f;" data-icon="fa-solid fa-square-poll-vertical"></span></span>
                         </div>
                         <button type="submit" class="btn-vote"
                             style="padding: 8px 25px; border-radius: 20px;">Paylaş</button>
@@ -697,7 +686,7 @@
                             onclick="openLightbox(this.src)">
                         {% else %}
                         <a href="/static/post_images/{{ display_post.image_file }}" target="_blank" class="post-file-link">
-                            <i class="fas fa-file-alt"></i> {{ display_post.image_file.split('_', 1)[1] if '_' in display_post.image_file else display_post.image_file }}
+                            <span class="icon-slot fas fa-file-alt" data-icon="fas fa-file-alt"></span> {{ display_post.image_file.split('_', 1)[1] if '_' in display_post.image_file else display_post.image_file }}
                         </a>
                         {% endif %}
                     </div>
@@ -746,31 +735,31 @@
                     <div class="post-actions">
                         <span class="action-item" onclick="likePost('{{ display_post.id }}', this)">
                             {% if current_user in display_post.liked_by %}
-                            <i class="fa-solid fa-heart" style="color: #ff4757;"></i>
+                            <span class="icon-slot fa-solid fa-heart" style="color: #ff4757;" data-icon="fa-solid fa-heart"></span>
                             {% else %}
-                            <i class="fa-regular fa-heart"></i>
+                            <span class="icon-slot fa-regular fa-heart" data-icon="fa-regular fa-heart"></span>
                             {% endif %}
                             <span class="like-count">{{ display_post.liked_by|length }}</span>
                         </span>
                         <span class="action-item js-comment-count-{{ display_post.id }}" onclick="toggleComments('comment-box-{{ post.id }}')">
-                            <i class="fa-regular fa-comment"></i> {{ display_post.comments|length }}
+                            <span class="icon-slot fa-regular fa-comment" data-icon="fa-regular fa-comment"></span> {{ display_post.comments|length }}
                         </span>
                         <span class="action-item" onclick="repostPost('{{ display_post.id }}', this)" data-reposted="{{ 'true' if display_post.has_reposted(current_user) else 'false' }}">
                             {% if display_post.has_reposted(current_user) %}
-                            <i class="fa-solid fa-retweet" style="color: #2ecc71;"></i> <span style="color: #2ecc71;">Yeniden Gönderildi</span>
+                            <span class="icon-slot fa-solid fa-retweet" style="color: #2ecc71;" data-icon="fa-solid fa-retweet"></span> <span style="color: #2ecc71;">Yeniden Gönderildi</span>
                             {% else %}
-                            <i class="fa-solid fa-retweet"></i> Yeniden Gönder
+                            <span class="icon-slot fa-solid fa-retweet" data-icon="fa-solid fa-retweet"></span> Yeniden Gönder
                             {% endif %}
                         </span>
                         <span class="action-item" onclick="savePost('{{ display_post.id }}', this)">
                             {% if current_user.has_saved(display_post) %}
-                            <span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><i class="fa-solid fa-bookmark"></i> Kaydedildi</span>
+                            <span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><span class="icon-slot fa-solid fa-bookmark" data-icon="fa-solid fa-bookmark"></span> Kaydedildi</span>
                             {% else %}
-                            <span class="save-icon"><i class="fa-regular fa-bookmark"></i> Kaydet</span>
+                            <span class="save-icon"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydet</span>
                             {% endif %}
                         </span>
                         <span class="action-item" onclick="openShareModal('post', '{{ post.id }}')">
-                            <i class="fa-regular fa-paper-plane"></i> Paylaş
+                            <span class="icon-slot fa-regular fa-paper-plane" data-icon="fa-regular fa-paper-plane"></span> Paylaş
                         </span>
 
                         <!-- MENÜ BURAYA TAŞINDI -->
@@ -872,7 +861,7 @@
             <div class="right-widget" style="margin-top: 20px;">
                 <div class="widget-header">
                     <h3 class="widget-title">🏆 Kulüpler Ligi</h3>
-                    <i class="fa-solid fa-chart-line" style="color: var(--ytu-lacivert); opacity: 0.5;"></i>
+                    <span class="icon-slot fa-solid fa-chart-line" style="color: var(--ytu-lacivert); opacity: 0.5;" data-icon="fa-solid fa-chart-line"></span>
                 </div>
 
                 <div class="club-list">
@@ -908,7 +897,7 @@
         </aside>
 
 
-    <button type="button" onclick="topFunction()" id="scrollTopBtn" title="Yukarı Çık"><i class="fas fa-arrow-up"></i></button>
+    <button type="button" onclick="topFunction()" id="scrollTopBtn" title="Yukarı Çık"><span class="icon-slot fas fa-arrow-up" data-icon="fas fa-arrow-up"></span></button>
 
 
     <div id="storyModal" class="story-view-modal">
@@ -923,12 +912,12 @@
 
         <a id="deleteStoryBtn" href="#" class="story-delete-btn" title="Hikayeyi sil"
             onclick="confirmStoryDelete(event)">
-            <i class="fa-solid fa-trash-can"></i>
+            <span class="icon-slot fa-solid fa-trash-can" data-icon="fa-solid fa-trash-can"></span>
         </a>
         <div id="storyViewers" class="story-viewers-badge">👁️ <span id="viewerCount">0</span></div>
 
         <button onclick="shareActiveStory()" class="story-share-btn" title="Hikayeyi Paylaş">
-            <i class="fa-regular fa-paper-plane"></i>
+            <span class="icon-slot fa-regular fa-paper-plane" data-icon="fa-regular fa-paper-plane"></span>
         </button>
 
         <div class="story-media-wrapper">
@@ -980,20 +969,20 @@
     <!-- Mobil Alt Nav -->
     <div class="mobile-bottom-nav">
         <a href="/" class="nav-item {{ 'active' if request.path == '/' else '' }}">
-            <i class="fa-solid fa-house"></i>
+            <span class="icon-slot fa-solid fa-house" data-icon="fa-solid fa-house"></span>
         </a>
         <a href="{{ url_for('main.explore') }}" class="nav-item {{ 'active' if 'explore' in request.path else '' }}">
-            <i class="fa-regular fa-compass"></i>
+            <span class="icon-slot fa-regular fa-compass" data-icon="fa-regular fa-compass"></span>
         </a>
         <a href="{{ url_for('main.reels') }}" class="nav-item {{ 'active' if 'reels' in request.path else '' }}">
-            <i class="fa-solid fa-clapperboard"></i>
+            <span class="icon-slot fa-solid fa-clapperboard" data-icon="fa-solid fa-clapperboard"></span>
         </a>
         <a href="{{ url_for('main.notifications') }}" class="nav-item {{ 'active' if 'notifications' in request.path else '' }}">
-            <i class="fa-regular fa-bell"></i>
+            <span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span>
             {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
         </a>
         <a href="{{ url_for('main.messages_inbox') }}" class="nav-item {{ 'active' if 'inbox' in request.path or 'chat' in request.path else '' }}">
-            <i class="fa-regular fa-envelope"></i>
+            <span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span>
             {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
         </a>
     </div>
@@ -1015,32 +1004,29 @@
         <!-- Ana Navigasyon -->
         <nav class="mob-drawer-nav">
             <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-regular fa-user"></i> Profil
+                <span class="icon-slot fa-regular fa-user" data-icon="fa-regular fa-user"></span> Profil
             </a>
             <a href="{{ url_for('main.messages_inbox') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-regular fa-envelope"></i>
+                <span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span>
                 <span>Mesajlar{% if unread_msg_count > 0 %} <span style="background:#ff4757;color:#fff;border-radius:10px;font-size:0.7rem;padding:2px 7px;margin-left:6px;">{{ unread_msg_count }}</span>{% endif %}</span>
             </a>
             <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-solid fa-book-open"></i> Not Havuzu
-            </a>
-            <a href="{{ url_for('main.exam_analyses') }}" class="mob-drawer-link" data-nav="exam-analysis" onclick="closeMobileDrawer()">
-                <i class="fa-solid fa-square-poll-vertical"></i> Sınav Analizi
+                <span class="icon-slot fa-solid fa-book-open" data-icon="fa-solid fa-book-open"></span> Not Havuzu
             </a>
             <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-regular fa-bookmark"></i> Kaydedilenler
+                <span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydedilenler
             </a>
             <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-solid fa-trophy"></i> Kulüpler Ligi
+                <span class="icon-slot fa-solid fa-trophy" data-icon="fa-solid fa-trophy"></span> Kulüpler Ligi
             </a>
             <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-solid fa-bullhorn"></i> İlanlar
+                <span class="icon-slot fa-solid fa-bullhorn" data-icon="fa-solid fa-bullhorn"></span> İlanlar
             </a>
             <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-solid fa-bus"></i> Ulaşım
+                <span class="icon-slot fa-solid fa-bus" data-icon="fa-solid fa-bus"></span> Ulaşım
             </a>
             <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-solid fa-gear"></i> Profili Düzenle
+                <span class="icon-slot fa-solid fa-gear" data-icon="fa-solid fa-gear"></span> Profili Düzenle
             </a>
         </nav>
 
@@ -1049,13 +1035,13 @@
         <!-- Fikir ve Destek -->
         <div class="mob-drawer-section-title">💡 Fikir ve Destek</div>
         <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Öneri')">
-            <i class="fa-solid fa-lightbulb"></i> Fikir Öner
+            <span class="icon-slot fa-solid fa-lightbulb" data-icon="fa-solid fa-lightbulb"></span> Fikir Öner
         </a>
         <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Diğer')">
-            <i class="fa-solid fa-comments"></i> Geri Bildirim
+            <span class="icon-slot fa-solid fa-comments" data-icon="fa-solid fa-comments"></span> Geri Bildirim
         </a>
         <a href="{{ url_for('main.settings') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-            <i class="fa-solid fa-gear"></i> Ayarlar
+            <span class="icon-slot fa-solid fa-gear" data-icon="fa-solid fa-gear"></span> Ayarlar
         </a>
 
         <div class="mob-drawer-sep"></div>
@@ -1068,7 +1054,7 @@
                 <div class="mob-drawer-trend-tag">#{{ tag }}</div>
                 <div class="mob-drawer-trend-count">{{ count }} gönderi</div>
             </div>
-            <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);"></i>
+            <span class="icon-slot fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);" data-icon="fa-solid fa-chevron-right"></span>
         </a>
         {% endfor %}
 
@@ -1097,7 +1083,7 @@
 
         <!-- Çıkış -->
         <a href="{{ url_for('auth.logout') }}" class="mob-drawer-logout">
-            <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+            <span class="icon-slot fa-solid fa-right-from-bracket" data-icon="fa-solid fa-right-from-bracket"></span> Çıkış Yap
         </a>
     </div>
 

@@ -7,7 +7,6 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
         .sv-top-bar, .sv-bottom-nav { display: none; }
@@ -78,7 +77,7 @@
 
     <!-- MOBİL ÜST BAR -->
     <div class="sv-top-bar">
-        <button class="sv-top-bar-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+        <button class="sv-top-bar-back" onclick="history.back()"><span class="icon-slot fas fa-arrow-left" data-icon="fas fa-arrow-left"></span></button>
         <span class="sv-top-bar-title">📌 Kaydedilenler</span>
         <div class="sv-top-bar-spacer"></div>
     </div>
@@ -131,19 +130,19 @@
                 <div class="post-actions">
                     <span class="action-item" onclick="likePost('{{ display_post.id }}', this)">
                         {% if current_user in display_post.liked_by %}
-                        <i class="fa-solid fa-heart" style="color: #ff4757;"></i>
+                        <span class="icon-slot fa-solid fa-heart" style="color: #ff4757;" data-icon="fa-solid fa-heart"></span>
                         {% else %}
-                        <i class="fa-regular fa-heart"></i>
+                        <span class="icon-slot fa-regular fa-heart" data-icon="fa-regular fa-heart"></span>
                         {% endif %}
                         <span class="like-count">{{ display_post.liked_by|length }}</span>
                     </span>
                     
                     <a href="{{ url_for('main.index') }}#post-content-{{ display_post.id }}" class="action-item" style="text-decoration: none;">
-                        <i class="fa-regular fa-comment"></i> Yorumlar
+                        <span class="icon-slot fa-regular fa-comment" data-icon="fa-regular fa-comment"></span> Yorumlar
                     </a>
                     
                     <span class="action-item" onclick="savePost('{{ display_post.id }}', this)">
-                        <span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><i class="fa-solid fa-bookmark"></i> Kaydedildi</span>
+                        <span class="save-icon" style="color: var(--ytu-lacivert); font-weight:bold;"><span class="icon-slot fa-solid fa-bookmark" data-icon="fa-solid fa-bookmark"></span> Kaydedildi</span>
                     </span>
                 </div>
             </div>
@@ -166,11 +165,11 @@
 
     <!-- MOBİL ALT NAV -->
     <nav class="sv-bottom-nav">
-        <a href="/"><i class="fas fa-home"></i><span>Ana Sayfa</span></a>
-        <a href="{{ url_for('main.explore') }}"><i class="fas fa-compass"></i><span>Keşfet</span></a>
-        <a href="{{ url_for('main.saved_posts_list') }}" class="active"><i class="fas fa-bookmark"></i><span>Kaydedilen</span></a>
-        <a href="{{ url_for('main.notifications') }}"><i class="fas fa-bell"></i><span>Bildirim</span></a>
-        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}"><i class="fas fa-user"></i><span>Profil</span></a>
+        <a href="/"><span class="icon-slot fas fa-home" data-icon="fas fa-home"></span><span>Ana Sayfa</span></a>
+        <a href="{{ url_for('main.explore') }}"><span class="icon-slot fas fa-compass" data-icon="fas fa-compass"></span><span>Keşfet</span></a>
+        <a href="{{ url_for('main.saved_posts_list') }}" class="active"><span class="icon-slot fas fa-bookmark" data-icon="fas fa-bookmark"></span><span>Kaydedilen</span></a>
+        <a href="{{ url_for('main.notifications') }}"><span class="icon-slot fas fa-bell" data-icon="fas fa-bell"></span><span>Bildirim</span></a>
+        <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}"><span class="icon-slot fas fa-user" data-icon="fas fa-user"></span><span>Profil</span></a>
     </nav>
 
     <script src="/static/script.js"></script>

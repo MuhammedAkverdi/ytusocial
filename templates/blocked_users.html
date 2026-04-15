@@ -7,7 +7,6 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦅</text></svg>">
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         .blocked-list {
             display: flex;
@@ -101,7 +100,7 @@
         
         <div style="margin-bottom: 30px;">
             <a href="{{ url_for('main.settings') }}" style="color: var(--ytu-lacivert); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 600;">
-                <i class="fa-solid fa-chevron-left"></i> Geri Dön
+                <span class="icon-slot fa-solid fa-chevron-left" data-icon="fa-solid fa-chevron-left"></span> Geri Dön
             </a>
         </div>
 
@@ -146,7 +145,7 @@
         {% else %}
             <div class="empty-state">
                 <div class="empty-icon">
-                    <i class="fa-solid fa-user-check"></i>
+                    <span class="icon-slot fa-solid fa-user-check" data-icon="fa-solid fa-user-check"></span>
                 </div>
                 <div class="empty-text">Hiç kimseyi engellemedin</div>
                 <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">

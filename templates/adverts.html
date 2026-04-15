@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>İlan & Proje Pazarı | YTU Social</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* --- GENEL AYARLAR --- */
         body { background-color: var(--bg-color); transition: background-color 0.3s; }
@@ -355,7 +354,7 @@
 
     <!-- MOBİL ÜST BAR -->
     <div class="adv-top-bar">
-        <button type="button" class="adv-top-bar-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+        <button type="button" class="adv-top-bar-back" onclick="history.back()"><span class="icon-slot fas fa-arrow-left" data-icon="fas fa-arrow-left"></span></button>
         <span class="adv-top-bar-title">📢 İlanlar</span>
         <div class="adv-top-bar-spacer"></div>
     </div>
@@ -389,7 +388,7 @@
                 
                 {% if ad.author == current_user or current_user.is_admin %}
                 <button type="button" class="ad-menu-btn" onclick="toggleAdMenu('menu-{{ ad.id }}')">
-                    <i class="fas fa-ellipsis-h"></i>
+                    <span class="icon-slot fas fa-ellipsis-h" data-icon="fas fa-ellipsis-h"></span>
                 </button>
                 <div id="menu-{{ ad.id }}" class="ad-dropdown">
                     <button type="button" class="edit-btn"
@@ -399,10 +398,10 @@
                         data-desc="{{ ad.description }}"
                         data-contact="{{ ad.contact_info or '' }}"
                         onclick="openEditModal(this)">
-                        <i class="fas fa-edit"></i> Düzenle
+                        <span class="icon-slot fas fa-edit" data-icon="fas fa-edit"></span> Düzenle
                     </button>
                     <a href="{{ url_for('main.delete_advert', adv_id=ad.id) }}" class="delete-btn" onclick="return confirm('Bu ilanı silmek istediğine emin misin?')">
-                        <i class="fas fa-trash-alt"></i> Sil
+                        <span class="icon-slot fas fa-trash-alt" data-icon="fas fa-trash-alt"></span> Sil
                     </a>
                 </div>
                 {% endif %}
@@ -412,7 +411,7 @@
                 
                 {% if ad.contact_info %}
                 <div class="ad-contact-box" style="font-size: 0.9rem; background: rgba(var(--ytu-lacivert-rgb), 0.05); padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid var(--border-color); color: var(--text-color);">
-                    <i class="fas fa-phone-alt" style="margin-right: 5px; color: var(--ytu-lacivert);"></i> 
+                    <span class="icon-slot fas fa-phone-alt" style="margin-right: 5px; color: var(--ytu-lacivert);" data-icon="fas fa-phone-alt"></span> 
                     <b>İletişim:</b> {{ ad.contact_info }}
                 </div>
                 {% endif %}
@@ -425,7 +424,7 @@
                     
                     {% if ad.author != current_user %}
                     <a href="/chat/{{ ad.author.handle }}" class="btn-vote" style="padding: 8px 18px; font-size: 0.85rem; border-radius: 20px; text-decoration:none;">
-                        <i class="far fa-paper-plane"></i> Mesaj
+                        <span class="icon-slot far fa-paper-plane" data-icon="far fa-paper-plane"></span> Mesaj
                     </a>
                     {% endif %}
                 </div>
@@ -435,7 +434,7 @@
             </div>
             {% else %}
             <div style="grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--text-muted);">
-                <i class="fas fa-bullhorn" style="font-size: 4rem; margin-bottom: 25px; opacity: 0.3;"></i>
+                <span class="icon-slot fas fa-bullhorn" style="font-size: 4rem; margin-bottom: 25px; opacity: 0.3;" data-icon="fas fa-bullhorn"></span>
                 <h3>Henüz hiç ilan yok.</h3>
                 <p>Sağ alttaki <b>+</b> butonuna tıklayarak ilk ilanı sen ver!</p>
             </div>
@@ -447,7 +446,7 @@
     </div>
 
     <button type="button" class="fab-btn" onclick="openCreateModal()" title="Yeni İlan Ekle">
-        <i class="fas fa-plus"></i>
+        <span class="icon-slot fas fa-plus" data-icon="fas fa-plus"></span>
     </button>
 
     <div id="adModal" class="modal-overlay" onclick="if(event.target === this) closeAdModal()">
@@ -486,7 +485,7 @@
                 </div>
 
                 <button type="submit" id="btnSubmit" class="btn-vote" style="width: 100%; padding: 15px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; background: var(--ytu-lacivert); border: none;">
-                    Yayınla <i class="fas fa-check-circle" style="margin-left: 8px;"></i>
+                    Yayınla <span class="icon-slot fas fa-check-circle" style="margin-left: 8px;" data-icon="fas fa-check-circle"></span>
                 </button>
             </form>
         </div>
@@ -497,20 +496,20 @@
     <!-- MOBİL ALT NAV -->
     <div class="mobile-bottom-nav">
         <a href="/" class="nav-item {{ 'active' if request.path == '/' else '' }}">
-            <i class="fa-solid fa-house"></i>
+            <span class="icon-slot fa-solid fa-house" data-icon="fa-solid fa-house"></span>
         </a>
         <a href="{{ url_for('main.explore') }}" class="nav-item {{ 'active' if 'explore' in request.path else '' }}">
-            <i class="fa-regular fa-compass"></i>
+            <span class="icon-slot fa-regular fa-compass" data-icon="fa-regular fa-compass"></span>
         </a>
         <a href="{{ url_for('main.adverts') }}" class="nav-item {{ 'active' if 'adverts' in request.path else '' }}">
-            <i class="fa-solid fa-bullhorn"></i>
+            <span class="icon-slot fa-solid fa-bullhorn" data-icon="fa-solid fa-bullhorn"></span>
         </a>
         <a href="{{ url_for('main.notifications') }}" class="nav-item {{ 'active' if 'notifications' in request.path else '' }}">
-            <i class="fa-regular fa-bell"></i>
+            <span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span>
             {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
         </a>
         <a href="{{ url_for('main.messages_inbox') }}" class="nav-item {{ 'active' if 'inbox' in request.path or 'chat' in request.path else '' }}">
-            <i class="fa-regular fa-envelope"></i>
+            <span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span>
             {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
         </a>
     </div>
@@ -541,7 +540,7 @@
             document.getElementById('adForm').action = "{{ url_for('main.adverts') }}"; // Ekleme URL'si
             document.getElementById('adForm').reset(); // Kutuları temizle
             document.getElementById('modalTitle').innerText = "📝 Yeni İlan Oluştur";
-            document.getElementById('btnSubmit').innerHTML = 'Yayınla <i class="fas fa-check-circle" style="margin-left: 8px;"></i>';
+            document.getElementById('btnSubmit').innerHTML = 'Yayınla <span class="icon-slot fas fa-check-circle" style="margin-left: 8px;" data-icon="fas fa-check-circle"></span>';
             document.getElementById('adModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
@@ -571,7 +570,7 @@
 
             // Başlıkları güncelle
             document.getElementById('modalTitle').innerText = "✏️ İlanı Düzenle";
-            document.getElementById('btnSubmit').innerHTML = 'Güncelle <i class="fas fa-save" style="margin-left: 8px;"></i>';
+            document.getElementById('btnSubmit').innerHTML = 'Güncelle <span class="icon-slot fas fa-save" style="margin-left: 8px;" data-icon="fas fa-save"></span>';
 
             // Menüyü kapat ve modalı aç
             document.querySelectorAll('.ad-dropdown').forEach(m => m.style.display = 'none');

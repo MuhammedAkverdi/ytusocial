@@ -111,19 +111,19 @@
         </div>
         <div class="share-footer">
             <div class="share-app-icon" onclick="copyShareLinkPro()">
-                <div class="app-icon-circle bg-copy"><i class="fas fa-link"></i></div>
+                <div class="app-icon-circle bg-copy"><span class="icon-slot fas fa-link" data-icon="fas fa-link"></span></div>
                 <small style="font-size: 0.75rem; color: var(--text-muted);">Kopyala</small>
             </div>
             <div class="share-app-icon" onclick="shareExternal('whatsapp')">
-                <div class="app-icon-circle bg-whatsapp"><i class="fab fa-whatsapp"></i></div>
+                <div class="app-icon-circle bg-whatsapp"><span class="icon-slot fab fa-whatsapp" data-icon="fab fa-whatsapp"></span></div>
                 <small style="font-size: 0.75rem; color: var(--text-muted);">WhatsApp</small>
             </div>
             <div class="share-app-icon" onclick="shareExternal('twitter')">
-                <div class="app-icon-circle bg-twitter"><i class="fab fa-twitter"></i></div>
+                <div class="app-icon-circle bg-twitter"><span class="icon-slot fab fa-twitter" data-icon="fab fa-twitter"></span></div>
                 <small style="font-size: 0.75rem; color: var(--text-muted);">Twitter</small>
             </div>
             <div class="share-app-icon" onclick="shareExternal('telegram')">
-                <div class="app-icon-circle bg-telegram"><i class="fab fa-telegram-plane"></i></div>
+                <div class="app-icon-circle bg-telegram"><span class="icon-slot fab fa-telegram-plane" data-icon="fab fa-telegram-plane"></span></div>
                 <small style="font-size: 0.75rem; color: var(--text-muted);">Telegram</small>
             </div>
         </div>
@@ -167,40 +167,4 @@ if (typeof window.toggleDarkMode !== 'function') {
     };
 }
 
-if (typeof window.injectExamAnalysisNavLink !== 'function') {
-    window.injectExamAnalysisNavLink = function () {
-        const examUrl = "{{ url_for('main.exam_analyses') }}";
-        document.querySelectorAll('.mob-drawer-nav').forEach((nav) => {
-            if (!nav || nav.querySelector('[data-nav="exam-analysis"]')) {
-                return;
-            }
-
-            const link = document.createElement('a');
-            link.href = examUrl;
-            link.className = 'mob-drawer-link';
-            link.setAttribute('data-nav', 'exam-analysis');
-            if (window.location.pathname === examUrl || window.location.pathname.startsWith('/exam/')) {
-                link.classList.add('active');
-            }
-            link.innerHTML = '<i class="fa-solid fa-square-poll-vertical"></i> Sınav Analizi';
-            link.addEventListener('click', function () {
-                if (typeof closeMobileDrawer === 'function') {
-                    closeMobileDrawer();
-                }
-            });
-
-            const notesLink = Array.from(nav.querySelectorAll('a[href*="/notes"]')).find((anchor) => {
-                return (anchor.textContent || '').includes('Not Havuzu');
-            });
-
-            if (notesLink && notesLink.parentNode === nav) {
-                notesLink.insertAdjacentElement('afterend', link);
-            } else {
-                nav.appendChild(link);
-            }
-        });
-    };
-
-    document.addEventListener('DOMContentLoaded', window.injectExamAnalysisNavLink);
-}
 </script>

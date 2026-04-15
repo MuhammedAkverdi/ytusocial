@@ -6,7 +6,6 @@
     <title>Gönderi • YTU Social</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
             background: var(--bg-light);
@@ -946,14 +945,14 @@
                                 <span class="pd-handle">@{{ post.author.handle }}</span>
                             </div>
                             <div class="pd-subline">
-                                <span class="pd-dept"><i class="fa-solid fa-graduation-cap"></i> {{ post.author.department or 'Yıldız Teknik Üniversitesi' }}</span>
+                                <span class="pd-dept"><span class="icon-slot fa-solid fa-graduation-cap" data-icon="fa-solid fa-graduation-cap"></span> {{ post.author.department or 'Yıldız Teknik Üniversitesi' }}</span>
                                 <span class="pd-date">{{ post.date_posted.strftime('%d.%m.%Y %H:%M') }}</span>
                             </div>
                         </div>
                     </a>
                     {% if post.author == current_user %}
                         <a href="{{ url_for('main.delete_post', post_id=post.id) }}" class="pd-menu" onclick="return confirm('Silmek istediğine emin misin?')" title="Sil">
-                            <i class="fa-solid fa-trash-can"></i>
+                            <span class="icon-slot fa-solid fa-trash-can" data-icon="fa-solid fa-trash-can"></span>
                         </a>
                     {% endif %}
                 </div>
@@ -969,7 +968,7 @@
                         {% endif %}
                     {% else %}
                         <div class="pd-media-placeholder">
-                            <i class="fa-regular fa-image"></i>
+                            <span class="icon-slot fa-regular fa-image" data-icon="fa-regular fa-image"></span>
                             <div>Bu gönderide medya yok</div>
                         </div>
                     {% endif %}
@@ -982,32 +981,32 @@
                 <aside class="post-detail-discussion">
                     <div class="pd-stats">
                         <div class="pd-stat">
-                            <span class="pd-stat-label"><i class="fa-regular fa-heart"></i> Beğeni</span>
+                            <span class="pd-stat-label"><span class="icon-slot fa-regular fa-heart" data-icon="fa-regular fa-heart"></span> Beğeni</span>
                             <span class="pd-stat-value js-like-stat-{{ post.id }}">{{ post.liked_by|length }}</span>
                         </div>
                         <div class="pd-stat">
-                            <span class="pd-stat-label"><i class="fa-regular fa-comment"></i> Yorum</span>
+                            <span class="pd-stat-label"><span class="icon-slot fa-regular fa-comment" data-icon="fa-regular fa-comment"></span> Yorum</span>
                             <span class="pd-stat-value js-comment-stat-{{ post.id }}">{{ post.comments|length }}</span>
                         </div>
                     </div>
 
                     <div class="pd-actions">
                         <span class="action-item pd-action-chip js-like-{{ post.id }} {% if current_user in post.liked_by %}liked{% endif %}" onclick="likePost('{{ post.id }}', this)">
-                            <i class="fa-{% if current_user in post.liked_by %}solid{% else %}regular{% endif %} fa-heart" {% if current_user in post.liked_by %}style="color: #ff4757;"{% endif %}></i>
+                            <span class="icon-slot fa-{% if current_user in post.liked_by %}solid{% else %}regular{% endif %} fa-heart" {% if current_user in post.liked_by %}style="color: #ff4757;"{% endif %} data-icon="fa-{% if current_user in post.liked_by %}solid{% else %}regular{% endif %} fa-heart"></span>
                             <span class="like-count">{{ post.liked_by|length }}</span>
                         </span>
                         <span class="action-item pd-action-chip js-comment-count-{{ post.id }}" onclick="document.querySelector('.pd-comment-input-section .comment-input').focus()">
-                            <i class="fa-regular fa-comment"></i>
+                            <span class="icon-slot fa-regular fa-comment" data-icon="fa-regular fa-comment"></span>
                             <span>{{ post.comments|length }}</span>
                         </span>
                         <span class="action-item pd-action-chip" onclick="openShareModal('post', '{{ post.id }}')">
-                            <i class="fa-regular fa-paper-plane"></i>
+                            <span class="icon-slot fa-regular fa-paper-plane" data-icon="fa-regular fa-paper-plane"></span>
                             <span>Paylaş</span>
                         </span>
                     </div>
 
                     <div class="pd-comments-header">
-                        <h3><i class="fa-regular fa-comments"></i> Yorumlar</h3>
+                        <h3><span class="icon-slot fa-regular fa-comments" data-icon="fa-regular fa-comments"></span> Yorumlar</h3>
                         <span class="pd-comments-count js-comment-stat-{{ post.id }}">{{ post.comments|length }}</span>
                     </div>
 
@@ -1048,7 +1047,7 @@
                         {% endfor %}
                         {% if not post.comments %}
                         <div class="pd-empty-comments">
-                            <i class="fa-regular fa-comments"></i>
+                            <span class="icon-slot fa-regular fa-comments" data-icon="fa-regular fa-comments"></span>
                             Henüz yorum yok
                         </div>
                         {% endif %}

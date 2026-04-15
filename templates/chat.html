@@ -9,7 +9,6 @@
     <title>{{ user.username }} ile Sohbet</title>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>if(localStorage.getItem("theme")==="dark")document.documentElement.classList.add("dark-mode");</script>
     <style>
         body{margin:0;font-family:"Inter",sans-serif;}
@@ -216,15 +215,15 @@
                     <span class="ig-sidebar-score">&#11088; {{ current_user.score }} Puan</span>
                 </div>
                 <nav>
-                    <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-house"></i> Ana Sayfa</a>
-                    <a href="{{ url_for('main.explore') }}"><i class="fa-regular fa-compass"></i> Keşfet</a>
-                    <a href="{{ url_for('main.reels') }}"><i class="fa-solid fa-clapperboard"></i> Reels</a>
-                    <a href="{{ url_for('main.saved_posts_list') }}"><i class="fa-regular fa-bookmark"></i> Kaydedilenler</a>
-                    <a href="{{ url_for('main.notes_pool') }}"><i class="fa-solid fa-book-open"></i> Not Havuzu</a>
-                    <a href="{{ url_for('main.clubs_full_list') }}"><i class="fa-solid fa-trophy"></i> Kulüpler Ligi</a>
-                    <a href="{{ url_for('main.adverts') }}"><i class="fa-solid fa-bullhorn"></i> İlanlar</a>
-                    <a href="{{ url_for('main.notifications') }}"><i class="fa-regular fa-bell"></i> Bildirimler</a>
-                    <a href="{{ url_for('main.messages_inbox') }}" class="active"><i class="fa-regular fa-envelope"></i> Mesajlar</a>
+                    <a href="{{ url_for('main.index') }}"><span class="icon-slot fa-solid fa-house" data-icon="fa-solid fa-house"></span> Ana Sayfa</a>
+                    <a href="{{ url_for('main.explore') }}"><span class="icon-slot fa-regular fa-compass" data-icon="fa-regular fa-compass"></span> Keşfet</a>
+                    <a href="{{ url_for('main.reels') }}"><span class="icon-slot fa-solid fa-clapperboard" data-icon="fa-solid fa-clapperboard"></span> Reels</a>
+                    <a href="{{ url_for('main.saved_posts_list') }}"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydedilenler</a>
+                    <a href="{{ url_for('main.notes_pool') }}"><span class="icon-slot fa-solid fa-book-open" data-icon="fa-solid fa-book-open"></span> Not Havuzu</a>
+                    <a href="{{ url_for('main.clubs_full_list') }}"><span class="icon-slot fa-solid fa-trophy" data-icon="fa-solid fa-trophy"></span> Kulüpler Ligi</a>
+                    <a href="{{ url_for('main.adverts') }}"><span class="icon-slot fa-solid fa-bullhorn" data-icon="fa-solid fa-bullhorn"></span> İlanlar</a>
+                    <a href="{{ url_for('main.notifications') }}"><span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span> Bildirimler</a>
+                    <a href="{{ url_for('main.messages_inbox') }}" class="active"><span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span> Mesajlar</a>
                 </nav>
             </div>
         </aside>
@@ -233,7 +232,7 @@
         <div class="ig-chat-panel">
             <!-- HEADER -->
             <div class="ig-chat-header">
-                <a href="{{ url_for('main.messages_inbox') }}" class="ig-back-btn"><i class="fas fa-chevron-left"></i></a>
+                <a href="{{ url_for('main.messages_inbox') }}" class="ig-back-btn"><span class="icon-slot fas fa-chevron-left" data-icon="fas fa-chevron-left"></span></a>
                 <a href="{{ url_for('main.user_profile', handle=user.handle) }}" class="ig-header-user" id="headerUserLink">
                     <div class="ig-header-avatar-wrap">
                         <img src="/static/{{ user.profile_pic }}" class="ig-header-avatar" alt="{{ user.username }}">
@@ -261,13 +260,13 @@
                     <img src="/static/{{ user.profile_pic }}" class="ig-msg-avatar" alt="{{ user.username }}">
                     {% endif %}
                     {% if msg.sender_id == current_user.id %}
-                    <button class="ig-delete-btn" onclick="confirmDeleteMsg(event,'/delete_message/{{ msg.id }}')" title="Sil"><i class="fas fa-trash-can"></i></button>
+                    <button class="ig-delete-btn" onclick="confirmDeleteMsg(event,'/delete_message/{{ msg.id }}')" title="Sil"><span class="icon-slot fas fa-trash-can" data-icon="fas fa-trash-can"></span></button>
                     {% endif %}
 
                     {% if msg.msg_type == "story" %}
                     <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %} media">
                         <div class="ig-story-card" onclick="viewSharedStory(event,'{{ msg.body }}')">
-                            <div class="ig-story-overlay"><i class="fas fa-play" style="font-size:1.8rem;margin-bottom:6px;"></i><span style="font-size:.8rem;font-weight:700;">Hikayeyi Izle</span></div>
+                            <div class="ig-story-overlay"><span class="icon-slot fas fa-play" style="font-size:1.8rem;margin-bottom:6px;" data-icon="fas fa-play"></span><span style="font-size:.8rem;font-weight:700;">Hikayeyi Izle</span></div>
                             <img src="/static/story_images/{{ msg.file_path }}" class="ig-story-img" onerror="this.src='/static/img/story_placeholder.jpg'">
                         </div>
                     </div>
@@ -293,9 +292,9 @@
                     {% elif msg.msg_type == "file" %}
                     <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}" style="padding:0;background:transparent;border:none;">
                         <a href="/static/message_files/{{ msg.file_path }}" target="_blank" class="ig-file-msg" download>
-                            <i class="fas fa-file-alt ig-file-icon"></i>
+                            <span class="icon-slot fas fa-file-alt ig-file-icon" data-icon="fas fa-file-alt ig-file-icon"></span>
                             <span class="ig-file-name">{{ msg.body }}</span>
-                            <i class="fas fa-download ig-file-dl"></i>
+                            <span class="icon-slot fas fa-download ig-file-dl" data-icon="fas fa-download ig-file-dl"></span>
                         </a>
                         <span class="ig-msg-time" style="padding:0 4px;">{{ msg.timestamp.strftime("%H:%M") }}</span>
                     </div>
@@ -303,7 +302,7 @@
                     {% else %}
                     <div class="ig-bubble {% if msg.sender_id == current_user.id %}sent{% else %}received{% endif %}">
                         {{ msg.body }}
-                        <span class="ig-msg-time">{{ msg.timestamp.strftime("%H:%M") }}{% if msg.sender_id == current_user.id %} <i class="fas fa-check" style="opacity:.8;font-size:.6rem;"></i>{% endif %}</span>
+                        <span class="ig-msg-time">{{ msg.timestamp.strftime("%H:%M") }}{% if msg.sender_id == current_user.id %} <span class="icon-slot fas fa-check" style="opacity:.8;font-size:.6rem;" data-icon="fas fa-check"></span>{% endif %}</span>
                     </div>
                     {% endif %}
                 </div>
@@ -318,7 +317,7 @@
             <!-- DOSYA ÖNİZLEME (strip card) -->
             <div class="x-preview-strip" id="filePreviewStrip">
                 <div class="x-preview-card">
-                    <button class="x-preview-close" onclick="clearFilePreview()"><i class="fas fa-times"></i></button>
+                    <button class="x-preview-close" onclick="clearFilePreview()"><span class="icon-slot fas fa-times" data-icon="fas fa-times"></span></button>
                     <div id="filePreviewThumb"></div>
                 </div>
             </div>
@@ -326,13 +325,13 @@
             <!-- INPUT BAR -->
             <div class="ig-input-bar">
                 <div class="x-attach-wrap">
-                    <button type="button" class="x-attach-plus" id="plusBtn" onclick="togglePlusMenu(event)" title="Ekle"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="x-attach-plus" id="plusBtn" onclick="togglePlusMenu(event)" title="Ekle"><span class="icon-slot fas fa-plus" data-icon="fas fa-plus"></span></button>
                     <div class="x-plus-menu" id="plusMenu">
-                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); closePlusMenu(); toggleEmojiPicker(event)"><i class="fa-regular fa-face-smile"></i><span>Emoji</span></button>
-                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); closePlusMenu(); document.getElementById('chatGifInput').click()"><i class="fa-solid fa-icons"></i><span>GIF</span></button>
-                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); openAttachmentPicker('photo')"><i class="fa-solid fa-image"></i><span>Fotoğraf</span></button>
-                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); openAttachmentPicker('audio')"><i class="fa-solid fa-music"></i><span>Müzik</span></button>
-                        <button type="button" class="x-plus-menu-item x-plus-menu-item-wide" onclick="event.stopPropagation(); openAttachmentPicker('file')"><i class="fa-solid fa-paperclip"></i><span>Dosya</span></button>
+                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); closePlusMenu(); toggleEmojiPicker(event)"><span class="icon-slot fa-regular fa-face-smile" data-icon="fa-regular fa-face-smile"></span><span>Emoji</span></button>
+                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); closePlusMenu(); document.getElementById('chatGifInput').click()"><span class="icon-slot fa-solid fa-icons" data-icon="fa-solid fa-icons"></span><span>GIF</span></button>
+                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); openAttachmentPicker('photo')"><span class="icon-slot fa-solid fa-image" data-icon="fa-solid fa-image"></span><span>Fotoğraf</span></button>
+                        <button type="button" class="x-plus-menu-item" onclick="event.stopPropagation(); openAttachmentPicker('audio')"><span class="icon-slot fa-solid fa-music" data-icon="fa-solid fa-music"></span><span>Müzik</span></button>
+                        <button type="button" class="x-plus-menu-item x-plus-menu-item-wide" onclick="event.stopPropagation(); openAttachmentPicker('file')"><span class="icon-slot fa-solid fa-paperclip" data-icon="fa-solid fa-paperclip"></span><span>Dosya</span></button>
                     </div>
                     <div class="x-emoji-grid" id="emojiPicker"></div>
                 </div>
@@ -341,8 +340,8 @@
                 <input type="text" id="messageInput" class="ig-text-field" placeholder="Mesaj" autocomplete="off"
                     oninput="onInputChange()"
                     onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage(event);}">
-                <button class="ig-send-btn" id="sendBtn" onclick="sendMessage(event)" title="Gonder" style="display:none;"><i class="fas fa-arrow-up"></i></button>
-                <button class="ig-mic-btn" id="recordBtn" title="Ses kaydet"><i class="fas fa-microphone"></i></button>
+                <button class="ig-send-btn" id="sendBtn" onclick="sendMessage(event)" title="Gonder" style="display:none;"><span class="icon-slot fas fa-arrow-up" data-icon="fas fa-arrow-up"></span></button>
+                <button class="ig-mic-btn" id="recordBtn" title="Ses kaydet"><span class="icon-slot fas fa-microphone" data-icon="fas fa-microphone"></span></button>
             </div>
         </div>
     </div>
@@ -356,7 +355,7 @@
             <span id="storyUserName" style="color:white;font-weight:bold;margin-left:10px;"></span>
             <span id="storyTime" style="color:#ddd;font-size:.8rem;margin-left:10px;"></span>
         </div>
-        <button onclick="shareActiveStory()" class="story-share-btn" title="Hikayeyi Paylas" style="right:75px;"><i class="fas fa-paper-plane"></i></button>
+        <button onclick="shareActiveStory()" class="story-share-btn" title="Hikayeyi Paylas" style="right:75px;"><span class="icon-slot fas fa-paper-plane" data-icon="fas fa-paper-plane"></span></button>
         <a id="deleteStoryBtn" href="#" class="story-delete-btn" onclick="confirmStoryDelete(event)">&#128465;</a>
         <div id="storyViewers" class="story-viewers-badge">&#128065; <span id="viewerCount">0</span></div>
         <div class="story-media-wrapper">
@@ -373,8 +372,8 @@
     <div class="x-profile-sheet" id="profileSheet">
         <div class="x-sheet-handle-bar"></div>
         <div class="x-sheet-top">
-            <button class="x-sheet-back" onclick="closeProfileSheet()"><i class="fas fa-arrow-left"></i></button>
-            <button class="x-sheet-share"><i class="fas fa-share-nodes"></i></button>
+            <button class="x-sheet-back" onclick="closeProfileSheet()"><span class="icon-slot fas fa-arrow-left" data-icon="fas fa-arrow-left"></span></button>
+            <button class="x-sheet-share"><span class="icon-slot fas fa-share-nodes" data-icon="fas fa-share-nodes"></span></button>
         </div>
         <div class="x-sheet-body">
             <img src="/static/{{ user.profile_pic }}" class="x-sheet-avatar">
@@ -382,23 +381,23 @@
             <span class="x-sheet-uname">@{{ user.handle }}</span>
             <div class="x-sheet-actions">
                 <a href="{{ url_for('main.user_profile', handle=user.handle) }}" class="x-sheet-action">
-                    <div class="x-sheet-action-icon"><i class="fa-regular fa-user"></i></div>
+                    <div class="x-sheet-action-icon"><span class="icon-slot fa-regular fa-user" data-icon="fa-regular fa-user"></span></div>
                     <span>Profil</span>
                 </a>
                 <button class="x-sheet-action" onclick="alert('Sessiz alma özelliği yakında!')">
-                    <div class="x-sheet-action-icon"><i class="fa-regular fa-bell"></i></div>
+                    <div class="x-sheet-action-icon"><span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span></div>
                     <span>Sessiz al</span>
                 </button>
                 <button class="x-sheet-action" data-user-id="{{ user.id }}" onclick="blockUserToggle(this.dataset.userId, this)">
-                    <div class="x-sheet-action-icon"><i class="fa-solid fa-ban"></i></div>
+                    <div class="x-sheet-action-icon"><span class="icon-slot fa-solid fa-ban" data-icon="fa-solid fa-ban"></span></div>
                     <span>Mesajları<br>Engelle</span>
                 </button>
                 <button class="x-sheet-action" id="moreActionBtn" onclick="toggleSheetMore(event)">
-                    <div class="x-sheet-action-icon"><i class="fa-solid fa-ellipsis"></i></div>
+                    <div class="x-sheet-action-icon"><span class="icon-slot fa-solid fa-ellipsis" data-icon="fa-solid fa-ellipsis"></span></div>
                     <span>Daha fazla</span>
                     <div class="x-more-dropdown" id="sheetMoreDropdown">
-                        <a href="#" onclick="event.preventDefault();closeProfileSheet();"><i class="fa-solid fa-magnifying-glass"></i> Ara</a>
-                        <a href="{{ url_for('main.delete_conversation', partner_id=user.id) }}" class="x-danger" onclick="return confirm('Bu kişiyle olan tüm mesajlaşmalar silinecek. Emin misin?');"><i class="fa-solid fa-trash"></i> Sohbeti sil</a>
+                        <a href="#" onclick="event.preventDefault();closeProfileSheet();"><span class="icon-slot fa-solid fa-magnifying-glass" data-icon="fa-solid fa-magnifying-glass"></span> Ara</a>
+                        <a href="{{ url_for('main.delete_conversation', partner_id=user.id) }}" class="x-danger" onclick="return confirm('Bu kişiyle olan tüm mesajlaşmalar silinecek. Emin misin?');"><span class="icon-slot fa-solid fa-trash" data-icon="fa-solid fa-trash"></span> Sohbeti sil</a>
                     </div>
                 </button>
             </div>
@@ -408,48 +407,48 @@
         <div class="x-sheet-settings">
             <div class="x-sheet-setting-row" onclick="openNicknameSheet()">
                 <div class="x-sheet-setting-left">
-                    <i class="fa-solid fa-at"></i>
+                    <span class="icon-slot fa-solid fa-at" data-icon="fa-solid fa-at"></span>
                     <span>Takma ad</span>
                 </div>
                 <div class="x-sheet-setting-right">
                     <span id="nickPreview">Ayarla</span>
-                    <i class="fa-solid fa-chevron-right"></i>
+                    <span class="icon-slot fa-solid fa-chevron-right" data-icon="fa-solid fa-chevron-right"></span>
                 </div>
             </div>
             <div class="x-sheet-setting-row" onclick="alert('Kaybolan mesajlar özelliği yakında!')">
                 <div class="x-sheet-setting-left">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span class="icon-slot fa-solid fa-clock-rotate-left" data-icon="fa-solid fa-clock-rotate-left"></span>
                     <span>Kaybolan Mesajlar</span>
                 </div>
                 <div class="x-sheet-setting-right">
                     <span>Kapalı</span>
-                    <i class="fa-solid fa-chevron-right"></i>
+                    <span class="icon-slot fa-solid fa-chevron-right" data-icon="fa-solid fa-chevron-right"></span>
                 </div>
             </div>
             <div class="x-sheet-setting-row" onclick="alert('Ekran görüntüsü engelleme özelliği yakında!')">
                 <div class="x-sheet-setting-left">
-                    <i class="fa-solid fa-mobile-screen"></i>
+                    <span class="icon-slot fa-solid fa-mobile-screen" data-icon="fa-solid fa-mobile-screen"></span>
                     <span>Ekran Görüntülerini Engelle</span>
                 </div>
                 <div class="x-sheet-setting-right">
                     <span>Kapalı</span>
-                    <i class="fa-solid fa-chevron-right"></i>
+                    <span class="icon-slot fa-solid fa-chevron-right" data-icon="fa-solid fa-chevron-right"></span>
                 </div>
             </div>
             <div class="x-sheet-setting-row" onclick="alert('Güvenlik numarası özelliği yakında!')">
                 <div class="x-sheet-setting-left">
-                    <i class="fa-solid fa-shield-halved"></i>
+                    <span class="icon-slot fa-solid fa-shield-halved" data-icon="fa-solid fa-shield-halved"></span>
                     <span>Güvenlik Numarası</span>
                 </div>
                 <div class="x-sheet-setting-right">
                     <span>Doğrulanmadı</span>
-                    <i class="fa-solid fa-chevron-right"></i>
+                    <span class="icon-slot fa-solid fa-chevron-right" data-icon="fa-solid fa-chevron-right"></span>
                 </div>
             </div>
         </div>
 
         <button class="x-sheet-danger" id="blockDangerBtn" data-user-id="{{ user.id }}" onclick="blockUserToggle(this.dataset.userId, this)">
-            <i class="fa-solid fa-ban"></i> <span id="blockBtnText">Mesajları Engelle</span>
+            <span class="icon-slot fa-solid fa-ban" data-icon="fa-solid fa-ban"></span> <span id="blockBtnText">Mesajları Engelle</span>
         </button>
     </div>
 
@@ -458,14 +457,14 @@
         <div class="x-sheet-handle-bar"></div>
         <div class="x-nick-header">
             <div class="x-nick-header-left">
-                <button class="x-set-back" onclick="closeNicknameSheet()"><i class="fas fa-arrow-left"></i></button>
+                <button class="x-set-back" onclick="closeNicknameSheet()"><span class="icon-slot fas fa-arrow-left" data-icon="fas fa-arrow-left"></span></button>
                 <h3 class="x-nick-title">Takma ad</h3>
             </div>
             <button class="x-nick-save" onclick="saveNickname()">Kaydet</button>
         </div>
         <div class="x-nick-body">
             <div class="x-nick-info">
-                <i class="fa-solid fa-circle-info"></i>
+                <span class="icon-slot fa-solid fa-circle-info" data-icon="fa-solid fa-circle-info"></span>
                 <p>Takma adlar sadece sana görünür. Diğer kullanıcılar göremez.</p>
             </div>
             <label class="x-nick-label">Takma ad</label>
@@ -508,9 +507,9 @@
                 }
             }else if(file.type.startsWith("audio/")){
                 var url=URL.createObjectURL(file);
-                thumbEl.innerHTML='<div class="x-preview-audio"><i class="fa-solid fa-music"></i><audio controls controlsList="nodownload" src="'+url+'"></audio><span>'+file.name+'</span></div>';
+                thumbEl.innerHTML='<div class="x-preview-audio"><span class="icon-slot fa-solid fa-music" data-icon="fa-solid fa-music"></span><audio controls controlsList="nodownload" src="'+url+'"></audio><span>'+file.name+'</span></div>';
             }else{
-                thumbEl.innerHTML='<div class="x-preview-file"><i class="fas fa-file-alt"></i><span>'+file.name+'</span></div>';
+                thumbEl.innerHTML='<div class="x-preview-file"><span class="icon-slot fas fa-file-alt" data-icon="fas fa-file-alt"></span><span>'+file.name+'</span></div>';
             }
             strip.classList.add("visible");
             document.getElementById("sendBtn").style.display="flex";

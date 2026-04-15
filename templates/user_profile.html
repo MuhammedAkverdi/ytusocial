@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ user.display_name }} | Profil</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* --- GENEL --- */
         body { 
@@ -532,7 +531,7 @@
 
 <!-- MOBİL HEADER -->
 <div class="prof-mob-header" style="display:none;">
-    <button class="prof-mob-back" onclick="history.back()"><i class="fas fa-arrow-left"></i></button>
+    <button class="prof-mob-back" onclick="history.back()"><span class="icon-slot fas fa-arrow-left" data-icon="fas fa-arrow-left"></span></button>
     <div class="prof-mob-title">
         {{ user.display_name }}
         <span>@{{ user.handle }} · {{ user.followers.count() }} takipçi</span>
@@ -558,15 +557,15 @@
 
                 <div class="profile-actions">
                     {% if user == current_user %}
-                        <a href="{{ url_for('main.edit_profile') }}" class="btn-modern"><i class="fas fa-pen"></i> Profili Düzenle</a>
-                        <a href="{{ url_for('auth.logout') }}" class="btn-modern btn-logout"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                        <a href="{{ url_for('main.edit_profile') }}" class="btn-modern"><span class="icon-slot fas fa-pen" data-icon="fas fa-pen"></span> Profili Düzenle</a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn-modern btn-logout"><span class="icon-slot fas fa-sign-out-alt" data-icon="fas fa-sign-out-alt"></span> Çıkış</a>
                     {% else %}
                         {% if current_user.is_following(user) %}
                             <a href="{{ url_for('main.unfollow', handle=user.handle) }}" class="btn-modern">Takibi Bırak</a>
                         {% else %}
                             <a href="{{ url_for('main.follow', handle=user.handle) }}" class="btn-modern" style="background: var(--ytu-lacivert); color: white; border: none;">Takip Et</a>
                         {% endif %}
-                        <a href="/chat/{{ user.handle }}" class="btn-modern"><i class="far fa-envelope"></i> Mesaj</a>
+                        <a href="/chat/{{ user.handle }}" class="btn-modern"><span class="icon-slot far fa-envelope" data-icon="far fa-envelope"></span> Mesaj</a>
                     {% endif %}
                 </div>
 
@@ -624,9 +623,9 @@
                             <span class="t-handle">@{{ display_post.author.handle }} · {{ display_post.date_posted.strftime('%d %b') }}</span>
                         </div>
                         {% if user == current_user and not post.repost_of %}
-                        <a href="{{ url_for('main.delete_post', post_id=post.id) }}" onclick="event.stopPropagation(); return confirm('Silmek istiyor musun?')" style="color: var(--text-muted);"><i class="fas fa-trash"></i></a>
+                        <a href="{{ url_for('main.delete_post', post_id=post.id) }}" onclick="event.stopPropagation(); return confirm('Silmek istiyor musun?')" style="color: var(--text-muted);"><span class="icon-slot fas fa-trash" data-icon="fas fa-trash"></span></a>
                         {% elif user == current_user and post.repost_of %}
-                        <a href="{{ url_for('main.delete_post', post_id=post.id) }}" onclick="event.stopPropagation(); return confirm('Yeniden gönderiyi kaldır?')" style="color: var(--text-muted);" title="Yeniden gönderiyi kaldır"><i class="fa-solid fa-retweet" style="font-size:0.85rem;"></i></a>
+                        <a href="{{ url_for('main.delete_post', post_id=post.id) }}" onclick="event.stopPropagation(); return confirm('Yeniden gönderiyi kaldır?')" style="color: var(--text-muted);" title="Yeniden gönderiyi kaldır"><span class="icon-slot fa-solid fa-retweet" style="font-size:0.85rem;" data-icon="fa-solid fa-retweet"></span></a>
                         {% endif %}
                     </div>
 
@@ -647,14 +646,14 @@
                     <div class="t-actions">
                         <button class="act-btn" onclick="event.stopPropagation(); likePost({{ display_post.id }}, this)">
                             {% if current_user in display_post.liked_by %}
-                            <i class="fa-solid fa-heart" style="color: #ff4757;"></i>
+                            <span class="icon-slot fa-solid fa-heart" style="color: #ff4757;" data-icon="fa-solid fa-heart"></span>
                             {% else %}
-                            <i class="fa-regular fa-heart"></i>
+                            <span class="icon-slot fa-regular fa-heart" data-icon="fa-regular fa-heart"></span>
                             {% endif %}
                             <span class="like-count" style="margin-left: 5px;">{{ display_post.liked_by|length }}</span>
                         </button>
-                        <button class="act-btn"><i class="fa-regular fa-comment"></i> {{ display_post.comments|length }}</button>
-                        <button class="act-btn" onclick="event.stopPropagation(); openShareModal('post', '{{ display_post.id }}')"><i class="fa-regular fa-paper-plane"></i></button>
+                        <button class="act-btn"><span class="icon-slot fa-regular fa-comment" data-icon="fa-regular fa-comment"></span> {{ display_post.comments|length }}</button>
+                        <button class="act-btn" onclick="event.stopPropagation(); openShareModal('post', '{{ display_post.id }}')"><span class="icon-slot fa-regular fa-paper-plane" data-icon="fa-regular fa-paper-plane"></span></button>
                     </div>
                 </div>
             </div>
@@ -672,7 +671,7 @@
                     <div class="ad-header">
                         <span class="ad-badge">{{ ad.category }}</span>
                         {% if user == current_user %}
-                        <a href="{{ url_for('main.delete_advert', adv_id=ad.id) }}" class="ad-menu-btn" onclick="event.stopPropagation(); return confirm('Silmek istiyor musun?')"><i class="fas fa-ellipsis-v"></i></a>
+                        <a href="{{ url_for('main.delete_advert', adv_id=ad.id) }}" class="ad-menu-btn" onclick="event.stopPropagation(); return confirm('Silmek istiyor musun?')"><span class="icon-slot fas fa-ellipsis-v" data-icon="fas fa-ellipsis-v"></span></a>
                         {% endif %}
                     </div>
                     
@@ -680,7 +679,7 @@
                     <div class="ad-desc">{{ ad.description }}</div>
                     
                     {% if ad.contact_info %}
-                    <div class="ad-contact"><i class="fas fa-phone-alt"></i> {{ ad.contact_info }}</div>
+                    <div class="ad-contact"><span class="icon-slot fas fa-phone-alt" data-icon="fas fa-phone-alt"></span> {{ ad.contact_info }}</div>
                     {% endif %}
                     
                     <div class="ad-footer">
@@ -690,7 +689,7 @@
                 </div>
                 {% else %}
                 <div style="text-align: center; padding: 50px; color: var(--text-muted); grid-column: 1/-1;">
-                    <p><i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.5;"></i></p>
+                    <p><span class="icon-slot fas fa-inbox" style="font-size: 2rem; opacity: 0.5;" data-icon="fas fa-inbox"></span></p>
                     <p>Henüz ilan yok.</p>
                 </div>
                 {% endfor %}
@@ -729,20 +728,20 @@
 
 <div class="mobile-bottom-nav">
     <a href="/" class="nav-item {{ 'active' if request.path == '/' else '' }}">
-        <i class="fa-solid fa-house"></i>
+        <span class="icon-slot fa-solid fa-house" data-icon="fa-solid fa-house"></span>
     </a>
     <a href="{{ url_for('main.explore') }}" class="nav-item {{ 'active' if 'explore' in request.path else '' }}">
-        <i class="fa-regular fa-compass"></i>
+        <span class="icon-slot fa-regular fa-compass" data-icon="fa-regular fa-compass"></span>
     </a>
     <a href="{{ url_for('main.reels') }}" class="nav-item {{ 'active' if 'reels' in request.path else '' }}">
-        <i class="fa-solid fa-clapperboard"></i>
+        <span class="icon-slot fa-solid fa-clapperboard" data-icon="fa-solid fa-clapperboard"></span>
     </a>
     <a href="{{ url_for('main.notifications') }}" class="nav-item {{ 'active' if 'notifications' in request.path else '' }}">
-        <i class="fa-regular fa-bell"></i>
+        <span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span>
         {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
     </a>
     <a href="{{ url_for('main.messages_inbox') }}" class="nav-item {{ 'active' if 'inbox' in request.path or 'chat' in request.path else '' }}">
-        <i class="fa-regular fa-envelope"></i>
+        <span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span>
         {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
     </a>
 </div>

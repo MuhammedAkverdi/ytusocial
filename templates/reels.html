@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reels | YTU Social</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="reels-mode">
 
@@ -228,20 +227,20 @@
     <!-- Mobil Alt Navbar -->
     <div class="mobile-bottom-nav">
         <a href="/" class="nav-item {{ 'active' if request.path == '/' else '' }}">
-            <i class="fa-solid fa-house"></i>
+            <span class="icon-slot fa-solid fa-house" data-icon="fa-solid fa-house"></span>
         </a>
         <a href="{{ url_for('main.explore') }}" class="nav-item {{ 'active' if 'explore' in request.path else '' }}">
-            <i class="fa-regular fa-compass"></i>
+            <span class="icon-slot fa-regular fa-compass" data-icon="fa-regular fa-compass"></span>
         </a>
         <a href="{{ url_for('main.reels') }}" class="nav-item {{ 'active' if 'reels' in request.path else '' }}">
-            <i class="fa-solid fa-clapperboard"></i>
+            <span class="icon-slot fa-solid fa-clapperboard" data-icon="fa-solid fa-clapperboard"></span>
         </a>
         <a href="{{ url_for('main.notifications') }}" class="nav-item {{ 'active' if 'notifications' in request.path else '' }}">
-            <i class="fa-regular fa-bell"></i>
+            <span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span>
             {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
         </a>
         <a href="{{ url_for('main.messages_inbox') }}" class="nav-item {{ 'active' if 'inbox' in request.path or 'chat' in request.path else '' }}">
-            <i class="fa-regular fa-envelope"></i>
+            <span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span>
             {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
         </a>
     </div>

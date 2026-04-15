@@ -16,7 +16,6 @@
 
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
     .mob-header, .mob-left-overlay, .mob-left-drawer { display: none; }
@@ -189,8 +188,8 @@
         <img src="/static/{{ current_user.profile_pic }}" class="mob-header-avatar" onclick="openMobileDrawer()" alt="Profil">
         <span class="x-chat-title">Sohbet</span>
         <div class="mob-header-right">
-            <button class="mob-header-icon" onclick="openDmSettings()" title="Ayarlar"><i class="fa-solid fa-gear"></i></button>
-            <button class="mob-header-icon" onclick="openNewMsgModal()" title="Yeni Mesaj"><i class="fa-regular fa-pen-to-square"></i></button>
+            <button class="mob-header-icon" onclick="openDmSettings()" title="Ayarlar"><span class="icon-slot fa-solid fa-gear" data-icon="fa-solid fa-gear"></span></button>
+            <button class="mob-header-icon" onclick="openNewMsgModal()" title="Yeni Mesaj"><span class="icon-slot fa-regular fa-pen-to-square" data-icon="fa-regular fa-pen-to-square"></span></button>
         </div>
     </div>
 
@@ -207,36 +206,36 @@
         </div>
         <nav class="mob-drawer-nav">
             <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-regular fa-user"></i> Profil
+                <span class="icon-slot fa-regular fa-user" data-icon="fa-regular fa-user"></span> Profil
             </a>
             <a href="{{ url_for('main.messages_inbox') }}" class="mob-drawer-link active" onclick="closeMobileDrawer()">
-                <i class="fa-regular fa-envelope"></i> Mesajlar
+                <span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span> Mesajlar
             </a>
             <a href="{{ url_for('main.notifications') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-regular fa-bell"></i>
+                <span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span>
                 <span>Bildirimler{% if unread_count > 0 %} <span style="background:#ff4757;color:#fff;border-radius:10px;font-size:0.7rem;padding:2px 7px;margin-left:6px;">{{ unread_count }}</span>{% endif %}</span>
             </a>
             <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-solid fa-book-open"></i> Not Havuzu
+                <span class="icon-slot fa-solid fa-book-open" data-icon="fa-solid fa-book-open"></span> Not Havuzu
             </a>
             <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-regular fa-bookmark"></i> Kaydedilenler
+                <span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydedilenler
             </a>
             <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-solid fa-trophy"></i> Kulüpler Ligi
+                <span class="icon-slot fa-solid fa-trophy" data-icon="fa-solid fa-trophy"></span> Kulüpler Ligi
             </a>
             <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-solid fa-bullhorn"></i> İlanlar
+                <span class="icon-slot fa-solid fa-bullhorn" data-icon="fa-solid fa-bullhorn"></span> İlanlar
             </a>
             <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()">
-                <i class="fa-solid fa-gear"></i> Profili Düzenle
+                <span class="icon-slot fa-solid fa-gear" data-icon="fa-solid fa-gear"></span> Profili Düzenle
             </a>
         </nav>
         <div class="mob-drawer-sep"></div>
         <div class="mob-drawer-section-title">💡 Fikir ve Destek</div>
-        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Öneri')"><i class="fa-solid fa-lightbulb"></i> Fikir Öner</a>
-        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Diğer')"><i class="fa-solid fa-comments"></i> Geri Bildirim</a>
-        <a href="{{ url_for('main.settings') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-gear"></i> Ayarlar</a>
+        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Öneri')"><span class="icon-slot fa-solid fa-lightbulb" data-icon="fa-solid fa-lightbulb"></span> Fikir Öner</a>
+        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Diğer')"><span class="icon-slot fa-solid fa-comments" data-icon="fa-solid fa-comments"></span> Geri Bildirim</a>
+        <a href="{{ url_for('main.settings') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-gear" data-icon="fa-solid fa-gear"></span> Ayarlar</a>
         <div class="mob-drawer-sep"></div>
         <div class="mob-drawer-section-title">
             🔥 Gündem
@@ -248,12 +247,12 @@
                 <div class="mob-drawer-trend-tag">#{{ tag }}</div>
                 <div class="mob-drawer-trend-count">{{ count }} gönderi</div>
             </div>
-            <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);"></i>
+            <span class="icon-slot fa-solid fa-chevron-right" style="font-size:0.7rem;color:var(--text-muted);" data-icon="fa-solid fa-chevron-right"></span>
         </a>
         {% endfor %}
         <div class="mob-drawer-sep"></div>
         <a href="{{ url_for('auth.logout') }}" class="mob-drawer-logout">
-            <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+            <span class="icon-slot fa-solid fa-right-from-bracket" data-icon="fa-solid fa-right-from-bracket"></span> Çıkış Yap
         </a>
     </div>
 
@@ -268,12 +267,12 @@
                     <div class="inbox-title-row">
                         <h2>Mesajlar</h2>
                         <button class="btn-new-msg" onclick="openNewMsgModal()">
-                            <i class="fa-solid fa-plus"></i> Yeni Mesaj
+                            <span class="icon-slot fa-solid fa-plus" data-icon="fa-solid fa-plus"></span> Yeni Mesaj
                         </button>
                     </div>
                     
                     <div class="inbox-search-wrapper">
-                        <i class="fa-solid fa-magnifying-glass search-icon-pos"></i>
+                        <span class="icon-slot fa-solid fa-magnifying-glass search-icon-pos" data-icon="fa-solid fa-magnifying-glass search-icon-pos"></span>
                         <input type="text" id="chatSearch" class="inbox-search-input" placeholder="Ara" onkeyup="searchChats()">
                     </div>
                     <div class="inbox-tabs">
@@ -325,7 +324,7 @@
                             </div>
                         </a>
                         <a href="{{ url_for('main.delete_conversation', partner_id=conv.user.id) }}" class="inbox-swipe-delete" onclick="return confirm('Bu kişiyle olan tüm mesajlaşmalar silinecek. Emin misin?');">
-                            <i class="fa-solid fa-trash"></i>
+                            <span class="icon-slot fa-solid fa-trash" data-icon="fa-solid fa-trash"></span>
                             <span>Sil</span>
                         </a>
                         </div>
@@ -333,7 +332,7 @@
                     {% else %}
                         
                         <div class="inbox-empty">
-                            <i class="fa-regular fa-paper-plane"></i>
+                            <span class="icon-slot fa-regular fa-paper-plane" data-icon="fa-regular fa-paper-plane"></span>
                             <h3>Henüz Mesajın Yok</h3>
                             <p>Arkadaşlarını bul ve onlara bir "Selam" çak! 👋</p>
                                 <a href="{{ url_for('main.explore') }}" class="btn-vote" style="margin-top:20px; text-decoration:none;">Kişileri Keşfet</a>
@@ -356,7 +355,7 @@
             </div>
             <div style="padding:12px 16px;border-bottom:1px solid var(--border-color);">
                 <div style="display:flex;align-items:center;gap:10px;background:var(--input-bg);border:1.5px solid var(--border-color);border-radius:24px;padding:10px 16px;">
-                    <i class="fas fa-search" style="color:var(--text-muted);font-size:.9rem;"></i>
+                    <span class="icon-slot fas fa-search" style="color:var(--text-muted);font-size:.9rem;" data-icon="fas fa-search"></span>
                     <input id="nmSearch" type="text" placeholder="Ada veya kullanıcı adına göre ara" oninput="filterNmList()"
                         style="border:none;background:transparent;outline:none;color:var(--text-color);font-size:.9rem;width:100%;font-family:inherit;">
                 </div>
@@ -375,7 +374,7 @@
                     {% endfor %}
                 {% else %}
                     <div style="text-align:center;padding:50px 20px;color:var(--text-muted);">
-                        <i class="fas fa-user-friends" style="font-size:2.5rem;opacity:.25;display:block;margin-bottom:12px;"></i>
+                        <span class="icon-slot fas fa-user-friends" style="font-size:2.5rem;opacity:.25;display:block;margin-bottom:12px;" data-icon="fas fa-user-friends"></span>
                         <p style="margin:0;font-size:.9rem;">Henüz kimseyi takip etmiyorsun.</p>
                     </div>
                 {% endif %}
@@ -389,15 +388,15 @@
 
     <!-- MOBİL ALT NAV -->
     <div class="mobile-bottom-nav">
-        <a href="{{ url_for('main.index') }}" class="nav-item"><i class="fa-solid fa-house"></i></a>
-        <a href="{{ url_for('main.explore') }}" class="nav-item"><i class="fa-regular fa-compass"></i></a>
-        <a href="{{ url_for('main.reels') }}" class="nav-item"><i class="fa-solid fa-clapperboard"></i></a>
+        <a href="{{ url_for('main.index') }}" class="nav-item"><span class="icon-slot fa-solid fa-house" data-icon="fa-solid fa-house"></span></a>
+        <a href="{{ url_for('main.explore') }}" class="nav-item"><span class="icon-slot fa-regular fa-compass" data-icon="fa-regular fa-compass"></span></a>
+        <a href="{{ url_for('main.reels') }}" class="nav-item"><span class="icon-slot fa-solid fa-clapperboard" data-icon="fa-solid fa-clapperboard"></span></a>
         <a href="{{ url_for('main.notifications') }}" class="nav-item">
-            <i class="fa-regular fa-bell"></i>
+            <span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span>
             {% if unread_count > 0 %}<span class="mob-nav-badge">{{ unread_count }}</span>{% endif %}
         </a>
         <a href="{{ url_for('main.messages_inbox') }}" class="nav-item active">
-            <i class="fa-solid fa-envelope"></i>
+            <span class="icon-slot fa-solid fa-envelope" data-icon="fa-solid fa-envelope"></span>
             {% if unread_msg_count > 0 %}<span class="mob-nav-badge">{{ unread_msg_count }}</span>{% endif %}
         </a>
     </div>
@@ -405,7 +404,7 @@
     <!-- DM AYARLAR SAYFASI -->
     <div class="x-settings-page" id="dmSettingsPage">
         <div class="x-set-header">
-            <button class="x-set-back" onclick="closeDmSettings()"><i class="fas fa-arrow-left"></i></button>
+            <button class="x-set-back" onclick="closeDmSettings()"><span class="icon-slot fas fa-arrow-left" data-icon="fas fa-arrow-left"></span></button>
             <h2>Ayarlar</h2>
         </div>
 
@@ -535,7 +534,7 @@
                     rows.forEach(function(r){r.style.display='none';});
                     if(!re){
                         var d=document.createElement('div');d.id='reqEmpty';d.className='inbox-empty';d.style.padding='50px 20px';d.style.textAlign='center';d.style.color='var(--text-muted)';
-                        d.innerHTML='<i class="fa-regular fa-envelope-open" style="font-size:2.5rem;opacity:.3;display:block;margin-bottom:12px;"></i><p style="margin:0;font-size:.9rem;">Henüz mesaj isteği yok.</p>';
+                        d.innerHTML='<span class="icon-slot fa-regular fa-envelope-open" style="font-size:2.5rem;opacity:.3;display:block;margin-bottom:12px;" data-icon="fa-regular fa-envelope-open"></span><p style="margin:0;font-size:.9rem;">Henüz mesaj isteği yok.</p>';
                         document.getElementById('inboxList').appendChild(d);
                     }else{re.style.display='';}
                 }else{

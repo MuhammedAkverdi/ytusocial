@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ club.name }} | Kulüp Detayı</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         /* KULÜP BAŞLIK KARTI */
@@ -250,23 +249,23 @@
             <span class="mob-drawer-score">⭐ {{ current_user.score }} Puan</span>
         </div>
         <nav class="mob-drawer-nav">
-            <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-regular fa-user"></i> Profil</a>
-            <a href="{{ url_for('main.messages_inbox') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-regular fa-envelope"></i> Mesajlar</a>
-            <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-book-open"></i> Not Havuzu</a>
-            <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-regular fa-bookmark"></i> Kaydedilenler</a>
-            <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link active" onclick="closeMobileDrawer()"><i class="fa-solid fa-trophy"></i> Kulüpler Ligi</a>
-            <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-bullhorn"></i> İlanlar</a>
-            <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-bus"></i> Ulaşım</a>
-            <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-gear"></i> Profili Düzenle</a>
+            <a href="{{ url_for('main.user_profile', handle=current_user.handle) }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-regular fa-user" data-icon="fa-regular fa-user"></span> Profil</a>
+            <a href="{{ url_for('main.messages_inbox') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span> Mesajlar</a>
+            <a href="{{ url_for('main.notes_pool') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-book-open" data-icon="fa-solid fa-book-open"></span> Not Havuzu</a>
+            <a href="{{ url_for('main.saved_posts_list') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-regular fa-bookmark" data-icon="fa-regular fa-bookmark"></span> Kaydedilenler</a>
+            <a href="{{ url_for('main.clubs_full_list') }}" class="mob-drawer-link active" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-trophy" data-icon="fa-solid fa-trophy"></span> Kulüpler Ligi</a>
+            <a href="{{ url_for('main.adverts') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-bullhorn" data-icon="fa-solid fa-bullhorn"></span> İlanlar</a>
+            <a href="{{ url_for('main.ulasim') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-bus" data-icon="fa-solid fa-bus"></span> Ulaşım</a>
+            <a href="{{ url_for('main.edit_profile') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-gear" data-icon="fa-solid fa-gear"></span> Profili Düzenle</a>
         </nav>
         <div class="mob-drawer-sep"></div>
         <div class="mob-drawer-section-title">💡 Fikir ve Destek</div>
-        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Öneri')"><i class="fa-solid fa-lightbulb"></i> Fikir Öner</a>
-        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Diğer')"><i class="fa-solid fa-comments"></i> Geri Bildirim</a>
-        <a href="{{ url_for('main.settings') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><i class="fa-solid fa-gear"></i> Ayarlar</a>
+        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Öneri')"><span class="icon-slot fa-solid fa-lightbulb" data-icon="fa-solid fa-lightbulb"></span> Fikir Öner</a>
+        <a href="javascript:void(0)" class="mob-drawer-link" onclick="closeMobileDrawer(); openFeedbackModal('Diğer')"><span class="icon-slot fa-solid fa-comments" data-icon="fa-solid fa-comments"></span> Geri Bildirim</a>
+        <a href="{{ url_for('main.settings') }}" class="mob-drawer-link" onclick="closeMobileDrawer()"><span class="icon-slot fa-solid fa-gear" data-icon="fa-solid fa-gear"></span> Ayarlar</a>
         <div class="mob-drawer-sep"></div>
         <a href="{{ url_for('auth.logout') }}" class="mob-drawer-logout">
-            <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+            <span class="icon-slot fa-solid fa-right-from-bracket" data-icon="fa-solid fa-right-from-bracket"></span> Çıkış Yap
         </a>
     </div>
 
@@ -282,17 +281,17 @@
                     <h1 class="c-name">{{ club.name }}</h1>
                     <div class="c-desc">{{ club.description }}</div>
                     <div class="c-meta">
-                        <span><i class="fas fa-users"></i> {{ club.followers|length }} Takipçi</span>
-                        <span><i class="fas fa-trophy"></i> {{ club.total_votes() }} Lig Puanı</span>
+                        <span><span class="icon-slot fas fa-users" data-icon="fas fa-users"></span> {{ club.followers|length }} Takipçi</span>
+                        <span><span class="icon-slot fas fa-trophy" data-icon="fas fa-trophy"></span> {{ club.total_votes() }} Lig Puanı</span>
                     </div>
                     {% if current_user.is_authenticated %}
                     <div class="c-actions">
                         <button onclick="toggleClubFollow('{{ club.id }}', this)" class="btn-c btn-follow {{ 'active' if current_user in club.followers else '' }}">
-                            <i class="fas {{ 'fa-check' if current_user in club.followers else 'fa-plus' }}"></i>
+                            <span class="icon-slot fas {{ 'fa-check' if current_user in club.followers else 'fa-plus' }}" data-icon="fas {{ 'fa-check' if current_user in club.followers else 'fa-plus' }}"></span>
                             {{ 'Takip Ediliyor' if current_user in club.followers else 'Takip Et' }}
                         </button>
                         <button onclick="voteClub('{{ club.id }}', this)" class="btn-c btn-vote {{ 'voted' if user_has_voted else '' }}" {% if user_has_voted %}disabled{% endif %}>
-                            <i class="fas {{ 'fa-check' if user_has_voted else 'fa-heart' }}"></i>
+                            <span class="icon-slot fas {{ 'fa-check' if user_has_voted else 'fa-heart' }}" data-icon="fas {{ 'fa-check' if user_has_voted else 'fa-heart' }}"></span>
                             {{ 'Oy Verildi' if user_has_voted else 'Oy Ver' }}
                         </button>
                     </div>
@@ -306,7 +305,7 @@
 
             {% if current_user == club.leader %}
             <div class="leader-panel-modern">
-                <div class="lp-header"><i class="fas fa-crown"></i> Başkan Paneli</div>
+                <div class="lp-header"><span class="icon-slot fas fa-crown" data-icon="fas fa-crown"></span> Başkan Paneli</div>
                 <div class="lp-tabs">
                     <button class="lp-tab active" onclick="switchLpTab('event', this)">✏️ Etkinlik Paylaş</button>
                     <button class="lp-tab" onclick="switchLpTab('settings', this)">⚙️ Ayarlar</button>
@@ -318,11 +317,11 @@
                         <textarea name="content" rows="3" class="lp-input-modern" placeholder="Etkinlik detayları, yer, zaman, linkler..." required></textarea>
                         <div class="lp-file-area" onclick="document.getElementById('eventFileInput').click()">
                             <input type="file" name="file" id="eventFileInput" accept="image/*,video/*" style="display:none;" onchange="handleEventFile(this)">
-                            <div class="lp-file-label-txt" id="fileLabel"><i class="fas fa-image"></i> Görsel veya Video Ekle (isteğe bağlı)</div>
+                            <div class="lp-file-label-txt" id="fileLabel"><span class="icon-slot fas fa-image" data-icon="fas fa-image"></span> Görsel veya Video Ekle (isteğe bağlı)</div>
                             <img id="filePreview" class="lp-file-preview" alt="">
                         </div>
                         <div class="lp-actions">
-                            <button type="button" style="background:var(--hover-bg);color:var(--text-muted);border:none;padding:10px 16px;border-radius:12px;cursor:pointer;font-weight:600;" onclick="clearEventFile()"><i class="fas fa-times"></i></button>
+                            <button type="button" style="background:var(--hover-bg);color:var(--text-muted);border:none;padding:10px 16px;border-radius:12px;cursor:pointer;font-weight:600;" onclick="clearEventFile()"><span class="icon-slot fas fa-times" data-icon="fas fa-times"></span></button>
                             <button type="submit" class="lp-btn-submit">Paylaş</button>
                         </div>
                     </form>
@@ -341,7 +340,7 @@
             </div>
             {% endif %}
 
-            <div class="section-title"><i class="fas fa-calendar-alt" style="color:var(--ytu-lacivert);"></i> Kulüp Etkinlikleri</div>
+            <div class="section-title"><span class="icon-slot fas fa-calendar-alt" style="color:var(--ytu-lacivert);" data-icon="fas fa-calendar-alt"></span> Kulüp Etkinlikleri</div>
             <div class="events-list">
                 {% for post in club.posts|reverse %}
                 <div class="event-card">
@@ -360,13 +359,13 @@
                             {% endif %}
                         {% endif %}
                         {% if current_user == club.leader %}
-                        <a href="{{ url_for('main.delete_club_post', post_id=post.id) }}" class="event-delete-btn" onclick="return confirm('Bu etkinliği silmek istediğine emin misin?')"><i class="fas fa-trash-alt"></i> Sil</a>
+                        <a href="{{ url_for('main.delete_club_post', post_id=post.id) }}" class="event-delete-btn" onclick="return confirm('Bu etkinliği silmek istediğine emin misin?')"><span class="icon-slot fas fa-trash-alt" data-icon="fas fa-trash-alt"></span> Sil</a>
                         {% endif %}
                     </div>
                 </div>
                 {% else %}
                 <div style="text-align:center;padding:50px;color:var(--text-muted);background:var(--card-bg);border-radius:16px;border:1px solid var(--border-color);">
-                    <i class="far fa-calendar-times" style="font-size:3rem;margin-bottom:15px;opacity:.4;display:block;"></i>
+                    <span class="icon-slot far fa-calendar-times" style="font-size:3rem;margin-bottom:15px;opacity:.4;display:block;" data-icon="far fa-calendar-times"></span>
                     Henüz etkinlik paylaşılmamış.
                 </div>
                 {% endfor %}
@@ -382,11 +381,11 @@
 
     <!-- MOBİL ALT NAV -->
     <div class="mobile-bottom-nav">
-        <a href="{{ url_for('main.index') }}" class="nav-item"><i class="fa-solid fa-house"></i></a>
-        <a href="{{ url_for('main.explore') }}" class="nav-item"><i class="fa-regular fa-compass"></i></a>
-        <a href="{{ url_for('main.reels') }}" class="nav-item"><i class="fa-solid fa-clapperboard"></i></a>
-        <a href="{{ url_for('main.notifications') }}" class="nav-item"><i class="fa-regular fa-bell"></i></a>
-        <a href="{{ url_for('main.messages_inbox') }}" class="nav-item"><i class="fa-regular fa-envelope"></i></a>
+        <a href="{{ url_for('main.index') }}" class="nav-item"><span class="icon-slot fa-solid fa-house" data-icon="fa-solid fa-house"></span></a>
+        <a href="{{ url_for('main.explore') }}" class="nav-item"><span class="icon-slot fa-regular fa-compass" data-icon="fa-regular fa-compass"></span></a>
+        <a href="{{ url_for('main.reels') }}" class="nav-item"><span class="icon-slot fa-solid fa-clapperboard" data-icon="fa-solid fa-clapperboard"></span></a>
+        <a href="{{ url_for('main.notifications') }}" class="nav-item"><span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span></a>
+        <a href="{{ url_for('main.messages_inbox') }}" class="nav-item"><span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span></a>
     </div>
 
     <script src="/static/script.js"></script>
@@ -418,7 +417,7 @@
             const area = input.closest('.lp-file-area');
             if (area) area.classList.add('has-file');
             const label = document.getElementById('fileLabel');
-            if (label) label.innerHTML = '<i class="fas fa-check-circle" style="color:#27ae60;"></i> ' + file.name;
+            if (label) label.innerHTML = '<span class="icon-slot fas fa-check-circle" style="color:#27ae60;" data-icon="fas fa-check-circle"></span> ' + file.name;
             const prev = document.getElementById('filePreview');
             if (prev && file.type.startsWith('image/')) {
                 const reader = new FileReader();
@@ -432,7 +431,7 @@
             const area = document.querySelector('.lp-file-area');
             if (area) area.classList.remove('has-file');
             const label = document.getElementById('fileLabel');
-            if (label) label.innerHTML = '<i class="fas fa-image"></i> Görsel veya Video Ekle (isteğe bağlı)';
+            if (label) label.innerHTML = '<span class="icon-slot fas fa-image" data-icon="fas fa-image"></span> Görsel veya Video Ekle (isteğe bağlı)';
             const prev = document.getElementById('filePreview');
             if (prev) { prev.src = ''; prev.style.display = 'none'; }
         }

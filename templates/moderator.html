@@ -11,7 +11,6 @@
     </script>
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         .moderator-hero {
             display: flex;
@@ -300,14 +299,14 @@
 <body class="admin-mode">
     <div class="moderator-mobile-topbar">
         <button type="button" class="moderator-mobile-topbar-back" onclick="history.back()" aria-label="Geri dön">
-            <i class="fa-solid fa-chevron-left"></i>
+            <span class="icon-slot fa-solid fa-chevron-left" data-icon="fa-solid fa-chevron-left"></span>
         </button>
         <div class="moderator-mobile-topbar-title">Moderatör Paneli</div>
         <div class="moderator-mobile-topbar-spacer"></div>
     </div>
 
     <a href="/" class="admin-back-btn">
-        <i class="fa-solid fa-arrow-left"></i> Ana Sayfaya Dön
+        <span class="icon-slot fa-solid fa-arrow-left" data-icon="fa-solid fa-arrow-left"></span> Ana Sayfaya Dön
     </a>
 
     <button onclick="toggleAdminTheme()" id="adminThemeBtn" class="admin-theme-btn" title="Temayı Değiştir">🌙</button>
@@ -333,7 +332,7 @@
             {% for task in moderator_tasks %}
             <a href="#{{ task.anchor }}" class="moderator-task-card">
                 <div class="moderator-task-top">
-                    <div class="moderator-task-icon"><i class="fa-solid {{ task.icon }}"></i></div>
+                    <div class="moderator-task-icon"><span class="icon-slot fa-solid {{ task.icon }}" data-icon="fa-solid {{ task.icon }}"></span></div>
                     <div class="moderator-task-count">{{ task.count }}</div>
                 </div>
                 <div class="moderator-task-body">
@@ -341,7 +340,7 @@
                     <p>{{ task.description }}</p>
                 </div>
                 <div class="moderator-task-action">
-                    Göreve git <i class="fa-solid fa-arrow-right"></i>
+                    Göreve git <span class="icon-slot fa-solid fa-arrow-right" data-icon="fa-solid fa-arrow-right"></span>
                 </div>
             </a>
             {% endfor %}
@@ -398,25 +397,25 @@
                             <td style="display:flex; gap:6px; flex-wrap:wrap;">
                                 <a href="/static/note_files/{{ note.file_path }}" target="_blank"
                                    class="btn-action btn-view">
-                                    <i class="fas fa-eye"></i> İncele
+                                    <span class="icon-slot fas fa-eye" data-icon="fas fa-eye"></span> İncele
                                 </a>
                                 <a href="{{ url_for('admin.approve_note', note_id=note.id) }}"
                                    class="btn-action"
                                    style="background:#27ae60;color:white;padding:5px 10px;border-radius:5px;text-decoration:none;"
                                    onclick="return confirm('Bu notu onayla? Kullanıcı +10 puan kazanacak.')">
-                                    <i class="fas fa-check"></i> Onayla
+                                    <span class="icon-slot fas fa-check" data-icon="fas fa-check"></span> Onayla
                                 </a>
                                 <a href="{{ url_for('admin.reject_note', note_id=note.id) }}"
                                    class="btn-action btn-ban"
                                    onclick="return confirm('Bu notu reddet ve sil?')">
-                                    <i class="fas fa-times"></i> Reddet
+                                    <span class="icon-slot fas fa-times" data-icon="fas fa-times"></span> Reddet
                                 </a>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="5" style="text-align:center; padding:50px; color:var(--text-muted);">
-                                <i class="fas fa-check-circle" style="font-size:3rem; color:#27ae60; display:block; margin-bottom:12px;"></i>
+                                <span class="icon-slot fas fa-check-circle" style="font-size:3rem; color:#27ae60; display:block; margin-bottom:12px;" data-icon="fas fa-check-circle"></span>
                                 Bekleyen not yok! 🎉
                             </td>
                         </tr>
@@ -427,65 +426,6 @@
         </div>
 
         <!-- ========== BİLDİRİLEN NOTLAR ========== -->
-        {% if reported_notes %}
-        <div class="admin-section moderator-section" id="reported-notes">
-            <div class="section-header">
-                <h2 class="admin-section-title" style="margin:0;">🚩 Bildirilen Notlar</h2>
-                <span class="badge bg-red">{{ reported_notes|length }} bildirim</span>
-            </div>
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Not</th>
-                            <th>Yükleyen</th>
-                            <th>Şikayet</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for note in reported_notes %}
-                        <tr>
-                            <td>
-                                <b>{{ note.title }}</b><br>
-                                <small style="color:var(--text-muted);">{{ note.course_code }} &bull; {{ note.department }}</small>
-                            </td>
-                            <td><b>{{ note.author.username }}</b></td>
-                            <td><span class="badge bg-red">{{ note.report_count }} 🚩</span></td>
-                            <td style="display:flex; gap:6px;">
-                                <a href="{{ url_for('admin.admin_delete_content', type='note', id=note.id) }}"
-                                   class="btn-action btn-ban"
-                                   onclick="return confirm('Bu notu kalıcı olarak sil?')">🗑️ Sil</a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- ========== BİLDİRİLEN GÖNDERILER ========== -->
-        {% if reported_posts %}
-        <div class="admin-section moderator-section" id="reported-posts">
-            <div class="section-header">
-                <h2 class="admin-section-title" style="margin:0;">🚨 Bildirilen Gönderiler</h2>
-                <span class="badge bg-red">{{ reported_posts|length }} bildirim</span>
-            </div>
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>İçerik</th>
-                            <th>Kullanıcı</th>
-                            <th>Şikayet</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for post in reported_posts %}
-                        <tr>
-                            <td style="width:40%;">
                                 <div style="display:flex; gap:10px; align-items:center;">
                                     {% if post.image_file %}
                                         {% if post.is_video() %}
@@ -518,84 +458,25 @@
         </div>
         {% endif %}
 
-        {% if reported_exam_comments %}
-        <div class="admin-section moderator-section" id="reported-exam-comments">
-            <div class="section-header">
-                <h2 class="admin-section-title" style="margin:0;">💬 Şikayet Edilen Sınav Yorumları</h2>
-                <span class="badge bg-red">{{ reported_exam_comments|length }} bildirim</span>
-            </div>
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Sınav / Soru</th>
-                            <th>Yorum</th>
-                            <th>Kullanıcı</th>
-                            <th>Şikayet</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for comment in reported_exam_comments %}
-                        <tr>
-                            <td>
-                                <b>{{ comment.exam_id }}</b><br>
-                                <small style="color:var(--text-muted);">Soru {{ comment.question_no }} • Kitapçık {{ comment.group }}</small>
-                            </td>
-                            <td style="max-width:360px;">{{ comment.body | truncate(140) }}</td>
-                            <td>
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <img src="/static/{{ comment.user.profile_pic }}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">
-                                    <div>
-                                        <b>{{ comment.user.display_name }}</b><br>
-                                        <small style="color:var(--text-muted);">{{ comment.user.email }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge bg-red">{{ comment.report_count }} 🚩</span></td>
-                            <td style="display:flex;gap:6px;flex-wrap:wrap;">
-                                <form action="{{ url_for('admin.hide_exam_comment', comment_id=comment.id) }}" method="POST" style="display:inline-flex;">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn-action btn-view" style="background:#34495e;color:#fff;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;">Gizle</button>
-                                </form>
-                                {% if current_user.is_admin %}
-                                <form action="{{ url_for('admin.delete_exam_comment', comment_id=comment.id) }}" method="POST" style="display:inline-flex;">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                    <button type="submit" class="btn-action btn-ban" style="background:#7b0000;color:#fff;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;">Sil</button>
-                                </form>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" style="text-align:center;padding:30px;color:var(--text-muted);">Şikayet edilen sınav yorumu yok.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        {% endif %}
-
     </div>
 
     <div class="admin-footer">Moderatör Paneli &mdash; YTU Social &copy; 2026</div>
 
     <div class="mobile-bottom-nav">
         <a href="/" class="nav-item {{ 'active' if request.path == '/' else '' }}">
-            <i class="fa-solid fa-house"></i>
+            <span class="icon-slot fa-solid fa-house" data-icon="fa-solid fa-house"></span>
         </a>
         <a href="{{ url_for('main.explore') }}" class="nav-item {{ 'active' if 'explore' in request.path else '' }}">
-            <i class="fa-regular fa-compass"></i>
+            <span class="icon-slot fa-regular fa-compass" data-icon="fa-regular fa-compass"></span>
         </a>
         <a href="{{ url_for('main.adverts') }}" class="nav-item {{ 'active' if 'adverts' in request.path else '' }}">
-            <i class="fa-solid fa-bullhorn"></i>
+            <span class="icon-slot fa-solid fa-bullhorn" data-icon="fa-solid fa-bullhorn"></span>
         </a>
         <a href="{{ url_for('main.notifications') }}" class="nav-item {{ 'active' if 'notifications' in request.path else '' }}">
-            <i class="fa-regular fa-bell"></i>
+            <span class="icon-slot fa-regular fa-bell" data-icon="fa-regular fa-bell"></span>
         </a>
         <a href="{{ url_for('main.messages_inbox') }}" class="nav-item {{ 'active' if 'inbox' in request.path or 'chat' in request.path else '' }}">
-            <i class="fa-regular fa-envelope"></i>
+            <span class="icon-slot fa-regular fa-envelope" data-icon="fa-regular fa-envelope"></span>
         </a>
     </div>
 
