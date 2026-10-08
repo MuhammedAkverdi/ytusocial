@@ -1,2 +1,49 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+important.env
 important.local.env
 instance/important.local.env
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Runtime / local state
+instance/*
+!instance/.gitkeep
+*.log
+security.log
+votes.json
+
+# User-generated uploads
+static/audio_files/*
+!static/audio_files/.gitkeep
+static/message_files/*
+!static/message_files/.gitkeep
+static/note_files/*
+!static/note_files/.gitkeep
+static/post_images/*
+!static/post_images/.gitkeep
+static/story_images/*
+!static/story_images/.gitkeep
+static/uploads/profiles/*
+!static/uploads/profiles/.gitkeep
+
+# Local binaries and tooling
+cloudflared.exe
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/*.log
