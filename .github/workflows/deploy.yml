@@ -1,29 +1,82 @@
-name: YTUSocial Otomatik Deploy
+name: YTUSocial Deploy
 
 on:
   push:
     branches:
-      - main  # Eğer GitHub'daki ana dalının adı master ise burayı master yap
+      - main
+
+concurrency:
+  group: ytusocial-production
+  cancel-in-progress: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Sunucuya Bağlan ve Güncelle
+      - name: Deploy safely over SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # 1. Doğru klasöre git
-            cd /root/ytusocial_project/ytusocial 
-            
-            # 2. GitHub'daki en güncel kodların listesini al (henüz indirme)
-            git fetch --all
-            
-            # 3. ZORLA GÜNCELLE: Sunucudaki app.py vb. manuel değişiklikleri ez, GitHub'ı birebir kopyala
+            set -eu
+            cd /root/ytusocial_project/ytusocial
+
+            BACKUP_DIR="$(mktemp -d)"
+            cleanup() { rm -rf "$BACKUP_DIR"; }
+            trap cleanup EXIT
+
+            # Preserve server-only configuration and user-generated/runtime data.
+            for path in \
+              .env \
+              important.env \
+              important.local.env \
+              instance \
+              static/audio_files \
+              static/message_files \
+              static/note_files \
+              static/post_images \
+              static/story_images \
+              static/uploads/profiles
+            do
+              if [ -e "$path" ]; then
+                mkdir -p "$BACKUP_DIR/$(dirname "$path")"
+                cp -a "$path" "$BACKUP_DIR/$path"
+              fi
+            done
+
+            git fetch origin main
             git reset --hard origin/main
-            
-            # 4. Flask uygulamasını (servisini) yeniden başlat ki yeni kodlar canlıda devreye girsin
+
+            # Restore server-only files after syncing source code.
+            for path in \
+              .env \
+              important.env \
+              important.local.env \
+              instance \
+              static/audio_files \
+              static/message_files \
+              static/note_files \
+              static/post_images \
+              static/story_images \
+              static/uploads/profiles
+            do
+              if [ -e "$BACKUP_DIR/$path" ]; then
+                rm -rf "$path"
+                mkdir -p "$(dirname "$path")"
+                cp -a "$BACKUP_DIR/$path" "$path"
+              fi
+            done
+
+            # Ensure production has a non-public session signing key.
+            mkdir -p instance
+            touch instance/important.local.env
+            if ! grep -q '^SECRET_KEY=' instance/important.local.env; then
+              python3 - <<'PY' >> instance/important.local.env
+            import secrets
+            print('SECRET_KEY=' + secrets.token_urlsafe(64))
+            PY
+            fi
+
             systemctl restart ytusocial
