@@ -34,11 +34,15 @@ def _load_important_env():
 _load_important_env()
 
 
-def _resolve_database_uri():
-    raw_url = (os.environ.get('DATABASE_URL') or '').strip()
+def _required_env(name):
+    value = (os.environ.get(name) or '').strip()
+    if not value:
+        raise RuntimeError(f'{name} is not set. Configure it in the environment or instance/important.local.env.')
+    return value
 
-    if not raw_url:
-        raise RuntimeError('DATABASE_URL is not set. This app now requires a single live PostgreSQL database.')
+
+def _resolve_database_uri():
+    raw_url = _required_env('DATABASE_URL')
 
     if raw_url.startswith('postgres://'):
         raw_url = raw_url.replace('postgres://', 'postgresql://', 1)
@@ -51,12 +55,15 @@ def _resolve_database_uri():
 
     return raw_url
 
+
 class Config:
-    SECRET_KEY = 'yildiz-teknik-gizli-anahtar'
+    # Never hard-code production signing keys in source control.
+    SECRET_KEY = _required_env('SECRET_KEY')
+
     SQLALCHEMY_DATABASE_URI = _resolve_database_uri()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAX_CONTENT_LENGTH = 100 * 1024 * 1024 
-    WTF_CSRF_CHECK_DEFAULT = False
+    MAX_CONTENT_LENGTH = 100 * 1024 * 1024
+    WTF_CSRF_CHECK_DEFAULT = _env_bool('WTF_CSRF_CHECK_DEFAULT', False)
 
     SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
     SENDGRID_FROM_EMAIL = os.environ.get('SENDGRID_FROM_EMAIL', 'portalytu@gmail.com')
